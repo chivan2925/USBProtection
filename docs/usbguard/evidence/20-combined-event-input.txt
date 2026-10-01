@@ -1,0 +1,16 @@
+=== HOSTNAME ===
+usbshield-lab
+
+=== ACTIVE USER ===
+status=RESOLVED
+username=usbdev
+uid=1000
+sessionId=21
+sessionType=wayland
+seat=seat0
+
+=== TIMESTAMP ===
+2026-09-28T14:10:16+07:00
+
+Note:
+At this time the physical USB Optical Mouse (093a:2510, class 03:01:02) was present and ALLOWED.

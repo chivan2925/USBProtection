@@ -1,0 +1,1 @@
+2 1000 usbdev seat0 tty2 active no -

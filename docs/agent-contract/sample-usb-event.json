@@ -1,0 +1,20 @@
+{
+  "endpointId": "POC-UNENROLLED-LAB-PC-01",
+  "hostname": "usbshield-lab",
+  "linuxUsername": "usbdev",
+  "linuxUid": 1000,
+  "sessionId": "21",
+  "sessionType": "wayland",
+  "seat": "seat0",
+  "device": {
+    "vendorId": "093a",
+    "productId": "2510",
+    "serial": "",
+    "name": "USB Optical Mouse",
+    "hash": "L46bZEAKg59EA+puzjHMh8D4jLliJqK4sYxKSd/DRz8=",
+    "interface": "03:01:02"
+  },
+  "eventType": "CONNECTED",
+  "decision": "ALLOWED",
+  "occurredAt": "2026-09-28T14:10:16+07:00"
+}
