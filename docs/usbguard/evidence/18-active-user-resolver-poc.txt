@@ -1,0 +1,6 @@
+status=RESOLVED
+username=usbdev
+uid=1000
+sessionId=2
+sessionType=wayland
+seat=seat0

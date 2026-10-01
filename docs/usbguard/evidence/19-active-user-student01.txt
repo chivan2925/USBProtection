@@ -1,0 +1,6 @@
+status=RESOLVED
+username=student01
+uid=1001
+sessionId=19
+sessionType=wayland
+seat=seat0

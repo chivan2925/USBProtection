@@ -1,0 +1,18 @@
+[IPC] Connected
+[device] PresenceChanged: id=10
+event=Remove
+target=block
+device_rule=block id 0951:1665 serial "C81F660E8BE8FFA14601FEF6" name "DataTraveler 2.0" hash "xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-2" with-interface 08:06:50 with-connect-type "unknown"
+[device] PresenceChanged: id=11
+event=Insert
+target=block
+device_rule=block id 0951:1665 serial "C81F660E8BE8FFA14601FEF6" name "DataTraveler 2.0" hash "xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-2" with-interface 08:06:50 with-connect-type "unknown"
+[device] PolicyChanged: id=11
+target_old=block
+target_new=block
+device_rule=block id 0951:1665 serial "C81F660E8BE8FFA14601FEF6" name "DataTraveler 2.0" hash "xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-2" with-interface 08:06:50 with-connect-type "unknown"
+rule_id=4294967294
+[device] PolicyApplied: id=11
+target_new=block
+device_rule=block id 0951:1665 serial "C81F660E8BE8FFA14601FEF6" name "DataTraveler 2.0" hash "xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-2" with-interface 08:06:50 with-connect-type "unknown"
+rule_id=4294967294

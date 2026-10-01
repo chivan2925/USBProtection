@@ -1,0 +1,2 @@
+NOT EXECUTED
+Reason: only one USB Mass Storage device was available.

@@ -1,0 +1,17 @@
+SIMULATED LOGIC TEST
+
+Command:
+~/usbshield-week1/active-user-poc/test-ambiguity.sh
+
+Observed output:
+status=UNKNOWN
+reason=ambiguous-active-local-sessions
+candidate=10|student01|1001|wayland|seat1
+candidate=11|student02|1002|wayland|seat2
+
+Result:
+PASS — simulated resolver test with two equally valid candidates returned UNKNOWN.
+
+Scope:
+This validates resolver decision logic only. It is not an integration test with
+two real simultaneously active Ubuntu graphical sessions.

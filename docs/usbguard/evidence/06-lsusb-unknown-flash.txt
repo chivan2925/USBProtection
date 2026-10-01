@@ -1,0 +1,1 @@
+Bus 003 Device 006: ID 0951:1665 Kingston Technology Digital DataTraveler SE9

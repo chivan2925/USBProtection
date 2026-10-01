@@ -1,0 +1,4 @@
+1: allow with-interface none-of { 08:*:* }
+2: allow id 0951:1665 serial "C81F660E8BE8FFA14601FEF6" name "DataTraveler 2.0" hash "xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" with-interface 08:06:50 with-connect-type "unknown"
+
+Observed: Specific DataTraveler remained ALLOW after reboot.
