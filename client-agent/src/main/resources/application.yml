@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: usbshield-agent
+  main:
+    # Run as a background daemon/console service without an embedded web server (Tomcat)
+    web-application-type: none
+
+usbshield:
+  agent:
+    # Admin Server base URL
+    server-url: http://localhost:8080
+    # Optional shared enrollment token
+    enrollment-token: default-enrollment-secret
+    # Heartbeat interval in milliseconds (default 5 seconds)
+    heartbeat-interval-ms: 5000
+    # Local data directory for credentials and offline spool
+    data-dir: ${USBSHIELD_DATA_DIR:./data}
+    # Local config directory
+    config-dir: ${USBSHIELD_CONFIG_DIR:./config}
+
+logging:
+  level:
+    com.group.usbshield.agent: INFO
+    root: INFO

@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local Agent Data & Spool ###
+client-agent/data/
+**/data/spool/
+*.deb
+packaging/staging/
+packaging/dist/
+
+### Private Member Docs ###
+docs_hbao/

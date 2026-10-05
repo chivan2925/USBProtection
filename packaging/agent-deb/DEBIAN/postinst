@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e
+
+# 1. Create dedicated system user/group if not exists
+if ! getent group usbshield >/dev/null; then
+    groupadd --system usbshield
+fi
+
+if ! getent passwd usbshield >/dev/null; then
+    useradd --system --gid usbshield --home-dir /var/lib/usbshield-agent --no-create-home \
+            --shell /usr/sbin/nologin usbshield
+fi
+
+# 2. Setup directories and permissions
+mkdir -p /opt/usbshield-agent
+mkdir -p /etc/usbshield-agent
+mkdir -p /var/lib/usbshield-agent/spool
+
+chown -R root:usbshield /opt/usbshield-agent
+chmod 755 /opt/usbshield-agent
+
+chown -R root:usbshield /etc/usbshield-agent
+chmod 750 /etc/usbshield-agent
+
+chown -R usbshield:usbshield /var/lib/usbshield-agent
+chmod 700 /var/lib/usbshield-agent
+
+# 3. Add usbshield user to usbguard group for IPC access if applicable
+if getent group usbguard >/dev/null; then
+    usermod -aG usbguard usbshield
+fi
+
+# 4. Initialize default USBGuard rules if not present or empty
+if [ ! -s /etc/usbguard/rules.conf ] && [ -f /etc/usbshield-agent/rules-v0.1.conf ]; then
+    mkdir -p /etc/usbguard
+    cp /etc/usbshield-agent/rules-v0.1.conf /etc/usbguard/rules.conf
+    chmod 600 /etc/usbguard/rules.conf
+    echo "Initialized default USBGuard rules at /etc/usbguard/rules.conf"
+fi
+
+# 5. Reload systemd daemon and enable service
+systemctl daemon-reload
+systemctl enable usbguard.service || true
+systemctl start usbguard.service || true
+systemctl enable usbshield-agent.service
+systemctl restart usbshield-agent.service || true
+
+echo "USBShield Agent installed and started successfully."
+exit 0
