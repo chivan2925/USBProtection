@@ -1,0 +1,1 @@
+10: allow id 093a:2510 serial "" name "USB Optical Mouse" hash "L46bZEAKg59EA+puzjHMh8D4jLliJqK4sYxKSd/DRz8=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-2" with-interface 03:01:02 with-connect-type "unknown"

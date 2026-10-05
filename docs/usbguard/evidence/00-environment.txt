@@ -1,0 +1,10 @@
+Host OS: Windows 11
+VMware: VMware Workstation 26H1u1
+Guest OS: Ubuntu 24.04.5 LTS (Noble Numbat)
+Hostname: usbshield-lab
+Kernel: 7.0.0-34-generic
+Architecture: x86_64
+VMware Tools: 13.0.10.0 (build-25056151)
+
+USBGuard package version:
+usbguard 1.1.2+ds-6build2
