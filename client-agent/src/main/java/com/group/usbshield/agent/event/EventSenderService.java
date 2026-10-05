@@ -65,8 +65,16 @@ public class EventSenderService {
                 .occurredAt(Instant.now())
                 .build();
 
+        sendPayload(payload);
+    }
+
+    public void sendPayload(UsbEventPayload payload) {
+        EndpointRegistration registration = endpointManager.getCurrentRegistration();
+        String endpointId = registration != null ? registration.getEndpointId() : payload.getEndpointId();
+        String agentToken = registration != null ? registration.getAgentToken() : "";
+
         log.info("[USB-EVENT] Detected USB {} by user '{}' ({}) -> Decision: {}",
-                eventType, username, device, decision);
+                payload.getEventType(), payload.getLinuxUsername(), payload.getDevice(), payload.getDecision());
 
         // Thử gửi trực tiếp lên Admin Server
         boolean sent = false;

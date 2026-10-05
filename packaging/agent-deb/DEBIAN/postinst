@@ -30,7 +30,15 @@ if getent group usbguard >/dev/null; then
     usermod -aG usbguard usbshield
 fi
 
-# 4. Reload systemd daemon and enable service
+# 4. Initialize default USBGuard rules if not present or empty
+if [ ! -s /etc/usbguard/rules.conf ] && [ -f /etc/usbshield-agent/rules-v0.1.conf ]; then
+    mkdir -p /etc/usbguard
+    cp /etc/usbshield-agent/rules-v0.1.conf /etc/usbguard/rules.conf
+    chmod 600 /etc/usbguard/rules.conf
+    echo "Initialized default USBGuard rules at /etc/usbguard/rules.conf"
+fi
+
+# 5. Reload systemd daemon and enable service
 systemctl daemon-reload
 systemctl enable usbguard.service || true
 systemctl start usbguard.service || true

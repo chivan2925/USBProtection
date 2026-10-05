@@ -112,6 +112,13 @@ public class EndpointManager {
         }
     }
 
+    public String getEndpointId() {
+        if (currentRegistration != null && currentRegistration.getEndpointId() != null) {
+            return currentRegistration.getEndpointId();
+        }
+        return "POC-UNENROLLED-" + systemInfoProvider.getHostname();
+    }
+
     public synchronized void updateAppliedPolicyVersion(long newVersion) {
         if (currentRegistration != null) {
             currentRegistration.setCurrentPolicyVersion(newVersion);
