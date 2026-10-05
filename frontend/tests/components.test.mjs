@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict'
+﻿import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -46,7 +46,7 @@ test('endpoint detail does not display devices belonging to another endpoint', (
   assert.ok(!html.includes('BLOCKED_TEST_DEVICE'))
 })
 test('event page shows only the newest ten records on the first page', () => {
-  const events = Array.from({ length: 12 }, (_, index) => ({ id: String(index), type: 'connected', timestamp: new Date(Date.UTC(2026, 8, 26, index)).toISOString(), message: `EVENT_TEST_${String(index).padStart(2, '0')}` }))
+  const events = Array.from({ length: 12 }, (_, index) => ({ id: String(index), type: 'connected', timestamp: new Date(Date.UTC(2026, 8, 26, index)).toISOString(), deviceName: `EVENT_TEST_${String(index).padStart(2, '0')}` }))
   const html = renderToStaticMarkup(createElement(Events, { ...props, state: { status: 'ready', data: { ...props.state.data, events } } }))
   assert.ok(html.includes('EVENT_TEST_11'))
   assert.ok(html.includes('EVENT_TEST_02'))
@@ -65,4 +65,15 @@ test('device names are rendered as text, never injected as HTML', () => {
   const html = renderToStaticMarkup(createElement(DataTable, { rows: [{ id: 'unsafe', name: '<img src=x onerror=alert(1)>' }], columns: [{ key: 'name', label: 'Name', render: row => row.name }], label: 'test' }))
   assert.ok(html.includes('&lt;img'))
   assert.ok(!html.includes('<img'))
+})
+
+test('event mock renders required columns, users, devices and decisions', () => {
+  const html = renderToStaticMarkup(createElement(Events, { ...props, state: { status: 'unavailable' } }))
+  for (const text of ['Timestamp', 'Endpoint', 'Linux User', 'USB', 'Event', 'Decision', 'LAB-PC-01', 'student01', 'Kingston', 'LAB-PC-02', 'employee07', 'SanDisk', 'ALLOW', 'BLOCK', 'Dữ liệu mock']) assert.ok(html.includes(text), text)
+  for (const label of ['Endpoint', 'Linux Username', 'Device', 'Decision', 'Date']) assert.ok(html.includes(`aria-label="${label}"`), label)
+})
+test('ready empty event response does not display mock records', () => {
+  const html = renderToStaticMarkup(createElement(Events, props))
+  assert.ok(!html.includes('student01'))
+  assert.ok(html.includes('Chưa có dữ liệu'))
 })
