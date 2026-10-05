@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+# Stop and disable systemd service before package removal
+if systemctl is-active --quiet usbshield-agent.service; then
+    systemctl stop usbshield-agent.service || true
+fi
+
+systemctl disable usbshield-agent.service || true
+
+echo "USBShield Agent service stopped."
+exit 0

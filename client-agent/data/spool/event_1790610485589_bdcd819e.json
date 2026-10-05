@@ -1,0 +1,19 @@
+{
+  "endpointId" : "UNENROLLED",
+  "hostname" : "DESKTOP-8STBDDD",
+  "linuxUsername" : "student01",
+  "linuxUid" : 1001,
+  "sessionId" : "3",
+  "sessionType" : "wayland",
+  "seat" : "seat0",
+  "device" : {
+    "serialNumber" : "00187D0F55B6EC21391910A2",
+    "productId" : "1666",
+    "vendorId" : "0951",
+    "deviceName" : "Kingston DataTraveler 3.0",
+    "deviceHash" : "c0ffee1234567890abcdef"
+  },
+  "eventType" : "CONNECTED",
+  "decision" : "BLOCKED",
+  "occurredAt" : "2026-09-28T15:48:05.588496400Z"
+}

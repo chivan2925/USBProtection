@@ -1,0 +1,26 @@
+[Unit]
+Description=USBShield Client Agent Protection Service
+Documentation=https://github.com/group/usbshield
+After=network-online.target usbguard.service
+Wants=network-online.target
+Requires=usbguard.service
+
+[Service]
+Type=simple
+User=usbshield
+Group=usbshield
+WorkingDirectory=/opt/usbshield-agent
+ExecStart=/usr/bin/java -jar /opt/usbshield-agent/usbshield-agent.jar
+Restart=on-failure
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=usbshield-agent
+
+# Hardening options
+ProtectSystem=full
+ProtectHome=read-only
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: usbshield-agent
+  main:
+    web-application-type: none
+
+usbshield:
+  agent:
+    # Set this to the actual Admin Server IP/domain in your LAN
+    server-url: http://localhost:8080
+    enrollment-token: default-enrollment-secret
+    heartbeat-interval-ms: 5000
+    data-dir: /var/lib/usbshield-agent
+    config-dir: /etc/usbshield-agent
+
+logging:
+  level:
+    com.group.usbshield.agent: INFO
+    root: INFO
