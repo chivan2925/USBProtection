@@ -1,4 +1,4 @@
-// Browser smoke checks using Node's WebSocket and the locally installed Chromium.
+﻿// Browser smoke checks using Node's WebSocket and the locally installed Chromium.
 // No browser automation dependency or browser download is required.
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
@@ -90,6 +90,17 @@ try {
     await navigate(route, heading)
     assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true, `Desktop overflow: ${route}`)
   }
+  await navigate('/events', 'Lịch sử sự kiện')
+  assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('thead th'), th => th.textContent)`), ['Timestamp', 'Endpoint', 'Linux User', 'USB', 'Event', 'Decision'])
+  assert.equal(await evaluate(`document.querySelector('tbody').innerText.includes('student01') && document.querySelector('tbody').innerText.includes('employee07')`), true)
+  await screenshot('events-desktop.png')
+  await evaluate(`const select = document.querySelector('[aria-label="Decision"]'); select.value = 'blocked'; select.dispatchEvent(new Event('change', { bubbles: true }))`)
+  await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 2`), 'event decision filter')
+  assert.equal(await evaluate(`Array.from(document.querySelectorAll('tbody tr'), row => row.lastElementChild.textContent).every(text => text === 'BLOCK')`), true)
+  await evaluate(`const input = document.querySelector('[aria-label="Endpoint"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'no-such-endpoint'); input.dispatchEvent(new Event('input', { bubbles: true }))`)
+  await until(() => evaluate(`document.body.innerText.includes('Không tìm thấy kết quả')`), 'event empty filter')
+  await evaluate(`Array.from(document.querySelectorAll('button')).find(button => button.getAttribute('aria-label') === 'Đặt lại tất cả bộ lọc').click()`)
+  await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 6`), 'event reset filters')
   await navigate('/devices', 'Quản lý thiết bị USB')
   await evaluate(`document.querySelector('select').value = 'blocked'; document.querySelector('select').dispatchEvent(new Event('change', { bubbles: true }))`)
   await until(() => evaluate(`document.body.innerText.includes('Đặt lại bộ lọc')`), 'status filter')
