@@ -18,7 +18,7 @@ export function Events({ state, refreshButton }: PageProps) {
     <PageHeading eyebrow="AUDIT & ACTIVITY" title="Lịch sử sự kiện" description="Tra cứu hoạt động USB và các sự kiện dịch vụ trên toàn hệ thống.">{refreshButton}</PageHeading>
     <Panel title="Event Logs" subtitle="Mới nhất trước · Thời gian theo múi giờ trình duyệt" action={<Badge>{useMockData ? 'Dữ liệu mock' : 'Nhật ký hệ thống'}</Badge>}>
       <EventFilters value={eventFilters} onChange={setEventFilters} onReset={() => setEventFilters(emptyEventFilters)} />
-      <EventTable key={`${JSON.stringify(eventFilters)}`} rows={rows} filtered={Object.values(eventFilters).some(Boolean)} />
+      <EventTable key={`${JSON.stringify(eventFilters)}`} events={rows} filtered={Object.values(eventFilters).some(Boolean)} />
     </Panel>
   </>
 }

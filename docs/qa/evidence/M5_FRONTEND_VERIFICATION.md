@@ -1,18 +1,26 @@
-# M5 Frontend Verification
+# M5 frontend verification
 
-Date: 2026-10-10 (Asia/Bangkok). Executed by Codex on Windows in `D:\USBProtection\frontend`, against the current working tree after merge-conflict resolution. This report records this run; it does not reconstruct missing historical evidence.
+Execution date: 2026-10-10 (Asia/Bangkok). Environment: Windows, repository frontend dependencies, locally installed Chromium. Commands ran from `frontend/`.
 
 | Command | Result | Scope |
 |---|---|---|
-| `npm test` | PASS: 31 tests, 0 failures | Five test files: core 6, components 7, eventFilters 2, M4 endpoints 8, M5 events 8 |
-| `npm run build` | PASS | TypeScript project build and Vite production bundle |
-| `npm run lint` | PASS | oxlint |
-| `npm run test:browser` | PASS | Routes, 404, refresh toast, event decision filter, empty result/reset, login, responsive layout and runtime errors |
+| `npm test` | PASS — 31 tests, 0 failures | Core utilities (6), shared/page rendering (7), event filters (2), M4 endpoints (8), M5 events (8). |
+| `npm run build` | PASS | TypeScript project build and Vite production bundle. |
+| `npm run lint` | PASS | oxlint. |
+| `npm run test:browser` | PASS | Routes, 404, refresh toast, filters, login safety, mobile navigation, responsive overflow and browser errors. |
 
-Node/Vite tests and browser checks required subprocess access outside the restricted sandbox; the initial sandbox attempt returned `spawn EPERM`. The completed runs above exited 0.
+`npm test` explicitly includes `m4_endpoints.test.mjs` and `m5_events.test.mjs`. SSR test servers disable WebSocket serving (`ws: false`) so concurrently running suites do not compete for its WebSocket port.
 
-`Events.tsx` and M5 tests import the same `components/event/EventTable.tsx`. EventFilters has one implementation in the same directory. Both use the frontend view model in `types/event.ts`; transport DTO fields require explicit mapping when API integration is added. Pagination, ready-empty responses without mock fallback, device/user display, decisions and endpoint links are covered by automated tests.
+## Event History implementation
 
-Browser screenshots are generated locally under `frontend/.artifacts/` by the smoke script; they are not committed evidence and this report does not link to them.
+- `src/types/event.ts` defines the frontend view model (`timestamp`, `type`, `username`, `deviceName`, lower-case decisions). Backend transport fields require mapping when the API adapter is implemented.
+- `pages/Events.tsx` and M5 tests use the same `components/event/EventTable.tsx`; the parallel root-level EventTable/EventFilters implementations were removed.
+- Shared table behavior preserves newest-first ordering, ten-row pagination, loading and empty/filtered states. Endpoint IDs link to endpoint details.
+- Filters retain Endpoint, Linux Username, Device, Decision and browser-local Date, combined matching and reset.
+- Tests cover both direct EventTable rendering and the Events page with ready data. A ready empty response stays empty; unavailable data uses explicitly labelled mock records.
 
-This verifies the frontend mock/fixture behavior. No Ubuntu hardware rerun, Admin Server boot, live Agent POST or full E2E verification was performed in this run. M2 source evidence was not changed.
+Browser screenshots are generated locally in `frontend/.artifacts/` by `tests/browser.mjs`; they are not committed evidence. This report records the execution result and reproducible command, without depending on those local files.
+
+## Limits
+
+No real backend/Agent integration or Ubuntu hardware tests were run. These results verify frontend mock/fixture behavior only. The initial sandbox run could not spawn test workers (`EPERM`); the full commands were subsequently run successfully with execution escalation.

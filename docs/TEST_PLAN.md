@@ -1,86 +1,102 @@
-﻿# USBShield — Test Plan v0.1
+# TEST PLAN v0.1
 
-## 1. Mục tiêu và phạm vi
+> **Owner:** Member 5  
+> **Project:** USBShield Ubuntu  
+> **Scope:** Week 1 — Prove Core + Freeze Client/Server Contract  
+> **Version:** v0.1
 
-Kế hoạch kiểm thử PoC Week 1 và integration Week 2–3: kiểm soát USB Mass Storage, nhận diện active Linux user, thu thập sự kiện, giao tiếp Agent/Server và giao diện quản trị theo endpoint.
+---
 
-Kết quả được theo dõi tại [Test Inventory](qa/WEEK1_TEST_INVENTORY.md), tổng kết tại [QA Summary](qa/WEEK1_QA_SUMMARY.md). Tài liệu này mô tả cách kiểm thử, không thay thế báo cáo thực thi.
+## 1. Week 1 Test Inventory
 
-## 2. Môi trường và evidence
+| ID | Test Case | Owner | Status | Notes |
+|---|---|---|---|---|
+| T01 | Unknown USB Flash Disk → BLOCK | M2 | **PASS** | Kingston DataTraveler 2.0, interface 08:06:50 |
+| T02 | USB Mouse/Keyboard → ALLOW | M2 | **PASS** | USB Optical Mouse, class 03:01:02 |
+| T03 | Mass Storage class 08 detected | M2 | **PASS** | `with-interface 08:06:50` confirmed |
+| T04 | Specific Allow (permanent whitelist) | M2 | **PASS** | `usbguard allow-device --permanent` |
+| T05 | Reconnect blocked device stays BLOCK | M2 | **PASS** | 3 reconnect attempts |
+| T06 | Reboot persistence of permanent allow | M2 | **PASS** | Rule survives reboot |
+| T07 | USBGuard event stream (watch) | M2 | **PASS** | Remove→Insert→PolicyChanged→PolicyApplied |
+| T08 | Active local Ubuntu user resolved | M2 | **PASS** | `usbdev`, UID 1000, wayland session |
+| T09 | Second user attribution | M2 | **PASS** | `student01`, UID 1001, session 19 |
+| T10 | Resolver ambiguity → UNKNOWN | M2 | **PASS (SIMULATED)** | Two equally valid candidates → UNKNOWN |
+| T11 | Java USBGuard parser — massStorage=true | M2 | **PASS** | DataTraveler parsed correctly |
+| T12 | Sample Agent event contract complete | M2 | **PASS** | endpoint+user+USB+decision in JSON |
+| T13 | Admin Server skeleton boots | M1 | NOT EXECUTED — Week 2 | |
+| T14 | Agent heartbeat POST reaches Admin Server | M3+M1 | NOT EXECUTED — Week 2 | |
+| T15 | Agent event POST deserialized by server | M3+M1 | NOT EXECUTED — Week 2 | |
+| T16 | Admin Web boots | M4 | **PASS** | React/Vite app starts |
+| T17 | Login wireframe renders | M4 | **PASS** | username/password/button present |
+| T18 | Dashboard renders stat cards | M4 | **PASS** | Mock data in Week 1 |
+| T19 | Endpoints list renders rows | M4 | **PASS** | hostname, status, policy version |
+| T20 | Endpoint Detail renders per-endpoint info | M4 | **PASS** | |
+| T21 | Per-endpoint whitelist — "Allow on this endpoint" | M4 | **PASS** | Label verified in test |
+| T22 | Per-endpoint whitelist — "Revoke on this endpoint" | M4 | **PASS** | Label verified in test |
+| T23 | Event History table renders | M5 | **PASS** | Mock data in Week 1 |
+| T24 | Event History columns: Timestamp, Endpoint, Linux User, USB, Event, Decision | M5 | **PASS** | All columns present |
+| T25 | Event History filter by decision | M5 | **PASS (MOCK)** | UI filter works on mock |
+| T26 | Multiple USB Mass Storage independent handling | M2 | **NOT EXECUTED** | Only one device available |
+| T27 | Real multi-session ambiguity (live) | M2 | **NOT EXECUTED** | Simulated only |
+| T28 | Admin Server H2 schema correct | M1 | PLANNED WEEK 2 | |
+| T29 | Agent → Server live heartbeat E2E | M1+M3 | PLANNED WEEK 2 | |
+| T30 | Agent → Server live event E2E | M1+M3 | PLANNED WEEK 2 | |
+| T31 | Per-endpoint policy sync | M1+M2+M3 | PLANNED WEEK 2 | |
+| T32 | Admin Web live API integration | M1+M4 | PLANNED WEEK 2 | |
+| T33 | USBGuard block on real hardware (no whitelist) | M2 | PLANNED WEEK 2 | Production integration |
+| T34 | .deb package install/uninstall | M3 | PLANNED WEEK 3 | |
 
-- USBGuard/active user: Ubuntu có USBGuard, USB flash class 08, chuột/bàn phím USB và hai tài khoản local. Ghi phiên bản OS, USBGuard, policy và thiết bị trước khi chạy; tham khảo [môi trường PoC](usbguard/evidence/00-environment.txt).
-- Frontend: Node/npm phù hợp với `frontend/package.json`; chạy trong thư mục `frontend`.
-- Agent/Backend: Java/Maven phù hợp với pom.xml của từng module. Kiểm tra cấu hình trước khi khởi động.
-- Integration: cần API Server thực sự được triển khai và hai endpoint đã đăng ký; mock UI không chứng minh integration thành công.
-- Mỗi lần chạy lưu ngày, người chạy, commit, lệnh/bước thực hiện, expected/actual, kết quả và đường dẫn log hoặc ảnh. Evidence cũ phải ghi là kết quả được báo cáo, không xem là lần QA chạy lại.
+---
 
-## 3. Test cases
+## 2. Week 1 Gate Criteria
 
-### 3.1. USBGuard — M2 thực hiện, M5 xác minh
+| Gate | Owner | Result |
+|---|---|---|
+| Unknown Flash BLOCK | M2 | ✅ PASS |
+| Mouse/keyboard ALLOW | M2 | ✅ PASS |
+| Active Ubuntu username/session | M2 | ✅ PASS |
+| Sample endpoint+user+USB+decision | M2 | ✅ PASS |
+| Admin Server skeleton | M1 | ⚠️ Not verified this week |
+| Contract freeze v0.1 | M1 | ⚠️ Not verified this week |
+| Agent shell starts | M3 | ⚠️ Not verified this week |
+| Heartbeat/event POST PoC | M3+M1 | ⚠️ Not verified this week |
+| Admin Web skeleton | M4 | ✅ PASS |
+| Event History mock | M5 | ✅ PASS |
+| Test Plan v0.1 | M5 | ✅ This document |
 
-Chuẩn bị policy mặc định chặn Mass Storage chưa whitelist, cho phép HID; ghi lại policy ban đầu. Lưu log `list-devices`, `list-rules` và event stream vào `docs/usbguard/evidence/`.
+---
 
-| ID | Tuần | Bước thực hiện | Tiêu chí đạt |
-|---|---|---|---|
-| TC-USB-01 | 1 | Cắm flash chưa whitelist; xem list-devices | Đúng thiết bị có target block |
-| TC-USB-02 | 1 | Cắm chuột USB; xem interface và target | Chuột class 03 được allow và sử dụng được |
-| TC-USB-03 | 1 | Cắm bàn phím USB; thử nhập | Bàn phím được allow và nhập được; không suy ra từ test chuột |
-| TC-USB-04 | 1 | Kiểm tra interface của flash | Có interface class 08 |
-| TC-USB-05 | 1 | Thêm permanent allow cho flash cụ thể | Flash được allow; rule định danh đúng thiết bị |
-| TC-USB-06 | 2 | Xóa quyền/rule allow; áp dụng policy | Flash bị block lại |
-| TC-USB-07 | 1 | Tháo và cắm flash chưa whitelist ba lần | Cả ba lần đều block |
-| TC-USB-08 | 1 | Permanent allow, reboot, cắm lại flash | Rule còn tồn tại và flash được allow |
-| TC-USB-09 | 1 | Cắm hai flash và kiểm tra riêng từng thiết bị | Quyết định đúng theo policy của từng flash; thiếu thiết bị thì NOT EXECUTED |
+## 3. Test Evidence Sources
 
-### 3.2. Active user và event — M2/M3 thực hiện, M5 xác minh
+| Component | Evidence |
+|---|---|
+| USBGuard PoC | `docs/usbguard/USBGuard_POC.md` |
+| USBGuard evidence | `docs/usbguard/evidence/` |
+| Sample event contract | `docs/agent-contract/sample-usb-event.json` |
+| Admin Web tests | `frontend/tests/m4_endpoints.test.mjs` |
+| Event History tests | `frontend/tests/m5_events.test.mjs` |
+| M2 PoC verification | `docs/qa/WEEK1_M2_POC_VERIFICATION.md` |
 
-| ID | Tuần | Bước thực hiện | Tiêu chí đạt |
-|---|---|---|---|
-| TC-USER-01 | 1 | Chạy resolver trong phiên local active; đối chiếu loginctl | Username, UID, session, seat khớp phiên active |
-| TC-USER-02 | 1 | Đăng nhập tài khoản thứ hai; chạy resolver | Trả đúng user thứ hai, không hard-code |
-| TC-USER-03 | 1 | Mô phỏng hai candidate hợp lệ ngang nhau | UNKNOWN kèm lý do ambiguity; ghi rõ simulated logic test |
-| TC-EVENT-01 | 1 | Chạy usbguard watch; cắm/rút USB | Log có sự kiện insert/remove và thay đổi policy liên quan |
-| TC-EVENT-02 | 1 | Review sample JSON với contract | Có endpoint, active user/session, USB, eventType, decision, occurredAt; chỉ xác minh sample PoC |
-| TC-EVENT-03 | 2 | Cắm USB và đối chiếu payload Agent gửi | Payload được tạo từ event thật và user tại thời điểm event |
+---
 
-Evidence tham khảo: [USBGuard PoC](usbguard/USBGuard_POC.md), [event contract](agent-contract/README.md), [sample JSON](agent-contract/sample-usb-event.json).
+## 4. Out of Scope — Week 1
 
-### 3.3. Agent/Server — M3 + M1
+```text
+Production Agent → Admin Server live event delivery
+Per-endpoint policy sync (USBGuard rules pulled from server)
+Real multi-session Ubuntu ambiguity test
+.deb packaging
+Full Admin authentication
+```
 
-| ID | Tuần | Bước thực hiện | Tiêu chí đạt |
-|---|---|---|---|
-| TC-SERVER-01 | 1 | Khởi động backend; lưu startup log | Server khởi động, không có lỗi fatal; không đồng nghĩa API đã có |
-| TC-AGENT-01 | 1 | Gửi heartbeat với endpoint/token hợp lệ | Server nhận request và phản hồi đúng contract đã thống nhất |
-| TC-AGENT-02 | 1 | Gửi sample event; đọc lại dữ liệu lưu | Server deserialize, lưu và trả đúng trường dữ liệu |
-| TC-POLICY-01 | 2 | Allow USB cho endpoint A; kiểm tra A và B | A được allow, B vẫn áp dụng policy riêng |
-| TC-E2E-01 | 3 | USB → Agent → Server → Web | Event thật hiển thị đúng endpoint, user, USB, event và decision |
+---
 
-Nếu API chưa triển khai, ghi BLOCKED cùng dependency cụ thể; chưa có xác nhận freeze contract thì không ghi đã freeze.
+## 5. Planned — Week 2
 
-### 3.4. Admin Web — M4/M5
-
-| ID | Tuần | Bước thực hiện | Tiêu chí đạt |
-|---|---|---|---|
-| TC-WEB-01 | 1 | npm run dev; mở URL do Vite cung cấp | Giao diện mở được, không có lỗi render |
-| TC-WEB-02 | 1 | Mở #/events khi backend chưa khả dụng | Hiển thị mock và nhãn Dữ liệu mock |
-| TC-WEB-03 | 1 | Kiểm tra header và mock rows | Đúng thứ tự Timestamp, Endpoint, Linux User, USB, Event, Decision; có ALLOW/BLOCK và dấu — khi không có decision |
-| TC-WEB-04 | 1 | Lọc Endpoint/Linux Username/Device/Decision/Date; nhập giá trị không khớp; reset | Kết quả đúng điều kiện, có trạng thái không tìm thấy, reset khôi phục danh sách |
-| TC-WEB-05 | 1 | Dùng fixture nhiều endpoint xem whitelist và endpoint detail | Whitelist chỉ chứa allowed; detail không lẫn thiết bị endpoint khác; chưa chứng minh backend enforcement |
-| TC-WEB-06 | 2 | API trả event thật và danh sách rỗng | Render dữ liệu API; danh sách rỗng không bị thay bằng mock |
-
-## 4. Test tự động
-
-Danh sách source và lệnh chạy nằm trong Inventory. Chỉ ghi PASS khi có log lần chạy; việc tồn tại test source không chứng minh test pass. Build/typecheck/lint cũng không thay thế kiểm thử trên trình duyệt hoặc USB thật.
-
-## 5. Quy ước báo cáo
-
-- Result: PASS / FAIL / NOT EXECUTED / BLOCKED.
-- Planned week: 1 / 2 / 3, tách khỏi Result.
-- Verification: REPORTED — kết quả member báo cáo; PENDING QA — chờ QA xác minh; VERIFIED — QA đã xác minh và có evidence.
-- PASS simulated, PASS PoC và PASS E2E phải ghi rõ phạm vi; không dùng kết quả một phạm vi để kết luận phạm vi khác.
-- Tổng kết phải ghi mẫu số và nguồn kết quả; không đánh dấu PASS nếu chưa có bằng chứng.
-
-## 6. M5 execution update
-
-2026-10-05: frontend 15/15 tests, build/lint/browser PASS; [execution report](qa/evidence/M5_FRONTEND_VERIFICATION.md). Heartbeat/event POST là PoC Week 1, hiện BLOCKED do API. EventFilters có Endpoint, Linux Username, Device, Decision, Date và reset.
-
+```text
+Admin Server H2 database verified
+Agent heartbeat/event reach live server
+Admin Web reads real API data
+Per-endpoint whitelist CRUD via API
+Contract v0.1 frozen across M1/M2/M3
+```
