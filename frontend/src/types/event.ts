@@ -1,4 +1,5 @@
 // Frontend view model; transport field names are mapped when a backend API is available.
+// Mapping and integration limits: docs/qa/EVENT_VIEW_MODEL_MAPPING.md.
 export type EventType = 'connected' | 'disconnected' | 'blocked' | 'allowed' | 'service'
 export interface UsbEvent {
   id: string

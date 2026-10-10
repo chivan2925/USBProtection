@@ -23,6 +23,14 @@ Updated: 2026-10-10 (Asia/Bangkok). Scope: repository review and frontend verifi
 | Real API in Admin Web | M1 + M4 + M5 | Integrate endpoint, event and whitelist APIs; preserve empty responses without mock fallback. |
 | Hardware/session gaps | M2 + M5 | Test keyboard, multiple storage devices and real concurrent sessions on Ubuntu. |
 
+## M5 completion review
+
+Week 1 M5 deliverables are present: Event History mock and required columns, five filter controls, page/table tests, Test Plan v0.1, inventory, nine-item M2 evidence review and this summary. Frontend checks are recorded in the execution report; M2 verification is read-only evidence review.
+
+Test Plan and inventory now share T* IDs. Keyboard hardware remains NOT EXECUTED; functional revoke T36 has explicit acceptance criteria and stays PLANNED WEEK 2. The M2 report records the actual Codex reviewer, date and reviewed revision without claiming an independent member sign-off. [Event field mapping](EVENT_VIEW_MODEL_MAPPING.md) documents the view model and API integration limits.
+
+No unresolved M5 mock/UI implementation blocker was found. Remaining runtime/hardware and live API work stays assigned to the relevant owners above; this does not imply every Week 1 system gate has passed.
+
 ## Verification limits
 
 This update does not rerun Java tests, USBGuard, reboot or Ubuntu session checks. M2 evidence files were left unchanged. Frontend PASS applies to the mock/fixture UI and recorded browser checks; it does not establish end-to-end Agent to Server to Web success.

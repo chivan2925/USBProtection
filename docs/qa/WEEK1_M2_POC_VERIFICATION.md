@@ -2,7 +2,7 @@
 
 ## 1. Phạm vi xác minh
 
-Ngày review: 2026-10-05 (Asia/Bangkok).
+Ngày review ban đầu: 2026-10-05 (Asia/Bangkok). Rà soát bổ sung: 2026-10-10 (Asia/Bangkok).
 
 Phương pháp: đọc và đối chiếu evidence trong repository trên Windows. Đây là **evidence review**, không chạy lại USBGuard, reboot, USB thật hoặc session resolver trên Ubuntu. PASS dưới đây chỉ có nghĩa evidence phù hợp với expected result trong phạm vi đã ghi; không chứng minh tính xác thực của log hoặc kết quả E2E.
 
@@ -48,8 +48,16 @@ Hạn chế: evidence reboot và second user chủ yếu là output/ghi nhận c
 
 Hành động tiếp theo:
 
-1. Member 5 xác nhận evidence review và ghi tên, ngày, commit khi review hoặc chạy lại.
+1. Khi Member 5 review trực tiếp hoặc chạy lại, ghi tên, ngày, commit và phạm vi thực hiện; đây là xác nhận bổ sung của thành viên, không phải điều kiện để ghi nhận review thực tế do Codex thực hiện bên dưới.
 2. Nếu cần mức VERIFIED runtime, chạy lại trên Ubuntu, bổ sung boot identity trước/sau reboot và loginctl detail cho second user.
 3. Xác minh event pipeline thật và Server POST riêng trong integration Week 2.
 
 [Test Inventory](WEEK1_TEST_INVENTORY.md) và [QA Summary](WEEK1_QA_SUMMARY.md) vẫn phân biệt kết quả M2 reported với QA runtime verification; báo cáo này chỉ bổ sung lớp evidence review.
+
+## 6. Review record
+
+| Reviewer | Date / timezone | Repository revision | Scope / result |
+|---|---|---|---|
+| Codex, theo yêu cầu người dùng phụ trách M5 | 2026-10-10 / Asia/Bangkok | `520a527` (source revision reviewed; QA corrections are subsequent working-tree changes) | Read-only evidence review on Windows: flash/mouse targets, reboot rules, watch sequence, resolver outputs, ambiguity and sample payload against combined input. 9/9 evidence-review PASS; 0 runtime reruns. |
+
+Đây là bản ghi review thực tế của Codex, không phải chữ ký hay xác nhận độc lập của thành viên nhóm. Nguồn M2 được giữ nguyên. Keyboard, nhiều storage device và ambiguity với session thật vẫn chưa có kết quả runtime xác minh trong review này.

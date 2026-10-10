@@ -2,7 +2,7 @@
 
 ## 1. Phạm vi và cách đọc
 
-Inventory theo dõi test Week 1 và kế hoạch Week 2–3. ID TC-* tham chiếu [Test Plan](../TEST_PLAN.md).
+Inventory theo dõi test Week 1 và kế hoạch Week 2–3. ID T* tham chiếu [Test Plan](../TEST_PLAN.md).
 
 Bảng dưới phản ánh evidence trong repository, không phải lần chạy lại QA. PASS (M2 reported) nghĩa là M2 đã báo cáo PASS tại [USBGuard PoC](../usbguard/USBGuard_POC.md); các kết quả M2 vẫn chờ QA runtime; chín mục đã được evidence review tại [M2 verification](WEEK1_M2_POC_VERIFICATION.md). NOT EXECUTED nghĩa là chưa có bản ghi thực thi trong inventory, không khẳng định chưa từng có ai chạy.
 
@@ -10,26 +10,26 @@ Bảng dưới phản ánh evidence trong repository, không phải lần chạy
 
 | ID | Test Plan ID | Test | Owner | Result / phạm vi | Evidence | Verification |
 |---|---|---|---|---|---|---|
-| W1-01 | TC-USB-01 | Unknown flash BLOCK | M2 / M5 | PASS (M2 reported) | [Blocked device](../usbguard/evidence/05-blocked-devices.txt) | PENDING QA |
-| W1-02 | TC-USB-02 | Mouse ALLOW | M2 / M5 | PASS (M2 reported, physical mouse) | [Mouse](../usbguard/evidence/12-hid-mouse-test.txt) | PENDING QA |
-| W1-03 | TC-USB-03 | Keyboard ALLOW | M2 / M5 | NOT EXECUTED | Chưa có evidence bàn phím | PENDING QA |
-| W1-04 | TC-USB-04 | Mass Storage class 08 | M2 / M5 | PASS (M2 reported) | [Blocked device: 08:06:50](../usbguard/evidence/05-blocked-devices.txt) | PENDING QA |
-| W1-05 | TC-USER-01 | Active local user | M2 / M5 | PASS (M2 reported, resolver PoC) | [Resolver](../usbguard/evidence/18-active-user-resolver-poc.txt) | PENDING QA |
-| W1-06 | TC-USER-02 | Second user | M2 / M5 | PASS (M2 reported, resolver PoC) | [student01](../usbguard/evidence/19-active-user-student01.txt) | PENDING QA |
-| W1-07 | TC-USER-03 | Ambiguous session | M2 / M5 | PASS (M2 reported, SIMULATED LOGIC TEST) | [Ambiguity](../usbguard/evidence/resolver-ambiguity.txt) | PENDING QA |
-| W1-08 | TC-EVENT-01 | USBGuard event stream | M2 / M5 | PASS (M2 reported) | [Watch log](../usbguard/evidence/13-usbguard-watch-full.txt) | PENDING QA |
-| W1-09 | TC-EVENT-02 | Sample payload complete | M2 / M5 | PASS (M2 reported, manual PoC) | [Sample JSON](../agent-contract/sample-usb-event.json), [contract](../agent-contract/README.md) | PENDING QA |
-| W1-10 | TC-USB-05 | Permanent allow | M2 / M5 | PASS (M2 reported) | [Rules](../usbguard/evidence/09-rules-after-permanent-allow.txt) | PENDING QA |
-| W1-11 | TC-USB-07 | Reconnect blocked flash | M2 / M5 | PASS (M2 reported) | [PoC results and steps](../usbguard/USBGuard_POC.md) | PENDING QA |
-| W1-12 | TC-USB-08 | Reboot persistence | M2 / M5 | PASS (M2 reported, local USBGuard policy) | [Rules after reboot](../usbguard/evidence/10-rules-after-reboot.txt), [PoC](../usbguard/USBGuard_POC.md) | PENDING QA |
-| W1-13 | TC-USB-09 | Multiple flash devices | M2 / M5 | NOT EXECUTED — only one flash available | [Limitation](../usbguard/evidence/TODO_CAPTURE.md) | PENDING QA |
-| W1-14 | TC-SERVER-01 | Backend boot | M1 | NOT EXECUTED | Chưa ghi startup log | PENDING QA |
-| W1-15 | TC-WEB-01 | Frontend boot | M4 / M5 | PASS | [Execution report](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-16 | TC-WEB-02, TC-WEB-03 | Event History render, columns, mock | M5 | PASS | [Screenshot / browser](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-17 | TC-WEB-04 | Event search/filter | M5 | PASS | [Browser + unit tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-18 | TC-WEB-05 | Whitelist/detail fixture isolation | M4 / M5 | PASS | [31/31 tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-19 | TC-AGENT-01 | Heartbeat POST PoC Week 1 | M3 + M1 | NOT EXECUTED (review này) | Server API và Agent transport đã có trên main | Chờ evidence live POST |
-| W1-20 | TC-AGENT-02 | Event POST PoC Week 1 | M3 + M1 | NOT EXECUTED (review này) | Server API và Agent transport đã có trên main | Chờ evidence live POST |
+| W1-01 | T01 | Unknown flash BLOCK | M2 / M5 | PASS (M2 reported) | [Blocked device](../usbguard/evidence/05-blocked-devices.txt) | PENDING QA |
+| W1-02 | T02 | Mouse ALLOW | M2 / M5 | PASS (M2 reported, physical mouse) | [Mouse](../usbguard/evidence/12-hid-mouse-test.txt) | PENDING QA |
+| W1-03 | T35 | Keyboard ALLOW | M2 / M5 | NOT EXECUTED | Chưa có evidence bàn phím | PENDING QA |
+| W1-04 | T03 | Mass Storage class 08 | M2 / M5 | PASS (M2 reported) | [Blocked device: 08:06:50](../usbguard/evidence/05-blocked-devices.txt) | PENDING QA |
+| W1-05 | T08 | Active local user | M2 / M5 | PASS (M2 reported, resolver PoC) | [Resolver](../usbguard/evidence/18-active-user-resolver-poc.txt) | PENDING QA |
+| W1-06 | T09 | Second user | M2 / M5 | PASS (M2 reported, resolver PoC) | [student01](../usbguard/evidence/19-active-user-student01.txt) | PENDING QA |
+| W1-07 | T10 | Ambiguous session | M2 / M5 | PASS (M2 reported, SIMULATED LOGIC TEST) | [Ambiguity](../usbguard/evidence/resolver-ambiguity.txt) | PENDING QA |
+| W1-08 | T07 | USBGuard event stream | M2 / M5 | PASS (M2 reported) | [Watch log](../usbguard/evidence/13-usbguard-watch-full.txt) | PENDING QA |
+| W1-09 | T12 | Sample payload complete | M2 / M5 | PASS (M2 reported, manual PoC) | [Sample JSON](../agent-contract/sample-usb-event.json), [contract](../agent-contract/README.md) | PENDING QA |
+| W1-10 | T04 | Permanent allow | M2 / M5 | PASS (M2 reported) | [Rules](../usbguard/evidence/09-rules-after-permanent-allow.txt) | PENDING QA |
+| W1-11 | T05 | Reconnect blocked flash | M2 / M5 | PASS (M2 reported) | [PoC results and steps](../usbguard/USBGuard_POC.md) | PENDING QA |
+| W1-12 | T06 | Reboot persistence | M2 / M5 | PASS (M2 reported, local USBGuard policy) | [Rules after reboot](../usbguard/evidence/10-rules-after-reboot.txt), [PoC](../usbguard/USBGuard_POC.md) | PENDING QA |
+| W1-13 | T26 | Multiple flash devices | M2 / M5 | NOT EXECUTED — only one flash available | [Limitation](../usbguard/evidence/TODO_CAPTURE.md) | PENDING QA |
+| W1-14 | T13 | Backend boot | M1 | NOT EXECUTED | Chưa ghi startup log | PENDING QA |
+| W1-15 | T16 | Frontend boot | M4 / M5 | PASS | [Execution report](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
+| W1-16 | T23, T24 | Event History render, columns, mock | M5 | PASS | [Browser smoke](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
+| W1-17 | T25, T37 | Event search/filter | M5 | PASS | [Browser + unit tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
+| W1-18 | T20, T21, T22, T38 | Whitelist/detail fixture isolation | M4 / M5 | PASS | [31/31 tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
+| W1-19 | T14 | Heartbeat POST PoC Week 1 | M3 + M1 | NOT EXECUTED (review này) | Server API và Agent transport đã có trên main | Chờ evidence live POST |
+| W1-20 | T15 | Event POST PoC Week 1 | M3 + M1 | NOT EXECUTED (review này) | Server API và Agent transport đã có trên main | Chờ evidence live POST |
 
 
 Tổng 20 mục: 11 PASS M2 reported, 4 PASS frontend VERIFIED, 5 NOT EXECUTED; 0 FAIL được ghi nhận. M1/M3 đã có code trên main; runtime chưa được xác minh trong review này. Số test tự động được thống kê riêng. Không phải kết luận toàn hệ thống PASS.
@@ -67,7 +67,7 @@ Chưa có bản ghi thực thi các mục dưới đây; heartbeat/event POST ph
 | W2-04 | Event History API thật | UI hiển thị event API; empty response không thành mock |
 | W2-05 | Endpoint whitelist sync | Policy đúng theo từng endpoint |
 | W2-06 | Allow endpoint A | Endpoint B không bị thay đổi quyền |
-| W2-07 | Revoke | USB bị block lại |
+| W2-07 | Revoke (T36) | USB bị BLOCK trên A sau policy apply và reconnect; quyền B không đổi; lưu policy version và event evidence |
 | W2-08 | Reconnect sau policy sync | Policy central vẫn áp dụng đúng |
 
 ## 5. Planned Week 3
@@ -81,3 +81,7 @@ Chưa có bản ghi thực thi các mục dưới đây; heartbeat/event POST ph
 | W3-05 | Full E2E | USB → Agent → Server → Web đúng dữ liệu |
 
 Kế hoạch: Week 2 có 8 mục, Week 3 có 5 mục. Local reboot PoC Week 1 không thay thế reboot E2E.
+
+## 6. Traceability notes
+
+W1-* identifies inventory rows; T* identifies canonical Test Plan cases. A row may cover several cases. T11 (parser evidence) and T27 (real multi-session ambiguity) are tracked separately in the Test Plan. Simulated ambiguity W1-07/T10 does not establish T27 PASS. T36 functional revoke remains NOT EXECUTED / PLANNED WEEK 2; UI label tests T21/T22 cannot establish enforcement PASS.
