@@ -1,4 +1,4 @@
-﻿# Week 1 — Member 2 PoC Verification
+# Week 1 — Member 2 PoC Verification
 
 ## 1. Phạm vi xác minh
 

@@ -1,4 +1,4 @@
-﻿# USBShield — Week 1 Test Inventory
+# USBShield — Week 1 Test Inventory
 
 ## 1. Phạm vi và cách đọc
 
@@ -25,29 +25,32 @@ Bảng dưới phản ánh evidence trong repository, không phải lần chạy
 | W1-13 | TC-USB-09 | Multiple flash devices | M2 / M5 | NOT EXECUTED — only one flash available | [Limitation](../usbguard/evidence/TODO_CAPTURE.md) | PENDING QA |
 | W1-14 | TC-SERVER-01 | Backend boot | M1 | NOT EXECUTED | Chưa ghi startup log | PENDING QA |
 | W1-15 | TC-WEB-01 | Frontend boot | M4 / M5 | PASS | [Execution report](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-16 | TC-WEB-02, TC-WEB-03 | Event History render, columns, mock | M5 | PASS | [Screenshot / browser](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
+| W1-16 | TC-WEB-02, TC-WEB-03 | Event History render, columns, mock | M5 | PASS | [Browser smoke](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
 | W1-17 | TC-WEB-04 | Event search/filter | M5 | PASS | [Browser + unit tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-18 | TC-WEB-05 | Whitelist/detail fixture isolation | M4 / M5 | PASS | [15/15 tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-19 | TC-AGENT-01 | Heartbeat POST PoC Week 1 | M3 + M1 | BLOCKED | Backend chưa có API | Chờ M1/M3 |
-| W1-20 | TC-AGENT-02 | Event POST PoC Week 1 | M3 + M1 | BLOCKED | Backend chưa có API | Chờ M1/M3 |
+| W1-18 | TC-WEB-05 | Whitelist/detail fixture isolation | M4 / M5 | PASS | [31/31 tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
+| W1-19 | TC-AGENT-01 | Heartbeat POST PoC Week 1 | M3 + M1 | NOT EXECUTED (live integration) | Agent API source merged; runtime evidence pending | PENDING QA |
+| W1-20 | TC-AGENT-02 | Event POST PoC Week 1 | M3 + M1 | NOT EXECUTED (live integration) | Agent API source merged; runtime evidence pending | PENDING QA |
 
 
-Tổng 20 mục: 11 PASS M2 reported, 4 PASS frontend VERIFIED, 3 NOT EXECUTED, 2 BLOCKED; 0 FAIL được ghi nhận. Số test tự động được thống kê riêng. Không phải kết luận toàn hệ thống PASS.
+Tổng 20 mục: 11 PASS M2 reported, 4 PASS frontend VERIFIED, 5 NOT EXECUTED, 0 BLOCKED; 0 FAIL được ghi nhận. Số test tự động được thống kê riêng. Không phải kết luận toàn hệ thống PASS.
 
 ## 3. Test tự động hiện có
 
-Frontend đã chạy: 15/15 test PASS, build/lint/browser PASS. Xem [execution report](evidence/M5_FRONTEND_VERIFICATION.md). Agent/Backend chưa chạy lại.
+Frontend đã chạy: 31/31 test PASS, build/lint/browser PASS. Xem [execution report](evidence/M5_FRONTEND_VERIFICATION.md). Agent/Backend chưa chạy lại.
 
 | Module | Source | Phạm vi | Lệnh chạy trong module |
 |---|---|---|---|
 | Frontend | [core.test.mjs](../../frontend/tests/core.test.mjs) | Format, search, sorting, pagination, unavailable API | npm test |
 | Frontend | [components.test.mjs](../../frontend/tests/components.test.mjs) | Render, policy lists, endpoint isolation, table states | npm test |
+| Frontend | [eventFilters.test.mjs](../../frontend/tests/eventFilters.test.mjs) | Combined field filters, local date, no decision | npm test |
+| Frontend | [m4_endpoints.test.mjs](../../frontend/tests/m4_endpoints.test.mjs) | Endpoint rendering and whitelist isolation | npm test |
+| Frontend | [m5_events.test.mjs](../../frontend/tests/m5_events.test.mjs) | Shared EventTable and Events page integration | npm test |
 | Frontend | [browser.mjs](../../frontend/tests/browser.mjs) | Browser checks theo script; đọc prerequisites trước khi chạy | npm run test:browser |
 | Agent | [UsbGuardEventParserTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardEventParserTest.java) | Parser | mvn test (cần Maven đã cài) |
 | Agent | [UsbGuardEventListenerTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardEventListenerTest.java) | Listener | Như trên |
 | Agent | [LinuxActiveUserResolverTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/session/LinuxActiveUserResolverTest.java) | Resolver | Như trên |
 | Agent | [ClientAgentTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/ClientAgentTest.java) | Theo test source | Như trên |
-| Backend | [UsbProtectionApplicationTests.java](../../backend/src/test/java/USBProtection/UsbProtectionApplicationTests.java) | Application context | .\mvnw.cmd test (Windows) / ./mvnw test (Linux) |
+| Admin Server | [UsbShieldServerApplicationTests.java](../../admin-server/src/test/java/com/group/usbshield/server/UsbShieldServerApplicationTests.java) | Application context | mvn test in admin-server |
 
 Test phân trang Event đã cập nhật assertion theo cột USB. Có thêm tests/eventFilters.test.mjs cho bộ lọc trường, ngày local và decision không áp dụng.
 

@@ -1,5 +1,5 @@
-﻿import { Icon } from './Icon'
-import type { EventFilterValues } from '../types/event'
+﻿import { Icon } from '../Icon'
+import type { EventFilterValues } from '../../types/event'
 export function EventFilters({ value, onChange, onReset }: { value: EventFilterValues; onChange: (value: EventFilterValues) => void; onReset: () => void }) {
   const update = (key: keyof EventFilterValues, next: string) => onChange({ ...value, [key]: next })
   return <div className="filters event-filters">

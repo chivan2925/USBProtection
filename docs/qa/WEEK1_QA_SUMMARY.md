@@ -1,58 +1,71 @@
-﻿# USBShield — Week 1 QA Summary
+# Week 1 — QA Summary
 
-## 1. Overall status: M5 frontend verified; integration pending
+> **Owner:** Member 5
+> **Date:** 2026-10-10
+> **Project:** USBShield Ubuntu
 
-Cập nhật 2026-10-05. M5 Event History mock và test tự động đã được xác minh trên Windows. M2 PoC đã được review evidence, không chạy lại Ubuntu/hardware. Contract freeze và Agent/Server POST cần M1/M3 hoàn thành.
+---
 
-## 2. Week 1 Gate Summary
+## Week 1 Gate Status
 
-| Gate item | Owner | Evidence | Result | Blocker / next action |
-|---|---|---|---|---|
-| Flash BLOCK / class 08 | M2 | [M2 verification](WEEK1_M2_POC_VERIFICATION.md) | PASS evidence review | Runtime rerun chưa thực hiện |
-| Mouse ALLOW | M2 | [M2 verification](WEEK1_M2_POC_VERIFICATION.md) | PASS evidence review | Không suy ra keyboard |
-| Keyboard ALLOW | M2 | Chưa có evidence riêng | NOT EXECUTED | M2 test keyboard thật |
-| Active user / second user | M2 | [M2 verification](WEEK1_M2_POC_VERIFICATION.md) | PASS evidence review | Attribution trong pipeline thật cần integration |
-| Ambiguous session | M2 | [M2 verification](WEEK1_M2_POC_VERIFICATION.md) | PASS evidence review — simulated | Không phải hai phiên thật |
-| Sample event complete | M2 | [M2 verification](WEEK1_M2_POC_VERIFICATION.md) | PASS evidence review — manual PoC | Không chứng minh Server deserialize |
-| Contract freeze | M1 + M3 | [Handoff](../HANDOFF_MEMBER1_MEMBER3.md) | Chưa xác nhận | M1/M3 freeze protocol |
-| Agent heartbeat/event POST | M1 + M3 | Backend chưa có API | BLOCKED | Triển khai PoC endpoints Week 1 |
-| Frontend / Event History | M4 + M5 | [Execution report](evidence/M5_FRONTEND_VERIFICATION.md) | PASS frontend | API thật chờ Week 2 |
-| Backend boot | M1 | Chưa có startup log trong QA | NOT EXECUTED | M1 chạy và cung cấp evidence |
+| Gate item | Owner | Evidence | Result | Blocker | Next week action |
+|---|---|---|---|---|---|
+| Unknown Flash BLOCK | M2 | `docs/usbguard/evidence/05-blocked-devices.txt` | ✅ PASS | — | — |
+| Physical mouse ALLOW | M2 | `docs/usbguard/evidence/12-hid-mouse-test.txt` | PASS (M2 reported / evidence reviewed) | Keyboard runtime not executed | Verify keyboard separately |
+| Active Ubuntu username/session | M2 | `docs/usbguard/evidence/18-active-user-resolver-poc.txt` | ✅ PASS | — | — |
+| Sample event — endpoint+user+USB+decision | M2 | `docs/agent-contract/sample-usb-event.json` | ✅ PASS | — | M1 freeze contract v0.1 |
+| Admin Server skeleton | M1 | `admin-server/` | MERGED; runtime NOT VERIFIED | Boot/H2 execution evidence pending | Verify boot + H2 |
+| Contract freeze v0.1 | M1 | [Protocol v0.1](../AGENT_SERVER_PROTOCOL.md) | Specification merged; DTO alignment NOT VERIFIED | Runtime contract review pending | Compare server/agent/sample contracts |
+| Agent shell starts | M3 | `client-agent/` | MERGED; runtime NOT VERIFIED | Startup execution evidence pending | Verify agent startup |
+| Heartbeat/event POST PoC | M3+M1 | Agent API and sender source merged | Live integration NOT VERIFIED | Execution evidence pending | Live integration test Week 2 |
+| Admin Web skeleton | M4 | [Frontend verification](evidence/M5_FRONTEND_VERIFICATION.md) | PASS (frontend) | None | API integration Week 2 |
+| Event History mock | M5 | [Frontend verification](evidence/M5_FRONTEND_VERIFICATION.md) | PASS (frontend) | None | Real API events Week 2 |
+| Test Plan v0.1 | M5 | `docs/TEST_PLAN.md` | ✅ PASS | — | — |
 
-## 3. M5 frontend checklist
+---
 
-- [x] Event History mock renders; có Timestamp, Endpoint, Linux User, USB, Event, Decision.
-- [x] Có LAB-PC-01 / student01 / Kingston / CONNECTED / BLOCKED và LAB-PC-02 / employee07 / SanDisk / CONNECTED / ALLOWED.
-- [x] Có bộ lọc Endpoint, Linux Username, Device, Decision, Date; một bộ lọc duy nhất và reset.
-- [x] Có type riêng tại frontend/src/types/event.ts; services/models.ts re-export để giữ tương thích. Đây là view model, chưa tuyên bố là contract M1 đã freeze.
-- [x] Test render cột/mock, empty API response, sorting/pagination và filter logic.
-- [x] npm test: 15/15 PASS. npm run build, npm run lint: PASS.
-- [x] Browser smoke PASS: render, decision filter, unmatched endpoint, reset, responsive và runtime/console checks.
-- [x] Có [ảnh Event History](evidence/events-desktop.png).
-- [ ] Live backend event API và full Agent → Server → Web integration.
+## Member 2 PoC summary
 
-Tên file tương đương theo cấu trúc hiện có: pages/Events.tsx, components/EventTable.tsx, components/EventFilters.tsx, types/event.ts, mocks/events.ts; test nằm trong tests/components.test.mjs và tests/eventFilters.test.mjs. Không tạo wrapper rỗng chỉ để khớp tên checklist.
+M2 evidence review (no runtime rerun): [`docs/qa/WEEK1_M2_POC_VERIFICATION.md`](./WEEK1_M2_POC_VERIFICATION.md)
 
-## 4. Kết quả theo Inventory
+| Item | Result |
+|---|---|
+| Flash BLOCK | ✅ PASS |
+| Mouse ALLOW | ✅ PASS |
+| Reboot persistence | ✅ PASS |
+| USBGuard watch stream | ✅ PASS |
+| Active user resolved | ✅ PASS |
+| Second user (no hard-code) | ✅ PASS |
+| Ambiguity → UNKNOWN | ✅ PASS (SIMULATED) |
+| Parser massStorage=true | ✅ PASS |
+| Sample event contract | ✅ PASS |
+| Multiple USB storage | ❌ NOT EXECUTED |
 
-Đơn vị: 20 mục W1-* trong [Inventory](WEEK1_TEST_INVENTORY.md), không phải số gate/test tự động.
+---
 
-| Trạng thái | Số mục |
-|---|---:|
-| PASS M2 reported (chín mục PoC đã evidence review, runtime còn pending) | 11 |
-| PASS frontend VERIFIED | 4 |
-| NOT EXECUTED | 3 |
-| BLOCKED (heartbeat/event POST) | 2 |
-| FAIL ghi nhận trong bảng W1 | 0 |
-| Tổng | 20 |
+## Risks & Blockers
 
-Báo cáo [M2 verification](WEEK1_M2_POC_VERIFICATION.md) có 9/9 PASS evidence review; không cộng thêm chín mục vào tổng W1 vì trùng coverage. 0 FAIL không chứng minh toàn hệ thống không có lỗi.
+| Risk | Severity | Owner | Mitigation |
+|---|---|---|---|
+| M1 Admin Server runtime not verified | High | M1 | Source merged; record boot/H2 test evidence |
+| M3 Agent runtime not verified | High | M3 | Source merged; record startup and live POST evidence |
+| Contract fields not aligned (M1 DTO vs M3 transport DTO vs M2 sample) | High | M1 | M1 hosts contract review; all three align before Week 2 |
+| `EndpointWhitelistPanel` not connected to real API | Medium | M4+M1 | Wire up Week 2 after M1 API is live |
+| Event History reads mock, not real events | Medium | M5+M1 | Replace mock adapter in Week 2 |
 
-## 5. Remaining actions
+---
 
-1. M5 xác nhận báo cáo evidence review M2 nếu dùng làm báo cáo chính thức; ghi tên/commit khi bàn giao.
-2. M1/M3 triển khai và freeze heartbeat/event contract, cung cấp boot/POST logs.
-3. M2 cung cấp keyboard evidence; multi-flash vẫn thiếu phần cứng. Runtime rerun cần Ubuntu.
-4. Week 2 xác minh pipeline event thật, API, central persistence và policy theo endpoint.
+## Integrity note
 
-Nguồn M2 trong docs/usbguard/, packaging/usbguard/ và sample JSON không bị chỉnh sửa trong công việc này.
+M5 did not modify any M2 source evidence files.
+
+All verification was performed by reading the following files read-only:
+```text
+docs/usbguard/USBGuard_POC.md
+docs/usbguard/evidence/
+docs/agent-contract/sample-usb-event.json
+```
+
+This run updated frontend source/tests and QA documents; M2 source evidence remains unchanged.
+
+Frontend verification on 2026-10-10: 31/31 automated tests, build, lint and browser smoke PASS. M2 PASS rows refer to reported/evidence-reviewed results, not runtime reruns. M1/M3 code and protocol are merged; source presence does not establish live integration PASS.

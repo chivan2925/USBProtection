@@ -1,4 +1,4 @@
-﻿import type { UsbEvent } from '../services/models'
+import type { UsbEvent } from '../services/models'
 
 export const mockEvents: UsbEvent[] = [
   { id: 'mock-1', timestamp: '2026-10-05T10:30:00+07:00', endpointName: 'LAB-PC-02', username: 'employee07', deviceName: 'SanDisk Ultra 32GB', type: 'connected', decision: 'allowed', message: 'USB trong whitelist được phép kết nối.' },
