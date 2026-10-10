@@ -1,69 +1,28 @@
-# Week 1 — QA Summary
+# Week 1 QA Summary
 
-> **Owner:** Member 5  
-> **Date:** 2026-10-09  
-> **Project:** USBShield Ubuntu
+Updated: 2026-10-10 (Asia/Bangkok). Scope: repository review and frontend verification on Windows.
 
----
+## Week 1 gate status
 
-## Week 1 Gate Status
-
-| Gate item | Owner | Evidence | Result | Blocker | Next week action |
-|---|---|---|---|---|---|
-| Unknown Flash BLOCK | M2 | `docs/usbguard/evidence/05-blocked-devices.txt` | ✅ PASS | — | — |
-| Mouse/keyboard ALLOW | M2 | `docs/usbguard/evidence/12-hid-mouse-test.txt` | ✅ PASS | — | — |
-| Active Ubuntu username/session | M2 | `docs/usbguard/evidence/18-active-user-resolver-poc.txt` | ✅ PASS | — | — |
-| Sample event — endpoint+user+USB+decision | M2 | `docs/agent-contract/sample-usb-event.json` | ✅ PASS | — | M1 freeze contract v0.1 |
-| Admin Server skeleton | M1 | *(not in this repo branch)* | ⚠️ NOT VERIFIED | Pending M1 branch merge | M1 verify boot + H2 |
-| Contract freeze v0.1 | M1 | *(pending)* | ⚠️ NOT VERIFIED | Depends on M1+M2+M3 alignment | M1 publish AGENT_SERVER_PROTOCOL.md |
-| Agent shell starts | M3 | *(not in this repo branch)* | ⚠️ NOT VERIFIED | Pending M3 branch merge | M3 verify skeleton boots |
-| Heartbeat/event POST PoC | M3+M1 | *(pending)* | ⚠️ NOT VERIFIED | Both branches need to merge | Live integration test Week 2 |
-| Admin Web skeleton | M4 | `frontend/tests/m4_endpoints.test.mjs` | ✅ PASS | — | API integration Week 2 |
-| Event History mock | M5 | `frontend/tests/m5_events.test.mjs` | ✅ PASS | — | Real API events Week 2 |
-| Test Plan v0.1 | M5 | `docs/TEST_PLAN.md` | ✅ PASS | — | — |
-
----
-
-## Member 2 PoC summary
-
-Full verification: [`docs/qa/WEEK1_M2_POC_VERIFICATION.md`](./WEEK1_M2_POC_VERIFICATION.md)
-
-| Item | Result |
-|---|---|
-| Flash BLOCK | ✅ PASS |
-| Mouse ALLOW | ✅ PASS |
-| Reboot persistence | ✅ PASS |
-| USBGuard watch stream | ✅ PASS |
-| Active user resolved | ✅ PASS |
-| Second user (no hard-code) | ✅ PASS |
-| Ambiguity → UNKNOWN | ✅ PASS (SIMULATED) |
-| Parser massStorage=true | ✅ PASS |
-| Sample event contract | ✅ PASS |
-| Multiple USB storage | ❌ NOT EXECUTED |
-
----
-
-## Risks & Blockers
-
-| Risk | Severity | Owner | Mitigation |
+| Gate item | Owner | Evidence | Result / remaining work |
 |---|---|---|---|
-| M1 Admin Server not merged/verified | High | M1 | Merge and boot test before Week 2 integration starts |
-| M3 Agent shell not merged/verified | High | M3 | Merge and test heartbeat POST before Week 2 |
-| Contract fields not aligned (M1 DTO vs M3 transport DTO vs M2 sample) | High | M1 | M1 hosts contract review; all three align before Week 2 |
-| `EndpointWhitelistPanel` not connected to real API | Medium | M4+M1 | Wire up Week 2 after M1 API is live |
-| Event History reads mock, not real events | Medium | M5+M1 | Replace mock adapter in Week 2 |
+| USBGuard flash BLOCK, physical mouse ALLOW, active user, sample event | M2 | [M2 evidence review](WEEK1_M2_POC_VERIFICATION.md) | 9/9 evidence-review PASS; Ubuntu runtime rerun pending. Keyboard and multiple flash devices remain unverified. |
+| Admin Server skeleton | M1 | [Admin Server](../../admin-server/), [contract test](../../admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentEventContractTest.java) | Code present on main; boot/H2 runtime verification not rerun in this review. |
+| Contract v0.1 | M1 | [Agent-Server protocol](../AGENT_SERVER_PROTOCOL.md) | Freeze document present; live interoperability verification pending. |
+| Agent shell, heartbeat/event transport | M3 | [Client Agent](../../client-agent/) | Code present on main; boot and live POST verification not rerun in this review. |
+| Heartbeat/event POST integration | M3 + M1 | Server API and Agent transport code present | Live integration evidence still required; no branch-merge blocker. |
+| Admin Web and Event History mock | M4 + M5 | [Frontend verification](evidence/M5_FRONTEND_VERIFICATION.md) | 31/31 automated tests PASS; build, lint and browser smoke PASS. |
+| Test Plan and inventory | M5 | [Test Plan](../TEST_PLAN.md), [inventory](WEEK1_TEST_INVENTORY.md) | Present; distinguishes evidence review, frontend checks and pending runtime integration. |
 
----
+## Remaining work
 
-## Integrity note
+| Item | Owner | Next action |
+|---|---|---|
+| Server and Agent runtime checks | M1 + M3 | Verify boot/H2 and live heartbeat/event POST; record execution evidence. |
+| Contract interoperability | M1 + M2 + M3 | Verify real payload against server DTO and published v0.1 protocol. |
+| Real API in Admin Web | M1 + M4 + M5 | Integrate endpoint, event and whitelist APIs; preserve empty responses without mock fallback. |
+| Hardware/session gaps | M2 + M5 | Test keyboard, multiple storage devices and real concurrent sessions on Ubuntu. |
 
-M5 did not modify any M2 source evidence files.
+## Verification limits
 
-All verification was performed by reading the following files read-only:
-```text
-docs/usbguard/USBGuard_POC.md
-docs/usbguard/evidence/
-docs/agent-contract/sample-usb-event.json
-```
-
-Results are recorded only in `docs/qa/` (M5 ownership).
+This update does not rerun Java tests, USBGuard, reboot or Ubuntu session checks. M2 evidence files were left unchanged. Frontend PASS applies to the mock/fixture UI and recorded browser checks; it does not establish end-to-end Agent to Server to Web success.

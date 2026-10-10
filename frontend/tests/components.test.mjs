@@ -10,7 +10,7 @@ let Events
 let EndpointDetail
 let DataTable
 before(async () => {
-  vite = await createServer({ server: { middlewareMode: true }, appType: 'custom' })
+  vite = await createServer({ server: { middlewareMode: true, hmr: false }, appType: 'custom' })
   ;({ Devices } = await vite.ssrLoadModule('/src/pages/Devices.tsx'))
   ;({ Events } = await vite.ssrLoadModule('/src/pages/Events.tsx'))
   ;({ EndpointDetail } = await vite.ssrLoadModule('/src/pages/Endpoints.tsx'))

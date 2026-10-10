@@ -1,77 +1,4 @@
-<<<<<<< HEAD
-# Week 1 — Test Inventory
-
-> **Owner:** Member 5  
-> **Project:** USBShield Ubuntu
-
----
-
-## Executed Week 1
-
-| ID | Test | Owner | Result |
-|---|---|---|---|
-| T01 | Unknown Flash BLOCK (Kingston DataTraveler 2.0) | M2 | ✅ PASS |
-| T02 | USB Mouse/Keyboard ALLOW (Optical Mouse class 03) | M2 | ✅ PASS |
-| T03 | Mass Storage class `08` detected in interface string | M2 | ✅ PASS |
-| T04 | Specific permanent allow (USBGuard `allow-device --permanent`) | M2 | ✅ PASS |
-| T05 | Reconnect blocked device — 3 attempts all BLOCK | M2 | ✅ PASS |
-| T06 | Reboot persistence — permanent allow rule survives | M2 | ✅ PASS |
-| T07 | USBGuard watch event stream: Remove→Insert→PolicyChanged→PolicyApplied | M2 | ✅ PASS |
-| T08 | Active local Ubuntu user resolved (usbdev, UID 1000) | M2 | ✅ PASS |
-| T09 | Second user attribution (student01, UID 1001, not hard-coded) | M2 | ✅ PASS |
-| T10 | Resolver ambiguity → UNKNOWN (simulated logic test) | M2 | ✅ PASS (SIMULATED) |
-| T11 | Java USBGuard parser — massStorage=true for class 08 device | M2 | ✅ PASS |
-| T12 | Sample Agent event JSON contract — all required fields present | M2 | ✅ PASS |
-| T16 | Admin Web boots (Vite/React app starts) | M4 | ✅ PASS |
-| T17 | Login wireframe renders (username/password/button) | M4 | ✅ PASS |
-| T18 | Dashboard renders with stat cards | M4 | ✅ PASS |
-| T19 | Endpoints list renders rows (hostname, status, policy) | M4 | ✅ PASS |
-| T20 | Endpoint Detail renders per-endpoint info | M4 | ✅ PASS |
-| T21 | EndpointWhitelistPanel: "Allow on this endpoint" label correct | M4 | ✅ PASS |
-| T22 | EndpointWhitelistPanel: "Revoke on this endpoint" label correct | M4 | ✅ PASS |
-| T23 | Event History table renders with mock data | M5 | ✅ PASS |
-| T24 | Event History columns: Timestamp/Endpoint/Linux User/USB/Event/Decision | M5 | ✅ PASS |
-| T25 | Event filter by decision (ALLOWED/BLOCKED/UNKNOWN) | M5 | ✅ PASS (MOCK) |
-
----
-
-## Not Executed Week 1
-
-| ID | Test | Reason | Owner |
-|---|---|---|---|
-| T26 | Multiple USB Mass Storage simultaneous handling | Only one device available | M2 |
-| T27 | Real live multi-session ambiguity | Single-seat VM, simulated only | M2 |
-| T13 | Admin Server skeleton boots | M1 backend not yet in this repo branch | M1 |
-| T14 | Agent heartbeat POST reaches Admin Server | Integration not live | M1+M3 |
-| T15 | Agent event POST deserialized by server | Integration not live | M1+M3 |
-
----
-
-## Planned Week 2
-
-| ID | Test | Owner |
-|---|---|---|
-| T29 | Admin Server H2 schema and context loads | M1 |
-| T30 | Agent heartbeat/event live POST to Admin Server | M1+M3 |
-| T31 | Contract v0.1 fields match between M1 DTO and M3 transport DTO | M1+M3 |
-| T32 | Per-endpoint policy sync: server → Agent | M1+M2+M3 |
-| T33 | Admin Web reads real API data (endpoints, events) | M1+M4 |
-| T34 | Per-endpoint whitelist Allow/Revoke via real API | M1+M4 |
-| T35 | USBGuard block on real hardware — Agent reports to server | M2+M3+M1 |
-
----
-
-## Planned Week 3
-
-| ID | Test | Owner |
-|---|---|---|
-| T40 | .deb package install on Ubuntu 24.04 | M3 |
-| T41 | .deb package uninstall (prerm/postrm) | M3 |
-| T42 | systemd unit enables on boot | M3 |
-| T43 | Multi-endpoint scenario: two machines, different policies | All |
-| T44 | Admin logs in with real credentials and views live events | M1+M4 |
-=======
-﻿# USBShield — Week 1 Test Inventory
+# USBShield — Week 1 Test Inventory
 
 ## 1. Phạm vi và cách đọc
 
@@ -100,27 +27,31 @@ Bảng dưới phản ánh evidence trong repository, không phải lần chạy
 | W1-15 | TC-WEB-01 | Frontend boot | M4 / M5 | PASS | [Execution report](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
 | W1-16 | TC-WEB-02, TC-WEB-03 | Event History render, columns, mock | M5 | PASS | [Screenshot / browser](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
 | W1-17 | TC-WEB-04 | Event search/filter | M5 | PASS | [Browser + unit tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-18 | TC-WEB-05 | Whitelist/detail fixture isolation | M4 / M5 | PASS | [15/15 tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
-| W1-19 | TC-AGENT-01 | Heartbeat POST PoC Week 1 | M3 + M1 | BLOCKED | Backend chưa có API | Chờ M1/M3 |
-| W1-20 | TC-AGENT-02 | Event POST PoC Week 1 | M3 + M1 | BLOCKED | Backend chưa có API | Chờ M1/M3 |
+| W1-18 | TC-WEB-05 | Whitelist/detail fixture isolation | M4 / M5 | PASS | [31/31 tests](evidence/M5_FRONTEND_VERIFICATION.md) | VERIFIED (frontend) |
+| W1-19 | TC-AGENT-01 | Heartbeat POST PoC Week 1 | M3 + M1 | NOT EXECUTED (review này) | Server API và Agent transport đã có trên main | Chờ evidence live POST |
+| W1-20 | TC-AGENT-02 | Event POST PoC Week 1 | M3 + M1 | NOT EXECUTED (review này) | Server API và Agent transport đã có trên main | Chờ evidence live POST |
 
 
-Tổng 20 mục: 11 PASS M2 reported, 4 PASS frontend VERIFIED, 3 NOT EXECUTED, 2 BLOCKED; 0 FAIL được ghi nhận. Số test tự động được thống kê riêng. Không phải kết luận toàn hệ thống PASS.
+Tổng 20 mục: 11 PASS M2 reported, 4 PASS frontend VERIFIED, 5 NOT EXECUTED; 0 FAIL được ghi nhận. M1/M3 đã có code trên main; runtime chưa được xác minh trong review này. Số test tự động được thống kê riêng. Không phải kết luận toàn hệ thống PASS.
 
 ## 3. Test tự động hiện có
 
-Frontend đã chạy: 15/15 test PASS, build/lint/browser PASS. Xem [execution report](evidence/M5_FRONTEND_VERIFICATION.md). Agent/Backend chưa chạy lại.
+Frontend chạy ngày 2026-10-10 (Asia/Bangkok): 31/31 test PASS, build/lint/browser PASS. Xem [execution report](evidence/M5_FRONTEND_VERIFICATION.md). Agent/Backend chưa chạy lại.
 
 | Module | Source | Phạm vi | Lệnh chạy trong module |
 |---|---|---|---|
 | Frontend | [core.test.mjs](../../frontend/tests/core.test.mjs) | Format, search, sorting, pagination, unavailable API | npm test |
 | Frontend | [components.test.mjs](../../frontend/tests/components.test.mjs) | Render, policy lists, endpoint isolation, table states | npm test |
+| Frontend | [eventFilters.test.mjs](../../frontend/tests/eventFilters.test.mjs) | Field filters, reset, local date, no-decision | npm test |
+| Frontend | [m4_endpoints.test.mjs](../../frontend/tests/m4_endpoints.test.mjs) | Endpoints, detail, per-endpoint whitelist | npm test |
+| Frontend | [m5_events.test.mjs](../../frontend/tests/m5_events.test.mjs) | Shared EventTable and Events page, decisions, links, loading/empty | npm test |
 | Frontend | [browser.mjs](../../frontend/tests/browser.mjs) | Browser checks theo script; đọc prerequisites trước khi chạy | npm run test:browser |
 | Agent | [UsbGuardEventParserTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardEventParserTest.java) | Parser | mvn test (cần Maven đã cài) |
 | Agent | [UsbGuardEventListenerTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardEventListenerTest.java) | Listener | Như trên |
 | Agent | [LinuxActiveUserResolverTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/session/LinuxActiveUserResolverTest.java) | Resolver | Như trên |
 | Agent | [ClientAgentTest.java](../../client-agent/src/test/java/com/group/usbshield/agent/ClientAgentTest.java) | Theo test source | Như trên |
 | Backend | [UsbProtectionApplicationTests.java](../../backend/src/test/java/USBProtection/UsbProtectionApplicationTests.java) | Application context | .\mvnw.cmd test (Windows) / ./mvnw test (Linux) |
+| Admin Server | [AgentEventContractTest.java](../../admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentEventContractTest.java) | Event contract deserialization (source present; not rerun) | mvn test |
 
 Test phân trang Event đã cập nhật assertion theo cột USB. Có thêm tests/eventFilters.test.mjs cho bộ lọc trường, ngày local và decision không áp dụng.
 
@@ -150,4 +81,3 @@ Chưa có bản ghi thực thi các mục dưới đây; heartbeat/event POST ph
 | W3-05 | Full E2E | USB → Agent → Server → Web đúng dữ liệu |
 
 Kế hoạch: Week 2 có 8 mục, Week 3 có 5 mục. Local reboot PoC Week 1 không thay thế reboot E2E.
->>>>>>> origin/huy
