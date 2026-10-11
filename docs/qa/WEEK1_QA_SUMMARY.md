@@ -33,4 +33,8 @@ No unresolved M5 mock/UI implementation blocker was found. Remaining runtime/har
 
 ## Verification limits
 
+### Member 4 follow-up — 2026-10-11 (Asia/Saigon)
+
+[M4 verification](evidence/M4_FRONTEND_VERIFICATION.md): build/lint, 34/34 tests và browser smoke PASS sau khi tích hợp whitelist vào Endpoint Detail và thêm demo rõ nhãn cho Dashboard/Endpoints. Merge markers đã hết trước lần rà soát này. M4 PASS áp dụng cho skeleton/wireframe Week 1; auth/session và API quản trị thật vẫn chờ tích hợp.
+
 This update does not rerun Java tests, USBGuard, reboot or Ubuntu session checks. M2 evidence files were left unchanged. Frontend PASS applies to the mock/fixture UI and recorded browser checks; it does not establish end-to-end Agent to Server to Web success.
