@@ -10,11 +10,13 @@ let vite
 let Endpoints
 let EndpointDetail
 let EndpointWhitelistPanel
+let Dashboard
 
 before(async () => {
   vite = await createServer({ server: { middlewareMode: true }, appType: 'custom' })
   ;({ Endpoints, EndpointDetail } = await vite.ssrLoadModule('/src/pages/Endpoints.tsx'))
   ;({ EndpointWhitelistPanel } = await vite.ssrLoadModule('/src/components/endpoint/EndpointWhitelistPanel.tsx'))
+  ;({ Dashboard } = await vite.ssrLoadModule('/src/pages/Dashboard.tsx'))
 })
 after(async () => { await vite?.close() })
 
@@ -30,7 +32,7 @@ const mockWhitelist = [
 ]
 
 const baseProps = {
-  state: { status: 'ready', data: { endpoints: mockEndpoints, devices: mockDevices, events: [] } },
+  state: { status: 'ready', data: { endpoints: mockEndpoints, devices: mockDevices, events: [], whitelist: mockWhitelist } },
   refresh() {},
   refreshButton: null,
 }
@@ -94,4 +96,43 @@ test('whitelist panel shows empty state when endpoint has no whitelist entries',
   }))
   assert.ok(html.includes('Chưa có thiết bị nào được cho phép'), 'should show empty state for endpoint with no entries')
   assert.ok(!html.includes('Kingston'), 'should not show LAB-PC-01 entries for LAB-PC-02')
+})
+
+test('active endpoint detail integrates its whitelist and disables unimplemented actions', () => {
+  const own = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-01' }))
+  const other = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-02' }))
+  assert.ok(own.includes('data-testid="endpoint-whitelist-panel"'))
+  assert.match(own, /id="revoke-wl-01"[^>]*disabled=""/)
+  assert.match(own, /id="allow-on-POC-LAB-PC-01"[^>]*disabled=""/)
+  assert.ok(other.includes('Chưa có thiết bị nào được cho phép'))
+  assert.ok(!other.includes('revoke-wl-01'))
+  assert.ok(!own.includes('href="#/whitelist"'))
+})
+
+test('unavailable backend offers labelled dashboard and endpoint preview with working detail IDs', () => {
+  const props = { ...baseProps, state: { status: 'unavailable' } }
+  const dashboard = renderToStaticMarkup(createElement(Dashboard, props))
+  const endpoints = renderToStaticMarkup(createElement(Endpoints, props))
+  const detail = renderToStaticMarkup(createElement(EndpointDetail, { ...props, endpointId: 'POC-LAB-PC-01' }))
+  for (const html of [dashboard, endpoints, detail]) assert.ok(html.includes('Dữ liệu mock'))
+  assert.ok(dashboard.includes('Chưa xác định trạng thái'))
+  assert.ok(!dashboard.includes('Hệ thống đang được bảo vệ'))
+  assert.ok(endpoints.includes('href="#/endpoints/POC-LAB-PC-01"'))
+  assert.ok(detail.includes('Kingston'))
+  assert.ok(detail.includes('student01'))
+})
+
+test('ready empty and failed endpoint responses never fall back to mock data', () => {
+  for (const state of [
+    { status: 'ready', data: { endpoints: [], devices: [], events: [], whitelist: [] } },
+    { status: 'error', error: 'Server failed' },
+    { status: 'loading' },
+  ]) {
+    const html = renderToStaticMarkup(createElement(Endpoints, { ...baseProps, state }))
+    assert.ok(!html.includes('LAB-PC-01'))
+    assert.ok(!html.includes('Dữ liệu mock'))
+  }
+  const missing = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, state: { status: 'unavailable' }, endpointId: 'missing' }))
+  assert.ok(missing.includes('Endpoint không tồn tại'))
+  assert.ok(!missing.includes('data-testid="endpoint-whitelist-panel"'))
 })

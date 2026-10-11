@@ -17,23 +17,19 @@ npm run test:browser
 
 - `build`: kiểm tra TypeScript và tạo bản production trong `dist/`.
 - `lint`: Oxlint, không có cảnh báo trong lần kiểm tra bàn giao.
-- `test`: 11 kiểm thử logic và component bằng Node test runner, React server renderer và Vite đã có sẵn.
+- `test`: 34 kiểm thử logic và component bằng Node test runner, React server renderer và Vite đã có sẵn.
 - `test:browser`: chạy bản build bằng Vite preview trên `127.0.0.1:4173`, mở Chrome/Edge headless, kiểm tra điều hướng/refresh/filter/login/responsive và lỗi JavaScript. Chạy build trước. Cần cổng 4173 trống. Tự đóng các tiến trình sau khi xong.
 - Trình duyệt được tìm tại vị trí cài đặt Windows thông thường; có thể đặt `CHROME_PATH` để chỉ định executable. Không tải trình duyệt hay thêm thư viện automation.
 - Ảnh kiểm tra lưu trong `.artifacts/` (gitignored). Profile trình duyệt tạm nằm trong workspace và được xóa sau kiểm tra.
 - Windows sandbox hạn chế tạo tiến trình có thể báo `spawn EPERM`; build/test cần môi trường cho phép Node/Vite chạy tiến trình con.
 
-## Kết quả phân tích backend
+## Trạng thái tích hợp backend
 
-Đã kiểm tra `backend/src`, `pom.xml` và `application.yaml`:
+**Frontend chưa tích hợp API thật của Admin Server.** `services/api.ts` hiện trả `BackendUnavailableError`; không gọi HTTP và chưa bật authentication hoặc thay đổi policy. Cần đối chiếu routes, DTO và session/cookie của `admin-server/` trước khi thay adapter. Không thay đổi backend trong đợt kiểm tra M4 Week 1 này.
 
-- Java 21, Spring Boot, Maven; dependencies Web MVC, JPA, MySQL, Lombok.
-- Chỉ có `UsbProtectionApplication` và test `contextLoads`.
-- Không có Controller, Service, Repository, Entity hoặc endpoint HTTP nghiệp vụ.
-- `application.yaml` chỉ khai báo tên ứng dụng.
-- Không có API xác thực, thống kê, service, USB, endpoints, whitelist/blacklist, lịch sử hoặc settings.
+Dashboard, Endpoints và Endpoint Detail tự hiển thị dữ liệu demo được ghi rõ là mock khi adapter báo chưa khả dụng. Login là wireframe; dùng **Xem giao diện quản lý** để mở demo mà không tạo phiên đăng nhập.
 
-**API đã kết nối: chưa có, vì backend chưa cung cấp API.** Không thay đổi backend trong đợt triển khai FE này.
+Demo whitelist: mở `#/endpoints/POC-LAB-PC-01` để xem Kingston được phép trên LAB-PC-01, sau đó `#/endpoints/POC-LAB-PC-02` để thấy cùng USB bị chặn và whitelist trống. Allow/Revoke là nút wireframe vô hiệu hóa, chưa thay đổi policy thật.
 
 ## Các màn hình
 
@@ -47,7 +43,7 @@ Dùng hash routing để truy cập trực tiếp, reload và Back/Forward mà k
 | `#/blocked` | USB bị chặn; lý do/thời gian; tìm kiếm và lọc endpoint; cấu trúc cho phép thiết bị có xác nhận |
 | `#/events` | Cắm/rút/chặn/cho phép USB và sự kiện service; tìm kiếm; lọc loại; mới nhất trước; phân trang 10 dòng |
 | `#/endpoints` | Máy Ubuntu, hostname, online/offline, user, policy version, last seen; tìm kiếm/lọc và liên kết chi tiết |
-| `#/endpoints/:id` | Chi tiết một máy; thiết bị và sự kiện chỉ thuộc endpoint đó |
+| `#/endpoints/:id` | Chi tiết một máy; thiết bị, sự kiện và whitelist chỉ thuộc endpoint đó; Allow/Revoke wireframe |
 | `#/settings` | Khả năng tích hợp thực tế và danh sách chức năng chờ backend; không tạo setting vô tác dụng |
 | `#/login` | Form username/password với trạng thái chưa có API xác thực; liên kết xem giao diện quản lý |
 | Đường dẫn khác | Trang 404 và liên kết về Dashboard |
@@ -56,8 +52,9 @@ Giao diện responsive có sidebar, highlight trang hiện tại, topbar, menu m
 
 ## Dữ liệu và giới hạn hiện tại
 
-- Không có dữ liệu mẫu trong ứng dụng. Dữ liệu fixture chỉ nằm trong tests.
-- Thống kê chưa biết hiển thị `—`, không hiển thị số 0 hay trạng thái “đang bảo vệ” giả.
+- Dashboard/Endpoints/Endpoint Detail có dữ liệu mẫu Week 1 trong `mocks/adminPreview.ts`, ghi rõ bằng banner. Event History dùng mock của M5. Các dữ liệu này chỉ minh họa giao diện.
+- Thống kê chưa biết hiển thị `—`; số liệu demo được ghi rõ là mock. Demo không tuyên bố trạng thái bảo vệ/service thực tế.
+- M4 chỉ dùng mock khi adapter báo `unavailable`; phản hồi thật rỗng, lỗi tải và loading không bị thay bằng mock.
 - `services/api.ts` là adapter tập trung. Khi chưa có backend, adapter trả `BackendUnavailableError` và không gọi URL tự đặt.
 - `services/models.ts` là view model của FE, **không phải hợp đồng API đã được backend triển khai**.
 - `useResource` xử lý tải, lỗi, thiếu API, hủy request cũ và chống cập nhật dữ liệu sau khi unmount.
@@ -130,6 +127,6 @@ Các asset của template không còn được import; không xóa dữ liệu c
 
 - Production build và TypeScript: thành công.
 - Oxlint: không lỗi/cảnh báo.
-- 11 unit/component tests: thành công (trạng thái không xác định, tìm kiếm tiếng Việt, thứ tự thời gian, phân trang, hủy request, không gọi API giả, tách whitelist/blocked, tách endpoint, render text an toàn, các trạng thái bảng).
+- 34 unit/component tests: thành công (logic chung, event filters, M4/M5, whitelist được tích hợp theo endpoint, mock có nhãn và không thay dữ liệu rỗng/lỗi).
 - Chrome headless desktop/mobile: điều hướng các màn hình, URL sai, refresh toast, filter/reset, login vô hiệu hóa, không lưu credentials, menu mobile, không tràn ngang, không có lỗi runtime hoặc Fetch/XHR đến API không tồn tại.
 - Chưa kiểm thử thao tác nghiệp vụ end-to-end vì chưa có API backend.
