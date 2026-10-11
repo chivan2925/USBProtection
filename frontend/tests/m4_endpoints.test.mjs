@@ -12,7 +12,7 @@ let EndpointDetail
 let EndpointWhitelistPanel
 
 before(async () => {
-  vite = await createServer({ server: { middlewareMode: true }, appType: 'custom' })
+  vite = await createServer({ server: { middlewareMode: true, ws: false }, appType: 'custom' })
   ;({ Endpoints, EndpointDetail } = await vite.ssrLoadModule('/src/pages/Endpoints.tsx'))
   ;({ EndpointWhitelistPanel } = await vite.ssrLoadModule('/src/components/endpoint/EndpointWhitelistPanel.tsx'))
 })
