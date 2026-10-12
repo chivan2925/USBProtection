@@ -101,4 +101,32 @@ class UsbGuardEventListenerTest {
         // Xác nhận popup thông báo đã được kích hoạt
         verify(desktopNotificationService, times(1)).notifyBlockedUsb(any(), any());
     }
+
+    @Test
+    @DisplayName("Kiểm tra khử trùng lặp: Cắm 1 USB phát sinh 3 khối PresenceChanged, PolicyChanged, PolicyApplied -> Chỉ gửi DUY NHẤT 1 event")
+    void testDeduplicateFullWatchStream() {
+        String[] fullWatchStreamLines = {
+                "[device] PresenceChanged: id=11",
+                "event=Insert",
+                "target=block",
+                "device_rule=block id 0951:1665 serial \"C81F660E8BE8FFA14601FEF6\" name \"DataTraveler 2.0\" hash \"xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=\" parent-hash \"Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=\" via-port \"3-2\" with-interface 08:06:50 with-connect-type \"unknown\"",
+                "[device] PolicyChanged: id=11",
+                "target_old=block",
+                "target_new=block",
+                "device_rule=block id 0951:1665 serial \"C81F660E8BE8FFA14601FEF6\" name \"DataTraveler 2.0\" hash \"xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=\" parent-hash \"Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=\" via-port \"3-2\" with-interface 08:06:50 with-connect-type \"unknown\"",
+                "rule_id=4294967294",
+                "[device] PolicyApplied: id=11",
+                "target_new=block",
+                "device_rule=block id 0951:1665 serial \"C81F660E8BE8FFA14601FEF6\" name \"DataTraveler 2.0\" hash \"xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=\" parent-hash \"Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=\" via-port \"3-2\" with-interface 08:06:50 with-connect-type \"unknown\"",
+                "rule_id=4294967294"
+        };
+
+        for (String line : fullWatchStreamLines) {
+            listener.processWatchLine(line);
+        }
+
+        // BẮT BUỘC chỉ được gọi đúng 1 lần duy nhất cho toàn bộ chuỗi cắm USB
+        verify(eventSenderService, times(1)).sendPayload(any());
+        verify(desktopNotificationService, times(1)).notifyBlockedUsb(any(), any());
+    }
 }

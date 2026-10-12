@@ -8,5 +8,5 @@ import java.util.List;
  */
 public interface UsbGuardGateway {
     boolean isAvailable();
-    void applyWhitelist(List<String> whitelistFingerprints);
+    boolean applyWhitelist(List<String> whitelistFingerprints);
 }
