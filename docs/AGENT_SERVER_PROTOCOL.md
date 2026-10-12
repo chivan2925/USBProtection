@@ -135,10 +135,12 @@ Sau khi cập nhật file `/etc/usbguard/rules.conf` thành công, Agent gửi x
     "interface": "03:01:02"
   },
   "eventType": "CONNECTED",
-  "decision": "BLOCKED",
+  "decision": "ALLOWED",
   "occurredAt": "2026-09-28T14:10:16+07:00"
 }
 ```
+
+Ví dụ trên lấy từ `docs/agent-contract/sample-usb-event.json` của M2: mouse class `03`, session `21`, decision `ALLOWED`. Đây là sample peripheral, không phải bằng chứng USB Flash Disk bị chặn. Test contract phải đọc trực tiếp file này và thất bại nếu thiếu file; không thay sample để làm test pass.
 
 ### Ý nghĩa các trường dữ liệu Active User Attribution:
 - `linuxUsername`: Tên tài khoản Ubuntu đăng nhập có phiên tương tác phần cứng tại thời điểm cắm USB.

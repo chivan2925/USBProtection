@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.agentapi.AgentEventContractTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.486 s -- in com.group.usbshield.server.agentapi.AgentEventContractTest
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.agentapi.AgentHttpIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.70 s -- in com.group.usbshield.server.agentapi.AgentHttpIntegrationTest
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.UsbShieldServerApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.004 s -- in com.group.usbshield.server.UsbShieldServerApplicationTests

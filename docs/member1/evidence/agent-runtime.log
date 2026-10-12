@@ -1,0 +1,24 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-10-12T15:24:22.648+07:00  INFO 19032 --- [usbshield-agent] [           main] c.g.u.agent.ClientAgentApplication       : Starting ClientAgentApplication v1.0.0-SNAPSHOT using Java 22.0.2 with PID 19032 (D:\USBProtection\client-agent\target\usbshield-agent.jar started by DELL in D:\USBProtection\client-agent)
+2026-10-12T15:24:22.653+07:00  INFO 19032 --- [usbshield-agent] [           main] c.g.u.agent.ClientAgentApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-10-12T15:24:24.599+07:00  INFO 19032 --- [usbshield-agent] [           main] c.g.u.agent.endpoint.EndpointManager     : Endpoint credential storage configured at: .\target\week1-runtime\data\endpoint.json
+2026-10-12T15:24:24.604+07:00  INFO 19032 --- [usbshield-agent] [           main] c.g.u.agent.endpoint.EndpointManager     : No existing endpoint credentials found. Ready for enrollment.
+2026-10-12T15:24:24.617+07:00  INFO 19032 --- [usbshield-agent] [           main] c.g.u.agent.outbox.OutboxSpoolService    : Outbox Spool directory initialized at: .\target\week1-runtime\data\spool
+2026-10-12T15:24:24.706+07:00  INFO 19032 --- [usbshield-agent] [           main] c.g.u.a.usbguard.UsbGuardEventListener   : [UsbGuardEventListener] Non-Linux environment detected ('windows 11') -> Live 'usbguard watch' inactive (simulation mode active)
+2026-10-12T15:24:25.033+07:00  INFO 19032 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-12T15:24:25.041+07:00  INFO 19032 --- [usbshield-agent] [           main] c.g.u.agent.ClientAgentApplication       : Started ClientAgentApplication in 3.637 seconds (process running for 4.71)
+2026-10-12T15:24:25.070+07:00  INFO 19032 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:18080 for host: VAN
+2026-10-12T15:24:25.469+07:00  INFO 19032 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Endpoint successfully enrolled! Assigned ID: EP-0437347F
+2026-10-12T15:24:35.060+07:00  INFO 19032 --- [usbshield-agent] [mulation-worker] c.g.u.agent.event.EventSimulationRunner  : [SIMULATION] Emulating a physical USB Flash Disk insertion event...
+2026-10-12T15:24:35.062+07:00  INFO 19032 --- [usbshield-agent] [mulation-worker] c.g.u.a.s.AdaptiveActiveUserResolver     : [ActiveUserResolver] Non-Linux environment detected ('windows 11') -> Using mock active user
+2026-10-12T15:24:35.064+07:00  INFO 19032 --- [usbshield-agent] [mulation-worker] c.g.u.agent.event.EventSenderService     : [USB-EVENT] Detected USB CONNECTED by user 'student01' ({serialNumber=00187D0F55B6EC21391910A2, productId=1666, vendorId=0951, deviceName=Kingston DataTraveler 3.0, deviceHash=c0ffee1234567890abcdef}) -> Decision: BLOCKED
+2026-10-12T15:24:35.099+07:00  INFO 19032 --- [usbshield-agent] [mulation-worker] c.g.u.agent.sync.AdminServerClient       : Successfully sent USB event CONNECTED for device {serialNumber=00187D0F55B6EC21391910A2, productId=1666, vendorId=0951, deviceName=Kingston DataTraveler 3.0, deviceHash=c0ffee1234567890abcdef} to Admin Server

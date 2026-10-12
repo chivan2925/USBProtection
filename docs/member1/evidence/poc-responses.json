@@ -1,0 +1,17 @@
+{
+  "sampleSession": "21",
+  "heartbeat": {
+    "accepted": true,
+    "serverTime": "2026-10-12T08:24:20.107791200Z",
+    "desiredPolicyVersion": 1,
+    "serverPolicyVersion": 1,
+    "lastAppliedPolicyVersion": 0,
+    "status": "OK"
+  },
+  "member2Event": {
+    "receivedAt": "2026-10-12T08:24:20.152669Z",
+    "success": true,
+    "eventId": 1
+  },
+  "sampleDecision": "ALLOWED"
+}
