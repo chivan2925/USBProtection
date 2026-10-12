@@ -1,16 +1,16 @@
 # Week 1 QA Summary
 
-Updated: 2026-10-10 (Asia/Bangkok). Scope: repository review and frontend verification on Windows.
+Updated: 2026-10-12 (Asia/Saigon). Scope: repository review, frontend verification and recorded M1/M3 Windows runtime evidence. This update reviews existing logs; it does not rerun Java or Ubuntu hardware tests.
 
 ## Week 1 gate status
 
 | Gate item | Owner | Evidence | Result / remaining work |
 |---|---|---|---|
 | USBGuard flash BLOCK, physical mouse ALLOW, active user, sample event | M2 | [M2 evidence review](WEEK1_M2_POC_VERIFICATION.md) | 9/9 evidence-review PASS; Ubuntu runtime rerun pending. Keyboard and multiple flash devices remain unverified. |
-| Admin Server skeleton | M1 | [Admin Server](../../admin-server/), [contract test](../../admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentEventContractTest.java) | Code present on main; boot/H2 runtime verification not rerun in this review. |
-| Contract v0.1 | M1 | [Agent-Server protocol](../AGENT_SERVER_PROTOCOL.md) | Freeze document present; live interoperability verification pending. |
-| Agent shell, heartbeat/event transport | M3 | [Client Agent](../../client-agent/) | Code present on main; boot and live POST verification not rerun in this review. |
-| Heartbeat/event POST integration | M3 + M1 | Server API and Agent transport code present | Live integration evidence still required; no branch-merge blocker. |
+| Admin Server skeleton | M1 | [Server verification](../member1/WEEK1_SERVER_VERIFICATION.md), [test summary](../member1/evidence/test-summary.txt), [server log](../member1/evidence/server-runtime.log) | PASS (Windows PoC): standalone server boots, file H2 connects; 4 tests pass, including HTTP and persisted data assertions. |
+| Contract v0.1 | M1 | [Agent-Server protocol](../AGENT_SERVER_PROTOCOL.md), [API](../API.md), [contract test](../../admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentEventContractTest.java) | PASS (Week 1 sample/DTO/docs): unchanged M2 sample, session 21, ALLOWED; production interoperability remains Week 2. |
+| Agent shell, heartbeat/event transport | M3 | [Agent runtime log](../member1/evidence/agent-runtime.log), [server runtime log](../member1/evidence/server-runtime.log) | PASS (Windows PoC): actual Agent JAR starts, enrolls and sends heartbeat. |
+| Heartbeat/event POST integration | M3 + M1 | [Responses](../member1/evidence/poc-responses.json), [runtime verification](../member1/WEEK1_SERVER_VERIFICATION.md) | PASS (real HTTP): M2 sample accepted and persisted; Agent simulated event persisted. Physical USB and active Ubuntu user E2E not executed. |
 | Admin Web and Event History mock | M4 + M5 | [Frontend verification](evidence/M5_FRONTEND_VERIFICATION.md) | 31/31 automated tests PASS; build, lint and browser smoke PASS. |
 | Test Plan and inventory | M5 | [Test Plan](../TEST_PLAN.md), [inventory](WEEK1_TEST_INVENTORY.md) | Present; distinguishes evidence review, frontend checks and pending runtime integration. |
 
@@ -18,8 +18,8 @@ Updated: 2026-10-10 (Asia/Bangkok). Scope: repository review and frontend verifi
 
 | Item | Owner | Next action |
 |---|---|---|
-| Server and Agent runtime checks | M1 + M3 | Verify boot/H2 and live heartbeat/event POST; record execution evidence. |
-| Contract interoperability | M1 + M2 + M3 | Verify real payload against server DTO and published v0.1 protocol. |
+| Ubuntu runtime and physical USB integration | M1 + M2 + M3 | Windows boot/H2/HTTP evidence is complete. Verify Ubuntu deployment, real USB events and actual active-session attribution. |
+| Production contract and authentication | M1 + M2 + M3 | Sample/DTO/docs checked for Week 1; verify authenticated endpoint isolation and production payload interoperability. Agent token validation remains unimplemented. |
 | Real API in Admin Web | M1 + M4 + M5 | Integrate endpoint, event and whitelist APIs; preserve empty responses without mock fallback. |
 | Hardware/session gaps | M2 + M5 | Test keyboard, multiple storage devices and real concurrent sessions on Ubuntu. |
 
@@ -37,4 +37,4 @@ No unresolved M5 mock/UI implementation blocker was found. Remaining runtime/har
 
 [M4 verification](evidence/M4_FRONTEND_VERIFICATION.md): build/lint, 34/34 tests và browser smoke PASS sau khi tích hợp whitelist vào Endpoint Detail và thêm demo rõ nhãn cho Dashboard/Endpoints. Merge markers đã hết trước lần rà soát này. M4 PASS áp dụng cho skeleton/wireframe Week 1; auth/session và API quản trị thật vẫn chờ tích hợp.
 
-This update does not rerun Java tests, USBGuard, reboot or Ubuntu session checks. M2 evidence files were left unchanged. Frontend PASS applies to the mock/fixture UI and recorded browser checks; it does not establish end-to-end Agent to Server to Web success.
+The M4 follow-up did not rerun Java tests, USBGuard, reboot or Ubuntu session checks. The 2026-10-12 synchronization incorporates the existing M1/M3 execution logs above. M2 evidence files remain unchanged. Frontend PASS applies to the mock/fixture UI and recorded browser checks; it does not establish end-to-end physical USB to Server to Web success.

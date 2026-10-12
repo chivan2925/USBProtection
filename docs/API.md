@@ -66,8 +66,8 @@
 curl -X POST http://localhost:8080/api/agent/heartbeat \
   -H "Content-Type: application/json" \
   -d '{
-    "endpointId": "POC-LAB-01",
-    "hostname": "ubuntu-lab-pc",
+    "endpointId": "POC-UNENROLLED-LAB-PC-01",
+    "hostname": "usbshield-lab",
     "agentVersion": "1.0.0-SNAPSHOT",
     "currentPolicyVersion": 1
   }'
@@ -78,11 +78,11 @@ curl -X POST http://localhost:8080/api/agent/heartbeat \
 curl -X POST http://localhost:8080/api/agent/events \
   -H "Content-Type: application/json" \
   -d '{
-    "endpointId": "POC-LAB-01",
-    "hostname": "ubuntu-lab-pc",
+    "endpointId": "POC-UNENROLLED-LAB-PC-01",
+    "hostname": "usbshield-lab",
     "linuxUsername": "usbdev",
     "linuxUid": 1000,
-    "sessionId": "2",
+    "sessionId": "21",
     "sessionType": "wayland",
     "seat": "seat0",
     "device": {
@@ -94,13 +94,21 @@ curl -X POST http://localhost:8080/api/agent/events \
       "interface": "03:01:02"
     },
     "eventType": "CONNECTED",
-    "decision": "BLOCKED",
+    "decision": "ALLOWED",
     "occurredAt": "2026-09-28T14:10:16+07:00"
   }'
+```
+
+Ví dụ event trên phải khớp `docs/agent-contract/sample-usb-event.json` của M2: USB Optical Mouse (class `03:01:02`) được `ALLOWED`, session `21`. Đây là sample peripheral, không phải evidence chặn Flash Disk. Để gửi nguyên sample từ repo root, dùng:
+
+```bash
+curl -X POST http://localhost:8080/api/agent/events \
+  -H "Content-Type: application/json" \
+  --data-binary @docs/agent-contract/sample-usb-event.json
 ```
 
 ### 6.3. Kéo chính sách Whitelist của Endpoint:
 ```bash
 curl -X GET http://localhost:8080/api/agent/policy \
-  -H "X-Endpoint-Id: POC-LAB-01"
+  -H "X-Endpoint-Id: POC-UNENROLLED-LAB-PC-01"
 ```
