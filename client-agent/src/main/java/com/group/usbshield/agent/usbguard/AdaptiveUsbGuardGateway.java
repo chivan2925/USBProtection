@@ -39,12 +39,12 @@ public class AdaptiveUsbGuardGateway implements UsbGuardGateway {
     }
 
     @Override
-    public void applyWhitelist(List<String> whitelistRules) {
+    public boolean applyWhitelist(List<String> whitelistRules) {
         String os = System.getProperty("os.name", "").toLowerCase();
         if (!os.contains("linux")) {
             log.info("[UsbGuardGateway] Non-Linux environment ('{}') -> Simulated applying {} whitelist rules:", os, whitelistRules.size());
             whitelistRules.forEach(r -> log.info("[UsbGuardGateway]   -> allow: {}", r));
-            return;
+            return true;
         }
 
         log.info("[UsbGuardGateway] Applying {} whitelist rules to /etc/usbguard/rules.conf...", whitelistRules.size());
@@ -68,33 +68,39 @@ public class AdaptiveUsbGuardGateway implements UsbGuardGateway {
             lines.add("");
 
             Path targetPath = Path.of(DEFAULT_RULES_PATH);
-            if (Files.isWritable(targetPath.getParent()) || Files.isWritable(targetPath)) {
-                Path tempFile = Files.createTempFile("usbguard-rules", ".tmp");
-                Files.write(tempFile, lines, StandardCharsets.UTF_8);
-                Files.move(tempFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                log.info("[UsbGuardGateway] Successfully updated {}", DEFAULT_RULES_PATH);
-
-                // Reload USBGuard daemon
-                reloadDaemon();
-            } else {
-                log.warn("[UsbGuardGateway] Cannot write to {} (insufficient permissions, requires root/sudo)", DEFAULT_RULES_PATH);
+            Path parent = targetPath.getParent() != null ? targetPath.getParent() : Path.of("/etc");
+            if (!Files.isWritable(parent) && (!Files.exists(targetPath) || !Files.isWritable(targetPath))) {
+                log.error("[UsbGuardGateway] Permission denied: Cannot write to {} (requires root permissions)", DEFAULT_RULES_PATH);
+                return false;
             }
+
+            Path tempFile = Files.createTempFile("usbguard-rules", ".tmp");
+            Files.write(tempFile, lines, StandardCharsets.UTF_8);
+            Files.move(tempFile, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            log.info("[UsbGuardGateway] Successfully updated {}", DEFAULT_RULES_PATH);
+
+            // Reload USBGuard daemon
+            return reloadDaemon();
         } catch (Exception e) {
             log.error("[UsbGuardGateway] Failed to apply whitelist to USBGuard: {}", e.getMessage(), e);
+            return false;
         }
     }
 
-    private void reloadDaemon() {
+    private boolean reloadDaemon() {
         try {
             Process process = new ProcessBuilder("systemctl", "reload", "usbguard").start();
             boolean finished = process.waitFor(3, TimeUnit.SECONDS);
             if (finished && process.exitValue() == 0) {
                 log.info("[UsbGuardGateway] Successfully reloaded usbguard.service");
+                return true;
             } else {
-                log.warn("[UsbGuardGateway] Could not reload usbguard.service via systemctl (exit code: {})", process.exitValue());
+                log.warn("[UsbGuardGateway] Could not reload usbguard.service via systemctl (exit code: {})", finished ? process.exitValue() : "TIMEOUT");
+                return false;
             }
         } catch (Exception e) {
-            log.debug("[UsbGuardGateway] Failed to execute systemctl reload usbguard: {}", e.getMessage());
+            log.error("[UsbGuardGateway] Failed to execute systemctl reload usbguard: {}", e.getMessage());
+            return false;
         }
     }
 }

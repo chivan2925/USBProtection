@@ -32,6 +32,16 @@ public class UsbGuardEventListener {
     private final SystemInfoProvider systemInfoProvider;
     private final EventSenderService eventSenderService;
     private final DesktopNotificationService desktopNotificationService;
+    public enum WatchSection {
+        NONE,
+        PRESENCE_CHANGED,
+        POLICY_CHANGED,
+        POLICY_APPLIED
+    }
+
+    private WatchSection currentSection = WatchSection.NONE;
+    private String currentEventType = "CONNECTED";
+    private final java.util.Map<String, Long> recentEventCache = new java.util.concurrent.ConcurrentHashMap<>();
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean running = true;
@@ -61,21 +71,8 @@ public class UsbGuardEventListener {
                         new InputStreamReader(watchProcess.getInputStream(), StandardCharsets.UTF_8))) {
 
                     String line;
-                    String currentEventType = "CONNECTED";
-
                     while (running && (line = reader.readLine()) != null) {
-                        line = line.trim();
-                        if (line.isEmpty()) continue;
-
-                        log.debug("[usbguard watch raw] {}", line);
-
-                        if (line.startsWith("event=Insert")) {
-                            currentEventType = "CONNECTED";
-                        } else if (line.startsWith("event=Remove")) {
-                            currentEventType = "DISCONNECTED";
-                        } else if (line.startsWith("device_rule=")) {
-                            handleDeviceRuleEvent(line, currentEventType);
-                        }
+                        processWatchLine(line);
                     }
                 }
 
@@ -97,12 +94,58 @@ public class UsbGuardEventListener {
         }
     }
 
+    /**
+     * Phân tích từng dòng từ usbguard watch và lọc chính xác điểm phát sự kiện.
+     */
+    public void processWatchLine(String line) {
+        if (line == null) return;
+        line = line.trim();
+        if (line.isEmpty() || line.startsWith("[IPC]")) return;
+
+        log.debug("[usbguard watch raw] {}", line);
+
+        if (line.startsWith("[device] PresenceChanged")) {
+            currentSection = WatchSection.PRESENCE_CHANGED;
+            currentEventType = "CONNECTED";
+        } else if (line.startsWith("[device] PolicyChanged")) {
+            currentSection = WatchSection.POLICY_CHANGED;
+        } else if (line.startsWith("[device] PolicyApplied")) {
+            currentSection = WatchSection.POLICY_APPLIED;
+        } else if (line.startsWith("event=Insert")) {
+            currentEventType = "CONNECTED";
+        } else if (line.startsWith("event=Remove")) {
+            currentEventType = "DISCONNECTED";
+        } else if (line.startsWith("device_rule=")) {
+            // Chỉ gửi sự kiện tại thời điểm quyết định cuối cùng:
+            // 1. Cắm USB: chỉ xử lý khi đã có kết quả [device] PolicyApplied
+            // 2. Rút USB: chỉ xử lý tại [device] PresenceChanged với event=Remove
+            boolean shouldHandle = (currentSection == WatchSection.POLICY_APPLIED && "CONNECTED".equals(currentEventType))
+                    || (currentSection == WatchSection.PRESENCE_CHANGED && "DISCONNECTED".equals(currentEventType));
+
+            if (shouldHandle) {
+                handleDeviceRuleEvent(line, currentEventType);
+            } else {
+                log.debug("[UsbGuardEventListener] Skipping intermediate device_rule in section {}: {}", currentSection, line);
+            }
+        }
+    }
+
     public void handleDeviceRuleEvent(String deviceRuleLine, String eventType) {
         try {
             UsbDeviceInfo deviceInfo = eventParser.parseDeviceLine(deviceRuleLine);
             if (deviceInfo == null) {
                 return;
             }
+
+            // Deduplication: Ngăn chặn gửi trùng lặp nếu sự kiện tương tự xuất hiện trong vòng 1.5 giây
+            String dedupKey = deviceInfo.getVendorId() + ":" + deviceInfo.getProductId() + ":" + deviceInfo.getSerial() + ":" + eventType + ":" + deviceInfo.getDecision();
+            long now = System.currentTimeMillis();
+            Long lastTime = recentEventCache.get(dedupKey);
+            if (lastTime != null && (now - lastTime) < 1500) {
+                log.debug("[UsbGuardEventListener] Deduplicating rapid repeated event for key: {}", dedupKey);
+                return;
+            }
+            recentEventCache.put(dedupKey, now);
 
             // Phân giải user active ngay tại thời điểm xảy ra sự kiện
             ActiveUserInfo activeUser = activeUserResolver.resolveCurrentActiveUser();
