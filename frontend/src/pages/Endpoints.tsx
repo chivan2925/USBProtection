@@ -13,10 +13,12 @@ export function Endpoints({ state, refresh, refreshButton }: PageProps) {
   const rows = (state.data?.endpoints ?? []).filter(endpoint => (filter === 'all' || endpoint.status === filter) && matches(query, endpoint.name, endpoint.hostname, endpoint.currentUser))
   return <><PageHeading eyebrow="ENDPOINT SECURITY" title="Quản lý endpoints" description="Theo dõi các máy Ubuntu và trạng thái kết nối với hệ thống.">{refreshButton}</PageHeading><ResourceNotice state={state} retry={refresh} /><Panel title="Danh sách máy tính" subtitle="Trạng thái kết nối, người dùng và phiên bản chính sách" action={<Badge>Managed endpoints</Badge>}><Filters query={query} onQuery={setQuery} value={filter} onValue={setFilter} options={[{ value: 'all', label: 'Tất cả trạng thái' }, ...Object.entries(endpointLabels).map(([value, label]) => ({ value, label }))]} placeholder="Tìm tên máy, hostname hoặc người dùng…" /><DataTable key={`${query}:${filter}`} rows={rows} label="Danh sách endpoints" loading={state.status === 'loading'} unavailable={state.status === 'unavailable'} failed={state.status === 'error'} filtered={!!query || filter !== 'all'} columns={[
     { key: 'name', label: 'Máy tính', render: endpoint => <a className="table-device" href={`#/endpoints/${encodeURIComponent(endpoint.id)}`}><span className="table-icon"><Icon name="monitor" size={18} /></span><div><strong>{endpoint.name}</strong><small>{endpoint.hostname ?? '—'}</small></div></a> },
+    { key: 'id', label: 'Endpoint ID', render: endpoint => <span className="mono">{endpoint.id}</span> },
     { key: 'os', label: 'Hệ điều hành', render: endpoint => endpoint.operatingSystem ?? '—' },
     { key: 'status', label: 'Trạng thái', render: endpoint => <Badge tone={endpoint.status === 'online' ? 'green' : 'neutral'}>{endpointLabels[endpoint.status]}</Badge> },
     { key: 'user', label: 'Người dùng', render: endpoint => endpoint.currentUser ?? '—' },
     { key: 'policy', label: 'Policy version', render: endpoint => <span className="mono">{endpoint.policyVersion ?? '—'}</span> },
+    { key: 'appliedPolicy', label: 'Last Applied Version', render: endpoint => <span className="mono">{endpoint.appliedPolicyVersion ?? '—'}</span> },
     { key: 'seen', label: 'Kết nối gần nhất', render: endpoint => formatDate(endpoint.lastSeenAt) },
     { key: 'action', label: 'Chi tiết', render: endpoint => <a href={`#/endpoints/${encodeURIComponent(endpoint.id)}`}>Xem chi tiết →</a> },
   ]} /></Panel></>

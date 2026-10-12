@@ -25,6 +25,7 @@ export interface Endpoint {
   currentUser?: string
   lastSeenAt?: string
   policyVersion?: string
+  appliedPolicyVersion?: string
 }
 export interface Overview {
   protection: 'enabled' | 'disabled' | 'unknown'

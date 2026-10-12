@@ -21,7 +21,7 @@ before(async () => {
 after(async () => { await vite?.close() })
 
 const mockEndpoints = [
-  { id: 'POC-LAB-PC-01', name: 'LAB-PC-01', hostname: 'lab-pc-01.local', status: 'online',  currentUser: 'usbdev',    policyVersion: '2' },
+  { id: 'POC-LAB-PC-01', name: 'LAB-PC-01', hostname: 'lab-pc-01.local', status: 'online',  currentUser: 'usbdev',    policyVersion: '2', appliedPolicyVersion: '1' },
   { id: 'POC-LAB-PC-02', name: 'LAB-PC-02', hostname: 'lab-pc-02.local', status: 'offline', currentUser: 'student01', policyVersion: '1' },
 ]
 const mockDevices = [
@@ -47,9 +47,13 @@ test('endpoint rows render with hostname, status, and policy version', () => {
   assert.ok(html.includes('Online'), 'should show online status')
 })
 
-test('endpoints page shows policy version column', () => {
+test('endpoint list shows ID and distinct policy and applied versions, with a fallback when unapplied', () => {
   const html = renderToStaticMarkup(createElement(Endpoints, baseProps))
-  assert.ok(html.includes('Policy version'), 'should have policy version column header')
+  assert.match(html, /<th scope="col">Endpoint ID<\/th>/)
+  assert.match(html, /<th scope="col">Policy version<\/th><th scope="col">Last Applied Version<\/th>/)
+  assert.match(html, /<td><span class="mono">POC-LAB-PC-01<\/span><\/td>/)
+  assert.match(html, /<td><span class="mono">2<\/span><\/td><td><span class="mono">1<\/span><\/td>/)
+  assert.match(html, /<td><span class="mono">1<\/span><\/td><td><span class="mono">—<\/span><\/td>/)
 })
 
 test('endpoint list has links to detail pages', () => {
@@ -121,6 +125,7 @@ test('missing or unavailable endpoint does not claim an empty whitelist', () => 
 test('demo snapshot maps endpoint IDs, preserves per-endpoint policy and returns independent fixtures', async () => {
   const first = await getDemoSnapshot(new AbortController().signal)
   assert.equal(first.endpoints[0].id, 'POC-LAB-PC-01')
+  assert.deepEqual(first.endpoints.map(endpoint => endpoint.appliedPolicyVersion), ['2', '1'])
   assert.ok(first.endpoints.every(endpoint => endpoint.lastSeenAt))
   assert.deepEqual(first.devices.map(device => device.status), ['allowed', 'blocked'])
   assert.equal(first.devices[0].serialNumber, first.devices[1].serialNumber)

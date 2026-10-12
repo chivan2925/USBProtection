@@ -14,6 +14,7 @@ export async function getDemoSnapshot(signal: AbortSignal): Promise<Snapshot> {
     currentUser: endpoint.currentUser,
     lastSeenAt: endpoint.lastSeen,
     policyVersion: endpoint.policyVersion,
+    appliedPolicyVersion: endpoint.appliedPolicyVersion,
   }))
   const usb = mockWhitelist[0]
   // Same physical USB, allowed on A and blocked on B.
