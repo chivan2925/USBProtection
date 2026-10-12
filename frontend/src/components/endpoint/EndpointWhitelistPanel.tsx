@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import type { WhitelistEntry } from '../../types/policy'
+import { formatDate } from '../../utils/format'
 
 // M4 owner — EndpointWhitelistPanel
 // REQUIRED: per-endpoint whitelist UX.
@@ -9,7 +10,7 @@ import type { WhitelistEntry } from '../../types/policy'
 interface Props {
   endpointId: string
   entries: WhitelistEntry[]
-  onAllow?: (deviceId: string) => void
+  onAllow?: (endpointId: string) => void
   onRevoke?: (entryId: string) => void
   disabled?: boolean
 }
@@ -55,12 +56,12 @@ export function EndpointWhitelistPanel({
                   <td>{entry.name ?? '—'}</td>
                   <td className="mono">{entry.vendorId}:{entry.productId}</td>
                   <td className="mono">{entry.serial ?? '—'}</td>
-                  <td>{entry.addedAt}</td>
+                  <td>{formatDate(entry.addedAt)}</td>
                   <td>
                     <button
                       id={`revoke-${entry.id}`}
                       className="button small"
-                      disabled={disabled}
+                      disabled={disabled || !onRevoke}
                       onClick={() => onRevoke?.(entry.id)}
                       aria-label={`Revoke on this endpoint: ${entry.name ?? entry.id}`}
                     >
@@ -78,12 +79,13 @@ export function EndpointWhitelistPanel({
         <button
           id={`allow-on-${endpointId}`}
           className="button primary"
-          disabled={disabled}
+          disabled={disabled || !onAllow}
           onClick={() => onAllow?.(endpointId)}
           aria-label="Allow on this endpoint"
         >
           Allow on this endpoint
         </button>
+        {disabled && <span>Thao tác Allow/Revoke đang chờ API quản lý whitelist theo endpoint.</span>}
       </div>
     </section>
   )

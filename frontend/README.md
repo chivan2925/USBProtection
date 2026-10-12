@@ -1,135 +1,75 @@
-﻿# USB Protection — Frontend
+# USBShield — Admin Web
 
-Giao diện quản trị React + TypeScript + Vite, giữ nguyên stack hiện có. Không thêm dependency.
+React + Vite + TypeScript. Kết quả rà soát Member 4 ngày 2026-10-11 (Asia/Saigon): **PASS cho UI skeleton/wireframe Week 1**. Xem [báo cáo kiểm tra](../docs/qa/evidence/M4_FRONTEND_VERIFICATION.md).
 
-## Chạy và kiểm tra
+## Chạy và demo
 
-Dùng Node.js 22.20+ (môi trường đã kiểm tra) và npm. Chạy trong `frontend/`:
+Dùng Node.js 22.20+ và npm; lần kiểm tra này dùng Node.js 24.21.0. Trong thư mục `frontend/`:
 
 ```sh
 npm ci
 npm run dev -- --host 127.0.0.1
+```
+
+Mở URL Vite hiển thị (mặc định `http://127.0.0.1:5173/`). Chọn **Mở demo**, hoặc dùng `http://127.0.0.1:5173/?demo=1#/dashboard`. Màn Login có liên kết **Xem demo Admin Web**.
+
+- Demo có nhãn **Chế độ demo · Dữ liệu mock** trên mọi màn quản lý.
+- Dashboard có thống kê; Endpoints có LAB-PC-01 và LAB-PC-02.
+- Mở LAB-PC-01: whitelist có Kingston; cùng USB bị chặn trên LAB-PC-02 và whitelist máy này rỗng.
+- Endpoint Detail chỉ hiển thị thiết bị, whitelist và sự kiện của máy đang chọn.
+- Event History có Endpoint, Linux User, USB, Event, Decision và bộ lọc.
+- Refresh tải lại fixture; **Thoát demo** quay về trạng thái chờ API.
+- Demo chỉ đọc dữ liệu mẫu, không tạo phiên đăng nhập, token hoặc thay đổi quyền USB trên máy thật.
+
+## Kiểm tra
+
+```sh
 npm run build
 npm run lint
 npm test
 npm run test:browser
 ```
 
-- `build`: kiểm tra TypeScript và tạo bản production trong `dist/`.
-- `lint`: Oxlint, không có cảnh báo trong lần kiểm tra bàn giao.
-- `test`: 11 kiểm thử logic và component bằng Node test runner, React server renderer và Vite đã có sẵn.
-- `test:browser`: chạy bản build bằng Vite preview trên `127.0.0.1:4173`, mở Chrome/Edge headless, kiểm tra điều hướng/refresh/filter/login/responsive và lỗi JavaScript. Chạy build trước. Cần cổng 4173 trống. Tự đóng các tiến trình sau khi xong.
-- Trình duyệt được tìm tại vị trí cài đặt Windows thông thường; có thể đặt `CHROME_PATH` để chỉ định executable. Không tải trình duyệt hay thêm thư viện automation.
-- Ảnh kiểm tra lưu trong `.artifacts/` (gitignored). Profile trình duyệt tạm nằm trong workspace và được xóa sau kiểm tra.
-- Windows sandbox hạn chế tạo tiến trình có thể báo `spawn EPERM`; build/test cần môi trường cho phép Node/Vite chạy tiến trình con.
+- `build`: TypeScript và production bundle trong `dist/`.
+- `lint`: Oxlint.
+- `test`: 34 kiểm thử logic/component, gồm tích hợp whitelist vào Endpoint Detail và phân tách policy theo endpoint.
+- `test:browser`: Vite preview tại `127.0.0.1:4173`, Chrome/Edge headless; kiểm tra cả trạng thái chờ API và demo, điều hướng, bộ lọc, refresh, login, desktop/mobile, lỗi runtime và Fetch/XHR. Chạy build trước, giữ cổng 4173 trống.
+- Không tải trình duyệt hoặc thêm dependency. Có thể đặt `CHROME_PATH` tới Chrome/Edge đã cài. Tiến trình được tự đóng, profile tạm được xóa; ảnh nằm trong `.artifacts/` (gitignored).
+- Nếu sandbox hạn chế tiến trình con/renderer, kiểm tra trình duyệt có thể báo EPERM hoặc timeout; cần chạy với quyền cho phép Chrome hoạt động.
 
-## Kết quả phân tích backend
-
-Đã kiểm tra `backend/src`, `pom.xml` và `application.yaml`:
-
-- Java 21, Spring Boot, Maven; dependencies Web MVC, JPA, MySQL, Lombok.
-- Chỉ có `UsbProtectionApplication` và test `contextLoads`.
-- Không có Controller, Service, Repository, Entity hoặc endpoint HTTP nghiệp vụ.
-- `application.yaml` chỉ khai báo tên ứng dụng.
-- Không có API xác thực, thống kê, service, USB, endpoints, whitelist/blacklist, lịch sử hoặc settings.
-
-**API đã kết nối: chưa có, vì backend chưa cung cấp API.** Không thay đổi backend trong đợt triển khai FE này.
-
-## Các màn hình
-
-Dùng hash routing để truy cập trực tiếp, reload và Back/Forward mà không cần cấu hình rewrite trên web server.
+## Màn hình
 
 | Đường dẫn | Nội dung |
 | --- | --- |
-| `#/dashboard` | Trạng thái bảo vệ/service; 4 thẻ thống kê; hoạt động gần nhất; endpoints online/offline; người dùng gần đây; refresh |
-| `#/devices` | Bảng thiết bị, VID/PID, serial, endpoint, trạng thái, thời gian; tìm kiếm không phân biệt dấu/hoa thường; lọc trạng thái |
-| `#/whitelist` | Thiết bị được phép; tìm kiếm và lọc endpoint; cấu trúc thao tác thu hồi quyền có xác nhận |
-| `#/blocked` | USB bị chặn; lý do/thời gian; tìm kiếm và lọc endpoint; cấu trúc cho phép thiết bị có xác nhận |
-| `#/events` | Cắm/rút/chặn/cho phép USB và sự kiện service; tìm kiếm; lọc loại; mới nhất trước; phân trang 10 dòng |
-| `#/endpoints` | Máy Ubuntu, hostname, online/offline, user, policy version, last seen; tìm kiếm/lọc và liên kết chi tiết |
-| `#/endpoints/:id` | Chi tiết một máy; thiết bị và sự kiện chỉ thuộc endpoint đó |
-| `#/settings` | Khả năng tích hợp thực tế và danh sách chức năng chờ backend; không tạo setting vô tác dụng |
-| `#/login` | Form username/password với trạng thái chưa có API xác thực; liên kết xem giao diện quản lý |
-| Đường dẫn khác | Trang 404 và liên kết về Dashboard |
+| `#/login` | Login wireframe; form chờ API xác thực; liên kết demo |
+| `#/dashboard` | Thống kê, hoạt động gần đây, trạng thái endpoints |
+| `#/endpoints` | Tìm kiếm/lọc, hostname, status, user, policy version, last seen |
+| `#/endpoints/:id` | Thông tin máy, whitelist riêng, USB/policy và sự kiện của máy |
+| `#/devices` | Tra cứu thiết bị, VID/PID, serial, endpoint và trạng thái |
+| `#/whitelist` | Danh sách thiết bị được phép, lọc theo endpoint |
+| `#/blocked` | Thiết bị bị chặn, lý do và endpoint |
+| `#/events` | Event History với năm bộ lọc và phân trang |
+| `#/settings` | Trạng thái chức năng đang chờ tích hợp |
+| Đường dẫn khác | 404 |
 
-Giao diện responsive có sidebar, highlight trang hiện tại, topbar, menu mobile, focus bàn phím, loading/skeleton, trạng thái rỗng, lỗi có thử lại, toast, dialog xác nhận native và hỗ trợ reduced motion.
+Hash routing hỗ trợ reload và Back/Forward. Tham số `?demo=1` được giữ khi điều hướng bằng hash.
 
-## Dữ liệu và giới hạn hiện tại
+## Dữ liệu và API
 
-- Không có dữ liệu mẫu trong ứng dụng. Dữ liệu fixture chỉ nằm trong tests.
-- Thống kê chưa biết hiển thị `—`, không hiển thị số 0 hay trạng thái “đang bảo vệ” giả.
-- `services/api.ts` là adapter tập trung. Khi chưa có backend, adapter trả `BackendUnavailableError` và không gọi URL tự đặt.
-- `services/models.ts` là view model của FE, **không phải hợp đồng API đã được backend triển khai**.
-- `useResource` xử lý tải, lỗi, thiếu API, hủy request cũ và chống cập nhật dữ liệu sau khi unmount.
-- Chính sách allow/block/revoke và đăng nhập bị vô hiệu hóa bằng capability hiện tại. Không tạo token giả, không lưu username/password và không tự cấp quyền admin.
-- Dialog xác nhận và thông báo thành công/thất bại cho thay đổi chính sách đã có cấu trúc xử lý, nhưng không thể thực hiện thao tác cho đến khi có API thật.
-- Không có chức năng bật/tắt bảo vệ, auto-block, cập nhật settings hoặc sửa service hoạt động thực tế do backend chưa hỗ trợ.
-- Bộ lọc và phân trang xử lý trên tập dữ liệu adapter cung cấp. Khi backend bổ sung phân trang phía server, phải điều chỉnh adapter/hook theo hợp đồng thật; không dùng một trang kết quả làm toàn bộ dữ liệu.
-- FE hiện là giao diện chờ tích hợp; không thực hiện phát hiện/chặn USB ở hệ điều hành và chưa có cơ chế xác thực end-to-end.
+- `services/api.ts` vẫn trả `BackendUnavailableError`; capabilities xác thực và thay đổi policy đều `false`.
+- `admin-server` hiện có các controller dành cho Agent (enroll, heartbeat, events, policy/ack). Frontend chưa tích hợp Admin API; API Agent không thay thế API quản trị Web.
+- `services/demo.ts` ánh xạ fixture endpoint (`endpointId`, `lastSeen`) sang view model (`id`, `lastSeenAt`), tạo snapshot riêng mỗi lần đọc, gắn endpoint ID cho event và cung cấp whitelist theo endpoint.
+- `services/models.ts` và `types/*` là view model; chưa phải response schema của API quản trị thật.
+- Ngoài demo, Dashboard/Endpoints chờ dữ liệu API và không hiển thị thống kê giả. Event History giữ mock có nhãn khi chưa có dữ liệu API; response thật ở trạng thái ready nhưng rỗng luôn giữ rỗng.
+- `useResource` xử lý loading/error/unavailable, hủy đọc cũ và tránh cập nhật sau unmount.
+- Allow/Revoke trong Endpoint Detail bị vô hiệu hóa và có giải thích chờ API. Panel cũng khóa nút nếu thiếu callback, tránh thao tác không có tác dụng.
 
-## Cấu trúc và danh sách file
+## Phần cần làm sau Week 1
 
-Các file mới:
+1. Chốt Admin routes/schema và ánh xạ response, bao gồm whitelist gắn endpoint ID.
+2. Tích hợp auth/session, guard/logout và quyền admin thật.
+3. Tích hợp đọc endpoints/events, Allow/Revoke theo endpoint; xử lý xác nhận, lỗi, policy version và trạng thái sync.
+4. Chỉ bật capabilities khi API tương ứng hoạt động; giữ demo tách biệt và có nhãn.
+5. Kiểm thử Agent → Server → Web cùng USB thật trên Ubuntu.
 
-```text
-src/
-  components/
-    Common.tsx          # Badge, PageHeading, Panel, EmptyState, LoadingState, ResourceNotice
-    ConfirmDialog.tsx   # Xác nhận, khóa khi xử lý, lỗi và trả focus
-    DataTable.tsx       # Bảng chung, trạng thái, phân trang
-    Filters.tsx         # Tìm kiếm, select, reset
-    Icon.tsx            # Icon SVG dùng chung, không tải từ bên ngoài
-    Toast.tsx           # Toast provider, tự đóng và live region
-  hooks/
-    useResource.ts      # Vòng đời đọc dữ liệu và refresh
-    useRoute.ts         # Hash route, Back/Forward
-    useToast.ts         # Toast context và hook
-  layouts/
-    AdminLayout.tsx     # Sidebar, topbar, responsive shell
-  pages/
-    Dashboard.tsx
-    Devices.tsx         # Tái sử dụng cho Devices, Whitelist, Blocked Devices
-    Endpoints.tsx       # Danh sách và chi tiết endpoint
-    Events.tsx
-    Login.tsx
-    Settings.tsx
-    types.ts
-  services/
-    api.ts
-    models.ts
-  utils/
-    format.ts           # Thời gian, thống kê, tìm kiếm, sắp xếp, phân trang
-tests/
-  core.test.mjs
-  components.test.mjs
-  browser.mjs
-```
-
-Các file hiện có được sửa:
-
-- `src/App.tsx`: router, điều phối dữ liệu, toast provider.
-- `src/App.css`, `src/index.css`: thay giao diện mẫu bằng admin dashboard.
-- `index.html`: ngôn ngữ tiếng Việt, title, description, theme color.
-- `public/favicon.svg`: nhận diện USB Protection.
-- `package.json`: thêm script test/test:browser; dependencies giữ nguyên.
-- `.gitignore`: loại trừ `.artifacts/`.
-- `README.md`: tài liệu này.
-
-Các asset của template không còn được import; không xóa dữ liệu có sẵn của project. `package-lock.json` không đổi vì không có dependency mới.
-
-## Tích hợp khi backend sẵn sàng
-
-1. Xác nhận endpoint thực tế, schema, phân trang, timezone, định nghĩa “sự kiện gần đây” và quyền truy cập.
-2. Thay các method ở `services/api.ts` bằng HTTP request tới endpoint thật; validate/map dữ liệu vào view model. Truyền `AbortSignal` và xử lý lỗi HTTP, xác thực, response không hợp lệ, timeout theo backend.
-3. Bổ sung session/auth guard/logout và hiển thị trạng thái người dùng thật khi backend có xác thực. Chế độ xem giao diện hiện tại không được dùng làm cơ chế phân quyền.
-4. Bật từng capability tương ứng sau khi API đã hoạt động; xử lý policy theo đúng scope endpoint và định danh thiết bị backend quy định.
-5. Bổ sung form settings dựa trên schema thật và trạng thái lưu thành công/thất bại; không chỉ bật công tắc ở FE.
-6. Chạy lại build/lint/tests và thêm kiểm thử tích hợp với backend.
-
-## Kiểm tra đã thực hiện
-
-- Production build và TypeScript: thành công.
-- Oxlint: không lỗi/cảnh báo.
-- 11 unit/component tests: thành công (trạng thái không xác định, tìm kiếm tiếng Việt, thứ tự thời gian, phân trang, hủy request, không gọi API giả, tách whitelist/blocked, tách endpoint, render text an toàn, các trạng thái bảng).
-- Chrome headless desktop/mobile: điều hướng các màn hình, URL sai, refresh toast, filter/reset, login vô hiệu hóa, không lưu credentials, menu mobile, không tràn ngang, không có lỗi runtime hoặc Fetch/XHR đến API không tồn tại.
-- Chưa kiểm thử thao tác nghiệp vụ end-to-end vì chưa có API backend.
+Frontend PASS không xác nhận enforcement USB, đăng nhập thật hoặc toàn bộ Week 1 system gate.

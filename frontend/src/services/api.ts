@@ -7,9 +7,9 @@ export class BackendUnavailableError extends Error {
   }
 }
 
-// Audited against backend/src: there are no controllers, services or auth APIs.
-// Do not invent URLs or fetch a non-existent endpoint. Replace this adapter only
-// once real routes, response schemas and authentication have been implemented.
+// Admin Web APIs are not integrated yet. admin-server has Agent controllers,
+// which are not Admin monitoring/authentication/whitelist APIs.
+// Replace this adapter once the Admin routes and schemas are agreed and tested.
 export const capabilities = Object.freeze({
   monitoring: false,
   authentication: false,
