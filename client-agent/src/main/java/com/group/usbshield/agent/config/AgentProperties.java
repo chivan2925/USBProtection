@@ -13,4 +13,5 @@ public class AgentProperties {
     private long heartbeatIntervalMs = 5000;
     private String dataDir = "/var/lib/usbshield-agent";
     private String configDir = "/etc/usbshield-agent";
+    private boolean notificationEnabled = true;
 }

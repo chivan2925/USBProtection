@@ -3,6 +3,7 @@ package com.group.usbshield.agent.usbguard;
 import com.group.usbshield.agent.endpoint.EndpointManager;
 import com.group.usbshield.agent.event.EventSenderService;
 import com.group.usbshield.agent.event.UsbEventPayload;
+import com.group.usbshield.agent.notification.DesktopNotificationService;
 import com.group.usbshield.agent.session.ActiveUserInfo;
 import com.group.usbshield.agent.session.ActiveUserResolver;
 import com.group.usbshield.agent.system.SystemInfoProvider;
@@ -30,6 +31,7 @@ public class UsbGuardEventListener {
     private final EndpointManager endpointManager;
     private final SystemInfoProvider systemInfoProvider;
     private final EventSenderService eventSenderService;
+    private final DesktopNotificationService desktopNotificationService;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile boolean running = true;
@@ -122,6 +124,11 @@ public class UsbGuardEventListener {
             log.info("[UsbGuardEventListener] REAL EVENT: {} device '{}' ({} - {}) by user '{}' -> Decision: {}",
                     payload.getEventType(), deviceInfo.getName(), deviceInfo.getVendorId(), deviceInfo.getProductId(),
                     payload.getLinuxUsername(), payload.getDecision());
+
+            // Nếu thiết bị bị chặn (BLOCKED), bắn popup cảnh báo lên màn hình người dùng
+            if ("BLOCKED".equalsIgnoreCase(deviceInfo.getDecision())) {
+                desktopNotificationService.notifyBlockedUsb(activeUser, deviceInfo);
+            }
 
             eventSenderService.sendPayload(payload);
         } catch (Exception e) {

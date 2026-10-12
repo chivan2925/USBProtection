@@ -7,6 +7,7 @@ if systemctl is-active --quiet usbshield-agent.service; then
 fi
 
 systemctl disable usbshield-agent.service || true
+rm -f /etc/sudoers.d/usbshield
 
 echo "USBShield Agent service stopped."
 exit 0

@@ -12,6 +12,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.group.usbshield.agent.notification.DesktopNotificationService;
+import com.group.usbshield.agent.session.ActiveUserInfo;
+import com.group.usbshield.agent.session.ActiveUserResolver;
+import com.group.usbshield.agent.system.SystemInfoProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -22,6 +32,7 @@ class UsbGuardEventListenerTest {
     private EndpointManager endpointManager;
     private SystemInfoProvider systemInfoProvider;
     private EventSenderService eventSenderService;
+    private DesktopNotificationService desktopNotificationService;
 
     private UsbGuardEventListener listener;
 
@@ -32,6 +43,7 @@ class UsbGuardEventListenerTest {
         endpointManager = mock(EndpointManager.class);
         systemInfoProvider = mock(SystemInfoProvider.class);
         eventSenderService = mock(EventSenderService.class);
+        desktopNotificationService = mock(DesktopNotificationService.class);
 
         when(endpointManager.getEndpointId()).thenReturn("EP-TEST-001");
         when(systemInfoProvider.getHostname()).thenReturn("ubuntu-test-lab");
@@ -51,7 +63,8 @@ class UsbGuardEventListenerTest {
                 activeUserResolver,
                 endpointManager,
                 systemInfoProvider,
-                eventSenderService
+                eventSenderService,
+                desktopNotificationService
         );
     }
 
@@ -84,5 +97,8 @@ class UsbGuardEventListenerTest {
         assertEquals("1665", captured.getDevice().get("productId"));
         assertEquals("DataTraveler 2.0", captured.getDevice().get("name"));
         assertEquals("08:06:50", captured.getDevice().get("interface"));
+
+        // Xác nhận popup thông báo đã được kích hoạt
+        verify(desktopNotificationService, times(1)).notifyBlockedUsb(any(), any());
     }
 }
