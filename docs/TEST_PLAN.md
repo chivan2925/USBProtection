@@ -7,7 +7,7 @@
 
 ---
 
-Updated: 2026-10-10 (Asia/Bangkok).
+Updated: 2026-10-12 (Asia/Saigon).
 
 M2 PASS means M2-reported evidence, not an independent Ubuntu runtime rerun. See [M2 verification](qa/WEEK1_M2_POC_VERIFICATION.md). Frontend PASS applies to mock/fixture checks in [frontend verification](qa/evidence/M5_FRONTEND_VERIFICATION.md). Missing execution evidence stays NOT EXECUTED. T01–T38 are the canonical Test Plan IDs used by [the inventory](qa/WEEK1_TEST_INVENTORY.md).
 
@@ -27,9 +27,9 @@ M2 PASS means M2-reported evidence, not an independent Ubuntu runtime rerun. See
 | T10 | Resolver ambiguity → UNKNOWN | M2 | **PASS (M2 reported, SIMULATED)** | Two equally valid candidates → UNKNOWN |
 | T11 | Java USBGuard parser — massStorage=true | M2 | **PASS (M2 reported)** | DataTraveler parsed correctly |
 | T12 | Sample Agent event contract complete | M2 | **PASS (M2 reported)** | endpoint+user+USB+decision in JSON |
-| T13 | Admin Server skeleton boots | M1 | NOT EXECUTED (this review; runtime evidence pending) | |
-| T14 | Agent heartbeat POST reaches Admin Server | M3+M1 | NOT EXECUTED (this review; runtime evidence pending) | |
-| T15 | Agent event POST deserialized by server | M3+M1 | NOT EXECUTED (this review; runtime evidence pending) | |
+| T13 | Admin Server skeleton boots | M1 | **PASS (Windows PoC)** | [Server verification](member1/WEEK1_SERVER_VERIFICATION.md): standalone JAR boot + H2 File Mode |
+| T14 | Agent heartbeat POST reaches Admin Server | M3+M1 | **PASS (Windows PoC)** | Actual Agent JAR enrolls and sends heartbeat; server runtime log |
+| T15 | Agent event POST deserialized by server | M3+M1 | **PASS (Windows PoC, simulated event)** | Unchanged M2 sample HTTP accepted; actual Agent simulated event persisted; 4 server tests pass |
 | T16 | Admin Web boots | M4 | **PASS** | React/Vite app starts |
 | T17 | Login wireframe renders | M4 | **PASS** | username/password/button present |
 | T18 | Dashboard renders stat cards | M4 | NOT EXECUTED (dedicated assertion) | Browser checks route/heading; no dedicated stat-card assertion in the recorded suite |
@@ -46,9 +46,9 @@ M2 PASS means M2-reported evidence, not an independent Ubuntu runtime rerun. See
 | T36 | Revoke per-endpoint permission and enforce BLOCK | M1+M2+M3 | NOT EXECUTED / PLANNED WEEK 2 | Functional enforcement; distinct from T22 button-label test |
 | T37 | Event field filters, local date and reset | M5 | PASS (MOCK) | eventFilters.test.mjs and browser smoke |
 | T38 | Whitelist/detail fixture isolation | M4+M5 | PASS (frontend) | components.test.mjs and m4_endpoints.test.mjs |
-| T28 | Admin Server H2 schema correct | M1 | PLANNED WEEK 2 | |
-| T29 | Agent → Server live heartbeat E2E | M1+M3 | PLANNED WEEK 2 | |
-| T30 | Agent → Server live event E2E | M1+M3 | PLANNED WEEK 2 | |
+| T28 | Admin Server H2 schema correct | M1 | **PARTIAL (Week 1)** | H2 connection/JPA context and persisted endpoint/event/device verified; full schema/constraint review remains Week 2 |
+| T29 | Agent → Server live heartbeat E2E | M1+M3 | PLANNED WEEK 2 (Ubuntu) | Windows real HTTP transport covered by T14; Ubuntu deployment remains pending |
+| T30 | Agent → Server live event E2E | M1+M3 | PLANNED WEEK 2 (physical USB/Ubuntu) | T15 proves HTTP with sample/simulation, not physical USB attribution |
 | T31 | Per-endpoint policy sync | M1+M2+M3 | PLANNED WEEK 2 | |
 | T32 | Admin Web live API integration | M1+M4 | PLANNED WEEK 2 | |
 | T33 | USBGuard block on real hardware (no whitelist) | M2 | PLANNED WEEK 2 | Production integration |
@@ -77,10 +77,10 @@ T21/T22 verify UI wording only; they do not verify API calls, policy synchroniza
 | Keyboard ALLOW | M2 | NOT EXECUTED; physical keyboard evidence missing |
 | Active Ubuntu username/session | M2 | PASS (M2 reported; evidence reviewed) |
 | Sample endpoint+user+USB+decision | M2 | PASS (M2 reported; evidence reviewed) |
-| Admin Server skeleton | M1 | ⚠️ Not verified this week |
-| Contract freeze v0.1 | M1 | ⚠️ Not verified this week |
-| Agent shell starts | M3 | ⚠️ Not verified this week |
-| Heartbeat/event POST PoC | M3+M1 | ⚠️ Not verified this week |
+| Admin Server skeleton | M1 | PASS (Windows PoC; boot/H2 evidence) |
+| Contract freeze v0.1 | M1 | PASS (sample/DTO/docs v0.1); production interoperability remains Week 2 |
+| Agent shell starts | M3 | PASS (Windows standalone JAR) |
+| Heartbeat/event POST PoC | M3+M1 | PASS (real HTTP; simulated USB event) |
 | Admin Web skeleton | M4 | ✅ PASS |
 | Event History mock | M5 | ✅ PASS |
 | Test Plan v0.1 | M5 | ✅ This document |
@@ -94,6 +94,7 @@ T21/T22 verify UI wording only; they do not verify API calls, policy synchroniza
 | USBGuard PoC | `docs/usbguard/USBGuard_POC.md` |
 | USBGuard evidence | `docs/usbguard/evidence/` |
 | Sample event contract | `docs/agent-contract/sample-usb-event.json` |
+| M1/M3 server and transport PoC | [Server verification](member1/WEEK1_SERVER_VERIFICATION.md), [4-test summary](member1/evidence/test-summary.txt), [server log](member1/evidence/server-runtime.log), [Agent log](member1/evidence/agent-runtime.log) |
 | Admin Web tests | `frontend/tests/m4_endpoints.test.mjs` |
 | Event History tests | `frontend/tests/m5_events.test.mjs` |
 | M2 PoC verification | `docs/qa/WEEK1_M2_POC_VERIFICATION.md` |
@@ -115,9 +116,9 @@ Full Admin authentication
 ## 5. Planned — Week 2
 
 ```text
-Admin Server H2 database verified
-Agent heartbeat/event reach live server
+Full H2 schema/constraint review (Week 1 connection and persistence already verified)
+Ubuntu Agent heartbeat and physical USB event reach server (Windows PoC already verified)
 Admin Web reads real API data
 Per-endpoint whitelist CRUD via API
-Contract v0.1 frozen across M1/M2/M3
+Production interoperability and authenticated endpoint contract beyond v0.1 PoC
 ```
