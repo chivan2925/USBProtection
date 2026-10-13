@@ -1,0 +1,54 @@
+﻿Command: npm run build
+Environment: Windows; timezone Asia/Bangkok
+Started: 2026-10-13T17:32:19.8934452+07:00
+Base commit: 8b644eafc7aa3651b92e7a6746f4f22a4f1ba65e
+Revision: working tree changes on huy, not committed
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+error TS5033: Could not write file 'D:/USBProtection/frontend/node_modules/.tmp/tsconfig.app.tsbuildinfo': EPERM: operation not permitted, open 'D:\USBProtection\frontend\node_modules\.tmp\tsconfig.app.tsbuildinfo'.
+error TS5033: Could not write file 'D:/USBProtection/frontend/node_modules/.tmp/tsconfig.node.tsbuildinfo': EPERM: operation not permitted, open 'D:\USBProtection\frontend\node_modules\.tmp\tsconfig.node.tsbuildinfo'.
+Exit code: 1
+Finished: 2026-10-13T17:32:25.5272123+07:00
+
+Retry with sandbox escalation: previous attempt hit EPERM (filesystem/process restriction)
+Started: 2026-10-13T17:32:42.8938687+07:00
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:  0.41 kB
+dist/assets/index-DtBvKwWG.css   24.60 kB │ gzip:  6.41 kB
+dist/assets/index-DnSPnWck.js   270.14 kB │ gzip: 82.42 kB
+
+✓ built in 716ms
+Exit code: 0
+Finished: 2026-10-13T17:32:48.3471168+07:00
+
+Log encoding normalized to UTF-8 from mixed PowerShell UTF-8/UTF-16 output.
+
+Final verification after scoped EventTable mobile layout change
+Command: npm run build
+Started: 2026-10-13T17:40:39.0445794+07:00
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 44 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:  0.42 kB
+dist/assets/index-BTK0Z20m.css   24.64 kB │ gzip:  6.44 kB
+dist/assets/index-Bk1z3_E0.js   270.20 kB │ gzip: 82.43 kB
+
+✓ built in 253ms
+Exit code: 0
+Finished: 2026-10-13T17:40:43.9260203+07:00

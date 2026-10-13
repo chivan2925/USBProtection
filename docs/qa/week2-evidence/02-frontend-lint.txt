@@ -1,0 +1,23 @@
+﻿Command: npm run lint
+Environment: Windows; timezone Asia/Bangkok
+Started: 2026-10-13T17:32:19.8864341+07:00
+Base commit: 8b644eafc7aa3651b92e7a6746f4f22a4f1ba65e
+Revision: working tree changes on huy, not committed
+
+> frontend@0.0.0 lint
+> oxlint
+
+Exit code: 0
+Finished: 2026-10-13T17:32:21.2323669+07:00
+
+Log encoding normalized to UTF-8 from mixed PowerShell UTF-8/UTF-16 output.
+
+Final verification after scoped EventTable mobile layout change
+Command: npm run lint
+Started: 2026-10-13T17:40:44.5107680+07:00
+
+> frontend@0.0.0 lint
+> oxlint
+
+Exit code: 0
+Finished: 2026-10-13T17:40:45.4101613+07:00
