@@ -122,3 +122,11 @@ Admin Web reads real API data
 Per-endpoint whitelist CRUD via API
 Production interoperability and authenticated endpoint contract beyond v0.1 PoC
 ```
+
+## 6. Week 2 execution plan (2026-10-13)
+
+Week 2 uses a separate [integration plan](qa/WEEK2_INTEGRATION_TEST_PLAN.md), [execution inventory](qa/WEEK2_TEST_INVENTORY.md) and [QA summary](qa/WEEK2_QA_SUMMARY.md). Canonical IDs are **W2-T01–W2-T18**; existing T01–T38 and M2-W2-* IDs are unchanged.
+
+Per the Week 2 ownership handoff, the group's accepted Week 1 scope is CLOSED/PASS; the historical evidence and limitations above remain intact. Physical keyboard testing is not a prerequisite for reopening Week 1. Native Ubuntu client BLOCK notification is a Week 2 requirement. Final .deb clean install/reboot and release guides remain Week 3/4.
+
+Frontend unit/fixture and browser-demo results are recorded separately from real HTTP, physical USB, GUI notification and full E2E results. Unexecuted cases stay NOT EXECUTED; new reports link owner evidence rather than copying or rewriting historical evidence.
