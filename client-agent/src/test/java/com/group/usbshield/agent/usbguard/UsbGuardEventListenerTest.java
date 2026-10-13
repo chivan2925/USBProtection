@@ -49,13 +49,7 @@ class UsbGuardEventListenerTest {
         when(systemInfoProvider.getHostname()).thenReturn("ubuntu-test-lab");
 
         when(activeUserResolver.resolveCurrentActiveUser()).thenReturn(
-                ActiveUserInfo.builder()
-                        .username("student01")
-                        .uid(1001L)
-                        .sessionId("3")
-                        .sessionType("wayland")
-                        .seat("seat0")
-                        .build()
+                ActiveUserInfo.resolved("student01", 1001L, "3", "wayland", "seat0")
         );
 
         listener = new UsbGuardEventListener(

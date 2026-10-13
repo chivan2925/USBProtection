@@ -144,22 +144,11 @@ public class LinuxActiveUserResolver {
     }
 
     private ActiveUserInfo toActiveUserInfo(SessionCandidate candidate) {
-        return ActiveUserInfo.builder()
-                .username(candidate.username() != null ? candidate.username() : "UNKNOWN")
-                .uid(candidate.uid())
-                .sessionId(candidate.sessionId())
-                .sessionType(candidate.sessionType())
-                .seat(candidate.seat())
-                .build();
+        return ActiveUserInfo.resolved(candidate.username(), candidate.uid(),
+                candidate.sessionId(), candidate.sessionType(), candidate.seat());
     }
 
     private ActiveUserInfo buildUnknownUser(String reason) {
-        return ActiveUserInfo.builder()
-                .username("UNKNOWN")
-                .uid(null)
-                .sessionId(null)
-                .sessionType(null)
-                .seat(null)
-                .build();
+        return ActiveUserInfo.unknown(reason);
     }
 }

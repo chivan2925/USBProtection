@@ -27,8 +27,8 @@ public class DesktopNotificationService {
             return;
         }
 
-        String deviceName = (deviceInfo != null && deviceInfo.getName() != null && !deviceInfo.getName().isBlank())
-                ? deviceInfo.getName()
+        String deviceName = (deviceInfo != null && deviceInfo.name() != null && !deviceInfo.name().isBlank())
+                ? deviceInfo.name()
                 : "USB Mass Storage";
 
         String title = "USBShield - Cảnh báo bảo mật";
@@ -40,13 +40,13 @@ public class DesktopNotificationService {
             return;
         }
 
-        if (activeUser == null || activeUser.getUsername() == null || "UNKNOWN".equalsIgnoreCase(activeUser.getUsername()) || activeUser.getUid() == null) {
+        if (activeUser == null || activeUser.username() == null || "UNKNOWN".equalsIgnoreCase(activeUser.username()) || activeUser.uid() == null) {
             log.warn("[DesktopNotification] Cannot display popup: No active graphical user resolved.");
             return;
         }
 
-        String username = activeUser.getUsername();
-        Long uid = activeUser.getUid();
+        String username = activeUser.username();
+        Long uid = activeUser.uid();
         log.info("[DesktopNotification] Sending desktop notification popup to active user '{}' (UID={})...", username, uid);
 
         try {

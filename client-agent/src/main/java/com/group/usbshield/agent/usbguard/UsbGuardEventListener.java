@@ -138,7 +138,7 @@ public class UsbGuardEventListener {
             }
 
             // Deduplication: Ngăn chặn gửi trùng lặp nếu sự kiện tương tự xuất hiện trong vòng 1.5 giây
-            String dedupKey = deviceInfo.getVendorId() + ":" + deviceInfo.getProductId() + ":" + deviceInfo.getSerial() + ":" + eventType + ":" + deviceInfo.getDecision();
+            String dedupKey = deviceInfo.vendorId() + ":" + deviceInfo.productId() + ":" + deviceInfo.serial() + ":" + eventType + ":" + deviceInfo.decision();
             long now = System.currentTimeMillis();
             Long lastTime = recentEventCache.get(dedupKey);
             if (lastTime != null && (now - lastTime) < 1500) {
@@ -149,27 +149,30 @@ public class UsbGuardEventListener {
 
             // Phân giải user active ngay tại thời điểm xảy ra sự kiện
             ActiveUserInfo activeUser = activeUserResolver.resolveCurrentActiveUser();
+            if (activeUser == null) {
+                activeUser = ActiveUserInfo.unknown("resolver-returned-null");
+            }
 
             UsbEventPayload payload = UsbEventPayload.builder()
                     .endpointId(endpointManager.getEndpointId())
                     .hostname(systemInfoProvider.getHostname())
-                    .linuxUsername(activeUser.getUsername())
-                    .linuxUid(activeUser.getUid())
-                    .sessionId(activeUser.getSessionId())
-                    .sessionType(activeUser.getSessionType())
-                    .seat(activeUser.getSeat())
+                    .linuxUsername(activeUser.username())
+                    .linuxUid(activeUser.uid())
+                    .sessionId(activeUser.sessionId())
+                    .sessionType(activeUser.sessionType())
+                    .seat(activeUser.seat())
                     .device(deviceInfo.toContractDeviceMap())
                     .eventType(eventType != null ? eventType : "CONNECTED")
-                    .decision(deviceInfo.getDecision())
+                    .decision(deviceInfo.decision())
                     .occurredAt(Instant.now())
                     .build();
 
             log.info("[UsbGuardEventListener] REAL EVENT: {} device '{}' ({} - {}) by user '{}' -> Decision: {}",
-                    payload.getEventType(), deviceInfo.getName(), deviceInfo.getVendorId(), deviceInfo.getProductId(),
+                    payload.getEventType(), deviceInfo.name(), deviceInfo.vendorId(), deviceInfo.productId(),
                     payload.getLinuxUsername(), payload.getDecision());
 
             // Nếu thiết bị bị chặn (BLOCKED), bắn popup cảnh báo lên màn hình người dùng
-            if ("BLOCKED".equalsIgnoreCase(deviceInfo.getDecision())) {
+            if ("BLOCKED".equalsIgnoreCase(deviceInfo.decision())) {
                 desktopNotificationService.notifyBlockedUsb(activeUser, deviceInfo);
             }
 
