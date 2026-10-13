@@ -10,6 +10,9 @@
 > **Database Admin Server:** H2 File Mode (embedded) cho MVP  
 > **Phân phối client:** `usbshield-agent_1.0.0_amd64.deb`  
 > **Java runtime trên client:** phương án A — `.deb` khai báo `openjdk-21-jre-headless` là runtime dependency, người dùng không phải tự cài Java bằng tay.
+> **Scope update (từ Week 2):** Thêm desktop notification trên chính Ubuntu Client khi USB Mass Storage bị USBGuard `BLOCK`. **Week 1 được giữ nguyên, không hồi tố yêu cầu notification vào Week 1.**
+> **Ownership update (từ Week 2):** M3 bàn giao nguyên trạng các class đang có dưới `client-agent/.../usbguard/` và `client-agent/.../session/` cho M2 tiếp quản, không tự tiếp tục sửa hai package này. M2 rà soát và chỉnh sửa trực tiếp trên code đã merge, không tạo bản trùng.
+
 
 ---
 
@@ -104,12 +107,13 @@ Tên này không làm thay đổi bài toán giảng viên giao. Phần “quả
 
 USB Flash Disk có thể được dùng để đưa dữ liệu không kiểm soát vào máy hoặc sao chép dữ liệu ra ngoài. Trong môi trường trường học/công ty/bệnh viện, người dùng cuối không nên tự ý sử dụng USB Mass Storage chưa được cấp phép.
 
-USBShield cần giải quyết đồng thời 4 bài toán:
+USBShield cần giải quyết đồng thời 5 bài toán:
 
 1. **Enforcement tại endpoint:** unknown USB Mass Storage bị BLOCK thật bằng USBGuard.
 2. **Không phá peripheral:** keyboard/mouse và USB không phải Mass Storage không bị ảnh hưởng.
 3. **User attribution:** khi có USB event, Agent xác định tài khoản Ubuntu đang active.
 4. **Central administration:** Admin Web xem event của các endpoint và quản lý whitelist **riêng cho từng endpoint**.
+5. **Client desktop feedback (bắt đầu Week 2):** Người dùng Ubuntu có session đồ họa đang active nhận desktop notification khi **USB Mass Storage bị BLOCK**; notification không thay thế enforcement, không đòi Admin Web hoặc network.
 
 Policy cơ bản trên mỗi endpoint:
 
@@ -154,6 +158,10 @@ Agent lấy active Linux session/user
         ↓
 Agent tạo event:
 endpoint + username + USB + decision + timestamp
+        ├── Nếu INSERT + Mass Storage + BLOCKED
+        │   → phát notification tới graphical session đang active
+        │     "USB Mass Storage chưa được cấp phép. Thiết bị đã bị chặn."
+        │     (bắt đầu Week 2; không làm chậm chặn USB/gửi event)
         ↓
 POST event về Admin Server
         ↓
@@ -257,7 +265,7 @@ MVP có thể lấy thông tin qua `systemd-logind/loginctl`. Production-quality
 ---
 
 
-# 6. Scope chính thức — 16 hạng mục bắt buộc
+# 6. Scope chính thức — 17 hạng mục bắt buộc
 
 ## 1. Nhận diện USB Flash Disk / Mass Storage
 
@@ -344,6 +352,7 @@ Các màn hình MVP:
 
 - USBGuard integration;
 - active-user resolution;
+- **publish BLOCKED Mass Storage notification to active graphical desktop session (Week 2+);**
 - event sender;
 - heartbeat;
 - policy sync/reconciliation;
@@ -430,6 +439,20 @@ Client user plugs USB
 ---
 
 
+## 17. Local desktop notification khi USB Mass Storage bị BLOCK — bắt đầu Week 2
+
+- Ubuntu Client phải hiện **desktop notification native** cho **đúng graphical/local active session** khi USBGuard xác nhận sự kiện **`PresenceChanged / Insert` + class `08` + target `block`/`reject`**.
+- Nội dung mặc định: **USBShield — USB Mass Storage bị chặn**; **Thiết bị lưu trữ USB chưa được cấp phép. Vui lòng liên hệ quản trị viên.** Có thể bổ sung tên thiết bị đã sanitize.
+- Chỉ hiện **một notification cho mỗi lần cắm**, không tạo thêm notification từ `PolicyChanged`, `PolicyApplied`, polling hoặc heartbeat; xử lý giảm spam/reconnect liên tiếp.
+- **Không hiện** khi thiết bị `ALLOWED`, USB non-storage/HID class `03`, hay lúc rút USB.
+- **Không có active graphical session / resolver trả `UNKNOWN`:** không đoán user, không hiển thị vào session khác; log lý do và vẫn gửi event về server.
+- **Thiếu DBus user session / desktop notification daemon / không có GUI:** chỉ thất bại phần hiển thị. Không làm thay đổi USBGuard enforcement, không chặn listener/event sender, không tự bật Allow.
+- MVP dùng **freedesktop.org Desktop Notifications** (Ubuntu `libnotify-bin`/`notify-send`) thông qua **user-session notifier helper**. Agent chạy bằng system user `usbshield`, không được giả định gọi `notify-send` trực tiếp từ service là sẽ xuất hiện popup trên desktop user.
+- **Không làm modal ép xác nhận** hoặc thêm nút cấp quyền USB trên client; quyền Allow/Revoke vẫn chỉ nằm trên Admin Web theo endpoint.
+- Đây là **chức năng bắt buộc bắt đầu từ Week 2**, **không thuộc Week 1 Gate**.
+
+---
+
 # 7. Out of Scope — cố ý KHÔNG làm trong 1 tháng
 
 Không làm:
@@ -460,7 +483,7 @@ Bonus nếu core xong sớm:
 - realtime Admin UI bằng SSE/WebSocket;
 - export CSV;
 - durable agent outbox/retry nâng cao;
-- desktop notification cho Admin;
+- desktop notification cho **Admin** (bonus, khác với client BLOCK notification bắt buộc từ Week 2);
 - charts.
 
 ---
@@ -543,6 +566,18 @@ Repo có ít nhất:
 - API/Protocol;
 - Test Plan;
 - Demo Script.
+
+## DoD-11: Client blocked-USB notification (từ Week 2)
+
+```text
+Ubuntu graphical user đang active
+→ cắm USB Mass Storage chưa whitelist
+→ USBGuard BLOCK thật
+→ một desktop notification trên đúng session của người dùng
+→ sự kiện BLOCKED vẫn được gửi/lưu; mất notification không làm fail-open
+```
+
+Không có GUI hoặc không resolve được user → chỉ ghi log + gửi event, **không chọn nhầm session**.
 
 ---
 
@@ -816,6 +851,31 @@ Agent gửi:
 ---
 
 
+## 13.6. Local notification integration — tách system service và user desktop session
+
+```text
+USBGuard PresenceChanged / Insert (class 08, BLOCKED)
+      ↓
+M2 UsbGuardEventListener + active-user resolver
+      ├── M3 EventSender (network/central log, không bị phụ thuộc notification)
+      └── M2 BlockNotificationPolicy + ClientNotificationPublisher
+                   ↓ local-only IPC; message chỉ là notification text/metadata
+          M2 DesktopNotificationClient (chạy bằng UID của desktop user)
+                   ↓ user's session D-Bus
+          notify-send / org.freedesktop.Notifications
+                   ↓
+          Ubuntu desktop notification
+```
+
+- **M2 owns** event classification, notification payload, dedup/cooldown logic, notification publisher/desktop client code và tests trong `client-agent/.../notification/`, plus USBGuard/session core đang bàn giao.
+- **M3 owns** transport lifecycle/config của Agent, provisioning quyền IPC giữa system service và GUI session, `packaging/desktop/` (XDG autostart/user-session helper launch), `.deb` dependency `libnotify-bin` và integration với unit `systemd`.
+- **M1/M4/M5** không phải sửa API/DB/Admin Web vì tính năng thông báo trên client dùng event đã có; M5 bổ sung test case/evidence từ Week 2.
+- Thiết kế IPC giữa `usbshield` system service và notifier user session phải **local-only**, xác thực/giới hạn peer, gắn notification với UID đã resolve và **không cấp khả năng quản lý USBGuard/policy cho desktop user**. Có thể dùng Unix-domain socket có kiểm soát quyền; không dùng port HTTP mở mạng hay file world-writable.
+- `notify-send` chỉ được gọi **trong môi trường D-Bus của session đồ họa đích**. Không chạy `sudo`/`bash -c` trong Java; không hard-code `DISPLAY=:0`, UID 1000 hay username cố định.
+- Nếu user-session helper chưa sẵn sàng, trả trạng thái `SKIPPED_NO_GUI`/`DELIVERY_FAILED` để log; enforcement và event posting vẫn độc lập.
+
+---
+
 # 14. Tech stack chính thức
 
 | Layer | Công nghệ | Lý do |
@@ -830,6 +890,7 @@ Agent gửi:
 | ORM | Spring Data JPA | Central persistence |
 | DB MVP | H2 File Mode trên Admin Server | Ít deployment dependency |
 | User attribution | systemd-logind / `loginctl` MVP | Active Linux session |
+| Ubuntu Client notification (Week 2+) | `libnotify-bin` / `notify-send` + user-session D-Bus | Native desktop feedback for BLOCKED Mass Storage |
 | USB enforcement | USBGuard | Linux USB authorization |
 | Client lifecycle | systemd | Auto-start/restart |
 | Client packaging | Debian `.deb` | Native Ubuntu install |
@@ -994,9 +1055,10 @@ com.group.usbshield.server
 
 ```text
 com.group.usbshield.agent
-├── usbguard
-├── session
-├── event
+├── usbguard              # M2 từ Week 2; M3 bàn giao code hiện có
+├── session               # M2 từ Week 2; M3 bàn giao code hiện có
+├── notification          # M2 logic/client; M3 desktop autostart/IPC packaging
+├── event                 # M3 transport; M2 enrichment tại boundary đã chốt
 ├── sync
 ├── endpoint
 ├── outbox
@@ -1023,6 +1085,18 @@ ActiveUserResolver
 LoginctlActiveUserResolver
 ActiveUserInfo
 ```
+
+### `notification` (bắt đầu Week 2)
+
+```text
+UsbBlockNotification
+BlockNotificationPolicy
+ClientNotificationPublisher
+DesktopNotificationClient
+NotifySendDesktopCommand
+```
+
+Các tên class này là cấu trúc gợi ý, không được tạo class trùng nếu đã có implementation tương đương. Code M2 phân loại/publish; M3 cài đặt session helper, tự khởi động và cấp quyền local IPC an toàn.
 
 ### `sync`
 
@@ -1372,6 +1446,7 @@ server JAR
 - mouse/keyboard ALLOW;
 - specific allow/revoke;
 - reboot/reconnect tests.
+- từ Week 2: desktop notification khi USB class `08` bị BLOCK, không hiển thị cho HID/ALLOWED.
 
 ### B. Java USBGuard integration
 
@@ -1384,6 +1459,8 @@ UsbGuardDeviceMapper
 UsbGuardEventListener
 UsbGuardPolicySynchronizer
 ```
+
+**Từ Week 2, toàn bộ class đã có trong `client-agent/src/main/java/com/group/usbshield/agent/usbguard/` được M3 bàn giao nguyên trạng cho M2.** M2 review/refactor/maintain trực tiếp, M3 không tiếp tục chỉnh các class này (kể cả `AdaptiveUsbGuardGateway`, `UsbGuardEventParser`, `MockUsbGuardGateway`, `UsbDeviceInfo`).
 
 ### C. Active user attribution — yêu cầu mới
 
@@ -1407,7 +1484,15 @@ seat
 
 Nếu không xác định được thì `UNKNOWN`, không đoán.
 
-### D. Handoff
+**Từ Week 2, toàn bộ class đã có trong `client-agent/src/main/java/com/group/usbshield/agent/session/` được M3 bàn giao nguyên trạng cho M2.** M2 sửa trên code hiện hữu (`LinuxActiveUserResolver`, `AdaptiveActiveUserResolver`, `MockActiveUserResolver`, `ActiveUserResolver`, `ActiveUserInfo`), không nhân đôi interface/model.
+
+### D. Client desktop notification (Week 2)
+
+- M2 sở hữu bộ lọc `Insert` + class `08` + `BLOCKED`, lấy UID/session từ resolver, dedup, notification publisher và user-session notification client.
+- M2 unit test và hardware verify popup/notification hiển thị đúng user trong Ubuntu GUI; không thay thế bằng console log.
+- M3 cung cấp XDG autostart/IPC permissions/`libnotify-bin` packaging; không sửa trực tiếp Java notification/USBGuard/session của M2.
+
+### E. Handoff
 
 Gửi cho M1/M3 event contract:
 
@@ -1423,6 +1508,7 @@ base policy
 real hardware evidence
 USBGuard Java adapter
 active-user attribution PoC/code
+Week 2 desktop BLOCK notification + unit/hardware evidence
 sample Agent event payload
 ```
 
@@ -1445,12 +1531,15 @@ sample Agent event payload
 - `.deb` installer/uninstall.
 - server URL configuration.
 - clean VM install test.
+- từ Week 2, xây dựng/cấu hình desktop user-session helper auto-start và IPC permissions theo contract M2, không sửa code M2 trong `usbguard/`, `session/`, `notification/`.
+- Week 3 `.deb` bổ sung `libnotify-bin` và file launcher XDG autostart của notifier.
 
 ### Deliverables
 
 ```text
 client-agent.jar
 usbshield-agent.service
+packaging/desktop/* (user-session notification helper launcher)
 agent↔server communication
 policy sync
 .deb
@@ -1636,7 +1725,9 @@ Real Client USB event
 - implement ActiveUserResolver;
 - combine USB event + active user;
 - policy synchronizer operations;
-- hardware integration tests.
+- hardware integration tests;
+- tiếp quản, review và sửa trực tiếp **toàn bộ class hiện có** trong `client-agent/.../usbguard/` và `client-agent/.../session/` do M3 bàn giao;
+- **client BLOCK notification**: M2 sở hữu detector + payload + dedup + publisher + desktop notifier code/tests; chỉ báo cho session graphical active và không tạo duplicate từ PolicyChanged/PolicyApplied.
 
 ### M3
 
@@ -1645,7 +1736,9 @@ Real Client USB event
 - event sender/retry;
 - policy fetch/version sync;
 - ack;
-- non-root Agent service draft.
+- non-root Agent service draft;
+- tích hợp/khởi chạy desktop notification helper trên Ubuntu user session, local IPC permission, và nghiên cứu/cập nhật packaging; **không sửa `usbguard/`, `session/`, `notification/` của M2**;
+- vô hiệu hóa auto fake-event runner khi chạy chế độ hardware/live để không phát notification hoặc event giả.
 
 ### M4
 
@@ -1659,7 +1752,8 @@ Real Client USB event
 - Event History integrate;
 - filters;
 - E2E test Client → Server → Web;
-- verify correct username attribution.
+- verify correct username attribution;
+- kiểm tra client notification hiển thị đúng user, một lần cho một Insert bị BLOCK, không popup khi ALLOWED/HID/Remove và không ảnh hưởng chặn USB lúc GUI không sẵn sàng.
 
 ### WEEK 2 GATE
 
@@ -1669,6 +1763,8 @@ Real Client USB event
 - [ ] Agent applies server desired policy.
 - [ ] event stored centrally.
 - [ ] unknown storage stays fail-closed.
+- [ ] Ubuntu graphical user nhận **một native desktop notification** khi unknown Mass Storage bị BLOCK trên máy đó (không phải notification ở Admin Web).
+- [ ] GUI không active, `UNKNOWN` hoặc notifier lỗi → không báo sai user; BLOCK/event processing không bị ảnh hưởng.
 
 ---
 
@@ -1698,6 +1794,7 @@ Real Client USB event
 - `.deb` agent;
 - enrollment config;
 - clean install;
+- đóng gói `libnotify-bin`, user-session notifier launcher (XDG autostart) và local IPC permissions thành `.deb`;
 - retry behavior;
 - server-down fail-safe test.
 
@@ -1872,6 +1969,10 @@ Không giữ code một tuần trên máy cá nhân mới push.
 | T22 | Fresh `.deb` install | success |
 | T23 | Uninstall | service/app remove đúng |
 | T24 | USBGuard unavailable | Agent/Admin báo DEGRADED, không fake success |
+| T25 | User GUI `student01` cắm Mass Storage lạ | USBGuard BLOCK và **một native desktop notification** hiện đúng session `student01` |
+| T26 | USB Mass Storage đã Allow, HID mouse hoặc Remove | Không hiển thị cảnh báo BLOCK |
+| T27 | Mất GUI/no active local session/notifier unavailable | Không báo nhầm session; USBGuard tiếp tục enforce; event vẫn được xử lý |
+| T28 | Insert bị BLOCK sinh PolicyChanged/PolicyApplied | Chỉ một notification; không duplicate/spam |
 
 ---
 
@@ -1906,9 +2007,11 @@ Client:
 ```text
 storage không usable
 USBGuard = BLOCK
+Ubuntu GUI: USBShield — USB Mass Storage bị chặn
+Thiết bị lưu trữ USB chưa được cấp phép. Vui lòng liên hệ quản trị viên.
 ```
 
-Admin Web phải xuất hiện event:
+Notification được bắt đầu triển khai từ Week 2, hiển thị đúng active desktop user; không bật cửa sổ modal. Admin Web phải xuất hiện event:
 
 ```text
 LAB-PC-01 | student01 | Kingston | CONNECTED | BLOCKED
@@ -2006,6 +2109,12 @@ High. Contract freeze Week 1, integration Week 2.
 ## R10 — Thiếu hardware USB
 High. Có ít nhất một Flash Disk thật; test multiple device nếu mượn được.
 
+## R11 — Không hiển thị notification vì Agent là system service
+High. `usbshield` system user không có mặc định graphical user-session D-Bus. M2 viết notifier trong user session, M3 đảm nhiệm khởi chạy/permissions local IPC và `libnotify-bin`; test trên Ubuntu 24.04 desktop thật. Failure chỉ làm mất notification, không làm fail-open.
+
+## R12 — M2/M3 trùng ownership Java Client Core
+High. Week 2 bàn giao nguyên trạng class dưới `client-agent/.../usbguard/` và `session/` cho M2; M3 ngừng sửa hai package, chỉ tích hợp qua API/contract và M3-owned shell/sync/packaging.
+
 ---
 
 
@@ -2018,6 +2127,7 @@ High. Có ít nhất một Flash Disk thật; test multiple device nếu mượn
 - Client Agent local setup;
 - USBGuard config/rules/IPC;
 - `loginctl`/logind active-user resolution;
+- cách triển khai `notification/`, UID-targeting, local IPC và `notify-send` trong user graphical D-Bus (Week 2);
 - endpoint enrollment/token;
 - event payload;
 - policy version/sync;
@@ -2053,9 +2163,11 @@ High. Có ít nhất một Flash Disk thật; test multiple device nếu mượn
 3. Set Admin Server URL/enrollment token.
 4. Verify Agent/USBGuard services.
 5. Verify endpoint appears on Admin Web.
-6. Uninstall.
+6. Check `libnotify-bin` / desktop notifier autostart và test cảnh báo khi USB bị BLOCK.
+7. Troubleshoot trường hợp không có graphical session hoặc không hiển thị notification.
+8. Uninstall.
 
-Normal Ubuntu user không cần mở USBShield UI.
+Normal Ubuntu user không cần mở USBShield UI; cảnh báo là desktop notification tự động.
 
 ---
 
@@ -2122,6 +2234,7 @@ Không cần thêm AI/Cloud/microservices để làm đề tài “khó hơn”.
 10. Client `.deb`.
 11. Admin Web tối thiểu xem endpoint/event và policy.
 12. Docs/test.
+13. Ubuntu Client native BLOCK notification cho active graphical user (bắt đầu Week 2; không hồi tố Week 1).
 
 ## P1
 
@@ -2248,6 +2361,8 @@ Normal user không được stop/sửa; root/sudo vẫn kiểm soát hệ thốn
 - [ ] active-user resolver.
 - [ ] user/session fields correct.
 - [ ] local policy persist.
+- [ ] blocked Mass Storage emits exactly one desktop notification to correct active GUI user (Week 2+).
+- [ ] no false alerts for HID/ALLOWED/Remove and no fail-open if GUI unavailable.
 
 ## Agent
 
@@ -2259,6 +2374,7 @@ Normal user không được stop/sửa; root/sudo vẫn kiểm soát hệ thốn
 - [ ] systemd.
 - [ ] normal-user restriction.
 - [ ] `.deb`.
+- [ ] `libnotify-bin` and user-session notifier autostart/secure IPC packaged.
 
 ## Admin Server
 
