@@ -11,9 +11,9 @@ import java.util.List;
  * that signature; {@code List<DeviceFingerprint>} cannot be overloaded against
  * {@code List<String>} because of Java type erasure.</p>
  *
- * <p>Inspection operations below are deliberately NOT IMPLEMENTED by the
- * Week 1 adapters; they fail explicitly until Member 2 implements the real
- * USBGuard CLI gateway in the subsequent Week 2 steps.</p>
+ * <p>Inspection operations are implemented by Week 2's real CLI gateway.
+ * Default methods only protect against accidentally using a legacy/mock gateway
+ * for hardware inspection.</p>
  */
 public interface UsbGuardGateway {
     boolean isAvailable();
