@@ -9,7 +9,7 @@ import java.util.Map;
  * <p>Field names follow the Week 1 Agent/Server JSON contract. Member 2
  * supplies truthful USBGuard decision and active session attribution;
  * Member 3 retains ownership of UsbEventPayload, EventSenderService and HTTP.
- * The boundary mapper/wiring is NOT IMPLEMENTED in this preparation package.</p>
+ * UsbEventEnricher and UsbGuardEventListener provide the M2-to-M3 handoff.</p>
  */
 public record ClientUsbEvent(
         String endpointId,

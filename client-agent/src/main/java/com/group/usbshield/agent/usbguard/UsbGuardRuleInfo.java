@@ -12,7 +12,7 @@ public record UsbGuardRuleInfo(
 ) {
     /** The baseline non-storage allow rule must survive whitelist reconciliation. */
     public boolean isBaseNonStorageRule() {
-        return rawRule != null
+        return "allow".equalsIgnoreCase(target) && rawRule != null
                 && rawRule.contains("none-of")
                 && rawRule.contains("08:*:*");
     }
