@@ -1,0 +1,8 @@
+2: allow id 1d6b:0001 serial "0000:02:00.0" name "UHCI Host Controller" hash "3QuFY0nRVqo+mgnIkqiXmmirRvxPDeP7P3mintodpys=" parent-hash "42PXRxhXx8adD0H10oXgQnna1ED6vikevkSl6cwgdOI=" via-port "usb1" with-interface 09:00:00 with-connect-type ""
+3: allow id 1d6b:0002 serial "0000:02:03.0" name "EHCI Host Controller" hash "pSuHBvcIETMUGFPlSwdlvEsYG58P+PYrptZLSQr57Kg=" parent-hash "HeMcwU5Di+GYGCjuHSiLNxmkqXZV7uCJ+LeEmwF3BsM=" via-port "usb2" with-interface 09:00:00 with-connect-type ""
+4: allow id 1d6b:0002 serial "0000:03:00.0" name "xHCI Host Controller" hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" parent-hash "PFucdDz6f2QaMhYE00ie4Ta7ree3IkXgUco68DftGZs=" via-port "usb3" with-interface 09:00:00 with-connect-type ""
+5: allow id 1d6b:0003 serial "0000:03:00.0" name "xHCI Host Controller" hash "c1GzfYehHdtWBOENk8lHR7dYx3uNOWqGa97jUfk5r0E=" parent-hash "PFucdDz6f2QaMhYE00ie4Ta7ree3IkXgUco68DftGZs=" via-port "usb4" with-interface 09:00:00 with-connect-type ""
+6: allow id 0e0f:0003 serial "" name "VMware Virtual USB Mouse" hash "F4BFfAiFQzjQxG8oQHVYMFiDF2/zhhARDrRSIj6oij8=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-1" with-interface 03:01:02 with-connect-type "unknown"
+7: allow id 0e0f:0002 serial "" name "VMware Virtual USB Hub" hash "0cDIzeFX6eYg1fPydeh+aK2a/vRVjjj9bIasbHuN5sE=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-3" with-interface 09:00:00 with-connect-type "unknown"
+8: allow id 0e0f:0002 serial "" name "VMware Virtual USB Hub" hash "5EH6pwEeKjiAo3isQ2bIHpQTDaN+2blPoJtEknkL8cY=" parent-hash "Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=" via-port "3-4" with-interface 09:00:00 with-connect-type "unknown"
+exit_code=0
