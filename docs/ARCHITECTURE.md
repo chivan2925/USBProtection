@@ -7,6 +7,22 @@
 
 ---
 
+## Week 2 implementation update — v0.2 (2026-10-16)
+
+Admin Server now separates session/CSRF-protected Admin APIs from endpoint-token
+Agent APIs. Token hashes are stored centrally, with endpoint binding. Enrollment
+has a configured bootstrap secret and rejects duplicate machine registration.
+Per-endpoint whitelist writes and ACK use transactional endpoint row locks.
+Heartbeat is telemetry only; applied version changes through validated ACK.
+Policy wire field is `whitelistedDevices` (v0.2). See [API](API.md) for exact DTOs,
+paging, HASH-only grants, errors, startup and cross-member handoff.
+
+H2 update is additive for credential hash/event hostname and machineId uniqueness;
+existing DB validation and deployment limits are documented in the
+[server integration report](member1/WEEK2_SERVER_INTEGRATION.md).
+Week 1 remains closed. Backend test results do not establish Ubuntu physical USB,
+client notification or integrated Web Gate completion.
+
 ## 1. Tổng quan hệ thống (System Overview)
 
 USBShield Ubuntu là giải pháp bảo mật Endpoint tập trung dành cho hệ điều hành Ubuntu (mục tiêu chính: Ubuntu 24.04 LTS amd64), giải quyết triệt để 2 bài toán cốt lõi:
@@ -153,7 +169,7 @@ erDiagram
 
 ### 5.2. Luồng đồng bộ chính sách (Policy Synchronization Flow)
 1. Định kỳ mỗi 15-30 giây, Client Agent gửi `POST /api/agent/heartbeat` chứa `currentPolicyVersion`.
-2. Admin Server kiểm tra nếu `desiredPolicyVersion > currentPolicyVersion`, phản hồi yêu cầu đồng bộ.
+2. Admin Server kiểm tra nếu `desiredPolicyVersion > currentPolicyVersion`, phản hồi desired version để Agent quyết định đồng bộ.
 3. Client Agent gọi `GET /api/agent/policy` kèm định danh máy qua header `X-Endpoint-Id`.
 4. Admin Server chỉ trả về danh sách Whitelist được gán riêng cho máy đó.
 5. Client Agent sinh luật tương thích với USBGuard, cập nhật file `/etc/usbguard/rules.conf` và nạp lại daemon.

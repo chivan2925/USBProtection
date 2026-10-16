@@ -28,6 +28,7 @@ class AgentHttpIntegrationTest {
     @Autowired EndpointRepository endpoints;
     @Autowired UsbEventRepository events;
     @Autowired UsbDeviceRepository devices;
+    @Autowired org.springframework.security.crypto.password.PasswordEncoder encoder;
 
     @Test
     void heartbeatAndMember2EventReachHttpServerAndPersistInH2() throws Exception {
@@ -43,7 +44,12 @@ class AgentHttpIntegrationTest {
         String endpointId = source.get("endpointId").asText();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        String token = java.util.UUID.randomUUID().toString();
+        endpoints.save(com.group.usbshield.server.endpoint.Endpoint.builder()
+                .endpointId(endpointId).hostname(source.get("hostname").asText())
+                .agentTokenHash(encoder.encode(token)).build());
         headers.set("X-Endpoint-Id", endpointId);
+        headers.set("X-Agent-Token", token);
 
         var heartbeat = mapper.createObjectNode();
         heartbeat.put("endpointId", endpointId);

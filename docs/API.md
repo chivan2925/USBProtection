@@ -1,65 +1,105 @@
-# USBShield Ubuntu — RESTful API Reference (v0.1)
+# USBShield REST API v0.2 — Week 2
 
-> **Dự án:** USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu  
-> **Tài liệu:** Danh mục và đặc tả REST API (OpenAPI Draft)  
-> **Phiên bản:** v0.1  
-> **Interactive Swagger UI:** `http://localhost:8080/swagger-ui.html`  
-> **OpenAPI JSON Spec:** `http://localhost:8080/api-docs`  
+Owner: M1. Updated 2026-10-16 (Asia/Saigon).
+Canonical Admin routes are `/api/admin/**`, not `/api/endpoints` or `/api/events`.
+[Week 1 draft archive](member1/API_V0_1_ARCHIVE.md) is historical; no Week 1 Gate is reopened.
+OpenAPI: `/api-docs`; Swagger: `/swagger-ui.html`.
 
----
+## Authentication and deployment
 
-## 1. Nhóm API dành cho Client Agent (`/api/agent/**`)
+Same-origin Admin session (`JSESSIONID`, HttpOnly, SameSite=Strict). No CORS wildcard.
+Frontend dev should proxy `/api` to server (M4); deployment over HTTPS should set
+`SERVER_SERVLET_SESSION_COOKIE_SECURE=true`.
 
-| Phương thức | Đường dẫn | Mục đích | Yêu cầu Auth |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/agent/enroll` | Đăng ký máy Endpoint mới vào hệ thống | Enrollment Token |
-| `POST` | `/api/agent/heartbeat` | Gửi nhịp tim định kỳ, cập nhật trạng thái Online | Header `X-Endpoint-Id` |
-| `GET` | `/api/agent/policy` | Lấy danh sách Whitelist cho riêng Endpoint | Header `X-Endpoint-Id` |
-| `POST` | `/api/agent/policy/ack` | Báo cáo đã nạp thành công phiên bản policy | Header `X-Endpoint-Id` |
-| `POST` | `/api/agent/events` | Đẩy sự kiện phát hiện/chặn USB kèm Active User | Header `X-Endpoint-Id` |
+1. `GET /api/auth/csrf`: returns `{token, headerName}` and session cookie.
+2. `POST /api/auth/login` with JSON `{username,password}`, same cookie, header
+   `X-CSRF-TOKEN: <token>`. Returns `{username}`; bad credentials 401.
+3. After login, GET CSRF again (session ID and token rotate).
+4. Preserve cookie for reads; send current CSRF header for Admin mutations/logout.
+5. `GET /api/auth/me` → `{username}`; `POST /api/auth/logout` → `{success:true}`.
 
----
+Configure `USBSHIELD_ADMIN_PASSWORD` and optionally `USBSHIELD_ADMIN_USERNAME`.
+A BCrypt account is created only if absent; changing the environment does not
+reset an existing password. Empty password creates no account, no public default.
+Configure `USBSHIELD_ENROLLMENT_TOKEN`; empty disables enrollment (503).
+Passwords/tokens must not be stored in source, screenshots or evidence logs.
 
-## 2. Nhóm API Quản trị & Xác thực (`/api/auth/**`)
+## Agent API
 
-| Phương thức | Đường dẫn | Mục đích | Payload |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/login` | Quản trị viên đăng nhập vào Admin Web | `{"username": "admin", "password": "..."}` |
-| `POST` | `/api/auth/logout` | Đăng xuất phiên làm việc | Trống |
-| `GET` | `/api/auth/me` | Lấy thông tin tài khoản đang đăng nhập | Trống |
+| Method/path | Request | Response / authorization |
+|---|---|---|
+| POST `/api/agent/enroll` | `{hostname,machineId,ipAddress?,enrollmentToken}` | `{endpointId,agentToken,currentPolicyVersion}`; bootstrap credential required |
+| POST `/api/agent/heartbeat` | `{endpointId,hostname?,agentVersion?,currentPolicyVersion?}` | `{accepted,serverTime,desiredPolicyVersion,serverPolicyVersion,lastAppliedPolicyVersion,status}` |
+| POST `/api/agent/events` | [M2 sample](agent-contract/sample-usb-event.json), using enrolled endpointId | `{success,eventId,receivedAt}` |
+| GET `/api/agent/policy` | no body | `{policyVersion,whitelistedDevices:[...]}` |
+| POST `/api/agent/policy/ack` | `{appliedPolicyVersion,appliedAt?,ruleCount?}` | `{acknowledged,appliedPolicyVersion,desiredPolicyVersion}` |
 
----
+All Agent routes except enrollment require BOTH `X-Endpoint-Id` and `X-Agent-Token`.
+Agent credentials do not grant Admin access. Admin session alone does not grant
+Agent access. CSRF is exempted only on Agent routes, which use explicit credentials.
+Tokens are returned once and stored as BCrypt hashes. Re-enrollment of an existing
+machineId returns 409 (no silent rotation); retain its credential. Legacy endpoints
+without a hash are rejected until an administrator performs controlled recovery.
+Concurrent duplicate machine enrollments are protected by a unique machineId constraint.
 
-## 3. Nhóm API Quản trị Endpoint (`/api/admin/endpoints/**`)
+Event endpointId must match authenticated identity (403 otherwise). `eventType`:
+CONNECTED/DISCONNECTED; `decision`: ALLOWED/BLOCKED. `device` and four-hex-digit
+VID/PID are required. Missing/blank username becomes UNKNOWN; UID/session become
+null for UNKNOWN. Offset timestamps normalize to UTC. Sample mouse stays session
+21 / ALLOWED. In live transport, replace only the temporary endpoint reference
+with the enrolled identity; never rewrite the frozen M2 evidence file.
 
-| Phương thức | Đường dẫn | Mục đích |
-| :--- | :--- | :--- |
-| `GET` | `/api/admin/endpoints` | Liệt kê danh sách toàn bộ Endpoint đang quản lý (kèm trạng thái Online/Offline, IP, lastSeen). |
-| `GET` | `/api/admin/endpoints/{id}` | Xem chi tiết thông tin và chính sách hiện tại của một Endpoint. |
-| `DELETE` | `/api/admin/endpoints/{id}` | Xóa hoặc hủy đăng ký một Endpoint khỏi hệ thống. |
+Heartbeat updates lastSeen, not applied version. `currentPolicyVersion` is telemetry.
+Only ACK updates applied version. Negative/malformed ACK → 400; future (> desired)
+or regressive (< applied) → 409. Duplicate ACK is idempotent. Older than desired
+but >= applied is accepted (a valid previous apply can arrive during a new update).
+ACK is an authenticated Agent report, not independent proof of hardware enforcement.
 
----
+Policy **canonical serialized field is `whitelistedDevices`**, matching existing M3
+`PolicyResponse`; `allowedDevices` from v0.1 is no longer emitted. Device entries:
+`vendorId,productId,serialNumber,deviceHash,deviceName,fingerprintValue`.
+Policy omits `fingerprintType` to match M3 DTO; HASH is the only supported type,
+and `deviceHash` / `fingerprintValue` both carry that hash. Admin entry DTO retains the type.
+Week 2 accepts HASH identity only. No VID/PID-only or name-based grants; missing hash
+returns 409 and needs identity review with M2/M3. Legacy non-HASH rules are rejected
+on policy fetch rather than silently broadened.
 
-## 4. Nhóm API Quản trị Whitelist theo Endpoint (`/api/admin/policies/**`)
+## Admin APIs (session required)
 
-| Phương thức | Đường dẫn | Mục đích | Payload ví dụ |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/endpoints/{endpointId}/whitelist` | Lấy danh sách thiết bị được phép của riêng endpoint này. | Không |
-| `POST` | `/api/admin/endpoints/{endpointId}/whitelist` | Cấp phép một thiết bị USB cho endpoint này (tăng `policyVersion`). | `{"fingerprintValue": "0951:1666", "fingerprintType": "VID_PID"}` |
-| `DELETE` | `/api/admin/endpoints/{endpointId}/whitelist/{id}` | Thu hồi quyền sử dụng USB khỏi endpoint này (tăng `policyVersion`). | Không |
+| Method/path | Request | Result |
+|---|---|---|
+| GET `/api/admin/endpoints` | none | array of EndpointResponse |
+| GET `/api/admin/endpoints/{endpointId}` | none | EndpointResponse, 404 if absent |
+| GET `/api/admin/endpoints/{endpointId}/whitelist` | none | enabled entries array, empty `[]` |
+| POST same whitelist URL | `{usbDeviceId}` | entry; duplicate enabled add returns same entry without version bump |
+| DELETE `/api/admin/endpoints/{endpointId}/whitelist/{entryId}` | none | 204; repeated revoke of same known entry is idempotent |
+| GET `/api/admin/events` | filters below | EventPage |
+| GET `/api/admin/events/{id}` | none | EventResponse |
 
----
+EndpointResponse: `endpointId,hostname,ipAddress,status,lastSeen,policyVersion,appliedPolicyVersion`.
+Status ONLINE if lastSeen within configured `usbshield.offline-after-seconds` (default 90),
+otherwise OFFLINE. It represents connectivity, not independently measured USBGuard health.
+No token hashes/passwords in responses. No endpoint-delete API implemented in Week 2.
 
-## 5. Nhóm API Lịch sử Sự kiện USB (`/api/admin/events/**`)
+Whitelist entry: `id,endpointId,usbDeviceId,fingerprintType,fingerprintValue,enabled`.
+Endpoint is taken from URL, never body. Select `usbDeviceId` from event response.
+Create/re-enable/revoke changes only that endpoint's desired version; serialized
+endpoint row locking prevents concurrent version loss. Revoke disables entry and
+excludes it from policy. Unknown/cross-endpoint entry returns 404.
 
-| Phương thức | Đường dẫn | Mục đích | Query params |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/events` | Lấy danh sách nhật ký sự kiện cắm/rút USB trên toàn bộ hệ thống. | `page`, `size`, `endpointId`, `decision` |
-| `GET` | `/api/admin/events/{id}` | Xem chi tiết một sự kiện (thông tin USB, session, user UID, thời điểm). | Không |
+Event filters (exact match): `endpointId,linuxUsername,deviceId,decision,eventType`;
+`from,to` are inclusive ISO-8601 instants with timezone. Range applies to occurredAt.
+`page` zero-based default 0; `size` default 20, range 1..100. Stable sort:
+occurredAt DESC, id DESC. Invalid range/enum/size → 400. Empty page remains real empty data.
 
----
+EventPage: `{content: EventResponse[],page,size,totalElements,totalPages}`.
+EventResponse: `id,endpointId,hostname,linuxUsername,linuxUid,sessionId,sessionType,seat,
+usbDeviceId,device,eventType,decision,occurredAt,receivedAt`. Device uses Agent DTO
+fields `vendorId,productId,serial,name,hash,interfaceClass`. Hostname is captured on
+ingestion; legacy rows fall back to registry hostname. FE maps enums to its view
+model at the adapter boundary; no backend contract change or mock fallback.
 
-## 6. Hướng dẫn kiểm thử nhanh qua cURL
+## Errors
 
 ### 6.1. Gửi Heartbeat thử nghiệm:
 ```bash

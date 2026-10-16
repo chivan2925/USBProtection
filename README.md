@@ -52,15 +52,18 @@ cd admin-server
 # Build và chạy kiểm thử
 mvn clean test
 
-# Khởi động ứng dụng
+# Cấu hình secret ngoài repo trước khi chạy (biến môi trường):
+# USBSHIELD_ADMIN_PASSWORD, USBSHIELD_ENROLLMENT_TOKEN
+# USBSHIELD_ADMIN_USERNAME optional, mặc định admin
 mvn spring-boot:run
 ```
 
 Sau khi server khởi động thành công:
 - **Server URL:** `http://localhost:8080`
 - **Swagger UI (Interactive API Docs):** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-- **H2 Database Console:** [http://localhost:8080/h2-console](http://localhost:8080/h2-console)  
-  *(JDBC URL: `jdbc:h2:file:./data/usbshield`, Username: `sa`, Password: để trống)*
+- **H2 Console:** tắt và bị chặn qua HTTP ở Week 2. File DB được giữ nguyên.
+- **Week 2 API/auth/CSRF:** [API v0.2](docs/API.md); [báo cáo M1](docs/member1/WEEK2_SERVER_INTEGRATION.md).
+- Frontend dev cần proxy `/api` cùng origin (M4); không mở CORS wildcard.
 
 ---
 

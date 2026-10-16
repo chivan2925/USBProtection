@@ -12,8 +12,10 @@ import lombok.*;
 public class AgentHeartbeatRequest {
 
     @NotBlank(message = "endpointId must not be blank")
+    @jakarta.validation.constraints.Size(max=100)
     private String endpointId;
 
+    @jakarta.validation.constraints.Size(max=150)
     private String hostname;
 
     private String agentVersion;

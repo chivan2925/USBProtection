@@ -22,5 +22,6 @@ public class WhitelistedDeviceDto {
 
     private String fingerprintValue;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String fingerprintType;
 }

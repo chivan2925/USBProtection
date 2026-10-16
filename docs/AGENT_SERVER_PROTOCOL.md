@@ -1,3 +1,27 @@
+# Agent–Server Protocol v0.2 — Week 2
+
+Updated 2026-10-16 (Asia/Saigon), owner M1.
+Authoritative current routes, fields, authentication/errors and examples are in
+[API v0.2](API.md). Changes from v0.1:
+
+- Agent credentials are mandatory, stored as hashes and bound to endpoint identity.
+- Enrollment requires configured bootstrap secret; duplicate machineId → 409.
+- Policy returns `whitelistedDevices` only, matching M3's existing PolicyResponse.
+- Allow/Revoke uses observed `usbDeviceId` + HASH fingerprint on an endpoint URL.
+- Heartbeat never updates applied version. Validated ACK is the only update path.
+- M2 event shape remains unchanged; its frozen mouse sample is session 21 / ALLOWED.
+- Admin APIs use session cookies and CSRF; errors and pagination have explicit shape.
+
+M2/M3 review and hardware interoperability remain integration work; no team sign-off
+is implied by publishing v0.2. Week 1 remains closed under its original scope.
+
+---
+
+## Historical v0.1 (Week 1; superseded for auth/policy)
+
+The following is preserved for history. It must not be used as the current security
+or policy field contract. Use v0.2 above for new calls.
+
 # USBShield Ubuntu — Agent to Server Protocol Specification (v0.1)
 
 > **Dự án:** USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu  
