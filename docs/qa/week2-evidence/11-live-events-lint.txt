@@ -1,0 +1,29 @@
+﻿M5 live Events lint
+Started: 2026-10-16T15:29:55.3257597+07:00
+Command: npm run lint
+
+
+> frontend@0.0.0 lint
+> oxlint
+
+tests/browser-live.mjs:140:55: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+tests/browser-live.mjs:140:66: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+tests/browser-live.mjs:147:57: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+tests/browser-live.mjs:147:93: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+tests/browser-live.mjs:158:72: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+tests/browser-live.mjs:158:104: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+tests/browser-live.mjs:159:72: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+tests/browser-live.mjs:159:94: warning eslint(no-useless-escape): Unnecessary escape character '"' help: Replace `\"` with `"`.
+
+Exit code: 0
+
+Final source lint
+Started: 2026-10-16T15:36:21.5111627+07:00
+Command: npm run lint
+
+
+> frontend@0.0.0 lint
+> oxlint
+
+
+Exit code: 0
