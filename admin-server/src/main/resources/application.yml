@@ -2,6 +2,10 @@ server:
   port: 8080
   servlet:
     context-path: /
+    session:
+      cookie:
+        http-only: true
+        same-site: strict
 
 spring:
   application:
@@ -21,10 +25,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        hbm2ddl:
+          halt_on_error: true
 
   h2:
     console:
-      enabled: true
+      enabled: false
       path: /h2-console
       settings:
         web-allow-others: false
@@ -44,3 +50,10 @@ logging:
     org.hibernate.SQL: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+usbshield:
+  enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:}
+  admin:
+    username: ${USBSHIELD_ADMIN_USERNAME:admin}
+    password: ${USBSHIELD_ADMIN_PASSWORD:}
+  offline-after-seconds: 90

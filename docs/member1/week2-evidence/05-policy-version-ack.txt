@@ -1,0 +1,1 @@
+PASS: negative ACK 400, future/stale 409, valid ACK 200; heartbeat 999 leaves applied=0. This proves server validation, not USBGuard apply.

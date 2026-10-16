@@ -27,8 +27,11 @@ public class Endpoint {
     @Column(nullable = false, length = 150)
     private String hostname;
 
-    @Column(length = 100)
+    @Column(length = 100, unique = true)
     private String machineId;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private String agentTokenHash;
 
     @Column(length = 50)
     private String ipAddress;
