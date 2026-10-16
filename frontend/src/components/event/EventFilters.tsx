@@ -6,8 +6,10 @@ export function EventFilters({ value, onChange, onReset }: { value: EventFilterV
     <label>Endpoint<input aria-label="Endpoint" value={value.endpoint} onChange={event => update('endpoint', event.target.value)} /></label>
     <label>Linux Username<input aria-label="Linux Username" value={value.username} onChange={event => update('username', event.target.value)} /></label>
     <label>Device<input aria-label="Device" value={value.device} onChange={event => update('device', event.target.value)} /></label>
-    <label>Decision<select aria-label="Decision" value={value.decision} onChange={event => update('decision', event.target.value)}><option value="">Tất cả</option><option value="allowed">ALLOW</option><option value="blocked">BLOCK</option><option value="none">Không áp dụng</option></select></label>
-    <label>Date<input type="date" aria-label="Date" value={value.date} onChange={event => update('date', event.target.value)} /></label>
+    <label>Event Type<select aria-label="Event Type" value={value.eventType} onChange={event => update('eventType', event.target.value)}><option value="">Tất cả</option><option value="connected">Cắm USB</option><option value="disconnected">Tháo USB</option><option value="allowed">Cho phép USB</option><option value="blocked">Chặn USB</option><option value="service">Service</option></select></label>
+    <label>Decision<select aria-label="Decision" value={value.decision} onChange={event => update('decision', event.target.value)}><option value="">Tất cả</option><option value="allowed">ALLOW</option><option value="blocked">BLOCK</option><option value="unknown">UNKNOWN</option><option value="none">Không áp dụng</option></select></label>
+    <label>Từ ngày<input type="date" aria-label="From Date" value={value.dateFrom} max={value.dateTo || undefined} onChange={event => update('dateFrom', event.target.value)} /></label>
+    <label>Đến ngày<input type="date" aria-label="To Date" value={value.dateTo} min={value.dateFrom || undefined} onChange={event => update('dateTo', event.target.value)} /></label>
     <button type="button" className="button small" aria-label="Đặt lại tất cả bộ lọc" title="Đặt lại tất cả bộ lọc" onClick={onReset}><Icon name="refresh" size={18} /></button>
   </div>
 }

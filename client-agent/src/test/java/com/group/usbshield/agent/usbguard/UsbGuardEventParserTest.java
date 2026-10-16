@@ -24,14 +24,15 @@ class UsbGuardEventParserTest {
         UsbDeviceInfo info = parser.parseDeviceLine(line);
 
         assertNotNull(info);
-        assertEquals("10", info.getRuntimeId());
-        assertEquals("093a", info.getVendorId());
-        assertEquals("2510", info.getProductId());
-        assertEquals("USB Optical Mouse", info.getName());
-        assertEquals("", info.getSerial());
-        assertEquals("03:01:02", info.getInterfaceClass());
-        assertFalse(info.isMassStorage(), "Chuột không phải là Mass Storage");
-        assertEquals("ALLOWED", info.getDecision());
+        assertEquals(10, info.runtimeId());
+        assertEquals("093a", info.vendorId());
+        assertEquals("2510", info.productId());
+        assertEquals("USB Optical Mouse", info.name());
+        assertEquals("", info.serial());
+        assertEquals("03:01:02", info.interfaceClass());
+        assertFalse(info.massStorage(), "Chuột không phải là Mass Storage");
+        assertEquals("ALLOWED", info.decision());
+        assertEquals("allow", info.state());
     }
 
     @Test
@@ -43,14 +44,15 @@ class UsbGuardEventParserTest {
         UsbDeviceInfo info = parser.parseDeviceLine(line);
 
         assertNotNull(info);
-        assertEquals("10", info.getRuntimeId());
-        assertEquals("0951", info.getVendorId());
-        assertEquals("1665", info.getProductId());
-        assertEquals("DataTraveler 2.0", info.getName());
-        assertEquals("C81F660E8BE8FFA14601FEF6", info.getSerial());
-        assertEquals("08:06:50", info.getInterfaceClass());
-        assertTrue(info.isMassStorage(), "Phải nhận diện đúng Mass Storage Class 08");
-        assertEquals("BLOCKED", info.getDecision());
+        assertEquals(10, info.runtimeId());
+        assertEquals("0951", info.vendorId());
+        assertEquals("1665", info.productId());
+        assertEquals("DataTraveler 2.0", info.name());
+        assertEquals("C81F660E8BE8FFA14601FEF6", info.serial());
+        assertEquals("08:06:50", info.interfaceClass());
+        assertTrue(info.massStorage(), "Phải nhận diện đúng Mass Storage Class 08");
+        assertEquals("BLOCKED", info.decision());
+        assertEquals("block", info.state());
     }
 
     @Test
@@ -62,11 +64,12 @@ class UsbGuardEventParserTest {
         UsbDeviceInfo info = parser.parseDeviceLine(watchLine);
 
         assertNotNull(info);
-        assertEquals("0951", info.getVendorId());
-        assertEquals("1665", info.getProductId());
-        assertEquals("DataTraveler 2.0", info.getName());
-        assertTrue(info.isMassStorage());
-        assertEquals("BLOCKED", info.getDecision());
+        assertEquals(-1, info.runtimeId());
+        assertEquals("0951", info.vendorId());
+        assertEquals("1665", info.productId());
+        assertEquals("DataTraveler 2.0", info.name());
+        assertTrue(info.massStorage());
+        assertEquals("BLOCKED", info.decision());
 
         var contractMap = info.toContractDeviceMap();
         assertEquals("0951", contractMap.get("vendorId"));

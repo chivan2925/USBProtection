@@ -1,0 +1,1 @@
+1: allow with-interface none-of { 08:*:* }

@@ -13,12 +13,6 @@ public class MockActiveUserResolver implements ActiveUserResolver {
     @Override
     public ActiveUserInfo resolveCurrentActiveUser() {
         log.debug("[MOCK] Resolving active user from mock session (student01)");
-        return ActiveUserInfo.builder()
-                .username("student01")
-                .uid(1001L)
-                .sessionId("3")
-                .sessionType("wayland")
-                .seat("seat0")
-                .build();
+        return ActiveUserInfo.resolved("student01", 1001L, "3", "wayland", "seat0");
     }
 }

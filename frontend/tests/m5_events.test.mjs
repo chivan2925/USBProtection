@@ -4,7 +4,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { createServer } from 'vite'
 
-// M5 — Week 1 tests for EventHistoryPage and EventTable.
+// M5 — Event History regression and Week 2 resource-state coverage.
 
 let vite
 let Events
@@ -14,6 +14,25 @@ before(async () => {
   vite = await createServer({ server: { middlewareMode: true, ws: false }, appType: 'custom' })
   ;({ Events } = await vite.ssrLoadModule('/src/pages/Events.tsx'))
   ;({ EventTable } = await vite.ssrLoadModule('/src/components/event/EventTable.tsx'))
+})
+
+test('Events loading, unavailable and error states never display fixture rows', () => {
+  for (const [state, expected] of [[{ status: 'loading' }, 'Đang tải dữ liệu'], [{ status: 'unavailable' }, 'Chưa có nguồn dữ liệu'], [{ status: 'error', error: 'TEST_NETWORK_FAILURE' }, 'TEST_NETWORK_FAILURE']]) {
+    const html = renderToStaticMarkup(createElement(Events, { state, refresh() {}, refreshButton: null }))
+    assert.ok(html.includes(expected), expected)
+    for (const value of ['student01', 'employee07', 'Kingston', 'SanDisk', 'Dữ liệu mock', 'Nhật ký hệ thống']) assert.ok(!html.includes(value), value)
+    assert.ok(!html.includes('<tbody><tr>'))
+  }
+})
+
+test('Events ready empty data stays empty, and UNKNOWN is never displayed as BLOCK', () => {
+  const html = renderToStaticMarkup(createElement(Events, { state: { status: 'ready', data: { events: [] } }, refresh() {}, refreshButton: null }))
+  assert.ok(html.includes('Chưa có dữ liệu'))
+  assert.ok(!html.includes('student01'))
+  const unknown = renderToStaticMarkup(createElement(EventTable, { events: [{ ...mockEvents[0], username: 'UNKNOWN', decision: 'unknown' }] }))
+  assert.ok(unknown.includes('badge amber'))
+  assert.ok(unknown.includes('UNKNOWN'))
+  assert.ok(!unknown.includes('>BLOCK<'))
 })
 after(async () => { await vite?.close() })
 

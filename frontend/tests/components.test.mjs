@@ -67,10 +67,11 @@ test('device names are rendered as text, never injected as HTML', () => {
   assert.ok(!html.includes('<img'))
 })
 
-test('event mock renders required columns, users, devices and decisions', () => {
+test('unavailable events preserve columns and filters without mock records', () => {
   const html = renderToStaticMarkup(createElement(Events, { ...props, state: { status: 'unavailable' } }))
-  for (const text of ['Timestamp', 'Endpoint', 'Linux User', 'USB', 'Event', 'Decision', 'LAB-PC-01', 'student01', 'Kingston', 'LAB-PC-02', 'employee07', 'SanDisk', 'ALLOW', 'BLOCK', 'Dữ liệu mock']) assert.ok(html.includes(text), text)
-  for (const label of ['Endpoint', 'Linux Username', 'Device', 'Decision', 'Date']) assert.ok(html.includes(`aria-label="${label}"`), label)
+  for (const text of ['Timestamp', 'Endpoint', 'Linux User', 'USB', 'Event', 'Decision', 'Chưa có nguồn dữ liệu']) assert.ok(html.includes(text), text)
+  for (const text of ['student01', 'employee07', 'Kingston', 'SanDisk', 'Dữ liệu mock']) assert.ok(!html.includes(text), text)
+  for (const label of ['Endpoint', 'Linux Username', 'Device', 'Decision', 'Event Type', 'From Date', 'To Date']) assert.ok(html.includes(`aria-label="${label}"`), label)
 })
 test('ready empty event response does not display mock records', () => {
   const html = renderToStaticMarkup(createElement(Events, props))

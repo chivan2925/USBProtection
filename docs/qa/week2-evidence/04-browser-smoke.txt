@@ -1,0 +1,90 @@
+﻿Command: npm run test:browser
+Environment: Windows; local Chromium; timezone Asia/Bangkok
+Started: 2026-10-13T17:33:14.9154973+07:00
+Base commit: 8b644eafc7aa3651b92e7a6746f4f22a4f1ba65e
+Revision: working tree changes on huy, not committed
+Scope: live unavailable state and explicit demo fixtures; no real Admin API or physical USB
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+npm.cmd : node:internal/modules/run_main:123
+At line:2 char:490
++ ... Path $taskLog -Encoding UTF8; & npm.cmd run test:browser 2>&1 | Tee-O ...
++                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (node:internal/modules/run_main:123:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: {"exceptionId":1,"text":"Uncaught","lineNumber":0,"columnNumber":0,"scriptId":"64","exc
+eption":{"type":"object","subtype":"error","className":"SyntaxError","description":"SyntaxError: Identifier 'select' 
+has already been declared","objectId":"5373175078793874260.3.2"}}
++ actual - expected
+
++ {
++   columnNumber: 0,
++   exception: {
++     className: 'SyntaxError',
++     description: "SyntaxError: Identifier 'select' has already been declared",
++     objectId: '5373175078793874260.3.2',
++     subtype: 'error',
++     type: 'object'
++   },
++   exceptionId: 1,
++   lineNumber: 0,
++   scriptId: '64',
++   text: 'Uncaught'
++ }
+- undefined
+
+    at evaluate (file:///D:/USBProtection/frontend/tests/browser.mjs:66:12)
+    at async file:///D:/USBProtection/frontend/tests/browser.mjs:150:3 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: {
+    exceptionId: 1,
+    text: 'Uncaught',
+    lineNumber: 0,
+    columnNumber: 0,
+    scriptId: '64',
+    exception: {
+      type: 'object',
+      subtype: 'error',
+      className: 'SyntaxError',
+      description: "SyntaxError: Identifier 'select' has already been declared",
+      objectId: '5373175078793874260.3.2'
+    }
+  },
+  expected: undefined,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.20.0
+Exit code: 1
+Finished: 2026-10-13T17:33:20.2385170+07:00
+
+Retry after fixing CDP script variable scope; timezone pinned to Asia/Bangkok
+Started: 2026-10-13T17:34:16.7613327+07:00
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+PASS: routes, 404, refresh toast, filters, login safety, mobile navigation, responsive overflow and browser errors. Screenshots: .artifacts/
+Exit code: 0
+Finished: 2026-10-13T17:34:22.5931710+07:00
+
+Log encoding normalized to UTF-8 from mixed PowerShell UTF-8/UTF-16 output.
+
+Final verification after scoped EventTable mobile layout change
+Command: npm run test:browser
+Started: 2026-10-13T17:40:59.3268013+07:00
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+PASS: routes, 404, refresh toast, filters, login safety, mobile navigation, responsive overflow and browser errors. Screenshots: .artifacts/
+Exit code: 0
+Finished: 2026-10-13T17:41:04.6609405+07:00

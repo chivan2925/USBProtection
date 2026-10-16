@@ -22,58 +22,30 @@ class DesktopNotificationServiceTest {
     }
 
     @Test
-    @DisplayName("Bắn popup cảnh báo khi cắm USB bị BLOCKED - Chạy an toàn không ném Exception")
+    @DisplayName("Bắn popup BLOCKED sử dụng record bất biến")
     void testNotifyBlockedUsbSuccess() {
-        ActiveUserInfo user = ActiveUserInfo.builder()
-                .username("student01")
-                .uid(1001L)
-                .sessionId("3")
-                .sessionType("wayland")
-                .seat("seat0")
-                .build();
-
-        UsbDeviceInfo device = UsbDeviceInfo.builder()
-                .name("Kingston DataTraveler 3.0")
-                .vendorId("0951")
-                .productId("1666")
-                .decision("BLOCKED")
-                .massStorage(true)
-                .build();
-
+        ActiveUserInfo user = ActiveUserInfo.resolved("student01", 1001L, "3", "wayland", "seat0");
+        UsbDeviceInfo device = new UsbDeviceInfo(-1, "block", "0951", "1666", "",
+                "Kingston DataTraveler 3.0", "hash", java.util.List.of("08:06:50"), true, "block id 0951:1666");
         assertDoesNotThrow(() -> notificationService.notifyBlockedUsb(user, device));
     }
 
     @Test
-    @DisplayName("Khi không có active user (UNKNOWN) - Bỏ qua an toàn không lỗi")
+    @DisplayName("Không có active user thì bỏ qua an toàn")
     void testNotifyWithUnknownUser() {
-        ActiveUserInfo unknownUser = ActiveUserInfo.builder()
-                .username("UNKNOWN")
-                .uid(null)
-                .build();
-
-        UsbDeviceInfo device = UsbDeviceInfo.builder()
-                .name("Unknown Flash")
-                .decision("BLOCKED")
-                .build();
-
+        ActiveUserInfo unknownUser = ActiveUserInfo.unknown("no-active-session");
+        UsbDeviceInfo device = new UsbDeviceInfo(-1, "block", "", "", "", "Unknown Flash",
+                "", java.util.List.of("08:06:50"), true, "block id 0000:0000");
         assertDoesNotThrow(() -> notificationService.notifyBlockedUsb(unknownUser, device));
     }
 
     @Test
-    @DisplayName("Khi tắt cấu hình thông báo (notificationEnabled=false) - Không bắn thông báo")
+    @DisplayName("Tắt notification không làm phát popup")
     void testNotificationDisabled() {
         properties.setNotificationEnabled(false);
-
-        ActiveUserInfo user = ActiveUserInfo.builder()
-                .username("student01")
-                .uid(1001L)
-                .build();
-
-        UsbDeviceInfo device = UsbDeviceInfo.builder()
-                .name("Kingston Flash")
-                .decision("BLOCKED")
-                .build();
-
+        ActiveUserInfo user = ActiveUserInfo.resolved("student01", 1001L, "3", "wayland", "seat0");
+        UsbDeviceInfo device = new UsbDeviceInfo(-1, "block", "0951", "1666", "", "Kingston Flash",
+                "hash", java.util.List.of("08:06:50"), true, "block id 0951:1666");
         assertDoesNotThrow(() -> notificationService.notifyBlockedUsb(user, device));
     }
 }

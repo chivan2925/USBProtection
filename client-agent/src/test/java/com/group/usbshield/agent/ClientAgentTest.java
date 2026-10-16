@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class ClientAgentTest {
@@ -53,7 +52,10 @@ class ClientAgentTest {
         assertNotNull(usbGuardGateway, "UsbGuardGateway bean must be present");
         assertNotNull(activeUserResolver, "ActiveUserResolver bean must be present");
 
-        assertTrue(usbGuardGateway.isAvailable(), "UsbGuardGateway mock should report available");
+        // Member 3 context smoke test: verify dependency injection, not USBGuard daemon health.
+        // Member 2 now supplies a real @Primary gateway, which correctly reports unavailable
+        // when USBGuard is not installed (for example, on Windows development machines).
+        // Real USBGuard availability/enforcement belongs to Ubuntu hardware integration tests.
         assertNotNull(activeUserResolver.resolveCurrentActiveUser(), "ActiveUserResolver should resolve mock active user");
     }
 }

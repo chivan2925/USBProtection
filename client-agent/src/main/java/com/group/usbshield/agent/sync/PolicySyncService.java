@@ -64,7 +64,11 @@ public class PolicySyncService {
         }
 
         // Nạp vào USBGuard Engine (qua Adapter của Member 2)
-        usbGuardGateway.applyWhitelist(fingerprints);
+        boolean applied = usbGuardGateway.applyWhitelist(fingerprints);
+        if (!applied) {
+            log.error("Failed to apply policy to USBGuard. Aborting version update and acknowledgment.");
+            return false;
+        }
 
         // Cập nhật version local
         endpointManager.updateAppliedPolicyVersion(newVersion);
