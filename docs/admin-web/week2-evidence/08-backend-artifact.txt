@@ -1,0 +1,3 @@
+Built M1 JAR used by test:live
+E5FAC4E18A055B7C122FCC99F4EE6552B3A2444BCEFEAB450A57953FE94412FC  admin-server/target/usbshield-admin-server.jar
+H2 isolated under frontend/.artifacts/live-uoEOb5; no existing project database used.

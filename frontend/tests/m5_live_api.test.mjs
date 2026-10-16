@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { ApiError, protectionApi } from '../src/services/api.ts'
+import { protectionApi } from '../src/services/api.ts'
+import { ApiError } from '../src/services/http.ts'
 import { getEventQuery } from '../src/utils/eventFilters.ts'
 import { emptyEventFilters } from '../src/types/event.ts'
 
@@ -19,7 +20,7 @@ test('live event adapter uses exact canonical query, session cookie and server p
     const url = new URL(path, 'http://localhost')
     assert.equal(url.pathname, '/api/admin/events')
     assert.deepEqual(Object.fromEntries(url.searchParams), Object.fromEntries(Object.entries(query).map(([key, value]) => [key, String(value)])))
-    assert.equal(options.credentials, 'same-origin')
+    assert.equal(options.credentials, 'include')
     assert.equal(options.cache, 'no-store')
     assert.ok(options.signal instanceof AbortSignal)
     return json(fixture)
@@ -51,12 +52,12 @@ test('cancelled live read makes no HTTP request', async () => {
   })
 })
 
-test('login rotates CSRF, me restores session, logout fetches current token', async () => {
+test('login verifies me and rotates CSRF; restored session supplies the logout token', async () => {
   const requests = []
   let csrf = 0
   await withFetch(async (path, options) => {
     requests.push(path)
-    assert.equal(options.credentials, 'same-origin')
+    assert.equal(options.credentials, 'include')
     if (path === '/api/auth/csrf') return json({ token: `csrf-${++csrf}`, headerName: 'X-CSRF-TOKEN' })
     if (path === '/api/auth/login') {
       assert.equal(options.method, 'POST')
@@ -74,7 +75,7 @@ test('login rotates CSRF, me restores session, logout fetches current token', as
     assert.deepEqual(await protectionApi.getCurrentAdmin(new AbortController().signal), { username: 'qa-admin' })
     await protectionApi.logout()
   })
-  assert.deepEqual(requests, ['/api/auth/csrf', '/api/auth/login', '/api/auth/csrf', '/api/auth/me', '/api/auth/csrf', '/api/auth/logout'])
+  assert.deepEqual(requests, ['/api/auth/csrf', '/api/auth/login', '/api/auth/me', '/api/auth/csrf', '/api/auth/me', '/api/auth/csrf', '/api/auth/logout'])
 })
 
 test('invalid CSRF response prevents credentials from being submitted', async () => {

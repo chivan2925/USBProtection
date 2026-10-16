@@ -4,6 +4,9 @@ import { defineConfig, loadEnv } from 'vite'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const proxy = { '/api': { target: env.USBSHIELD_API_TARGET || 'http://127.0.0.1:8080', changeOrigin: true } }
-  return { plugins: [react()], server: { proxy }, preview: { proxy } }
+  const proxy = { '/api': { target: env.API_PROXY_TARGET || env.USBSHIELD_API_TARGET || 'http://127.0.0.1:8080', changeOrigin: true } }
+  return {
+    plugins: [react()], server: { proxy }, preview: { proxy },
+    ssr: { external: ['react', 'react-dom', 'react/jsx-runtime', 'react/jsx-dev-runtime'] },
+  }
 })

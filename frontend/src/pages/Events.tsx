@@ -8,7 +8,8 @@ import { formatDate as formatDateForEvents, newestFirst } from '../utils/format'
 import type { PageProps } from './types'
 import { useCallback, useEffect } from 'react'
 import { useResource } from '../hooks/useResource'
-import { ApiError, protectionApi } from '../services/api'
+import { protectionApi } from '../services/api'
+import { ApiError } from '../services/http'
 import { getEventQuery } from '../utils/eventFilters'
 
 export function Events({ state, refresh, refreshButton }: PageProps) {

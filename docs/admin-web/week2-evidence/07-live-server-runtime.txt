@@ -1,0 +1,79 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-10-16 14:35:55.755 [main] INFO  c.g.u.s.UsbShieldServerApplication - Starting UsbShieldServerApplication v1.0.0-SNAPSHOT using Java 21.0.9 with PID 9968 (D:\USBProtection\admin-server\target\usbshield-admin-server.jar started by phong in D:\USBProtection)
+2026-10-16 14:35:55.758 [main] DEBUG c.g.u.s.UsbShieldServerApplication - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-10-16 14:35:55.759 [main] INFO  c.g.u.s.UsbShieldServerApplication - No active profile set, falling back to 1 default profile: "default"
+2026-10-16 14:35:57.444 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-16 14:35:57.541 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 89 ms. Found 5 JPA repository interfaces.
+2026-10-16 14:35:58.538 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 58075 (http)
+2026-10-16 14:35:58.561 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-10-16 14:35:58.561 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.30]
+2026-10-16 14:35:58.626 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-10-16 14:35:58.628 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2787 ms
+2026-10-16 14:35:58.907 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-16 14:35:59.031 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-10-16 14:35:59.102 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-10-16 14:35:59.726 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-16 14:35:59.768 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-10-16 14:36:00.105 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:file:D:/USBProtection/frontend/.artifacts/live-uoEOb5/db user=SA
+2026-10-16 14:36:00.105 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-10-16 14:36:00.151 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-10-16 14:36:01.703 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-16 14:36:01.830 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-16 14:36:02.305 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-16 14:36:03.514 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-10-16 14:36:03.592 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-10-16 14:36:04.763 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 58075 (http) with context path '/'
+2026-10-16 14:36:04.792 [main] INFO  c.g.u.s.UsbShieldServerApplication - Started UsbShieldServerApplication in 9.807 seconds (process running for 10.631)
+2026-10-16 14:36:04.872 [http-nio-127.0.0.1-58075-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-16 14:36:04.872 [http-nio-127.0.0.1-58075-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-10-16 14:36:04.875 [http-nio-127.0.0.1-58075-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2026-10-16 14:36:08.492 [http-nio-127.0.0.1-58075-exec-5] INFO  c.g.u.s.a.AgentEventController - [USB EVENT INGESTION] Received event from endpoint: 'EP-c2000c59-dc3b-4b06-a328-f84e7101df80', User: 'm4-synthetic-user' (UID: 1000), Session: 'm4-test-session' (wayland), Event: 'CONNECTED', Decision: 'BLOCKED', Time: '2026-10-16T07:36:08.364Z'
+2026-10-16 14:36:08.492 [http-nio-127.0.0.1-58075-exec-5] INFO  c.g.u.s.a.AgentEventController - [USB DEVICE INFO] VID: 0951, PID: 1666, Serial: 'm4-test', Name: 'M4 Synthetic USB', Hash: 'm4-synthetic-hash'
+2026-10-16 14:36:08.505 [http-nio-127.0.0.1-58075-exec-5] INFO  c.g.u.s.a.AgentEventController - [USB EVENT SAVED] Persisted event ID #1 successfully
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-10-16 14:36:13.156 [main] INFO  c.g.u.s.UsbShieldServerApplication - Starting UsbShieldServerApplication v1.0.0-SNAPSHOT using Java 21.0.9 with PID 23516 (D:\USBProtection\admin-server\target\usbshield-admin-server.jar started by phong in D:\USBProtection)
+2026-10-16 14:36:13.158 [main] DEBUG c.g.u.s.UsbShieldServerApplication - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-10-16 14:36:13.159 [main] INFO  c.g.u.s.UsbShieldServerApplication - No active profile set, falling back to 1 default profile: "default"
+2026-10-16 14:36:14.847 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-16 14:36:14.980 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 117 ms. Found 5 JPA repository interfaces.
+2026-10-16 14:36:16.351 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 58075 (http)
+2026-10-16 14:36:16.371 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-10-16 14:36:16.371 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.30]
+2026-10-16 14:36:16.452 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-10-16 14:36:16.453 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3193 ms
+2026-10-16 14:36:16.762 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-16 14:36:16.924 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-10-16 14:36:17.028 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-10-16 14:36:17.774 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-16 14:36:17.836 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-10-16 14:36:18.197 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:file:D:/USBProtection/frontend/.artifacts/live-uoEOb5/db user=SA
+2026-10-16 14:36:18.202 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-10-16 14:36:18.242 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-10-16 14:36:19.672 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-16 14:36:19.751 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-16 14:36:20.318 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-16 14:36:21.497 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-10-16 14:36:21.575 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-10-16 14:36:22.787 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 58075 (http) with context path '/'
+2026-10-16 14:36:22.820 [main] INFO  c.g.u.s.UsbShieldServerApplication - Started UsbShieldServerApplication in 10.47 seconds (process running for 11.285)
+2026-10-16 14:36:23.015 [http-nio-127.0.0.1-58075-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-16 14:36:23.015 [http-nio-127.0.0.1-58075-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-10-16 14:36:23.018 [http-nio-127.0.0.1-58075-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
