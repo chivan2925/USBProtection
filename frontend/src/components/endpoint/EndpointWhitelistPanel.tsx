@@ -13,6 +13,7 @@ interface Props {
   onAllow?: (endpointId: string) => void
   onRevoke?: (entryId: string) => void
   disabled?: boolean
+  disabledReason?: string
 }
 
 export function EndpointWhitelistPanel({
@@ -21,6 +22,7 @@ export function EndpointWhitelistPanel({
   onAllow,
   onRevoke,
   disabled = false,
+  disabledReason = 'Thao tác Allow/Revoke đang chờ API quản lý whitelist theo endpoint.',
 }: Props): ReactNode {
   const ownEntries = entries.filter(e => e.endpointId === endpointId)
 
@@ -46,6 +48,7 @@ export function EndpointWhitelistPanel({
                 <th scope="col">Tên thiết bị</th>
                 <th scope="col">VID:PID</th>
                 <th scope="col">Serial</th>
+                <th scope="col">Fingerprint</th>
                 <th scope="col">Thêm lúc</th>
                 <th scope="col">Thao tác</th>
               </tr>
@@ -54,8 +57,9 @@ export function EndpointWhitelistPanel({
               {ownEntries.map(entry => (
                 <tr key={entry.id}>
                   <td>{entry.name ?? '—'}</td>
-                  <td className="mono">{entry.vendorId}:{entry.productId}</td>
+                  <td className="mono">{entry.vendorId && entry.productId ? `${entry.vendorId}:${entry.productId}` : '—'}</td>
                   <td className="mono">{entry.serial ?? '—'}</td>
+                  <td className="mono fingerprint-cell">{entry.fingerprintType ? `${entry.fingerprintType}: ${entry.fingerprintValue}` : entry.hash ?? '—'}</td>
                   <td>{formatDate(entry.addedAt)}</td>
                   <td>
                     <button
@@ -85,7 +89,7 @@ export function EndpointWhitelistPanel({
         >
           Allow on this endpoint
         </button>
-        {disabled && <span>Thao tác Allow/Revoke đang chờ API quản lý whitelist theo endpoint.</span>}
+        {disabled && <span>{disabledReason}</span>}
       </div>
     </section>
   )

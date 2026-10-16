@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "oxlint src tests vite.config.ts",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test tests/core.test.mjs tests/components.test.mjs tests/eventFilters.test.mjs tests/m4_endpoints.test.mjs tests/m5_events.test.mjs tests/m5_event_api.test.mjs",
-    "test:browser": "node tests/browser.mjs"
+    "test": "node --experimental-strip-types --test tests/core.test.mjs tests/components.test.mjs tests/eventFilters.test.mjs tests/m4_endpoints.test.mjs tests/m4_admin_api.test.mjs tests/m4_auth.test.mjs tests/m5_events.test.mjs tests/m5_event_api.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "test:live": "node tests/browser.mjs --live"
   },
   "dependencies": {
     "react": "^19.2.8",

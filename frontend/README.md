@@ -1,6 +1,6 @@
 # USBShield — Admin Web
 
-React + Vite + TypeScript. Kết quả rà soát Member 4 ngày 2026-10-11 (Asia/Saigon): **PASS cho UI skeleton/wireframe Week 1**. Xem [báo cáo kiểm tra](../docs/qa/evidence/M4_FRONTEND_VERIFICATION.md).
+React + Vite + TypeScript. M4 Week 2 ngày 2026-10-16 (Asia/Saigon): **PASS tích hợp Admin Web với Spring Security/H2 thật**. Xem [báo cáo kiểm tra](../docs/admin-web/week2-evidence/README.md).
 
 ## Chạy và demo
 
@@ -18,7 +18,7 @@ Mở URL Vite hiển thị (mặc định `http://127.0.0.1:5173/`). Chọn **M�
 - Mở LAB-PC-01: whitelist có Kingston; cùng USB bị chặn trên LAB-PC-02 và whitelist máy này rỗng.
 - Endpoint Detail chỉ hiển thị thiết bị, whitelist và sự kiện của máy đang chọn.
 - Event History có Endpoint, Linux User, USB, Event, Decision và bộ lọc.
-- Refresh tải lại fixture; **Thoát demo** quay về trạng thái chờ API.
+- Refresh tải lại fixture; **Thoát demo** quay về Login và kiểm tra phiên server.
 - Demo chỉ đọc dữ liệu mẫu, không tạo phiên đăng nhập, token hoặc thay đổi quyền USB trên máy thật.
 
 ## Kiểm tra
@@ -28,12 +28,14 @@ npm run build
 npm run lint
 npm test
 npm run test:browser
+npm run test:live
 ```
 
 - `build`: TypeScript và production bundle trong `dist/`.
 - `lint`: Oxlint.
-- `test`: 34 kiểm thử logic/component, gồm tích hợp whitelist vào Endpoint Detail và phân tách policy theo endpoint.
-- `test:browser`: Vite preview tại `127.0.0.1:4173`, Chrome/Edge headless; kiểm tra cả trạng thái chờ API và demo, điều hướng, bộ lọc, refresh, login, desktop/mobile, lỗi runtime và Fetch/XHR. Chạy build trước, giữ cổng 4173 trống.
+- `test`: 57 kiểm thử logic/component/HTTP, gồm auth/CSRF, whitelist A/B và hồi quy Events M5.
+- `test:browser`: Chrome/Edge headless + HTTP fixture; login/session, Allow/Revoke, lỗi/rỗng/network, demo, desktop/mobile và Events.
+- `test:live`: Chrome/Edge + JAR M1 thật, Spring Security/H2 riêng, login/session/CSRF, Allow/Revoke, ACK HTTP có kiểm soát, restart/persistence. Cần Java 21 và build `mvn package -DskipTests` trong `admin-server` trước. Đặt `JAVA_HOME` nếu Java mặc định không phải 21. Cả hai browser tests cần build frontend trước, giữ cổng 4173 trống, chạy từng lệnh lần lượt.
 - Không tải trình duyệt hoặc thêm dependency. Có thể đặt `CHROME_PATH` tới Chrome/Edge đã cài. Tiến trình được tự đóng, profile tạm được xóa; ảnh nằm trong `.artifacts/` (gitignored).
 - Nếu sandbox hạn chế tiến trình con/renderer, kiểm tra trình duyệt có thể báo EPERM hoặc timeout; cần chạy với quyền cho phép Chrome hoạt động.
 
@@ -41,7 +43,7 @@ npm run test:browser
 
 | Đường dẫn | Nội dung |
 | --- | --- |
-| `#/login` | Login wireframe; form chờ API xác thực; liên kết demo |
+| `#/login` | Login thật bằng session/CSRF M1; liên kết demo |
 | `#/dashboard` | Thống kê, hoạt động gần đây, trạng thái endpoints |
 | `#/endpoints` | Tìm kiếm/lọc, hostname, status, user, policy version, last seen |
 | `#/endpoints/:id` | Thông tin máy, whitelist riêng, USB/policy và sự kiện của máy |
@@ -56,20 +58,16 @@ Hash routing hỗ trợ reload và Back/Forward. Tham số `?demo=1` được gi
 
 ## Dữ liệu và API
 
-- `services/api.ts` vẫn trả `BackendUnavailableError`; capabilities xác thực và thay đổi policy đều `false`.
-- `admin-server` hiện có các controller dành cho Agent (enroll, heartbeat, events, policy/ack). Frontend chưa tích hợp Admin API; API Agent không thay thế API quản trị Web.
+- `services/api.ts` gọi Admin API canonical trong `docs/API.md`: auth, endpoints, events và whitelist per-endpoint. Vite proxy `/api` tới `http://127.0.0.1:8080`; có thể đổi `API_PROXY_TARGET` trong `.env.local`.
+- `services/http.ts` gửi cookie cùng origin và CSRF từ `/api/auth/csrf`; không lưu credential trong localStorage. Đăng nhập cần tài khoản M1 cấp ngoài repo.
 - `services/demo.ts` ánh xạ fixture endpoint (`endpointId`, `lastSeen`) sang view model (`id`, `lastSeenAt`), tạo snapshot riêng mỗi lần đọc, gắn endpoint ID cho event và cung cấp whitelist theo endpoint.
-- `services/models.ts` và `types/*` là view model; chưa phải response schema của API quản trị thật.
-- Ngoài demo, Dashboard/Endpoints chờ dữ liệu API và không hiển thị thống kê giả. Event History giữ mock có nhãn khi chưa có dữ liệu API; response thật ở trạng thái ready nhưng rỗng luôn giữ rỗng.
+- `services/models.ts` và `types/*` là view model; adapter/mapper chuyển DTO M1 tại boundary.
+- Ngoài demo, Dashboard/Endpoints/Events chỉ dùng dữ liệu API; rỗng/lỗi không tự chuyển sang mock. Protection/service giữ unknown khi chưa có health API.
 - `useResource` xử lý loading/error/unavailable, hủy đọc cũ và tránh cập nhật sau unmount.
-- Allow/Revoke trong Endpoint Detail bị vô hiệu hóa và có giải thích chờ API. Panel cũng khóa nút nếu thiếu callback, tránh thao tác không có tác dụng.
+- Allow chọn USB có HASH và `usbDeviceId` từ events endpoint; POST `{usbDeviceId}`. Revoke dùng entryId; refetch desired/applied sau success. Allow trùng idempotent. Demo luôn khóa mutation.
 
-## Phần cần làm sau Week 1
+## Phần cần môi trường Ubuntu
 
-1. Chốt Admin routes/schema và ánh xạ response, bao gồm whitelist gắn endpoint ID.
-2. Tích hợp auth/session, guard/logout và quyền admin thật.
-3. Tích hợp đọc endpoints/events, Allow/Revoke theo endpoint; xử lý xác nhận, lỗi, policy version và trạng thái sync.
-4. Chỉ bật capabilities khi API tương ứng hoạt động; giữ demo tách biệt và có nhãn.
-5. Kiểm thử Agent → Server → Web cùng USB thật trên Ubuntu.
+Agent M3 apply/ACK, USBGuard M2, USB vật lý và native notification còn `NOT EXECUTED`. ACK HTTP và events trong `test:live` là đầu vào tổng hợp cho backend thật, không phải evidence hardware.
 
-Frontend PASS không xác nhận enforcement USB, đăng nhập thật hoặc toàn bộ Week 1 system gate.
+Hướng dẫn chạy/handoff: [M4 integration](../docs/admin-web/WEEK2_ADMIN_API_INTEGRATION.md). Frontend/backend PASS chưa đóng Week 2 toàn nhóm.

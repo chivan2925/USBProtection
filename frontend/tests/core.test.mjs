@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { count, formatDate, matches, newestFirst, paginate } from '../src/utils/format.ts'
-import { BackendUnavailableError, capabilities, protectionApi } from '../src/services/api.ts'
+import { capabilities, protectionApi } from '../src/services/api.ts'
+import { ApiError } from '../src/services/http.ts'
 
 test('unknown statistics are not represented as zero or protected', () => {
   assert.equal(count(undefined), '—')
@@ -36,18 +37,17 @@ test('pagination clamps stale page numbers after filtering and handles empty res
   assert.deepEqual(paginate([], 99), { page: 1, totalPages: 1, rows: [] })
 })
 
-test('unavailable backend rejects reads and mutations without any HTTP calls', async () => {
+test('live adapter attempts HTTP and reports unavailable network without mock data', async () => {
   const originalFetch = globalThis.fetch
   let requests = 0
   globalThis.fetch = async () => { requests++; throw new Error('Unexpected request') }
   try {
-    assert.ok(Object.values(capabilities).every(value => value === false))
-    await assert.rejects(protectionApi.getSnapshot(new AbortController().signal), BackendUnavailableError)
-    for (const action of ['allow', 'block', 'revoke']) {
-      await assert.rejects(protectionApi.changeDevicePolicy('test-only', action), BackendUnavailableError)
-    }
-    await assert.rejects(protectionApi.login('test-only', 'not-a-real-password'), BackendUnavailableError)
-    assert.equal(requests, 0)
+    assert.equal(capabilities.authentication, true)
+    assert.equal(capabilities.block, false)
+    assert.equal(capabilities.settings, false)
+    await assert.rejects(protectionApi.getSnapshot(new AbortController().signal), ApiError)
+    await assert.rejects(protectionApi.login('test-only', 'not-a-real-password'), ApiError)
+    assert.equal(requests, 2)
   } finally { globalThis.fetch = originalFetch }
 })
 

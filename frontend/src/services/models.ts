@@ -1,10 +1,12 @@
-﻿// View models for the frontend. These are not an existing backend API contract.
+// Frontend view models; services/mappers translates backend DTOs into these fields.
 export type DeviceStatus = 'allowed' | 'blocked' | 'detected' | 'disconnected'
 import type { UsbEvent } from '../types/event'
 import type { WhitelistEntry } from '../types/policy'
 export type { UsbEvent, EventType } from '../types/event'
 export interface Device {
   id: string
+  usbDeviceId?: number
+  hash?: string
   name: string
   vendorId?: string
   productId?: string
@@ -20,6 +22,7 @@ export interface Endpoint {
   id: string
   name: string
   hostname?: string
+  ipAddress?: string
   operatingSystem?: string
   status: 'online' | 'offline' | 'unknown'
   currentUser?: string
@@ -36,6 +39,8 @@ export interface Overview {
   recentEvents: number | null
   onlineEndpoints: number | null
   offlineEndpoints: number | null
+  unknownEndpoints?: number
+  blockedToday?: number
 }
 export interface Snapshot {
   overview: Overview

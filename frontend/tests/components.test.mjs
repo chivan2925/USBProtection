@@ -1,4 +1,4 @@
-﻿import assert from 'node:assert/strict'
+import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -25,19 +25,20 @@ const devices = [
   { id: '3', name: 'DETECTED_TEST_DEVICE', status: 'detected', endpointId: 'a' },
 ]
 const props = {
-  state: { status: 'ready', data: { devices, endpoints: [{ id: 'a', name: 'TEST_ENDPOINT', status: 'online' }], events: [] } },
+  state: { status: 'ready', data: { devices, whitelist: [{ id: 'rule-a', endpointId: 'a', name: 'WHITELIST_RULE_DEVICE', vendorId: '0951', productId: '1666', addedAt: '2026-10-14T10:00:00Z' }], endpoints: [{ id: 'a', name: 'TEST_ENDPOINT', status: 'online' }], events: [] } },
   refresh() {}, refreshButton: null,
 }
-test('whitelist and blacklist isolate device policy states', () => {
+test('whitelist uses rules rather than event ALLOWED states; blocked list uses observations', () => {
   const whitelist = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'whitelist' }))
   const blocked = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'blocked' }))
-  assert.ok(whitelist.includes('ALLOWED_TEST_DEVICE'))
+  assert.ok(whitelist.includes('WHITELIST_RULE_DEVICE'))
+  assert.ok(!whitelist.includes('ALLOWED_TEST_DEVICE'))
   assert.ok(!whitelist.includes('BLOCKED_TEST_DEVICE'))
   assert.ok(!whitelist.includes('DETECTED_TEST_DEVICE'))
   assert.ok(blocked.includes('BLOCKED_TEST_DEVICE'))
   assert.ok(!blocked.includes('ALLOWED_TEST_DEVICE'))
   assert.ok(!blocked.includes('DETECTED_TEST_DEVICE'))
-  assert.match(whitelist, /disabled=""[^>]*>Xóa khỏi whitelist/)
+  assert.ok(whitelist.includes('href="#/endpoints/a"'))
 })
 test('endpoint detail does not display devices belonging to another endpoint', () => {
   const html = renderToStaticMarkup(createElement(EndpointDetail, { ...props, endpointId: 'a' }))

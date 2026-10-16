@@ -28,7 +28,7 @@ export function useResource<T>(loader: (signal: AbortSignal) => Promise<T>) {
         setState({ status: 'unavailable' })
         return 'unavailable' as const
       }
-      setState({ status: 'error', error: 'Không thể tải dữ liệu. Vui lòng thử lại hoặc kiểm tra kết nối với máy chủ.' })
+      setState({ status: 'error', error: error instanceof Error ? error.message : 'Không thể tải dữ liệu. Vui lòng kiểm tra kết nối với máy chủ.' })
       return 'error' as const
     }
   }, [loader])
