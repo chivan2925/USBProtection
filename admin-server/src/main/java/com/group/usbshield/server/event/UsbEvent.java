@@ -27,6 +27,9 @@ public class UsbEvent {
 
     private Long usbDeviceId;
 
+    @Column(length = 150)
+    private String hostname;
+
     @Column(nullable = false, length = 100)
     @Builder.Default
     private String linuxUsername = "UNKNOWN";

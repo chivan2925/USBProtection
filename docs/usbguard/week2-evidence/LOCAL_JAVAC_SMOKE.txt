@@ -1,0 +1,31 @@
+M2 Week 2 offline verification — 2026-10-14
+Environment: Debian 13, OpenJDK 21.0.12; no Maven binary or Spring/JUnit dependency cache available.
+
+Command: javac --release 21 [M2-owned pure Java models, parsers, gateway,
+  policy sync, logind/session, notification helper, event enrichment sources;
+  temporary Spring @Component stub used ONLY to compile without Maven]
+Result: PASS (exit code 0).
+
+Command: javac --release 21 Smoke.java && java Smoke
+Result: PASS 30 Java smoke assertions
+Cases: storage/mouse detection; base rule; PresenceChanged not PolicyChanged; rule
+identity/sanitization; gateway health and device list; add/reapply/revoke; base
+preservation; unique user/ambiguous/no user; event enrichment/decision; popup
+eligibility, cooldown, UNKNOWN, Remove, ALLOWED and HID exclusions.
+
+This DOES NOT constitute full Maven/JUnit or real Ubuntu/USBGuard/hardware evidence.
+Run client-agent Maven tests and Ubuntu manual tests separately before closing Week 2.
+
+Further offline verification:
+- 21 new source-level @Test methods run via minimal local JUnit API substitutes: PASS.
+- 11 existing source-level @Test methods (UsbGuardEventParser, UsbDeviceInfo,
+  ActiveUserInfo, LinuxActiveUserResolver) run via the same substitutes: PASS.
+- 8 simulated full USBGuard watch stream assertions (Insert, PolicyChanged,
+  PolicyApplied, Remove, HID, user attribution, notification dedup): PASS.
+- Unix-domain socket helper/data protocol test: PASS in 5 separate runs,
+  including target UID check and skip other UID; notify-send/graphical D-Bus
+  was NOT exercised. An initial startup race was reproduced and mitigated
+  with bounded retries; all 5 post-fix runs passed.
+All offline substitutes and harness code live outside the deliverable patch.
+Full Spring/JUnit/Maven, hardware enforcement, GUI notification and service
+permissions remain NOT EXECUTED in this environment.

@@ -1,0 +1,24 @@
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.agentapi.AgentEventContractTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.633 s -- in com.group.usbshield.server.agentapi.AgentEventContractTest
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.agentapi.AgentHttpIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 35.37 s -- in com.group.usbshield.server.agentapi.AgentHttpIntegrationTest
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.PolicyConsumerContractTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.14 s -- in com.group.usbshield.server.PolicyConsumerContractTest
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.UsbShieldServerApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.485 s -- in com.group.usbshield.server.UsbShieldServerApplicationTests
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.Week2ExistingH2Test
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.807 s -- in com.group.usbshield.server.Week2ExistingH2Test
+-------------------------------------------------------------------------------
+Test set: com.group.usbshield.server.Week2ServerIntegrationTest
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.41 s -- in com.group.usbshield.server.Week2ServerIntegrationTest

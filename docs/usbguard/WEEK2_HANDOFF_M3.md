@@ -1,0 +1,8 @@
+# Member 2 → Member 3 — Week 2 integration contract
+
+- `UsbGuardGateway`/`AdaptiveUsbGuardGateway`: M2 giữ interface `boolean applyWhitelist(List<String>)` để `sync/PolicySyncService.java` M3 không đổi signature. `false` = failure, M3 **không được ACK**. `listDevices()`, `listRules()`, `health()` cung cấp inspection.
+- `UsbGuardCliGateway` và `UsbGuardPolicySynchronizer`: rules được gắn `label "usbshield-managed"`, base rule bắt buộc còn tồn tại, không xóa foreign rules. DTO typed `DeviceFingerprint` hỗ trợ hash hoặc VID/PID+serial; M3 cần xác nhận `fingerprintValue` trả từ Server định dạng hash/rule được parser hỗ trợ.
+- M2 `UsbGuardEventListener` gọi `EventSenderService.sendPayload(UsbEventPayload)` hiện có, không chỉnh file M3. **M3 phải tắt `EventSimulationRunner` trong live/hardware profile**, nếu không dữ liệu giả sẽ lẫn với dữ liệu USB thật.
+- Notification M2: `ClientNotificationPublisher` với trạng thái `DELIVERED/SKIPPED_NO_GUI/FAILED`, implementation `UnixSocketNotificationPublisher`; M2 helper `DesktopNotificationClient` và `DesktopNotificationClientMain` chờ M3 tạo `/run/usbshield-notifier` có ACL phù hợp và khởi chạy helper dưới đúng GUI UID. Path `<UID>.sock` phải thuộc đúng UID đó; lập peer-auth/permission test trước khi tuyên bố notification production-ready. Cần `libnotify-bin` và session D-Bus.
+- **M3 own** `PolicySyncService` apply/ACK/error handling, heartbeat, auth, outbox, credentials, systemd, `.deb`, XDG autostart. Patch M2 không chỉnh các file này.
+- Phần endpoint-to-USBGuard policy sync phải chứng minh false ACK bị chặn, M1 lưu đúng appliedPolicyVersion, M2 thực sự add/revoke và USBGuard persists sau restart.

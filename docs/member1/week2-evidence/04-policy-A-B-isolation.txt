@@ -1,0 +1,1 @@
+PASS: real HTTP allow/duplicate/revoke/idempotent revoke; A versions 1->2->3; B stays 1/empty. CSRF missing 403.

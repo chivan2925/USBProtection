@@ -1,0 +1,44 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-10-16 14:00:25.148 [main] INFO  c.g.u.s.UsbShieldServerApplication - Starting UsbShieldServerApplication v1.0.0-SNAPSHOT using Java 22.0.2 with PID 34092 (D:\USBProtection\admin-server\target\usbshield-admin-server.jar started by DELL in D:\USBProtection\admin-server)
+2026-10-16 14:00:25.160 [main] DEBUG c.g.u.s.UsbShieldServerApplication - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-10-16 14:00:25.163 [main] INFO  c.g.u.s.UsbShieldServerApplication - No active profile set, falling back to 1 default profile: "default"
+2026-10-16 14:00:31.519 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-16 14:00:31.929 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 358 ms. Found 5 JPA repository interfaces.
+2026-10-16 14:00:36.069 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 18082 (http)
+2026-10-16 14:00:36.143 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-10-16 14:00:36.148 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.30]
+2026-10-16 14:00:36.375 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-10-16 14:00:36.382 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 10943 ms
+2026-10-16 14:00:37.478 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-16 14:00:37.893 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-10-16 14:00:38.064 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-10-16 14:00:39.845 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-16 14:00:40.044 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-10-16 14:00:41.521 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:file:D:/USBProtection/admin-server/target/week2-f43f5d8a028341b2985953ad2666c4de/server-db user=SA
+2026-10-16 14:00:41.530 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-10-16 14:00:41.686 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-10-16 14:00:46.976 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-16 14:00:47.297 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-16 14:00:49.414 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-10-16 14:00:53.651 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-10-16 14:00:53.876 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-10-16 14:00:56.901 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 18082 (http) with context path '/'
+2026-10-16 14:00:57.066 [main] INFO  c.g.u.s.UsbShieldServerApplication - Started UsbShieldServerApplication in 33.453 seconds (process running for 34.901)
+2026-10-16 14:00:57.832 [http-nio-127.0.0.1-18082-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-16 14:00:57.832 [http-nio-127.0.0.1-18082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-10-16 14:00:57.840 [http-nio-127.0.0.1-18082-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-10-16 14:01:01.556 [http-nio-127.0.0.1-18082-exec-1] INFO  o.s.api.AbstractOpenApiResource - Init duration for springdoc-openapi is: 3040 ms
+2026-10-16 14:01:02.081 [http-nio-127.0.0.1-18082-exec-2] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2026-10-16 14:01:02.081 [http-nio-127.0.0.1-18082-exec-1] WARN  o.s.w.s.m.s.DefaultHandlerExceptionResolver - Resolved [org.springframework.web.context.request.async.AsyncRequestNotUsableException: ServletOutputStream failed to write: java.io.IOException: An established connection was aborted by the software in your host machine]
+2026-10-16 14:01:06.435 [http-nio-127.0.0.1-18082-exec-2] INFO  c.g.u.s.a.AgentEventController - [USB EVENT INGESTION] Received event from endpoint: 'EP-3b412643-a197-46bb-8a0d-466c4536e511', User: 'usbdev' (UID: 1000), Session: '21' (wayland), Event: 'CONNECTED', Decision: 'ALLOWED', Time: '2026-09-28T07:10:16Z'
+2026-10-16 14:01:06.435 [http-nio-127.0.0.1-18082-exec-2] INFO  c.g.u.s.a.AgentEventController - [USB DEVICE INFO] VID: 093a, PID: 2510, Serial: '', Name: 'USB Optical Mouse', Hash: 'L46bZEAKg59EA+puzjHMh8D4jLliJqK4sYxKSd/DRz8='
+2026-10-16 14:01:06.462 [http-nio-127.0.0.1-18082-exec-2] INFO  c.g.u.s.a.AgentEventController - [USB EVENT SAVED] Persisted event ID #1 successfully

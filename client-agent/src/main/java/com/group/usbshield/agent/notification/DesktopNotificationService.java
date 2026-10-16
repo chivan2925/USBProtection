@@ -2,76 +2,42 @@ package com.group.usbshield.agent.notification;
 
 import com.group.usbshield.agent.config.AgentProperties;
 import com.group.usbshield.agent.session.ActiveUserInfo;
-import com.group.usbshield.agent.usbguard.UsbDeviceInfo;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.group.usbshield.agent.usbguard.*;
+import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.Instant;
+import java.util.concurrent.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-@Slf4j
+/**
+ * Member 2 — Week 2: non-blocking, bounded notification dispatch.
+ * No shell injection or sudo; failures cannot prevent security event delivery.
+ */
 @Service
-@RequiredArgsConstructor
 public class DesktopNotificationService {
-
     private final AgentProperties properties;
+    private final ClientNotificationPublisher publisher;
+    private final BlockNotificationPolicy policy=new BlockNotificationPolicy();
+    private final ThreadPoolExecutor queue = new ThreadPoolExecutor(1,1,0,TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(128),task->{
+                Thread t=new Thread(task,"usbshield-notification");t.setDaemon(true);return t;
+            },new ThreadPoolExecutor.DiscardPolicy());
 
-    /**
-     * Bắn popup/notification lên màn hình desktop của người dùng khi cắm USB bị chặn.
-     */
-    public void notifyBlockedUsb(ActiveUserInfo activeUser, UsbDeviceInfo deviceInfo) {
-        if (!properties.isNotificationEnabled()) {
-            log.debug("[DesktopNotification] Notifications are disabled in configuration.");
-            return;
-        }
-
-        String deviceName = (deviceInfo != null && deviceInfo.getName() != null && !deviceInfo.getName().isBlank())
-                ? deviceInfo.getName()
-                : "USB Mass Storage";
-
-        String title = "USBShield - Cảnh báo bảo mật";
-        String message = String.format("Thiết bị '%s' đã bị CHẶN theo chính sách an toàn thông tin của hệ thống!", deviceName);
-
-        String os = System.getProperty("os.name", "").toLowerCase();
-        if (!os.contains("linux")) {
-            log.info("[DesktopNotification] [SIMULATION - NON-LINUX] Popup notification: [{}] {}", title, message);
-            return;
-        }
-
-        if (activeUser == null || activeUser.getUsername() == null || "UNKNOWN".equalsIgnoreCase(activeUser.getUsername()) || activeUser.getUid() == null) {
-            log.warn("[DesktopNotification] Cannot display popup: No active graphical user resolved.");
-            return;
-        }
-
-        String username = activeUser.getUsername();
-        Long uid = activeUser.getUid();
-        log.info("[DesktopNotification] Sending desktop notification popup to active user '{}' (UID={})...", username, uid);
-
-        try {
-            // Lệnh chạy notify-send dưới session D-Bus của user trên Ubuntu (Wayland / X11)
-            // Cú pháp: sudo -n -u <username> DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/<uid>/bus notify-send ...
-            String busAddress = "DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/" + uid + "/bus";
-            List<String> cmd = List.of(
-                    "bash", "-c",
-                    String.format(
-                            "sudo -n -u %s %s notify-send -u critical -i drive-removable-media -a 'USBShield' '%s' '%s' || %s notify-send -u critical -i drive-removable-media -a 'USBShield' '%s' '%s'",
-                            username, busAddress, title, message,
-                            busAddress, title, message
-                    )
-            );
-
-            Process process = new ProcessBuilder(cmd).start();
-            boolean finished = process.waitFor(3, TimeUnit.SECONDS);
-
-            if (finished && process.exitValue() == 0) {
-                log.info("[DesktopNotification] Popup notification displayed successfully for user '{}'.", username);
-            } else {
-                log.warn("[DesktopNotification] notify-send process completed with exit code: {}", finished ? process.exitValue() : "TIMEOUT");
-            }
-        } catch (Exception e) {
-            log.error("[DesktopNotification] Failed to send desktop popup notification: {}", e.getMessage());
-        }
+    @Autowired public DesktopNotificationService(AgentProperties properties,ClientNotificationPublisher publisher) {
+        this.properties=properties;this.publisher=publisher;
     }
+    /** Compatibility constructor for existing M2 unit tests. */
+    public DesktopNotificationService(AgentProperties properties) {
+        this(properties,new UnixSocketNotificationPublisher());
+    }
+    public void notifyBlockedUsb(ActiveUserInfo user,UsbDeviceInfo device) {
+        if(!properties.isNotificationEnabled()||device==null)return;
+        policy.classify(new UsbGuardPresenceEvent(UsbGuardPresenceEvent.PresenceType.INSERT,device.state(),device),user,Instant.now())
+                .ifPresent(notice->queue.execute(()->{
+                    try {publisher.publish(notice);}catch(RuntimeException ignored){
+                        // Never affect USBGuard policy or M3 event transport.
+                    }
+                }));
+    }
+    @PreDestroy public void stop() {queue.shutdownNow();}
 }

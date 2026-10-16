@@ -27,15 +27,15 @@ public class AgentEventController {
     private final UsbEventRepository usbEventRepository;
     private final UsbDeviceRepository usbDeviceRepository;
 
+    @org.springframework.transaction.annotation.Transactional
     @PostMapping
     @Operation(summary = "Tiếp nhận USB Event từ Client Agent", description = "Lưu trữ sự kiện cắm/rút USB cùng thông tin Active User và quyết định ALLOWED/BLOCKED")
     public ResponseEntity<Map<String, Object>> handleUsbEvent(
             @Valid @RequestBody AgentEventRequest request,
-            @RequestHeader(value = "X-Endpoint-Id", required = false) String headerEndpointId) {
+            java.security.Principal principal) {
 
-        String effectiveEndpointId = (request.getEndpointId() != null && !request.getEndpointId().isBlank())
-                ? request.getEndpointId()
-                : headerEndpointId;
+        String effectiveEndpointId = principal.getName();
+        AgentCredentialService.bind(effectiveEndpointId, request.getEndpointId());
 
         log.info("[USB EVENT INGESTION] Received event from endpoint: '{}', User: '{}' (UID: {}), Session: '{}' ({}), Event: '{}', Decision: '{}', Time: '{}'",
                 effectiveEndpointId,
@@ -74,10 +74,11 @@ public class AgentEventController {
 
         UsbEvent usbEvent = UsbEvent.builder()
                 .endpointId(effectiveEndpointId)
+                .hostname(request.getHostname())
                 .usbDeviceId(usbDeviceId)
                 .linuxUsername(request.getLinuxUsername())
-                .linuxUid(request.getLinuxUid())
-                .sessionId(request.getSessionId())
+                .linuxUid("UNKNOWN".equals(request.getLinuxUsername()) ? null : request.getLinuxUid())
+                .sessionId("UNKNOWN".equals(request.getLinuxUsername()) ? null : request.getSessionId())
                 .sessionType(request.getSessionType())
                 .seat(request.getSeat())
                 .eventType(request.getEventType())

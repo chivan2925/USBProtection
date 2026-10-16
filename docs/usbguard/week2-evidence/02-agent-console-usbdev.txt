@@ -1,0 +1,73 @@
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------< [0;36mcom.group.usbshield:client-agent[0;1m >------------------[m
+[[1;34mINFO[m] [1mBuilding USBShield Client Agent 1.0.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m>>> [0;32mspring-boot-maven-plugin:3.3.4:run[m [1m(default-cli)[0;1m > [0;1mtest-compile[m @ [36mclient-agent[0;1m >>>[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:resources[m [1m(default-resources)[m @ [36mclient-agent[0;1m ---[m
+[[1;34mINFO[m] Copying 1 resource from src/main/resources to target/classes
+[[1;34mINFO[m] Copying 0 resource from src/main/resources to target/classes
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.13.0:compile[m [1m(default-compile)[m @ [36mclient-agent[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:3.3.1:testResources[m [1m(default-testResources)[m @ [36mclient-agent[0;1m ---[m
+[[1;34mINFO[m] skip non existing resourceDirectory /home/usbdev/USBProtection/client-agent/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.13.0:testCompile[m [1m(default-testCompile)[m @ [36mclient-agent[0;1m ---[m
+[[1;34mINFO[m] Nothing to compile - all classes are up to date.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m<<< [0;32mspring-boot-maven-plugin:3.3.4:run[m [1m(default-cli)[0;1m < [0;1mtest-compile[m @ [36mclient-agent[0;1m <<<[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mspring-boot-maven-plugin:3.3.4:run[m [1m(default-cli)[m @ [36mclient-agent[0;1m ---[m
+[[1;34mINFO[m] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-10-16T11:00:32.646+07:00  INFO 22109 --- [usbshield-agent] [           main] c.g.u.agent.ClientAgentApplication       : Starting ClientAgentApplication using Java 21.0.12.1 with PID 22109 (/home/usbdev/USBProtection/client-agent/target/classes started by usbdev in /home/usbdev/USBProtection/client-agent)
+2026-10-16T11:00:32.648+07:00  INFO 22109 --- [usbshield-agent] [           main] c.g.u.agent.ClientAgentApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-10-16T11:00:33.102+07:00  INFO 22109 --- [usbshield-agent] [           main] c.g.u.agent.endpoint.EndpointManager     : Endpoint credential storage configured at: ./data/endpoint.json
+2026-10-16T11:00:33.103+07:00  INFO 22109 --- [usbshield-agent] [           main] c.g.u.agent.endpoint.EndpointManager     : No existing endpoint credentials found. Ready for enrollment.
+2026-10-16T11:00:33.105+07:00  INFO 22109 --- [usbshield-agent] [           main] c.g.u.agent.outbox.OutboxSpoolService    : Outbox Spool directory initialized at: ./data/spool
+2026-10-16T11:00:33.177+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-16T11:00:33.179+07:00  INFO 22109 --- [usbshield-agent] [           main] c.g.u.agent.ClientAgentApplication       : Started ClientAgentApplication in 0.774 seconds (process running for 0.957)
+2026-10-16T11:00:33.179+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:8080 for host: usbshield-lab
+2026-10-16T11:00:33.238+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Enrollment failed (Server may be offline): I/O error on POST request for "http://localhost:8080/api/agent/enroll": null
+2026-10-16T11:00:33.238+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Enrollment could not be completed at this time (Admin Server unreachable).
+2026-10-16T11:00:38.239+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-16T11:00:38.239+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:8080 for host: usbshield-lab
+2026-10-16T11:00:38.242+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Enrollment failed (Server may be offline): I/O error on POST request for "http://localhost:8080/api/agent/enroll": null
+2026-10-16T11:00:38.243+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Enrollment could not be completed at this time (Admin Server unreachable).
+2026-10-16T11:00:43.182+07:00  INFO 22109 --- [usbshield-agent] [mulation-worker] c.g.u.agent.event.EventSimulationRunner  : [SIMULATION] Emulating a physical USB Flash Disk insertion event...
+2026-10-16T11:00:43.223+07:00  INFO 22109 --- [usbshield-agent] [mulation-worker] c.g.u.agent.event.EventSenderService     : [USB-EVENT] Detected USB CONNECTED by user 'usbdev' ({serialNumber=00187D0F55B6EC21391910A2, productId=1666, vendorId=0951, deviceName=Kingston DataTraveler 3.0, deviceHash=c0ffee1234567890abcdef}) -> Decision: BLOCKED
+2026-10-16T11:00:43.235+07:00  WARN 22109 --- [usbshield-agent] [mulation-worker] c.g.u.agent.outbox.OutboxSpoolService    : [OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: event_1792123243223_39cd66eb.json
+2026-10-16T11:00:43.243+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-16T11:00:43.243+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:8080 for host: usbshield-lab
+2026-10-16T11:00:43.245+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Enrollment failed (Server may be offline): I/O error on POST request for "http://localhost:8080/api/agent/enroll": null
+2026-10-16T11:00:43.245+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Enrollment could not be completed at this time (Admin Server unreachable).
+2026-10-16T11:00:48.246+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-16T11:00:48.246+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:8080 for host: usbshield-lab
+2026-10-16T11:00:48.249+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Enrollment failed (Server may be offline): I/O error on POST request for "http://localhost:8080/api/agent/enroll": null
+2026-10-16T11:00:48.249+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Enrollment could not be completed at this time (Admin Server unreachable).
+2026-10-16T11:00:53.250+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-16T11:00:53.250+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:8080 for host: usbshield-lab
+2026-10-16T11:00:53.253+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Enrollment failed (Server may be offline): I/O error on POST request for "http://localhost:8080/api/agent/enroll": null
+2026-10-16T11:00:53.253+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Enrollment could not be completed at this time (Admin Server unreachable).
+2026-10-16T11:00:58.255+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-16T11:00:58.256+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:8080 for host: usbshield-lab
+2026-10-16T11:00:58.265+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Enrollment failed (Server may be offline): I/O error on POST request for "http://localhost:8080/api/agent/enroll": null
+2026-10-16T11:00:58.266+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Enrollment could not be completed at this time (Admin Server unreachable).
+2026-10-16T11:01:03.266+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Attempting to enroll this endpoint with Admin Server...
+2026-10-16T11:01:03.267+07:00  INFO 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Sending enrollment request to http://localhost:8080 for host: usbshield-lab
+2026-10-16T11:01:03.270+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.sync.AdminServerClient       : Enrollment failed (Server may be offline): I/O error on POST request for "http://localhost:8080/api/agent/enroll": null
+2026-10-16T11:01:03.270+07:00  WARN 22109 --- [usbshield-agent] [   scheduling-1] c.g.u.agent.endpoint.EndpointManager     : Enrollment could not be completed at this time (Admin Server unreachable).
