@@ -93,7 +93,7 @@ try {
   }
   await navigate('/events', 'Lịch sử sự kiện')
   assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('thead th'), th => th.textContent)`), ['Timestamp', 'Endpoint', 'Linux User', 'USB', 'Event', 'Decision'])
-  await until(() => evaluate(`document.body.innerText.includes('Chưa có nguồn dữ liệu')`), 'live Events unavailable state')
+  await until(() => evaluate(`document.body.innerText.includes('Dữ liệu tạm thời không khả dụng') || document.body.innerText.includes('Cần đăng nhập quản trị')`), 'live Events error/auth state')
   assert.equal(await evaluate(`document.querySelectorAll('tbody tr').length`), 0)
   assert.equal(await evaluate(`document.body.innerText.includes('student01') || document.body.innerText.includes('employee07') || document.body.innerText.includes('Dữ liệu mock')`), false)
   await screenshot('events-desktop.png')
@@ -106,7 +106,7 @@ try {
   await navigate('/endpoints/%ZZ', 'Không tìm thấy trang')
   await evaluate(`location.hash = '/login'`)
   await until(() => evaluate(`!!document.querySelector('.login-page')`), 'login')
-  assert.equal(await evaluate(`document.querySelector('button[type="submit"]').disabled && document.querySelector('#password').disabled`), true)
+  assert.equal(await evaluate(`document.querySelector('button[type="submit"]').disabled || document.querySelector('#password').disabled`), false)
   assert.equal(await evaluate(`localStorage.length + sessionStorage.length`), 0)
   await screenshot('login-desktop.png')
   await cdp('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 1, mobile: true })
@@ -122,6 +122,7 @@ try {
   await navigate('/dashboard', 'Tổng quan bảo vệ')
   await screenshot('dashboard-mobile.png')
   await cdp('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1050, deviceScaleFactor: 1, mobile: false })
+  const requestsBeforeDemo = requests.length
   await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/?demo=1#/dashboard' })
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '2'`), 'demo snapshot load')
   assert.equal(await evaluate(`document.body.innerText.includes('Chế độ demo · Dữ liệu mock')`), true)
@@ -184,7 +185,8 @@ try {
   await evaluate(`Array.from(document.querySelectorAll('a')).find(link => link.textContent === 'Thoát demo').click()`)
   await until(() => evaluate(`!location.search && document.body.innerText.includes('Đang chờ kết nối backend')`), 'exit demo')
   assert.deepEqual(errors, [], 'No browser runtime or console errors')
-  assert.deepEqual(requests, [], 'No invented API requests')
+  assert.equal(requests.length, requestsBeforeDemo, 'Explicit demo does not call the Admin API')
+  assert.ok(requests.every(url => { const path = new URL(url).pathname; return path === '/api/auth/me' || path === '/api/admin/events' }), 'Unavailable smoke only makes canonical read requests')
   console.log('PASS: routes, 404, refresh toast, filters, login safety, mobile navigation, responsive overflow and browser errors. Screenshots: .artifacts/')
   await cdp('Browser.close')
 } finally {

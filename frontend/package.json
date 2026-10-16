@@ -8,8 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test tests/core.test.mjs tests/components.test.mjs tests/eventFilters.test.mjs tests/m4_endpoints.test.mjs tests/m5_events.test.mjs tests/m5_event_api.test.mjs",
-    "test:browser": "node tests/browser.mjs"
+    "test": "node --experimental-strip-types --test tests/core.test.mjs tests/components.test.mjs tests/eventFilters.test.mjs tests/m4_endpoints.test.mjs tests/m5_events.test.mjs tests/m5_event_api.test.mjs tests/m5_live_api.test.mjs",
+    "test:browser": "node tests/browser.mjs",
+    "test:browser:live": "node tests/browser-live.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",

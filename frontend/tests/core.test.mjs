@@ -36,17 +36,18 @@ test('pagination clamps stale page numbers after filtering and handles empty res
   assert.deepEqual(paginate([], 99), { page: 1, totalPages: 1, rows: [] })
 })
 
-test('unavailable backend rejects reads and mutations without any HTTP calls', async () => {
+test('unsupported snapshot and management actions remain unavailable without HTTP calls', async () => {
   const originalFetch = globalThis.fetch
   let requests = 0
   globalThis.fetch = async () => { requests++; throw new Error('Unexpected request') }
   try {
-    assert.ok(Object.values(capabilities).every(value => value === false))
+    assert.equal(capabilities.authentication, true)
+    assert.equal(capabilities.events, true)
+    for (const key of ['monitoring', 'allow', 'block', 'revoke', 'settings']) assert.equal(capabilities[key], false)
     await assert.rejects(protectionApi.getSnapshot(new AbortController().signal), BackendUnavailableError)
     for (const action of ['allow', 'block', 'revoke']) {
       await assert.rejects(protectionApi.changeDevicePolicy('test-only', action), BackendUnavailableError)
     }
-    await assert.rejects(protectionApi.login('test-only', 'not-a-real-password'), BackendUnavailableError)
     assert.equal(requests, 0)
   } finally { globalThis.fetch = originalFetch }
 })

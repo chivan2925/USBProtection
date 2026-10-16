@@ -78,3 +78,12 @@ test('ready empty event response does not display mock records', () => {
   assert.ok(!html.includes('student01'))
   assert.ok(html.includes('Chưa có dữ liệu'))
 })
+
+test('server pagination displays the full received page and global totals', () => {
+  const rows = Array.from({ length: 20 }, (_, index) => ({ id: String(index + 21) }))
+  const html = renderToStaticMarkup(createElement(DataTable, { rows, columns: [{ key: 'id', label: 'ID', render: row => row.id }], label: 'server page', pagination: { page: 1, size: 20, totalElements: 42, totalPages: 3, onPageChange() {} } }))
+  assert.equal((html.match(/<tr>/g) ?? []).length, 21)
+  assert.ok(html.includes('21–40 trên 42 bản ghi'))
+  assert.ok(html.includes('Trang 2 / 3'))
+  assert.ok(html.includes('<td>40</td>'))
+})

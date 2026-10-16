@@ -10,11 +10,27 @@ import { getDemoSnapshot } from './services/demo'
 import { formatDate } from './utils/format'
 import { Dashboard } from './pages/Dashboard'
 import { Devices } from './pages/Devices'
-import { Events } from './pages/Events'
+import { Events, LiveEvents } from './pages/Events'
 import { Endpoints, EndpointDetail } from './pages/Endpoints'
 import { Settings } from './pages/Settings'
 import { Login } from './pages/Login'
 import './App.css'
+import { useCallback, useState } from 'react'
+
+function LiveEventConsole() {
+  const session = useResource(protectionApi.getCurrentAdmin)
+  const notify = useToast()
+  const [loggingOut, setLoggingOut] = useState(false)
+  const refreshSession = session.refresh
+  const onUnauthorized = useCallback(() => { void refreshSession() }, [refreshSession])
+  const logout = async () => {
+    setLoggingOut(true)
+    try { await protectionApi.logout(); window.location.hash = '/login' }
+    catch { notify('Chưa thể đăng xuất. Vui lòng thử lại.', 'error') }
+    finally { setLoggingOut(false) }
+  }
+  return <AdminLayout route="/events" admin={session.state.status === 'ready' ? session.state.data.username : undefined} onLogout={() => void logout()} loggingOut={loggingOut}><LiveEvents onUnauthorized={onUnauthorized} /></AdminLayout>
+}
 function Console({ route }: { route: string }) {
   const demo = new URLSearchParams(window.location.search).get('demo') === '1'
   const { state, refresh, updatedAt } = useResource(demo ? getDemoSnapshot : protectionApi.getSnapshot)
@@ -44,5 +60,9 @@ function Console({ route }: { route: string }) {
   }
   return <AdminLayout route={route}><div className="notice" role="status"><Icon name="info" /><div><strong>{demo ? 'Chế độ demo · Dữ liệu mock' : 'Admin Web · Week 1'}</strong><p>{demo ? 'Số liệu và chính sách minh họa. Allow/Revoke đang chờ API; không thay đổi quyền USB trên máy thật.' : 'Có thể xem dữ liệu mẫu cho Dashboard, Endpoints và whitelist theo từng máy.'}</p></div><a href={demo ? `${window.location.pathname}#/dashboard` : '?demo=1#/dashboard'}>{demo ? 'Thoát demo' : 'Mở demo'}</a></div>{page}</AdminLayout>
 }
-function Router() { const route = useRoute(); return route === '/login' ? <Login /> : <Console route={route} /> }
+function Router() {
+  const route = useRoute()
+  const demo = new URLSearchParams(window.location.search).get('demo') === '1'
+  return route === '/login' ? <Login /> : route === '/events' && !demo ? <LiveEventConsole /> : <Console route={route} />
+}
 export default function App() { return <ToastProvider><Router /></ToastProvider> }
