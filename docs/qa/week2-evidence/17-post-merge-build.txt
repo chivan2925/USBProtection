@@ -1,0 +1,27 @@
+M5 Week 2 post-merge Windows verification
+Started: 2026-10-16T16:42:08.5768793+07:00
+Timezone: Asia/Bangkok
+Revision: a9b1799e2920cba8b6d02fc1d7186fbc0bc59825
+Branch: huy
+Command: npm run build
+Working directory: D:\USBProtection\frontend
+Source: committed frontend at the revision above; QA documentation/evidence updated separately.
+Scope: Windows; fixtures or real Spring Boot/H2 with synthetic HTTP inputs. Ubuntu/physical USB/native notification NOT EXECUTED.
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 51 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:  0.42 kB
+dist/assets/index-BeALIVYP.css   25.37 kB │ gzip:  6.62 kB
+dist/assets/index-DyijkKXr.js   288.95 kB │ gzip: 87.82 kB
+
+✓ built in 278ms
+
+Finished: 2026-10-16T16:42:13.8155597+07:00
+Exit code: 0

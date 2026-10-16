@@ -1,50 +1,53 @@
 # Week 2 QA summary — M5
 
-Updated: 2026-10-16 (Asia/Bangkok). Current base: `cd81060b8f5f32e4ffa42e9120e2827d92219204`, branch `huy`, plus working-tree changes. [Inventory](WEEK2_TEST_INVENTORY.md), [plan](WEEK2_INTEGRATION_TEST_PLAN.md), [current live Events verification](week2-evidence/M5_LIVE_EVENTS_VERIFICATION.md). The earlier [mapper-only run](week2-evidence/M5_EVENT_CONTRACT_VERIFICATION.md) and [2026-10-13 frontend report](week2-evidence/M5_FRONTEND_VERIFICATION.md) retain their original scope.
+Updated: 2026-10-16 (Asia/Bangkok). Tested frontend revision: `a9b1799e2920cba8b6d02fc1d7186fbc0bc59825`, branch `huy`, after merging `main` (`1eb6be6`). This follow-up changes QA documentation and captures evidence for that committed implementation. [Current verification](week2-evidence/M5_POST_MERGE_VERIFICATION.md), [inventory](WEEK2_TEST_INVENTORY.md), [plan](WEEK2_INTEGRATION_TEST_PLAN.md), [M4/M5 technical handoff](M4_M5_WEEK2_HANDOFF.md).
 
-**Current Windows live Events scope: PASS. Week 2 group integration remains OPEN.** The user's live Events request extended the mapper work to shared adapter/session support and server-driven UI controls. Ubuntu scenarios remain deferred/NOT EXECUTED. Week 1 stays CLOSED with historical reports preserved.
-
-M1 now supplies the [published API v0.2](../API.md), Admin Events controller and [backend/HTTP evidence](../member1/WEEK2_SERVER_INTEGRATION.md). The earlier statement that the Admin API is absent is superseded. Owner evidence was reviewed for this summary, not rerun by M5.
+**Windows frontend, Admin API/browser integration and M5 documentation: PASS. Whole Week 2 integration remains OPEN.** Physical Ubuntu/USBGuard/GUI scenarios remain NOT EXECUTED in this scope. Week 1 stays CLOSED for the group's accepted scope, with historical reports preserved. M4 owner approval is tracked separately from the completed technical handoff.
 
 ## Gate status
 
-| Gate | Owner | Status | Evidence/remaining work |
+| Gate | Owner | Status | Evidence and remaining work |
 |---|---|---|---|
-| Physical USB event persisted with endpoint/active user/device/decision/time | M2/M3/M1 | NOT EXECUTED | Ubuntu correlated USBGuard/loginctl/Agent/Server/DB run deferred |
-| Web shows real backend events | M1/M4/M5 | PARTIAL (Windows HTTP/browser PASS) | Real Spring Boot/H2 → live Web verified with isolated HTTP-seeded QA records; physical USB source correlation deferred. [Evidence](week2-evidence/13-live-events-browser-http.txt) |
-| Admin and Agent authentication | M1/M3/M4 | PARTIAL (Admin browser + backend PASS) | Real browser invalid/valid login, CSRF/session/reload/logout verified; actual Agent runtime remains deferred. [M1 Agent HTTP](../member1/week2-evidence/03-agent-auth-http.txt) |
-| Per-endpoint Allow/Revoke/version/apply/ACK | M1–M4/M5 | PARTIAL (backend only) | [M1 A/B isolation](../member1/week2-evidence/04-policy-A-B-isolation.txt), [ACK](../member1/week2-evidence/05-policy-version-ack.txt); UI/apply/USBGuard evidence pending, Ubuntu deferred |
-| Unknown USB remains BLOCKED during server/network/notifier outage | M2/M3 | NOT EXECUTED | Actual offline/outbox/reconnect and USBGuard state deferred |
-| One native BLOCK notification on correct GUI user; exclusions/failures safe | M2/M3/M5 | NOT EXECUTED | Ubuntu GUI/physical notification and negative traces deferred |
-| Honest QA statuses, environment and evidence index | M5 | PASS (current handoff) | Plan contains all W2-T01–T18; inventory separates unit/demo from unexecuted real cases |
+| Physical USB event persisted with endpoint/active user/device/decision/time | M2/M3/M1 | NOT EXECUTED | Correlated Ubuntu USBGuard/loginctl/Agent/Server/DB run remains deferred |
+| Web shows persisted backend events | M1/M4/M5 | PARTIAL; Windows HTTP/browser PASS | [25-event Events run](week2-evidence/22-post-merge-browser-events.txt); physical USB source correlation remains deferred |
+| Admin and Agent authentication | M1/M3/M4 | PARTIAL; Admin browser and Agent HTTP PASS | [Fresh management browser](week2-evidence/21-post-merge-browser-management.txt), [M1 Agent authorization](../member1/week2-evidence/03-agent-auth-http.txt); actual Ubuntu Agent runtime remains deferred |
+| Per-endpoint Allow/Revoke/version/apply/ACK | M1–M4/M5 | PARTIAL; Web/API/H2 and controlled HTTP ACK PASS | [Fresh management run](week2-evidence/21-post-merge-browser-management.txt): A desired 1→2→3, duplicate Allow idempotent, B unchanged, controlled ACK and restart persistence; actual Agent/USBGuard apply remains deferred |
+| Unknown USB remains BLOCKED during server/network/notifier outage | M2/M3 | NOT EXECUTED | Actual offline/outbox/reconnect and USBGuard state remain deferred |
+| One native BLOCK notification on correct GUI user; safe exclusions/failures | M2/M3/M5 | NOT EXECUTED | Ubuntu GUI/physical notification and negative traces remain deferred |
+| QA status, environment, revision and evidence index | M5 | PASS for Windows handoff | W2-T01–T18 retain complete-scenario status; new logs, screenshots and manifest identify the tested merge revision |
 
-## Completed M5 work
+## Completed implementation and verification
 
-- Events reads only ready `state.data.events`; loading/error/unavailable no longer manufacture rows. Empty ready response stays empty. Existing explicit demo loader remains the source of fixtures, with a visible demo badge.
-- All six columns and endpoint links retained. Added Event Type, UNKNOWN decision and from/to dates; local inclusive calendar bounds converted to [from, day-after-to), including DST. Device metadata search includes VID/PID/serial/hash. Local ten-row pagination/newest-first regression retained.
-- Mapper aligned to the published Admin `EventResponse`: canonical `device.interfaceClass`, string `usbDeviceId`, separate receivedAt, unchanged event/user/session attribution and source timestamp precision. Invalid/unsafe IDs or payloads fail the read.
-- Added `EventPage` and `mapEventPage()` with preserved server order/page/size/global totals, including last/empty/out-of-range pages and invalid-page rejection.
-- Connected live Events in the shared API adapter with cookie session, CSRF login/logout and `/me` restoration. Events queries exact endpoint/user/device identity, server enums and inclusive calendar dates; table uses server totals and 20-row pages. Demo remains separate and performs no Admin HTTP calls. Other management adapters/actions remain unavailable.
-- Current Windows verification: build, lint and **60/60 tests PASS**, plus browser regression and real Spring Boot/H2/Chromium integration. Authenticated Agent HTTP seeded 25 QA events into an isolated DB; Web read, pagination, empty/filter/date/reload/logout and mobile layout passed. Browser 403/500/network failures were injected. Raw logs and screenshots are linked in the current report.
-- The earlier mapper-only run passed 52 tests; its synthetic fixture/HTTP limitations apply to that run, which is preserved separately.
-- Historical 2026-10-13 verification: build/lint, 45 tests and Chromium demo/unavailable smoke PASS. Browser was not rerun for this mapper/model change; its earlier evidence is not a current live Admin API test.
+- Event mapping preserves endpoint, Linux user/UID/session, USB identity, source `occurredAt`, separate `receivedAt`, canonical enums and string IDs. UNKNOWN never becomes the Admin username. Invalid records or page metadata fail the read.
+- Live Event History uses the shared API adapter and `mapEventPage()`: six columns, endpoint detail links, server order, exact endpoint/user/Device ID filters, canonical type/decision, 20-row pages and server global totals. Calendar dates include the whole selected local day, with timezone/DST and fractional timestamp regression coverage.
+- Explicit demo uses local fixture filtering/newest-first/ten-row pagination. Loading, empty, error and unauthorized live reads never substitute mock history. Protected routes and expired sessions redirect to Login through the shared AuthProvider; API payload errors and 403/500/network failures clear rows.
+- The merged M4 management adapters now supply live Dashboard, Endpoints/detail, Devices and per-endpoint whitelist Allow/Revoke. Settings and global Block remain unavailable as declared by capabilities. Auth/session/CSRF, shared HTTP errors, cancellation and both Vite proxy variable names are documented in the handoff.
+- Post-merge verification captures build, lint, **72/72 tests**, HTTP fixture browser regression, real Spring Boot/H2 management browser and real Events browser. The management run covers A/B isolation, duplicate Allow, Revoke, controlled HTTP ACK, desired/applied display and persistence after restart. The Events run uses 25 synthetic authenticated HTTP inputs, covering pagination, filters, inclusive dates, reload/logout and mobile layout. Browser 403/500/network faults are explicitly injected.
+- [Test Plan](../TEST_PLAN.md) references the separate Week 2 plan; inventory, summary, mapping and technical handoff now describe the merged implementation. Owner evidence is linked below rather than rewritten.
 
-## Issues and blockers
+## Evidence provenance and owner handoff
 
-| ID | Severity / state | Finding | Follow-up |
-|---|---|---|---|
-| M5-W2-01 | High / FIXED | Live non-ready Events displayed mock history, giving misleading audit data | Fix and regression tests included; verify again after M4 live adapter |
-| M5-W2-02 | FIXED (Windows Events scope) | Shared adapter/session login and live Events now read actual API responses | M4 reviews shared auth/API changes; remaining management pages have their own scope |
-| M5-W2-03 | FIXED (Windows Events scope) | Live table now uses server page/total/query, verified beyond first page | Retain server metadata; local pagination remains demo-only |
-| M5-W2-04 | DEFERRED by current user scope | Ubuntu hardware/GUI/A–B/offline scenarios not executed | M2/M3/M5 execute in a later Ubuntu phase; retain NOT EXECUTED |
-| M5-W2-05 | FIXED (published API semantics) | Live labels/query use exact identities; date upper bound is one nanosecond before next midnight | H2 persists microsecond precision; input precision/rounding remains a backend storage consideration |
+| Producer | Reviewed or rerun evidence | Interpretation |
+|---|---|---|
+| M1 | [Server integration report](../member1/WEEK2_SERVER_INTEGRATION.md), [13-test Maven summary](../member1/week2-evidence/test-summary.txt), [A/B policy](../member1/week2-evidence/04-policy-A-B-isolation.txt), [ACK](../member1/week2-evidence/05-policy-version-ack.txt) | Existing owner-run backend evidence reviewed; no new Maven execution in this capture |
+| M2 | [Integration report](../usbguard/USBGuard_Week2_Integration.md), [raw Maven output](../usbguard/week2-evidence/11-mvn-test.txt), [M2→M3 contract](../usbguard/WEEK2_HANDOFF_M3.md) | Raw output now present: 40 tests, zero failures/errors/skips, BUILD SUCCESS on 2026-10-14. Older M2 status text still says the raw output is missing; the actual artifact supersedes that statement. Windows unit evidence does not prove Ubuntu/GUI behavior |
+| M3 | [Recorded Agent→Server run](../client-agent/evidence/01-agent-server-e2e-live-run.txt) | Historical 2026-10-12 Windows Agent process with EventSimulationRunner; not a current Ubuntu Week 2 run or physical USB attribution proof |
+| M4 | [Owner execution report](../admin-web/week2-evidence/README.md), [live backend browser](../admin-web/week2-evidence/06-live-backend-browser.txt) | Historical 57-test M4 implementation run; management/browser integration rerun against the merged frontend in the new M5 evidence |
+| M5 | [Post-merge verification](week2-evidence/M5_POST_MERGE_VERIFICATION.md), [manifest](week2-evidence/23-post-merge-source-state.txt) | Current 72-test merged frontend and three browser suites; synthetic HTTP source clearly identified |
 
-The historical 2026-10-13 logs retain initial sandbox EPERM and browser script attempts plus successful retries. Current tests/build used permitted local execution for child processes and passed; lint passed locally. No Ubuntu test was attempted in the current scope.
+The earlier [45-test frontend report](week2-evidence/M5_FRONTEND_VERIFICATION.md), [52-test mapper report](week2-evidence/M5_EVENT_CONTRACT_VERIFICATION.md), [60-test Events report](week2-evidence/M5_LIVE_EVENTS_VERIFICATION.md), and their logs/manifests remain historical records of their original revisions. They are not edited to claim the new run.
 
-## Remaining handoff
+## Issues and remaining work
 
-Review the shared API/auth/layout changes with M4. The live Events path is implemented and Windows-verified; Endpoint Detail/dashboard/policy management live adapters remain separate work. Current DTO/query/session details are documented in [mapping/handoff](EVENT_VIEW_MODEL_MAPPING.md) and [run instructions](../../frontend/README.md). Production Event History displays whatever the configured backend actually persists; the browser harness seeds only its isolated QA database.
+| ID | State | Finding and follow-up |
+|---|---|---|
+| M5-W2-01 | FIXED and regression verified | Non-ready live Events no longer displays fabricated mock rows |
+| M5-W2-02 | FIXED and merge verified | Shared auth/API and management adapters are integrated with live Events; [technical handoff](M4_M5_WEEK2_HANDOFF.md) complete, M4 human acknowledgment not recorded |
+| M5-W2-03 | FIXED and regression verified | Live filters/pages use global server results and totals; demo alone keeps local pagination |
+| M5-W2-04 | DEFERRED | Ubuntu real Agent, USBGuard apply/revoke, offline/outbox and GUI notification scenarios require M2/M3/M5 execution |
+| M5-W2-05 | FIXED for published API semantics | Exact identity filters and inclusive nanosecond query upper bound verified; H2 stored timestamps have microsecond precision |
+| M5-W2-06 | DOCUMENTATION COMPLETE | Current QA reports now identify the merge commit, 72 tests, management browser coverage, shared contracts and M1–M4 evidence provenance |
 
-When Ubuntu testing resumes, M3 provides enrolled endpoint/transport/outbox/apply/ACK traces; M2 provides physical BLOCK/active-user and notification traces with M3 helper startup evidence. Those runs are deferred, not prerequisites to completing the current mapper/model work.
+M5's technical review and review-ready M4 handoff package are complete. A human M4 approval is **PENDING** because no such confirmation is available in the repository; this report does not substitute an automated run for an owner's signature.
 
-Owner evidence is linked when delivered, under the member's chosen Week 2 folder; a proposed folder path alone is not evidence. M5 then executes the canonical scenarios, records failing/unexecuted cases honestly, and updates this gate table. Final .deb clean install/reboot and final release guides remain Week 3/4.
+When Ubuntu testing resumes, M3 supplies authenticated Agent/transport/outbox/apply/ACK and helper startup traces; M2 supplies physical BLOCK/active-user and notification traces; M5 correlates them with persisted IDs and Web rows. Final .deb clean install/reboot and release guides remain Week 3/4.

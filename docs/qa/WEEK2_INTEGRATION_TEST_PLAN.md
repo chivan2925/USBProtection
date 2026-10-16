@@ -2,7 +2,7 @@
 
 Owner: M5. Created: 2026-10-13 (Asia/Bangkok). Baseline: `8b644eafc7aa3651b92e7a6746f4f22a4f1ba65e`.
 
-Current execution scope (2026-10-16): the user deferred Ubuntu tests, then requested live Event History. M5 completed the mapper/model/page contracts and connected Events through the shared adapter, with necessary Admin login/session support. Windows Spring Boot/H2/Chromium execution now covers persisted Backend → Web, query/page/date controls and auth. HTTP-seeded QA data and injected browser faults are labeled in [current verification](week2-evidence/M5_LIVE_EVENTS_VERIFICATION.md). The full scenarios below remain the plan; deferred physical Ubuntu cases stay NOT EXECUTED.
+Current execution scope (2026-10-16): Windows documentation/evidence completion after merging `main` into `huy`, tested frontend revision `a9b1799e2920cba8b6d02fc1d7186fbc0bc59825`. M5 event mapping/UI and M4 shared session/management adapters are integrated. [Current verification](week2-evidence/M5_POST_MERGE_VERIFICATION.md) captures build/lint/72 tests, fixture browser, real management browser and real Events browser. Coverage includes Web Allow/Revoke/A–B isolation, controlled HTTP ACK/restart persistence, persisted Backend → Web and query/page/date/auth behavior. HTTP-seeded QA inputs and injected browser faults are labeled. Physical Ubuntu/GUI cases remain deferred/NOT EXECUTED; [technical handoff](M4_M5_WEEK2_HANDOFF.md) separates completed review from pending human M4 acknowledgment.
 
 Source: the provided `USBShield_Week2_File_Ownership_M1_M3_M4_M5.md`, sections 1, 3 and 7. This document is an execution plan, not evidence that Week 2 has passed. [Inventory](WEEK2_TEST_INVENTORY.md) records runs; [summary](WEEK2_QA_SUMMARY.md) records gates/blockers.
 
@@ -43,7 +43,7 @@ Record commit/tag for each module, exact environment, Asia/Bangkok timestamp/off
 | W2-T17 — M4/M5 | Installed frontend dependencies/local Chromium. Run build/lint/unit/browser commands below. | All commands exit 0; live unavailable has no fixture rows; explicit demo filters/routes/mobile regressions pass. | Fresh terminal logs, environment/time/revision and screenshots |
 | W2-T18 — M1/M3/M2 | Maven/Java toolchain; P2/P3 for startup smoke. Run Maven tests; verify non-root service, USBGuard IPC and desktop helper startup on Ubuntu. | Tests pass; services/helper ready with correct access; separate Java-only results from Linux smoke. | Maven output and systemd/IPC/helper evidence |
 
-W2-T15 fixture execution does not imply its live query portion passed. W2-T17 browser smoke currently uses unavailable live state and explicit demo, not a live Admin API. Keep canonical IDs intact; label sub-runs `W2-T14-FE`, `W2-T15-FE`, etc., without replacing the canonical real scenarios or M2-W2-* IDs.
+W2-T15 has fixture and real HTTP/browser query evidence recorded separately. W2-T17 now includes HTTP fixture regression and both real Spring Boot/H2 browser suites. Full physical scenarios retain their complete acceptance criteria even when Windows sub-runs pass. Keep canonical IDs intact; label sub-runs without replacing the canonical real scenarios or M2-W2-* IDs.
 
 ## Runnable frontend checks
 
@@ -54,9 +54,11 @@ npm run build
 npm run lint
 npm test
 npm run test:browser
+npm run test:live
+npm run test:browser:live
 ```
 
-Use existing dependencies; `npm ci` only if dependency installation is needed. Browser smoke requires local Chrome/Chromium/Edge (`CHROME_PATH` can select executable), built dist and free port 4173. Script fixes browser timezone to Asia/Bangkok. It launches preview and headless browser and cleans up its own temporary profile. Screenshots under `frontend/.artifacts/` are runtime outputs; selected copies can be kept in QA evidence.
+Use existing dependencies; `npm ci` only if installation is needed. Browser tests require local Chrome/Chromium/Edge (`CHROME_PATH`), built dist and run sequentially. Fixture/management uses preview 4173; real Events uses backend 18083 and preview 4174. Real suites also require the built Admin Server JAR and JDK 21+ (`JAVA_HOME`); tested binaries are identified by the environment/manifest. Both suites use isolated H2, synthetic HTTP input and Asia/Bangkok browser timezone; temporary profiles/processes are cleaned up. Selected screenshots are copied from `frontend/.artifacts/` into the new evidence folder.
 
 From repo root, when executing M1/M3 tests:
 
@@ -71,7 +73,7 @@ These commands are a plan, not a recorded Maven run in this handoff.
 
 Classify each run: UNIT, FRONTEND FIXTURE, BROWSER DEMO, HTTP CONTRACT, REAL USB, GUI NOTIFICATION or FULL E2E. PASS requires matching expected/actual with fresh evidence and exit codes. FAIL means executed but expectation failed. NOT EXECUTED means not run. BLOCKED means an identified prerequisite prevents execution; name follow-up owner. Never promote old Windows/simulation evidence to physical Ubuntu E2E.
 
-For each canonical test, record owner/environment/revision/date-time/steps/expected/actual/status/evidence/limitation/follow-up. Preserve initial failed attempts and explain successful retries. Keep secrets and raw tokens/passwords out of evidence. Link M1 `docs/member1/week2-evidence/`, M3 `docs/client-agent/week2-evidence/`, M4 `docs/admin-web/week2-evidence/` and actual M2 owner artifacts when delivered; proposed locations are not proof of delivery.
+For each canonical test, record owner/environment/revision/date-time/steps/expected/actual/status/evidence/limitation/follow-up. Preserve initial attempts and explain retries. Keep secrets and raw tokens/passwords out of evidence. Current owner artifacts are linked from the inventory: M1 `docs/member1/week2-evidence/`, M2 `docs/usbguard/week2-evidence/`, M3 historical Windows runtime in `docs/client-agent/evidence/`, and M4 `docs/admin-web/week2-evidence/`. No current Ubuntu M3 Week 2 runtime package is claimed; a proposed folder is not proof of delivery.
 
 ## Contract and ownership boundaries
 

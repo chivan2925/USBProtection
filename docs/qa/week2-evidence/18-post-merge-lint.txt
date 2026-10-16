@@ -1,0 +1,17 @@
+M5 Week 2 post-merge Windows verification
+Started: 2026-10-16T16:42:13.8396323+07:00
+Timezone: Asia/Bangkok
+Revision: a9b1799e2920cba8b6d02fc1d7186fbc0bc59825
+Branch: huy
+Command: npm run lint
+Working directory: D:\USBProtection\frontend
+Source: committed frontend at the revision above; QA documentation/evidence updated separately.
+Scope: Windows; fixtures or real Spring Boot/H2 with synthetic HTTP inputs. Ubuntu/physical USB/native notification NOT EXECUTED.
+
+
+> frontend@0.0.0 lint
+> oxlint src tests vite.config.ts
+
+
+Finished: 2026-10-16T16:42:14.7534409+07:00
+Exit code: 0

@@ -1,0 +1,20 @@
+M5 Week 2 post-merge Windows verification
+Started: 2026-10-16T16:42:53.5946625+07:00
+Timezone: Asia/Bangkok
+Revision: a9b1799e2920cba8b6d02fc1d7186fbc0bc59825
+Branch: huy
+Command: npm run test:browser
+Working directory: D:\USBProtection\frontend
+Source: committed frontend at the revision above; QA documentation/evidence updated separately.
+Scope: Windows; fixtures or real Spring Boot/H2 with synthetic HTTP inputs. Ubuntu/physical USB/native notification NOT EXECUTED.
+
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+PASS: M4 browser with HTTP fixture; protected routes, invalid/valid login, refresh /me, CSRF, A/B Allow/Revoke, duplicate/error/empty states, M5 events/filter, expired session/logout, demo read-only, network error, responsive routes.
+Scope: HTTP fixture regression. Run npm run test:live for Spring Security/H2 evidence. Physical USB and actual Agent apply/ACK require Ubuntu.
+Screenshots: frontend/.artifacts/m4-*.png; demo regression screenshots.
+
+Finished: 2026-10-16T16:43:02.9285760+07:00
+Exit code: 0
