@@ -1,0 +1,20 @@
+M5 Week 2 post-merge Windows verification
+Started: 2026-10-16T16:43:02.9485726+07:00
+Timezone: Asia/Bangkok
+Revision: a9b1799e2920cba8b6d02fc1d7186fbc0bc59825
+Branch: huy
+Command: npm run test:live
+Working directory: D:\USBProtection\frontend
+Source: committed frontend at the revision above; QA documentation/evidence updated separately.
+Scope: Windows; fixtures or real Spring Boot/H2 with synthetic HTTP inputs. Ubuntu/physical USB/native notification NOT EXECUTED.
+
+
+> frontend@0.0.0 test:live
+> node tests/browser.mjs --live
+
+PASS: real Spring Boot/Spring Security + file-backed H2; browser invalid/valid login, empty data, session reload, endpoint/event mapping, A Allow/idempotency/Revoke, B isolation, CSRF rejection, policy fetch, controlled HTTP ACK display, persistence after restart, expired session, logout, mobile.
+{"endpointA":"EP-1c613bd2-ff50-4bf6-b649-01e2a9b4f833","endpointB":"EP-552e43b7-c93a-4a27-b271-fb7e250ab11a","beforeA":{"endpointId":"EP-1c613bd2-ff50-4bf6-b649-01e2a9b4f833","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-16T09:43:20.848260Z","policyVersion":1,"appliedPolicyVersion":0},"allowedA":{"endpointId":"EP-1c613bd2-ff50-4bf6-b649-01e2a9b4f833","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-16T09:43:20.848260Z","policyVersion":2,"appliedPolicyVersion":0},"revokedA":{"endpointId":"EP-1c613bd2-ff50-4bf6-b649-01e2a9b4f833","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-16T09:43:20.848260Z","policyVersion":3,"appliedPolicyVersion":2},"persistedDesired":3,"persistedApplied":2,"eventCount":1}
+NOT EXECUTED: actual M3 Agent apply/ACK, Ubuntu USBGuard enforcement, physical USB, native notification. Events and HTTP ACK above are synthetic inputs to real backend.
+
+Finished: 2026-10-16T16:43:41.9196382+07:00
+Exit code: 0

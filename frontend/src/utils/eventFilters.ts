@@ -1,5 +1,6 @@
 ﻿import type { EventFilterValues, UsbEvent } from '../types/event'
 import { matches } from './format.ts'
+import type { EventQuery } from '../types/event.ts'
 
 function localMidnight(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined
@@ -17,6 +18,28 @@ export function getEventDateRange(filters: Pick<EventFilterValues, 'dateFrom' | 
   if ((filters.dateFrom && !from) || (filters.dateTo && !to) || (from && to && from > to)) return { valid: false }
   if (to) to.setDate(to.getDate() + 1)
   return { valid: true, fromInclusive: from?.toISOString(), toExclusive: to?.toISOString() }
+}
+
+// Inclusive Java Instant upper bound includes sub-millisecond events on the last
+// selected day, while excluding midnight at the start of the following day.
+export function getEventQuery(filters: EventFilterValues, page = 0, size = 20): EventQuery {
+  const range = getEventDateRange(filters)
+  if (!range.valid) throw new Error('Khoảng ngày không hợp lệ. Kiểm tra ngày bắt đầu và kết thúc.')
+  if (!Number.isInteger(page) || page < 0 || !Number.isInteger(size) || size < 1 || size > 100) throw new Error('Trang hoặc kích thước trang không hợp lệ.')
+  const deviceId = filters.device.trim()
+  if (deviceId && (!/^[1-9]\d*$/.test(deviceId) || BigInt(deviceId) > 9223372036854775807n)) throw new Error('Device ID phải là số nguyên dương hợp lệ.')
+  if (filters.decision && !['allowed', 'blocked'].includes(filters.decision)) throw new Error('API chỉ hỗ trợ lọc quyết định ALLOW hoặc BLOCK.')
+  if (filters.eventType && !['connected', 'disconnected'].includes(filters.eventType)) throw new Error('API chỉ hỗ trợ sự kiện cắm hoặc tháo USB.')
+  return {
+    page, size,
+    endpointId: filters.endpoint.trim() || undefined,
+    linuxUsername: filters.username.trim() || undefined,
+    deviceId: deviceId || undefined,
+    decision: filters.decision ? filters.decision === 'allowed' ? 'ALLOWED' : 'BLOCKED' : undefined,
+    eventType: filters.eventType ? filters.eventType === 'connected' ? 'CONNECTED' : 'DISCONNECTED' : undefined,
+    from: range.fromInclusive,
+    to: range.toExclusive ? new Date(Date.parse(range.toExclusive) - 1000).toISOString().replace(/\.\d{3}Z$/, '.999999999Z') : undefined,
+  }
 }
 
 export function matchesEventFilters(event: UsbEvent, filters: EventFilterValues) {

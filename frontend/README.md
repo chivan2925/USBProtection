@@ -1,6 +1,10 @@
 # USBShield — Admin Web
 
-React + Vite + TypeScript. M4 Week 2 ngày 2026-10-16 (Asia/Saigon): **PASS tích hợp Admin Web với Spring Security/H2 thật**. Xem [báo cáo kiểm tra](../docs/admin-web/week2-evidence/README.md).
+React + Vite + TypeScript. Admin Web tích hợp session/CSRF, Dashboard, Endpoints, whitelist theo máy và Event History với bộ lọc/phân trang phía server. Xem [báo cáo M4](../docs/admin-web/week2-evidence/README.md) và [kiểm tra Events trên Windows](../docs/qa/week2-evidence/M5_LIVE_EVENTS_VERIFICATION.md).
+
+## Chạy với Admin Server
+
+Chạy backend theo [hướng dẫn M1](../docs/member1/WEEK2_SERVER_INTEGRATION.md), mặc định ở `http://127.0.0.1:8080`. Tài khoản Admin lấy từ cấu hình `USBSHIELD_ADMIN_USERNAME` và `USBSHIELD_ADMIN_PASSWORD`; mật khẩu bootstrap chỉ khởi tạo tài khoản chưa tồn tại. Chạy Vite như hướng dẫn dưới, mở `http://127.0.0.1:5173/#/login`, đăng nhập rồi vào `#/events` để xem sự kiện đã lưu. Frontend không tự tạo sự kiện trong database.
 
 ## Chạy và demo
 
@@ -29,13 +33,15 @@ npm run lint
 npm test
 npm run test:browser
 npm run test:live
+npm run test:browser:live
 ```
 
 - `build`: TypeScript và production bundle trong `dist/`.
 - `lint`: Oxlint.
-- `test`: 57 kiểm thử logic/component/HTTP, gồm auth/CSRF, whitelist A/B và hồi quy Events M5.
+- `test`: kiểm thử logic/component/HTTP, gồm auth/CSRF, whitelist A/B, mapper và bộ lọc/phân trang Events M5.
 - `test:browser`: Chrome/Edge headless + HTTP fixture; login/session, Allow/Revoke, lỗi/rỗng/network, demo, desktop/mobile và Events.
 - `test:live`: Chrome/Edge + JAR M1 thật, Spring Security/H2 riêng, login/session/CSRF, Allow/Revoke, ACK HTTP có kiểm soát, restart/persistence. Cần Java 21 và build `mvn package -DskipTests` trong `admin-server` trước. Đặt `JAVA_HOME` nếu Java mặc định không phải 21. Cả hai browser tests cần build frontend trước, giữ cổng 4173 trống, chạy từng lệnh lần lượt.
+- `test:browser:live`: Chrome/Edge + JAR M1, tạo 25 sự kiện QA qua Agent HTTP trong H2 cô lập, kiểm tra đăng nhập, Events, phân trang/lọc/ngày, reload/logout và lỗi. Cần JDK 21+ (`JAVA_HOME`, hoặc JDK 22 tại đường dẫn Windows mặc định của script); giữ cổng backend 18083 và preview 4174 trống. Các browser tests chạy lần lượt sau khi build frontend.
 - Không tải trình duyệt hoặc thêm dependency. Có thể đặt `CHROME_PATH` tới Chrome/Edge đã cài. Tiến trình được tự đóng, profile tạm được xóa; ảnh nằm trong `.artifacts/` (gitignored).
 - Nếu sandbox hạn chế tiến trình con/renderer, kiểm tra trình duyệt có thể báo EPERM hoặc timeout; cần chạy với quyền cho phép Chrome hoạt động.
 
@@ -50,7 +56,7 @@ npm run test:live
 | `#/devices` | Tra cứu thiết bị, VID/PID, serial, endpoint và trạng thái |
 | `#/whitelist` | Danh sách thiết bị được phép, lọc theo endpoint |
 | `#/blocked` | Thiết bị bị chặn, lý do và endpoint |
-| `#/events` | Event History với năm bộ lọc và phân trang |
+| `#/events` | Event History với bộ lọc và phân trang phía server; demo lọc cục bộ |
 | `#/settings` | Trạng thái chức năng đang chờ tích hợp |
 | Đường dẫn khác | 404 |
 
@@ -58,11 +64,12 @@ Hash routing hỗ trợ reload và Back/Forward. Tham số `?demo=1` được gi
 
 ## Dữ liệu và API
 
-- `services/api.ts` gọi Admin API canonical trong `docs/API.md`: auth, endpoints, events và whitelist per-endpoint. Vite proxy `/api` tới `http://127.0.0.1:8080`; có thể đổi `API_PROXY_TARGET` trong `.env.local`.
+- `services/api.ts` gọi Admin API canonical trong `docs/API.md`: auth, endpoints, events và whitelist per-endpoint. Vite proxy `/api` tới `http://127.0.0.1:8080`; có thể đổi `API_PROXY_TARGET` trong `.env.local` hoặc biến môi trường. `USBSHIELD_API_TARGET` tiếp tục được hỗ trợ nếu chưa đặt `API_PROXY_TARGET`. Production cần reverse proxy `/api` cùng origin với frontend.
 - `services/http.ts` gửi cookie cùng origin và CSRF từ `/api/auth/csrf`; không lưu credential trong localStorage. Đăng nhập cần tài khoản M1 cấp ngoài repo.
 - `services/demo.ts` ánh xạ fixture endpoint (`endpointId`, `lastSeen`) sang view model (`id`, `lastSeenAt`), tạo snapshot riêng mỗi lần đọc, gắn endpoint ID cho event và cung cấp whitelist theo endpoint.
 - `services/models.ts` và `types/*` là view model; adapter/mapper chuyển DTO M1 tại boundary.
 - Ngoài demo, Dashboard/Endpoints/Events chỉ dùng dữ liệu API; rỗng/lỗi không tự chuyển sang mock. Protection/service giữ unknown khi chưa có health API.
+- Events đọc `/api/admin/events`, hiển thị đủ sáu cột, 20 bản ghi/trang và tổng từ `totalElements`. Endpoint ID, Linux Username và Device ID lọc chính xác trên toàn bộ lịch sử; quyết định/loại sự kiện dùng enum backend. Khoảng ngày bao gồm toàn bộ ngày đầu/cuối theo múi giờ trình duyệt, giữ độ chính xác nanosecond ở mốc cuối. 401 chuyển về Login; 403, lỗi server/mạng và payload sai không chuyển sang mock.
 - `useResource` xử lý loading/error/unavailable, hủy đọc cũ và tránh cập nhật sau unmount.
 - Allow chọn USB có HASH và `usbDeviceId` từ events endpoint; POST `{usbDeviceId}`. Revoke dùng entryId; refetch desired/applied sau success. Allow trùng idempotent. Demo luôn khóa mutation.
 

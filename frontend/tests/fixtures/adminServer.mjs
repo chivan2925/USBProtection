@@ -66,10 +66,22 @@ export async function startAdminFixture() {
       return
     }
     if (path === '/api/admin/events') {
-      const events = state.empty ? [] : state.events
+      let events = state.empty ? [] : state.events
+      for (const field of ['endpointId', 'linuxUsername', 'decision', 'eventType']) {
+        const value = url.searchParams.get(field)
+        if (value) events = events.filter(event => event[field] === value)
+      }
+      const deviceId = url.searchParams.get('deviceId')
+      if (deviceId) events = events.filter(event => String(event.usbDeviceId) === deviceId)
+      const from = url.searchParams.get('from')
+      const to = url.searchParams.get('to')
+      if (from) events = events.filter(event => Date.parse(event.occurredAt) >= Date.parse(from))
+      if (to) events = events.filter(event => Date.parse(event.occurredAt) <= Date.parse(to))
       const page = Number(url.searchParams.get('page') ?? 0)
-      // Force multiple pages even for a tiny fixture.
-      send(200, { content: events.slice(page, page + 1), page: state.brokenPage ? page + 1 : page, totalPages: events.length, totalElements: events.length })
+      const requestedSize = Number(url.searchParams.get('size') ?? 20)
+      // Force snapshot reads to traverse pages, while live Events uses its requested size.
+      const size = requestedSize === 100 ? 1 : requestedSize
+      send(200, { content: events.slice(page * size, (page + 1) * size), page: state.brokenPage ? page + 1 : page, size, totalPages: Math.ceil(events.length / size), totalElements: events.length })
       return
     }
     const match = path.match(/^\/api\/admin\/endpoints\/([^/]+)(?:\/whitelist(?:\/([^/]+))?)?$/)

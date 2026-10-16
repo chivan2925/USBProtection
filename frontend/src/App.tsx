@@ -13,7 +13,7 @@ import { getDemoSnapshot } from './services/demo'
 import { formatDate } from './utils/format'
 import { Dashboard } from './pages/Dashboard'
 import { Devices } from './pages/Devices'
-import { Events } from './pages/Events'
+import { Events, LiveEvents } from './pages/Events'
 import { Endpoints, EndpointDetail } from './pages/Endpoints'
 import { Settings } from './pages/Settings'
 import { Login } from './pages/Login'
@@ -96,6 +96,7 @@ function Router({ demo }: { demo: boolean }) {
     </Panel>
   </main>
   if (route === '/login' || (!demo && !auth?.user)) return <Login demo={demo} />
+  if (route === '/events' && !demo) return <AdminLayout route={route}><LiveEvents /></AdminLayout>
   return <Console route={route} demo={demo} />
 }
 

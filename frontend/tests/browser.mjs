@@ -157,7 +157,7 @@ try {
   await navigate('/endpoints/B', 'fixture-ubuntu-b')
   await until(() => evaluate(`document.querySelector('[data-testid="endpoint-whitelist-panel"]')?.innerText.includes('fixture-hash-a')`), 'B rule remains')
   await navigate('/events', 'Lịch sử sự kiện')
-  await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 2`), 'M5 receives all API event pages')
+  await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 2`), 'M5 receives the server event page')
   assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('thead th'), th => th.textContent)`), ['Timestamp', 'Endpoint', 'Linux User', 'USB', 'Event', 'Decision'])
   await evaluate(`{ const select = document.querySelector('[aria-label="Decision"]'); select.value = 'blocked'; select.dispatchEvent(new Event('change', { bubbles: true })); }`)
   await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 1`), 'live event filter')

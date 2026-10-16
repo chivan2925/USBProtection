@@ -20,8 +20,11 @@ export function clearCsrfToken() {
 export async function refreshCsrfToken(signal?: AbortSignal) {
   clearCsrfToken()
   const data = readObject(await request('/api/auth/csrf', { signal, notifyUnauthorized: false }))
-  csrfToken = readText(data.token, true)!
-  csrfHeader = readText(data.headerName, true)!
+  if (typeof data.token !== 'string' || !data.token.trim() || data.headerName !== 'X-CSRF-TOKEN') {
+    throw new Error('Máy chủ trả CSRF token hoặc header không hợp lệ.')
+  }
+  csrfToken = data.token
+  csrfHeader = data.headerName
 }
 
 function errorMessage(status: number) {
@@ -43,6 +46,7 @@ interface RequestOptions {
 }
 
 export async function request(path: string, options: RequestOptions = {}): Promise<unknown> {
+  options.signal?.throwIfAborted()
   const method = options.method ?? 'GET'
   const headers: Record<string, string> = { Accept: 'application/json' }
   if (options.body !== undefined) headers['Content-Type'] = 'application/json'

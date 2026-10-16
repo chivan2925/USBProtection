@@ -1,9 +1,10 @@
 import type { Device, Endpoint, Snapshot, UsbEvent } from './models.ts'
 import type { WhitelistEntry } from '../types/policy.ts'
+import type { EventPage, EventQuery } from '../types/event.ts'
 import { clearCsrfToken, readId, readObject, readText, refreshCsrfToken, request } from './http.ts'
 import { mapEndpoint } from './mappers/endpointMapper.ts'
 import { mapWhitelistEntry } from './mappers/policyMapper.ts'
-import { mapEvents } from './mappers/eventMapper.ts'
+import { mapEventPage, mapEvents } from './mappers/eventMapper.ts'
 
 export class BackendUnavailableError extends Error {
   constructor() {
@@ -16,6 +17,7 @@ export class BackendUnavailableError extends Error {
 export const capabilities = Object.freeze({
   monitoring: true,
   authentication: true,
+  events: true,
   allow: true,
   block: false,
   revoke: true,
@@ -30,7 +32,7 @@ function endpointPath(endpointId: string) {
   return `/api/admin/endpoints/${encodeURIComponent(endpointId)}`
 }
 
-// M5 filters locally. Fetch every page before exposing events or metrics.
+// Dashboard and management snapshots need all events before deriving metrics.
 async function getAllRows(path: string, signal: AbortSignal): Promise<unknown[]> {
   const rows: unknown[] = []
   let totalPages: number | undefined
@@ -108,6 +110,13 @@ export const protectionApi = {
   async logout() {
     await request('/api/auth/logout', { method: 'POST' })
     clearCsrfToken()
+  },
+
+  async getEventPage(query: EventQuery, signal: AbortSignal): Promise<EventPage> {
+    signal.throwIfAborted()
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(query)) if (value !== undefined) params.set(key, String(value))
+    return mapEventPage(await request(`/api/admin/events?${params}`, { signal }))
   },
 
   async getEndpoint(endpointId: string, signal: AbortSignal): Promise<Endpoint> {

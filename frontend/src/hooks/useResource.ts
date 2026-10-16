@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { BackendUnavailableError } from '../services/api'
+import { ApiError } from '../services/http'
 
 export type ResourceState<T> =
   | { status: 'loading'; data?: never; error?: never }
   | { status: 'ready'; data: T; error?: never }
   | { status: 'unavailable'; data?: never; error?: never }
-  | { status: 'error'; data?: never; error: string }
+  | { status: 'error'; data?: never; error: string; statusCode?: number }
 
 export function useResource<T>(loader: (signal: AbortSignal) => Promise<T>) {
   const [state, setState] = useState<ResourceState<T>>({ status: 'loading' })
@@ -28,7 +29,7 @@ export function useResource<T>(loader: (signal: AbortSignal) => Promise<T>) {
         setState({ status: 'unavailable' })
         return 'unavailable' as const
       }
-      setState({ status: 'error', error: error instanceof Error ? error.message : 'Không thể tải dữ liệu. Vui lòng kiểm tra kết nối với máy chủ.' })
+      setState({ status: 'error', error: error instanceof Error ? error.message : 'Không thể tải dữ liệu. Vui lòng kiểm tra kết nối với máy chủ.', statusCode: error instanceof ApiError ? error.status : undefined })
       return 'error' as const
     }
   }, [loader])
