@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=USBShield Desktop Notifier
+Comment=USBShield Graphical Notification Helper for Blocked Mass Storage
+Exec=/opt/usbshield-agent/usbshield-notifier-launcher.sh
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
+Categories=System;Security;

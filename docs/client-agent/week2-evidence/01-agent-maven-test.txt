@@ -1,0 +1,75 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.group.usbshield:client-agent >------------------
+[INFO] Building USBShield Client Agent 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ client-agent ---
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ client-agent ---
+[INFO] Compiling 56 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ client-agent ---
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ client-agent ---
+[INFO] Compiling 20 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ client-agent ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.group.usbshield.agent.ClientAgentTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.842 s -- in com.group.usbshield.agent.ClientAgentTest
+[INFO] Running com.group.usbshield.agent.endpoint.EndpointManagerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.306 s -- in com.group.usbshield.agent.endpoint.EndpointManagerTest
+[INFO] Running com.group.usbshield.agent.event.EventSenderServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.179 s -- in com.group.usbshield.agent.event.EventSenderServiceTest
+[INFO] Running com.group.usbshield.agent.event.UsbEventEnricherTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in com.group.usbshield.agent.event.UsbEventEnricherTest
+[INFO] Running com.group.usbshield.agent.notification.BlockNotificationPolicyTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in com.group.usbshield.agent.notification.BlockNotificationPolicyTest
+[INFO] Running com.group.usbshield.agent.notification.DesktopNotificationServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in com.group.usbshield.agent.notification.DesktopNotificationServiceTest
+[INFO] Running com.group.usbshield.agent.outbox.OutboxSpoolServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.096 s -- in com.group.usbshield.agent.outbox.OutboxSpoolServiceTest
+[INFO] Running com.group.usbshield.agent.session.ActiveUserInfoTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.group.usbshield.agent.session.ActiveUserInfoTest
+[INFO] Running com.group.usbshield.agent.session.LinuxActiveUserResolverTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.group.usbshield.agent.session.LinuxActiveUserResolverTest
+[INFO] Running com.group.usbshield.agent.session.LoginctlActiveUserResolverTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in com.group.usbshield.agent.session.LoginctlActiveUserResolverTest
+[INFO] Running com.group.usbshield.agent.sync.AdminServerClientContractTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.073 s -- in com.group.usbshield.agent.sync.AdminServerClientContractTest
+[INFO] Running com.group.usbshield.agent.sync.HeartbeatCoordinatorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in com.group.usbshield.agent.sync.HeartbeatCoordinatorTest
+[INFO] Running com.group.usbshield.agent.sync.PolicyAckRecoveryTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.053 s -- in com.group.usbshield.agent.sync.PolicyAckRecoveryTest
+[INFO] Running com.group.usbshield.agent.sync.PolicySyncServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in com.group.usbshield.agent.sync.PolicySyncServiceTest
+[INFO] Running com.group.usbshield.agent.usbguard.UsbDeviceInfoTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.group.usbshield.agent.usbguard.UsbDeviceInfoTest
+[INFO] Running com.group.usbshield.agent.usbguard.UsbGuardEventListenerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.067 s -- in com.group.usbshield.agent.usbguard.UsbGuardEventListenerTest
+[INFO] Running com.group.usbshield.agent.usbguard.UsbGuardEventParserTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.group.usbshield.agent.usbguard.UsbGuardEventParserTest
+[INFO] Running com.group.usbshield.agent.usbguard.UsbGuardOutputParserTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.group.usbshield.agent.usbguard.UsbGuardOutputParserTest
+[INFO] Running com.group.usbshield.agent.usbguard.UsbGuardPolicySynchronizerTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in com.group.usbshield.agent.usbguard.UsbGuardPolicySynchronizerTest
+[INFO] Running com.group.usbshield.agent.usbguard.UsbGuardPresenceParserTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in com.group.usbshield.agent.usbguard.UsbGuardPresenceParserTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 61, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  36.533 s
+[INFO] Finished at: 2026-10-17T22:11:24+07:00
+[INFO] ------------------------------------------------------------------------

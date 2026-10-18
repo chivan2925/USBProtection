@@ -1,0 +1,41 @@
+=== USBShield Client Agent - Desktop Notifier & IPC Evidence ===
+Target Session: Graphical User Session (student01, UID 1000)
+XDG Autostart File: /etc/xdg/autostart/usbshield-notifier.desktop
+Launcher Script: /opt/usbshield-agent/usbshield-notifier-launcher.sh
+Runtime IPC Socket: /run/usbshield-notifier/1000.sock
+
+--- 1. Desktop Helper Autostart Configuration ---
+$ cat /etc/xdg/autostart/usbshield-notifier.desktop
+[Desktop Entry]
+Type=Application
+Name=USBShield Desktop Notifier
+Comment=USBShield Graphical Notification Helper for Blocked Mass Storage
+Exec=/opt/usbshield-agent/usbshield-notifier-launcher.sh
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+
+--- 2. Helper Process Execution under Desktop User ---
+$ ps -ef | grep DesktopNotificationClientMain
+student01  3420  2980  0 15:10 ?  00:00:00 /usr/bin/java -cp /opt/usbshield-agent/usbshield-agent.jar com.group.usbshield.agent.notification.DesktopNotificationClientMain 1000
+
+--- 3. Unix Domain Socket Permissions ---
+$ ls -ld /run/usbshield-notifier
+drwxrwxrwt 2 root root 40 Oct 17 15:10 /run/usbshield-notifier
+
+$ ls -l /run/usbshield-notifier/
+srwxr-xr-x 1 student01 student01 0 Oct 17 15:10 1000.sock
+
+--- 4. Notification Dispatch Trace upon BLOCKED Event ---
+1. USBGuard detects unauthorized USB Mass Storage insertion.
+2. UsbGuardEventListener resolves active UID = 1000.
+3. UnixSocketNotificationPublisher connects to /run/usbshield-notifier/1000.sock.
+4. Payload sent to helper:
+   {
+     "vendorId": "0951",
+     "productId": "1666",
+     "deviceName": "Kingston DataTraveler 3.0",
+     "reason": "Unauthorized USB Mass Storage Device Blocked by Policy"
+   }
+5. DesktopNotificationClient receives payload and executes /usr/bin/notify-send via argv in student01's GUI session.
+6. Desktop notification popup displays on GNOME/Wayland desktop.

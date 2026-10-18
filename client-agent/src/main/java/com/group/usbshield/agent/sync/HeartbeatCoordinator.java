@@ -59,14 +59,33 @@ public class HeartbeatCoordinator {
         log.debug("Heartbeat ACK from server: status={}, serverPolicyVersion={}",
                 response.getStatus(), response.getServerPolicyVersion());
 
-        // 3. Kiểm tra xem Server có phiên bản Whitelist mới hơn không
+        // 3. Retry pending policy ACK nếu có version đã áp dụng thành công nhưng server chưa ACK
+        retryPendingAckIfAny(registration, endpointId, agentToken);
+
+        // 4. Kiểm tra xem Server có phiên bản Whitelist mới hơn không
         if (response.getServerPolicyVersion() != null && response.getServerPolicyVersion() > localVersion) {
             log.info("New policy version detected on server (local: {}, server: {}). Initiating sync...",
                     localVersion, response.getServerPolicyVersion());
             policySyncService.syncPolicy(registration);
         }
 
-        // 4. Nếu Server đang ONLINE, gửi bù các sự kiện cũ trong hàng đợi spool ngoại tuyến
+        // 5. Nếu Server đang ONLINE, gửi bù các sự kiện cũ trong hàng đợi spool ngoại tuyến
         outboxSpoolService.drainOutbox(endpointId, agentToken, adminServerClient);
+    }
+
+    private void retryPendingAckIfAny(EndpointRegistration registration, String endpointId, String agentToken) {
+        Long pendingAck = registration.getPendingAckVersion();
+        if (pendingAck != null) {
+            log.info("Retrying pending policy ACK for version {}...", pendingAck);
+            com.group.usbshield.agent.sync.dto.PolicyAckRequest retryAck = com.group.usbshield.agent.sync.dto.PolicyAckRequest.builder()
+                    .appliedPolicyVersion(pendingAck)
+                    .build();
+            if (adminServerClient.acknowledgePolicy(endpointId, agentToken, retryAck)) {
+                endpointManager.clearPendingAck();
+                log.info("Pending policy ACK for version {} successfully confirmed by server.", pendingAck);
+            } else {
+                log.warn("Retry of pending policy ACK for version {} failed. Will retry on next heartbeat cycle.", pendingAck);
+            }
+        }
     }
 }

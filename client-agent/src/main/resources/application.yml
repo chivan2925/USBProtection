@@ -17,6 +17,8 @@ usbshield:
     data-dir: ${USBSHIELD_DATA_DIR:./data}
     # Local config directory
     config-dir: ${USBSHIELD_CONFIG_DIR:./config}
+    # Simulation mode (disabled by default in live/hardware)
+    simulation-enabled: ${USBSHIELD_SIMULATION_ENABLED:false}
 
 logging:
   level:
