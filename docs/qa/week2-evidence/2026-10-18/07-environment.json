@@ -1,0 +1,105 @@
+{
+  "captured_at": "2026-10-18T14:45:54.986632+07:00",
+  "timezone": "Asia/Bangkok",
+  "branch": "huy",
+  "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+  "source": "Working tree; source-manifest.json contains exact hashes.",
+  "os": "Windows-10-10.0.26200-SP0",
+  "node": "v22.20.0",
+  "npm": "10.9.3",
+  "java": "java version \"22.0.2\" 2024-07-16\nJava(TM) SE Runtime Environment (build 22.0.2+9-70)\nJava HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)",
+  "java_command": "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath\\java.EXE",
+  "JAVA_HOME": null,
+  "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "backend_jar": "admin-server/target/usbshield-admin-server.jar",
+  "backend_rebuilt": false,
+  "maven_rerun": false,
+  "process_cleanup": {
+    "remaining_test_jvms": 0,
+    "method": "Win32_Process enumeration after final suites, filtered to isolated frontend/.artifacts/live-* databases; checked outside sandbox"
+  },
+  "database_preservation": {
+    "path": "admin-server/data/usbshield.mv.db",
+    "sha256_before": "acd86897fc9e59d02c2aa891fba4cfef5141a9f6e2d8979341598399670c06e6",
+    "sha256_after": "acd86897fc9e59d02c2aa891fba4cfef5141a9f6e2d8979341598399670c06e6",
+    "unchanged": true
+  },
+  "checks": {
+    "01-frontend-tests": {
+      "command": [
+        "npm.cmd",
+        "test"
+      ],
+      "started": "2026-10-18T14:40:34.581894+07:00",
+      "finished": "2026-10-18T14:40:36.838763+07:00",
+      "exit_code": 0,
+      "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+      "branch": "huy"
+    },
+    "02-frontend-lint": {
+      "command": [
+        "npm.cmd",
+        "run",
+        "lint"
+      ],
+      "started": "2026-10-18T14:40:36.991535+07:00",
+      "finished": "2026-10-18T14:40:37.845480+07:00",
+      "exit_code": 0,
+      "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+      "branch": "huy"
+    },
+    "03-frontend-build": {
+      "command": [
+        "npm.cmd",
+        "run",
+        "build"
+      ],
+      "started": "2026-10-18T14:40:37.989369+07:00",
+      "finished": "2026-10-18T14:40:43.174531+07:00",
+      "exit_code": 0,
+      "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+      "branch": "huy"
+    },
+    "04-browser-fixture": {
+      "command": [
+        "npm.cmd",
+        "run",
+        "test:browser"
+      ],
+      "started": "2026-10-18T14:40:59.789570+07:00",
+      "finished": "2026-10-18T14:41:08.594781+07:00",
+      "exit_code": 0,
+      "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+      "branch": "huy"
+    },
+    "05-browser-management": {
+      "command": [
+        "npm.cmd",
+        "run",
+        "test:live"
+      ],
+      "started": "2026-10-18T14:39:23.306625+07:00",
+      "finished": "2026-10-18T14:39:54.825248+07:00",
+      "exit_code": 0,
+      "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+      "branch": "huy"
+    },
+    "06-browser-events": {
+      "command": [
+        "npm.cmd",
+        "run",
+        "test:browser:live"
+      ],
+      "started": "2026-10-18T14:41:08.738520+07:00",
+      "finished": "2026-10-18T14:41:29.036350+07:00",
+      "exit_code": 0,
+      "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+      "branch": "huy"
+    }
+  },
+  "limitations": [
+    "Synthetic HTTP input and controlled ACK; no physical USB, Ubuntu Agent, USBGuard or GUI execution.",
+    "Reviewed M3 61-test log is owner evidence from 2026-10-17, not a fresh Maven run.",
+    "M3 owner raw log does not identify its OS or Git revision; these are not inferred."
+  ]
+}

@@ -1,0 +1,590 @@
+{
+  "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+  "branch": "huy",
+  "source": "Working tree; source-manifest.json contains exact hashes.",
+  "captured_at": "2026-10-18T14:48:06.514938+07:00",
+  "application_database": {
+    "path": "admin-server/data/usbshield.mv.db",
+    "sha256_before": "acd86897fc9e59d02c2aa891fba4cfef5141a9f6e2d8979341598399670c06e6",
+    "sha256_after": "acd86897fc9e59d02c2aa891fba4cfef5141a9f6e2d8979341598399670c06e6",
+    "unchanged": true
+  },
+  "files": {
+    ".gitattributes": {
+      "bytes": 40,
+      "sha256": "18be76f9008af08719be1d98d291e1286907ad6df86e7bd4e2dbed4ce0903fe8"
+    },
+    "admin-server/pom.xml": {
+      "bytes": 3998,
+      "sha256": "fbe533c112950ae642d0b90d800d6faa401b02097f0bee35b1c41e7e2be95b1e"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentAuthenticationFilter.java": {
+      "bytes": 1986,
+      "sha256": "1b0eeb9bc40351d36d704ee9050810a3ec4ddbc4489728ff442d7a5baff861c4"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentCredentialService.java": {
+      "bytes": 1286,
+      "sha256": "f532d64d15af7f741c9a5babd0c5f3327aed45784c1f1c7e9f88d0c565ecf463"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEnrollmentController.java": {
+      "bytes": 2423,
+      "sha256": "86900ee43d12a17c3ef1bbf033463f07c1b1e3214418205d8969f7a764ec23c2"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEventController.java": {
+      "bytes": 4736,
+      "sha256": "7c0579d18d14c1f5bc1d9c130c118fdd07efe70b213ea6c67dbe6cb3302ec69e"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentHeartbeatController.java": {
+      "bytes": 1314,
+      "sha256": "31c0d124a62680f0118c83fda411e5f0d091e9d70b98d70d689f9d22df19e75e"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEnrollmentRequest.java": {
+      "bytes": 409,
+      "sha256": "048d1f744fe31fde0261eebefefe53a638d40efb48a1b6e1f9ebe4d6f501bcc2"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEnrollmentResponse.java": {
+      "bytes": 277,
+      "sha256": "65a947f49e5f80cb67e8d8a7ede42627028b568f646c8b6d8ba74162b6b70cda"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEventRequest.java": {
+      "bytes": 1688,
+      "sha256": "e877317023cd2b1e4083fa303a21d9210d445a4ae4419fc472014f755abfb475"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentHeartbeatRequest.java": {
+      "bytes": 631,
+      "sha256": "f02c4d896f1720a73537c7f94ab54db698be156d529c7a6923411e25a3ae652c"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentHeartbeatResponse.java": {
+      "bytes": 622,
+      "sha256": "464ffb2e90e836831c06cc50feb8f2a93461e21aaffb4fd3b68e6502dfddfca0"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentUsbDeviceDto.java": {
+      "bytes": 1163,
+      "sha256": "4ea2401a3d5be4ff2cdee2f2f44a59ce984c4d832b4071d3f328497ee8877373"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/auth/AdminAuthController.java": {
+      "bytes": 2730,
+      "sha256": "b6707957422c9da1c36e222f46efd024fc969cdb45a346be67b5402e4b6ada45"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/auth/AdminBootstrap.java": {
+      "bytes": 911,
+      "sha256": "65c2bd1dfe2af359a7ea12507f1b57809dbd129a90ca5b856f5a66499c63f61c"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/auth/AdminUser.java": {
+      "bytes": 799,
+      "sha256": "5fd1ded00f6c23002ccc4ca7eacca26e573113f27b5e14c7a9b4b37cfcda4b80"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/auth/AdminUserRepository.java": {
+      "bytes": 391,
+      "sha256": "3bd98619390f93572d1fc49e30a36769483f7f9b70507dd13ed0cb038e21acf1"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/common/ApiExceptionHandler.java": {
+      "bytes": 1413,
+      "sha256": "435819c02877bf946f7c13aed1db48b1155141d709ee6d56cfdf5c27abd140a0"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/config/OpenApiConfig.java": {
+      "bytes": 2214,
+      "sha256": "f451cf8209da30219c6c51b303d5a001d9eb621221ad340107d7d471ff6fc6a8"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/config/SecurityConfig.java": {
+      "bytes": 2640,
+      "sha256": "2d01f65e5607441eb2f21add8f8d5c9e7a0ce7bf21b153687c6491e7b8eeecab"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/device/UsbDevice.java": {
+      "bytes": 1208,
+      "sha256": "8ba3fcef7e88962bf25dbb40439c77bfb763fd6e52b2af8728f734bc3696655e"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/device/UsbDeviceRepository.java": {
+      "bytes": 473,
+      "sha256": "afb414931004288a997275175e064bd11cee7c2ccc2445dc8aeeee0e0f457006"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/endpoint/AdminEndpointController.java": {
+      "bytes": 1471,
+      "sha256": "6a5c88d02d2317b3742385987f2e72421e13088ebdb5b82ed8efe38823e79287"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/endpoint/Endpoint.java": {
+      "bytes": 1587,
+      "sha256": "e7b262e7106de6ae10188e97717bfa613a9820b5ca551f7871cbc514e4c2854f"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/endpoint/EndpointRepository.java": {
+      "bytes": 775,
+      "sha256": "599d9ea2d285e189b8a9d3eb0dbc51df38dc257bc7db94730c64686c98bce2d7"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/event/AdminEventController.java": {
+      "bytes": 3930,
+      "sha256": "becfc6a9ceeac8dbf92baff5d90e8d0581a4067d2a12e29d4ed35903c3c05365"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/event/UsbEvent.java": {
+      "bytes": 1705,
+      "sha256": "c524cb7ea5182e809beb04485fa2e2226150b5967ae94ad8f0469bb9d173333f"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/event/UsbEventRepository.java": {
+      "bytes": 490,
+      "sha256": "8c0593357482f0b7482d8b351cc0ed1ebe04f99413ce1bc09498d79e258f531d"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/policy/AdminEndpointWhitelistController.java": {
+      "bytes": 922,
+      "sha256": "e8c2e29f20269ce693f3323d6ef458ded64c2149faa41d55a81c02664f8492db"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/policy/AgentPolicyController.java": {
+      "bytes": 1129,
+      "sha256": "e4bdb7ff99548e7526ff54409ab100aa2429441aa78d0604b47b05954d773a89"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/policy/dto/AgentPolicyResponse.java": {
+      "bytes": 277,
+      "sha256": "1813d2a254861b9ba4c94a56bf277ca088afd5a238db629ff667bcebd5a91390"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/policy/dto/WhitelistedDeviceDto.java": {
+      "bytes": 574,
+      "sha256": "87eef35d0721727f2000e342dddcb19c36f8a0db9cc1b28570975e994e89ce44"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/policy/EndpointPolicyService.java": {
+      "bytes": 4570,
+      "sha256": "bfd33f761e64b623e17fddfdb6f381930cb9ba29b18b3b583ae585e0f7f06728"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/policy/EndpointWhitelistEntry.java": {
+      "bytes": 1564,
+      "sha256": "02b276c8395f1c7d2b0bb187aaeb3356ebca0e1c9bfe517abebe3826fa8c4124"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/policy/EndpointWhitelistEntryRepository.java": {
+      "bytes": 612,
+      "sha256": "de1ac20f38c9b86fd2cdb72e0093fc46397cd408ab56ae1cdc82a4541963c379"
+    },
+    "admin-server/src/main/java/com/group/usbshield/server/UsbShieldServerApplication.java": {
+      "bytes": 360,
+      "sha256": "ff7ccba63dbae8954fe94c3551eb1c6f387ef2771b83ccc6e1512036b7ec84ad"
+    },
+    "admin-server/src/main/resources/application.yml": {
+      "bytes": 1304,
+      "sha256": "bfd71f25c44e9d15efd19ab60c941dddceed2acdcc3d374b78c3a339bab244e0"
+    },
+    "admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentEventContractTest.java": {
+      "bytes": 3251,
+      "sha256": "a892c30b15115c5dd2e73c92bebb5020b5efbcdbe6d78cfd539749fbe2b5e98d"
+    },
+    "admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentHttpIntegrationTest.java": {
+      "bytes": 4533,
+      "sha256": "d99477c1947e4651077fc6473d639ba6e15077d89dec630813f33487c04ee64a"
+    },
+    "admin-server/src/test/java/com/group/usbshield/server/PolicyConsumerContractTest.java": {
+      "bytes": 2442,
+      "sha256": "9ad23056df79a3274c1e72a29c1f74b299fc7ef723b49cbfbf2fbfe4b398fc29"
+    },
+    "admin-server/src/test/java/com/group/usbshield/server/UsbShieldServerApplicationTests.java": {
+      "bytes": 328,
+      "sha256": "5b8db630d44dee7af17245d819faced9721e5bc598ec2b2700c9d649bdacbb36"
+    },
+    "admin-server/src/test/java/com/group/usbshield/server/Week2ExistingH2Test.java": {
+      "bytes": 2570,
+      "sha256": "b9462840249654b98217313a5a865bbb63cec5c2b808ce2b742a9add1019e4db"
+    },
+    "admin-server/src/test/java/com/group/usbshield/server/Week2ServerIntegrationTest.java": {
+      "bytes": 14436,
+      "sha256": "03ea52c3f6e53b095f30b021e37c35bd81567cf675f345f0ede4097636bb0c08"
+    },
+    "admin-server/target/usbshield-admin-server.jar": {
+      "bytes": 57212978,
+      "sha256": "20e70663c2c88726f7916525886c6d1bdad6850f86afceb98d32ef2d75c3a09b"
+    },
+    "docs/client-agent/week2-evidence/01-agent-maven-test.txt": {
+      "bytes": 6033,
+      "sha256": "967caa35138183f861053a8e9ca28589eb10e6a11fa3d6ba01d17b013af7d625"
+    },
+    "docs/client-agent/WEEK2_AGENT_INTEGRATION.md": {
+      "bytes": 10503,
+      "sha256": "267ec984ed1b0bd5e778e1a913b91af7fc688f10f96a8a1e260c9f840d975aa9"
+    },
+    "docs/qa/EVENT_VIEW_MODEL_MAPPING.md": {
+      "bytes": 10589,
+      "sha256": "4286997247375a4be4d5cac9fc54bb7e8eecb86c84d661e84a347dceae90a740"
+    },
+    "docs/qa/M4_M5_WEEK2_HANDOFF.md": {
+      "bytes": 6880,
+      "sha256": "cc963abebfa7f5d743b1f9bb6960933589dc2d50e5097659dde4e99512b4962a"
+    },
+    "docs/qa/WEEK1_M2_POC_VERIFICATION.md": {
+      "bytes": 4664,
+      "sha256": "bb38bbd654865b0d1c1903545b76c439e834590919ab693c1b59bd129733f472"
+    },
+    "docs/qa/WEEK1_QA_SUMMARY.md": {
+      "bytes": 4660,
+      "sha256": "a67e021ebe901e1f5711998030e5ed9fddd9fa405c86d09beb4e28d751d56935"
+    },
+    "docs/qa/WEEK1_TEST_INVENTORY.md": {
+      "bytes": 6205,
+      "sha256": "4445f97ea671f41a604982974dedbdcd206c680b9fde38506cb66aefd4d31cab"
+    },
+    "docs/qa/week2-evidence/2026-10-18/01-frontend-tests.txt": {
+      "bytes": 15899,
+      "sha256": "e512745627a3498b13ec22fa9f70eea7d77b05f44e349225b458b89c06803b3a"
+    },
+    "docs/qa/week2-evidence/2026-10-18/01-frontend-tests.txt.json": {
+      "bytes": 259,
+      "sha256": "dbffb318f9e8fe633240211c53c81925f9e9fbf5098efd2b61fd65e3ea514076"
+    },
+    "docs/qa/week2-evidence/2026-10-18/02-frontend-lint.txt": {
+      "bytes": 538,
+      "sha256": "3459df4cf673de8156fa369bc92eadaad92d2b1920758782e0f1659ef31e8b38"
+    },
+    "docs/qa/week2-evidence/2026-10-18/02-frontend-lint.txt.json": {
+      "bytes": 271,
+      "sha256": "80ecce9258219774e42bb1baa43c23e8a962e2eb1b744bb73ebe362962712c6a"
+    },
+    "docs/qa/week2-evidence/2026-10-18/03-frontend-build.txt": {
+      "bytes": 877,
+      "sha256": "2e351a3a33e2dce95a98dd645f8afb8604f3562fab6ae854cab0c002c5a5c30d"
+    },
+    "docs/qa/week2-evidence/2026-10-18/03-frontend-build.txt.json": {
+      "bytes": 272,
+      "sha256": "63ccf525353e7b8b5f540840c57590f748bc48687440f549b03d3331c0bbbe63"
+    },
+    "docs/qa/week2-evidence/2026-10-18/04-browser-fixture.txt": {
+      "bytes": 994,
+      "sha256": "4adad8f8fa984284fa3a178cefa5476041082d3c99b3e9dcec0be2a1e9f4501b"
+    },
+    "docs/qa/week2-evidence/2026-10-18/04-browser-fixture.txt.json": {
+      "bytes": 279,
+      "sha256": "a0b07f5e2459b5c411e049bd5f1926b91d8c3d0dc4b1004d43f411474affd8ee"
+    },
+    "docs/qa/week2-evidence/2026-10-18/05-browser-management.txt": {
+      "bytes": 1830,
+      "sha256": "d17f8346664531c97ec4ea25afd8cc88e52bf1e9296169cd9d57ffccdebab310"
+    },
+    "docs/qa/week2-evidence/2026-10-18/05-browser-management.txt.json": {
+      "bytes": 276,
+      "sha256": "f4b9f25dda997a1ea3594d96c4feb2abe609de6f09b2691b8eef40ca52c01508"
+    },
+    "docs/qa/week2-evidence/2026-10-18/06-browser-events.txt": {
+      "bytes": 1051,
+      "sha256": "885877891df55911ca2ecf63d2c493e4058339a40ffc56e6aed91bbe3630cdde"
+    },
+    "docs/qa/week2-evidence/2026-10-18/06-browser-events.txt.json": {
+      "bytes": 284,
+      "sha256": "63a8fb1a3c1c49cf26fe5f7d731afea3d24774f62986fd12fcbfc0df1f3a3a21"
+    },
+    "docs/qa/week2-evidence/2026-10-18/07-environment.json": {
+      "bytes": 3704,
+      "sha256": "d34001b0f822a73fc58d7c4f19376b75dc2e924da685506e19beb4cfeef614bc"
+    },
+    "docs/qa/week2-evidence/2026-10-18/08-restart-diagnostic.txt": {
+      "bytes": 1417,
+      "sha256": "bd96f6dd307c822e8f182c7a88bdd1f09695e1c6a0d020db312aa5bec493e4b8"
+    },
+    "docs/qa/week2-evidence/2026-10-18/screenshots/events-real-http-date-filter.png": {
+      "bytes": 173637,
+      "sha256": "f86bcc5f14d77ecbb3265e66c1224f108a9e614c95b3760fe321250ead3809cc"
+    },
+    "docs/qa/week2-evidence/2026-10-18/screenshots/events-real-http-desktop.png": {
+      "bytes": 173526,
+      "sha256": "a5da59a7507b8e1c5c113cdd9a4dd656408daa8389e3bc2d8d9bb46f625ff73e"
+    },
+    "docs/qa/week2-evidence/2026-10-18/screenshots/events-real-http-mobile.png": {
+      "bytes": 84553,
+      "sha256": "c2691c04bc567e818597bf4eb8abb38d629ccc960fa28eedcb01fdccd14a2d29"
+    },
+    "docs/qa/week2-evidence/2026-10-18/screenshots/m4-live-allow-a.png": {
+      "bytes": 113952,
+      "sha256": "a1b7f63d8efd1880eff9bf1bf63810740babcf980f9219a54a94bf8a916941ba"
+    },
+    "docs/qa/week2-evidence/2026-10-18/screenshots/m4-live-expired-session.png": {
+      "bytes": 44737,
+      "sha256": "81895e760357295d888cd5e6f9b1cbd78d1f558eb80af840cb2dd3ecf5c85adc"
+    },
+    "docs/qa/week2-evidence/2026-10-18/screenshots/m4-live-revoke-a.png": {
+      "bytes": 110743,
+      "sha256": "363d8951ef7f1cf83ab89c2a700eb668c9fb1aade59d05236027eb1f14d4df4e"
+    },
+    "docs/qa/week2-evidence/M5_NON_UBUNTU_COMPLETION_20261018.md": {
+      "bytes": 6675,
+      "sha256": "cb9221297387504dfc484563e61a10c13d9dd610940f1d27deb83e222af6ea86"
+    },
+    "docs/qa/WEEK2_INTEGRATION_TEST_PLAN.md": {
+      "bytes": 11417,
+      "sha256": "1f36233e2fb8a0de34249d4f486169e8f442de396c6abc6714eb0f4921bbf48f"
+    },
+    "docs/qa/WEEK2_QA_SUMMARY.md": {
+      "bytes": 9001,
+      "sha256": "9c364dd74d8d297d37365e6c3fa89e83ea061856c2b9c44e52805c04b0688261"
+    },
+    "docs/qa/WEEK2_TEST_INVENTORY.md": {
+      "bytes": 17320,
+      "sha256": "52b0ba0fce026d31984a20175193c7c79fcf68fa9fc52cb7c4cc101c72fc4873"
+    },
+    "docs/TEST_PLAN.md": {
+      "bytes": 9442,
+      "sha256": "1502a9b48fd405696c2577f08ef402bbe98a1659e2cce536d8088ec380864074"
+    },
+    "frontend/package-lock.json": {
+      "bytes": 41474,
+      "sha256": "4a185849d04dd0a27a130f13778ad451d3e1398e5a761be54406f825a565cb9a"
+    },
+    "frontend/package.json": {
+      "bytes": 1021,
+      "sha256": "2788ba54d253e9346d6a0f1e61f7e8046e942b56f433ef7e736b6e0a7da1dad6"
+    },
+    "frontend/src/App.css": {
+      "bytes": 24422,
+      "sha256": "f914bbdbc45b5de8d8e61e3dc448fcdac051da1c3e8db20f13ea901215e9ae85"
+    },
+    "frontend/src/App.tsx": {
+      "bytes": 5692,
+      "sha256": "097c2d9e4b8470a664cdb90bb8ea3a2af6d4e4fc51247b161395041ccf93a3b5"
+    },
+    "frontend/src/assets/hero.png": {
+      "bytes": 13057,
+      "sha256": "881ffbcaafc212e49addad08846a5b82761355fa20624253af3477ba33262c5c"
+    },
+    "frontend/src/assets/react.svg": {
+      "bytes": 4126,
+      "sha256": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5"
+    },
+    "frontend/src/assets/vite.svg": {
+      "bytes": 8709,
+      "sha256": "5be21acd42eb7b896e517f4e0f0f11eb5c5d9e54fbbcebe9453f033008fcca6f"
+    },
+    "frontend/src/components/Common.tsx": {
+      "bytes": 2757,
+      "sha256": "0c112514ed221965e66c101212ed776e9d31f5316f3c2a535467523294cff5f4"
+    },
+    "frontend/src/components/ConfirmDialog.tsx": {
+      "bytes": 1564,
+      "sha256": "fc0759aeb0b85e1d43a0a6f12370ca7ab2eba3b7a9ebaad1ec1a44a7be3f9e6d"
+    },
+    "frontend/src/components/DataTable.tsx": {
+      "bytes": 2903,
+      "sha256": "65a57ce442bd01ed4a4898d7a0e85982e83977d18f5b97d0df67de798b29d4f9"
+    },
+    "frontend/src/components/endpoint/EndpointStatusBadge.tsx": {
+      "bytes": 865,
+      "sha256": "50ea5c1a873f1042c38c669b153e8cf12378d55127123751b361b0a6b330f78b"
+    },
+    "frontend/src/components/endpoint/EndpointWhitelistPanel.tsx": {
+      "bytes": 3487,
+      "sha256": "d4f18ed79af6114e1c9c636315d70a4034d21739a70e2bfd8b39ab9324ef0522"
+    },
+    "frontend/src/components/event/EventFilters.tsx": {
+      "bytes": 2372,
+      "sha256": "d23b474f1cc5e522f773546514efd6fb79fda64d045c9b19360848208c403774"
+    },
+    "frontend/src/components/event/events.css": {
+      "bytes": 135,
+      "sha256": "948e887789b5d58054772f9c4a9a02da530b702d92102c52bc827b7a7fe701b4"
+    },
+    "frontend/src/components/event/EventTable.tsx": {
+      "bytes": 2074,
+      "sha256": "3f84a850a5eeda4765c6ed8355fa6ba4aa2236341bfc0b08b6f643ff61d87b7a"
+    },
+    "frontend/src/components/Filters.tsx": {
+      "bytes": 944,
+      "sha256": "251bb5a99ffeecf51a3292c49e21d25d400c83533fff42e729e25f19538a0114"
+    },
+    "frontend/src/components/Icon.tsx": {
+      "bytes": 1698,
+      "sha256": "2b4454e33fcb30931f4e3a68f33456e94dc403b4f7f06491de293d39e7bf20f6"
+    },
+    "frontend/src/components/Toast.tsx": {
+      "bytes": 1263,
+      "sha256": "742deee182ede614724b941b566ee89b851c63af646b28b7a4b62ae0f2896ec0"
+    },
+    "frontend/src/hooks/AuthProvider.tsx": {
+      "bytes": 2167,
+      "sha256": "5d284c4bcaff73e03d8e0a7326ac9170e70b8d485e67a865d14222e0c76a6074"
+    },
+    "frontend/src/hooks/useAuth.ts": {
+      "bytes": 438,
+      "sha256": "27f1810f748b6c61eaeae12e924b50dc5cc42626cd4470b98e0c38c32bc9df8c"
+    },
+    "frontend/src/hooks/useResource.ts": {
+      "bytes": 2058,
+      "sha256": "2c1354d0e371346b827b6ed09fcf6a704c3fa96cd73957a8a16c885deeb0ee3a"
+    },
+    "frontend/src/hooks/useRoute.ts": {
+      "bytes": 364,
+      "sha256": "de81b416e28e9461a782ff3aa5c47407aef6d60d10cb447f54de98620ffcce51"
+    },
+    "frontend/src/hooks/useToast.ts": {
+      "bytes": 291,
+      "sha256": "0343571842b9d56d2933cd74af90bb6a804c2c59372a7e1395cd562f3492e854"
+    },
+    "frontend/src/index.css": {
+      "bytes": 1205,
+      "sha256": "eda91fc7a2babaf9d00e64989ced709f6327786777984d7f5864d688f7b8602b"
+    },
+    "frontend/src/layouts/AdminLayout.tsx": {
+      "bytes": 5068,
+      "sha256": "0ee81d54d4c3e824ad7e97ae805ae260b934d43324a240d8e765741d2cd2ca00"
+    },
+    "frontend/src/main.tsx": {
+      "bytes": 230,
+      "sha256": "6e9e5807fcbd48b75a96db5cbef36c996262196be42e6d4760dc86babbe61ad2"
+    },
+    "frontend/src/mocks/dashboard.ts": {
+      "bytes": 394,
+      "sha256": "c38fe3955dd00432d4745653807ba79fe006a0c7ef61d16f98db8a3eeace7bc6"
+    },
+    "frontend/src/mocks/endpoints.ts": {
+      "bytes": 1374,
+      "sha256": "4ad29bd0e0db7588feb708fbc062b65eb389764bca74d4b969cac78ffccfdfa8"
+    },
+    "frontend/src/mocks/events.ts": {
+      "bytes": 1461,
+      "sha256": "834d3112556e593792aac22f78bdfa79250153cdc1c615d067e3336ba9802e1d"
+    },
+    "frontend/src/pages/Dashboard.tsx": {
+      "bytes": 6885,
+      "sha256": "8577f40797024f00da1942f89b1cec854db210ac592c97b779d07d7ece046865"
+    },
+    "frontend/src/pages/Devices.tsx": {
+      "bytes": 5522,
+      "sha256": "e29497ed6182aabcbe653173bfb89b6b99c0e28a64bb46db11436003a3269f25"
+    },
+    "frontend/src/pages/Endpoints.tsx": {
+      "bytes": 11362,
+      "sha256": "653197b006a82cbde361169370b5f049404a30a05fefc79b32b39eb0f57a530f"
+    },
+    "frontend/src/pages/Events.tsx": {
+      "bytes": 4790,
+      "sha256": "6bf976713b8d00948b55cd5ba3964360b24f53068cfc96deaa3ef1f10e1d85e5"
+    },
+    "frontend/src/pages/Login.tsx": {
+      "bytes": 4323,
+      "sha256": "14fe46391d56a34b5c6ab5e37b7d39047e3bd41c52caef1d0fc05a3d42459c49"
+    },
+    "frontend/src/pages/Settings.tsx": {
+      "bytes": 1459,
+      "sha256": "5b361752aa3167640b495645e8ee4ca6218f66ce88e4640c4c0c1cc7bf14d3e7"
+    },
+    "frontend/src/pages/types.ts": {
+      "bytes": 277,
+      "sha256": "015acfa952823fdcf42f1c67729899b5b1ce293c84ef76bc044987e6dc817d4a"
+    },
+    "frontend/src/services/api.ts": {
+      "bytes": 9792,
+      "sha256": "ecfaeb1336282101d80764e00bacbb64bd84d9ec3e63ca4474111fbd2b30dedf"
+    },
+    "frontend/src/services/demo.ts": {
+      "bytes": 2424,
+      "sha256": "131ae311dc5c376a64651bc7d6804f0b742ef3bbf9772acfa5a2dcde1df6af13"
+    },
+    "frontend/src/services/http.ts": {
+      "bytes": 4777,
+      "sha256": "d36e707f9bcc0aa796aa30ef210b1b9e66903a9a69209e68bb35c5407578432e"
+    },
+    "frontend/src/services/mappers/endpointMapper.ts": {
+      "bytes": 813,
+      "sha256": "fd3b859f11ddbd4d5dd684769cf56bdc7a8fb14bd060a290b8f9e8c6324afe42"
+    },
+    "frontend/src/services/mappers/eventMapper.ts": {
+      "bytes": 5420,
+      "sha256": "73070635d892f606ba08f1962b756b95a53c1a8ad053097d67698473af864654"
+    },
+    "frontend/src/services/mappers/policyMapper.ts": {
+      "bytes": 847,
+      "sha256": "d505098d105b31102521ae1d3e6c7673b3338c0a4905403aeef934adc66adf47"
+    },
+    "frontend/src/services/models.ts": {
+      "bytes": 1510,
+      "sha256": "ddbece2083bb163b3cb31626424a36e4351eb14994889af50a264005b7906798"
+    },
+    "frontend/src/types/endpoint.ts": {
+      "bytes": 426,
+      "sha256": "64d7ae6f540bd53a88a3825fe3e90b5a6d12876a9153bd4f4990a43056aa9448"
+    },
+    "frontend/src/types/event.ts": {
+      "bytes": 1639,
+      "sha256": "8e25553b24d65985330e40bf273c79f775a44d55ecf2f6321ffeed1fc8c06a1c"
+    },
+    "frontend/src/types/policy.ts": {
+      "bytes": 559,
+      "sha256": "aa0ec96181f51d3f9000e68b4a3b96e4b2311b9468cc9df054a2bb39293c2b69"
+    },
+    "frontend/src/utils/eventFilters.ts": {
+      "bytes": 3921,
+      "sha256": "d10275c7c5d679ebfcd14b2f14fb8bc3c4aafee2fb1a2c5c0f27af475367ec5c"
+    },
+    "frontend/src/utils/format.ts": {
+      "bytes": 1626,
+      "sha256": "7269a443f100261ef2263524656651ad356708b0fe4c05621b9d504f724941a4"
+    },
+    "frontend/tests/browser-live.mjs": {
+      "bytes": 15470,
+      "sha256": "743b6d09ad4e073e953e0944dcb66806b4993952eda506a0499f664dccd98c75"
+    },
+    "frontend/tests/browser.mjs": {
+      "bytes": 23831,
+      "sha256": "3af22c2025a0a6f2b53970ec80441028aaf6d8c0fd04f8a689db5da6240ccfb5"
+    },
+    "frontend/tests/components.test.mjs": {
+      "bytes": 5731,
+      "sha256": "46ec154384af331c6409acc5a8cc0b60363143dea7727192564ad6a6cd34ec74"
+    },
+    "frontend/tests/core.test.mjs": {
+      "bytes": 2614,
+      "sha256": "970183102e3910267158b727ba36b592446511e6f52b3b4a55acb283321502b9"
+    },
+    "frontend/tests/eventFilters.test.mjs": {
+      "bytes": 4684,
+      "sha256": "a69abadc6d885593cbc9ef6823936b563bbc78aa845ad258ecf598db19e457fb"
+    },
+    "frontend/tests/fixtures/admin-events-page.json": {
+      "bytes": 1473,
+      "sha256": "3630691c4972a279875067453cdc0615c3468a52f4255a92b0c3109ea023641b"
+    },
+    "frontend/tests/fixtures/adminServer.mjs": {
+      "bytes": 7232,
+      "sha256": "1a20aa77ddff45555fc14d5151bdf19a03b98e93537880e883cf29fb36fd716e"
+    },
+    "frontend/tests/liveServer.mjs": {
+      "bytes": 14467,
+      "sha256": "310465fc67338fb64dff61b8f05e4c51da14b216042bfb9109bf57247af2171f"
+    },
+    "frontend/tests/m4_admin_api.test.mjs": {
+      "bytes": 6134,
+      "sha256": "e6226130b1a3d964677f9fd614d0287037e9e42e573f98f4fa1607bf170017e7"
+    },
+    "frontend/tests/m4_auth.test.mjs": {
+      "bytes": 3090,
+      "sha256": "2e46975be7e464a4aac2e4887f2b3d9b903fc870b8dd12710a9817212f5e9cd0"
+    },
+    "frontend/tests/m4_endpoints.test.mjs": {
+      "bytes": 7481,
+      "sha256": "403b1a32c10c9e54e3ff848aa6b5c4bdce2df2b6aea7c2c36c8ac79c4f74c10c"
+    },
+    "frontend/tests/m5_event_api.test.mjs": {
+      "bytes": 7945,
+      "sha256": "83c6604e5d0d22a7931ed0e224663bba741811040097b627873ee03b78c23b16"
+    },
+    "frontend/tests/m5_events.test.mjs": {
+      "bytes": 5367,
+      "sha256": "240bea70479d198f027562797a7d8b1541078275447b17ed7c6a6699325e4b9b"
+    },
+    "frontend/tests/m5_live_api.test.mjs": {
+      "bytes": 6278,
+      "sha256": "861d87d63643bf89412e352da5d0a67dae58635982d31b325852e44e81e041ea"
+    },
+    "frontend/vite.config.ts": {
+      "bytes": 528,
+      "sha256": "8d8ae4c4e719915c84efd8c8562966baf961dbb4ce68efdd1db93c96dad8f57d"
+    },
+    "frontend/dist/favicon.svg": {
+      "bytes": 354,
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea"
+    },
+    "frontend/dist/icons.svg": {
+      "bytes": 5031,
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a"
+    },
+    "frontend/dist/index.html": {
+      "bytes": 656,
+      "sha256": "63cdeec648249cf5a4a0a662a4589909b476003848de2567dd382716d8254355"
+    },
+    "frontend/dist/assets/index-BeALIVYP.css": {
+      "bytes": 25376,
+      "sha256": "e3e35e251ae5dcb71c7699adaf0cbea241b4fafc51e377eeeb35d64ef3cdb9cb"
+    },
+    "frontend/dist/assets/index-Dj3Hlp7B.js": {
+      "bytes": 288903,
+      "sha256": "d6f6f74b8eeb215a80e0b3ab07e5121b9ff2914e3332f2ee9abc6e62a5d2c3f8"
+    }
+  }
+}

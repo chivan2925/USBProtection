@@ -1,8 +1,8 @@
 # Event transport to frontend mapping
 
-Owner: M5. Updated: 2026-10-16 (Asia/Bangkok).
+Owner: M5. Updated: 2026-10-18 (Asia/Bangkok).
 
-The [pure mapper](../../frontend/src/services/mappers/eventMapper.ts) follows **Admin API v0.2** `EventResponse` and `EventPage`. [Twelve fixture contract tests](../../frontend/tests/m5_event_api.test.mjs) verify that boundary. The merged [shared API adapter](../../frontend/src/services/api.ts), auth provider and server-driven Events controls are verified at frontend revision `a9b1799e2920cba8b6d02fc1d7186fbc0bc59825`. [Current post-merge verification](week2-evidence/M5_POST_MERGE_VERIFICATION.md) records 72 tests and three browser suites; [M4/M5 handoff](M4_M5_WEEK2_HANDOFF.md) documents the shared contracts. Ubuntu execution remains deferred.
+The [pure mapper](../../frontend/src/services/mappers/eventMapper.ts) follows **Admin API v0.2** `EventResponse` and `EventPage`. [Twelve fixture contract tests](../../frontend/tests/m5_event_api.test.mjs) verify that boundary. The [shared API adapter](../../frontend/src/services/api.ts), auth provider and server-driven Events controls pass [current verification](week2-evidence/M5_NON_UBUNTU_COMPLETION_20261018.md) on the `huy` working tree based on `e7b05fe`: 72 tests and three browser suites. The [M4/M5 handoff](M4_M5_WEEK2_HANDOFF.md) documents shared contracts; [2026-10-16 verification](week2-evidence/M5_POST_MERGE_VERIFICATION.md) remains historical. Ubuntu execution remains deferred.
 
 Sources: [canonical API](../API.md), [Admin read controller/records](../../admin-server/src/main/java/com/group/usbshield/server/event/AdminEventController.java), [serialized device DTO](../../admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentUsbDeviceDto.java), [M2 sample](../agent-contract/sample-usb-event.json), [frontend view model](../../frontend/src/types/event.ts).
 
@@ -62,3 +62,7 @@ The [Admin page fixture](../../frontend/tests/fixtures/admin-events-page.json) i
 ## Remaining integration and evidence boundaries
 
 Mapper, session/auth, live Events controls, dates and the merged M4 management paths have been exercised with real Spring Boot/H2 and Chromium. Management coverage includes A-only Allow/duplicate/Revoke, B isolation, controlled HTTP ACK and restart persistence. HTTP-created QA events in an isolated DB validate Backend → Web; physical USB attribution, actual Agent apply/ACK and native GUI notification remain deferred. Browser 403/500/network failures are explicitly injected. The technical handoff is complete; human M4 acknowledgment is PENDING until recorded by that owner. Update mapper and tests together when the API changes; the [Week 2 plan](WEEK2_INTEGRATION_TEST_PLAN.md) retains Ubuntu scenarios and the [older Events report](week2-evidence/M5_LIVE_EVENTS_VERIFICATION.md) retains its original 60-test scope.
+
+## Verification follow-up, 2026-10-18
+
+[Current verification](week2-evidence/M5_NON_UBUNTU_COMPLETION_20261018.md) covers the `huy` working tree based on `e7b05fe`: 72 tests and all browser suites PASS. The shared management harness now stops the Windows Java process tree before restart and asserts old-session HTTP 401 and cleared protected Events rows. Mapper and application authentication behavior were unchanged. The 2026-10-16 reports above remain historical; latest file hashes and raw logs are linked from the current report.

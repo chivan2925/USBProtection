@@ -1,6 +1,6 @@
 // Real Spring Boot + file-backed H2. Enrollment/events/ACK requests are synthetic.
 import assert from 'node:assert/strict'
-import { spawn } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { mkdtemp, writeFile } from 'node:fs/promises'
@@ -45,7 +45,16 @@ export async function startLiveServer(artifacts) {
   async function stop() {
     if (child?.pid && child.exitCode === null) {
       const stopped = new Promise(resolveExit => child.once('exit', resolveExit))
-      child.kill()
+      // Windows java launchers can spawn a separate JVM. Killing only the
+      // launcher leaves that JVM serving requests and holding the H2 file.
+      if (process.platform === 'win32') {
+        await new Promise((resolveKill, rejectKill) => {
+          execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, error => {
+            if (error && child.exitCode === null) rejectKill(error)
+            else resolveKill()
+          })
+        })
+      } else child.kill()
       await stopped
     }
   }
@@ -178,8 +187,11 @@ export async function checkLiveBrowser(backend, { cdp, evaluate, until, screensh
   assert.equal(persistedA.appliedPolicyVersion, revokedA.appliedPolicyVersion)
   assert.deepEqual(await backend.rules(backend.a.endpointId), [])
   assert.equal((await backend.http('/api/admin/events', { admin: true })).totalElements, 1)
+  assert.equal(await evaluate(`fetch('/api/auth/me').then(response => response.status)`), 401, 'Restart must invalidate the browser session')
   await evaluate(`document.querySelector('.refresh-actions button').click()`)
   await until(() => evaluate(`!!document.querySelector('#password')`), 'session invalid after server restart')
+  assert.equal(await evaluate(`document.querySelectorAll('tbody tr').length`), 0, 'Expired session clears protected event rows')
+  await screenshot('m4-live-expired-session.png')
   await login()
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '1'`), 'login after H2 restart')
   await evaluate(`document.querySelector('[aria-label="Đăng xuất"]').click()`)

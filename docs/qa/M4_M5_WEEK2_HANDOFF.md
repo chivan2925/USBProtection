@@ -48,3 +48,9 @@ Run browser commands sequentially. M4 fixture/management preview uses 4173; its 
 M4 can review the merge contract table and evidence above and record their name, date, reviewed revision and accepted/open items here or in a linked PR review. The confirmation fields remain **PENDING** until M4 provides that record; Codex's technical review is the only review attributed here.
 
 M5 maintains event mapping/filter/UI and QA; M4 maintains shared networking/auth/management. M1 owns API/DTO changes. M2/M3 supply Ubuntu USBGuard, actual Agent apply/ACK, offline/outbox, correct user and native notification evidence for the still-open Week 2 group gate.
+
+## Technical follow-up, 2026-10-18
+
+Branch `huy`, working tree based on `e7b05fe972f07aa2d304dcd8e6cf21c664f4d085`: [M5 non-Ubuntu completion](week2-evidence/M5_NON_UBUNTU_COMPLETION_20261018.md) records 72 tests, lint/build and all three browser suites PASS. The shared `tests/liveServer.mjs` harness now stops the full Windows Java process tree before restart; regression assertions verify old-session HTTP 401, Login without protected Events rows, reauthentication and H2 persistence. No production authentication or management source was changed. M3 61-test owner evidence from 2026-10-17 is reviewed in the QA summary/inventory.
+
+**M5 non-Ubuntu technical work: COMPLETE. Human M4 acknowledgment: PENDING.** The existing owner acknowledgment fields and Ubuntu follow-up remain open; no acceptance is inferred from automated tests.
