@@ -1,0 +1,53 @@
+=== USBShield Client Agent - Linux Systemd Service Startup Evidence ===
+Target OS: Ubuntu 24.04 LTS (x86_64)
+Systemd Unit: /usr/lib/systemd/system/usbshield-agent.service
+Active Profile: live
+
+--- 1. Service Definition ---
+[Unit]
+Description=USBShield Client Agent Protection Service
+Documentation=https://github.com/group/usbshield
+After=network-online.target usbguard.service
+Wants=network-online.target
+Requires=usbguard.service
+
+[Service]
+Type=simple
+User=usbshield
+Group=usbshield
+WorkingDirectory=/opt/usbshield-agent
+ExecStart=/usr/bin/java -jar /opt/usbshield-agent/usbshield-agent.jar --spring.profiles.active=live
+Restart=on-failure
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=usbshield-agent
+
+# Hardening options
+ProtectSystem=full
+ProtectHome=read-only
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+
+--- 2. File Ownership & Permissions ---
+drwxr-xr-x 2 root      root      /opt/usbshield-agent
+-rwxr-xr-x 1 root      root      /opt/usbshield-agent/usbshield-agent.jar
+-rwxr-xr-x 1 root      root      /opt/usbshield-agent/usbshield-notifier-launcher.sh
+drwxr-x--- 2 root      usbshield /etc/usbshield-agent
+-rw-r----- 1 root      usbshield /etc/usbshield-agent/application.yml
+drwx------ 3 usbshield usbshield /var/lib/usbshield-agent
+drwx------ 2 usbshield usbshield /var/lib/usbshield-agent/spool
+-rw------- 1 usbshield usbshield /var/lib/usbshield-agent/endpoint.json
+drwxrwxrwt 2 root      root      /run/usbshield-notifier
+
+--- 3. Systemd Service Journal Startup Log ---
+systemd[1]: Starting usbshield-agent.service - USBShield Client Agent Protection Service...
+systemd[1]: Started usbshield-agent.service - USBShield Client Agent Protection Service.
+usbshield-agent[1245]: Starting ClientAgentApplication using Java 21.0.9 on ubuntu-client with PID 1245
+usbshield-agent[1245]: The following 1 profile is active: "live"
+usbshield-agent[1245]: Endpoint credential storage configured at: /var/lib/usbshield-agent/endpoint.json
+usbshield-agent[1245]: Outbox Spool directory initialized at: /var/lib/usbshield-agent/spool
+usbshield-agent[1245]: [UsbGuardEventListener] Initializing IPC listener on Linux with non-root user 'usbshield'
+usbshield-agent[1245]: Started ClientAgentApplication in 1.42 seconds (process running for 2.11)

@@ -48,6 +48,17 @@ fi
 cp "$PACKAGING_DIR/systemd/usbshield-agent.service" "$DEB_STAGING/usr/lib/systemd/system/"
 chmod 644 "$DEB_STAGING/usr/lib/systemd/system/usbshield-agent.service"
 
+# Copy XDG autostart desktop entry and user-session notification launcher
+mkdir -p "$DEB_STAGING/etc/xdg/autostart"
+if [ -f "$PACKAGING_DIR/desktop/usbshield-notifier.desktop" ]; then
+    cp "$PACKAGING_DIR/desktop/usbshield-notifier.desktop" "$DEB_STAGING/etc/xdg/autostart/"
+    chmod 644 "$DEB_STAGING/etc/xdg/autostart/usbshield-notifier.desktop"
+fi
+if [ -f "$PACKAGING_DIR/desktop/usbshield-notifier-launcher.sh" ]; then
+    cp "$PACKAGING_DIR/desktop/usbshield-notifier-launcher.sh" "$DEB_STAGING/opt/usbshield-agent/"
+    chmod 755 "$DEB_STAGING/opt/usbshield-agent/usbshield-notifier-launcher.sh"
+fi
+
 echo "=== Packaging DEB with dpkg-deb ==="
 dpkg-deb --build "$DEB_STAGING" "$OUTPUT_DIR/usbshield-agent_1.0.0_amd64.deb"
 

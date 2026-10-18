@@ -1,0 +1,58 @@
+=== USBShield Client Agent - Policy Fetch, Apply & ACK Flow Evidence ===
+Endpoint: EP-6A72C3D9
+Scenario: Admin approves USB Kingston Flash on EP-6A72C3D9 via Web Console
+Desired Server Version: 1 -> Local Applied Version: 1
+
+--- 1. Detection via Heartbeat ---
+[INFO] New policy version detected on server (local: 0, server: 1). Initiating sync...
+
+--- 2. GET /api/agent/policy ---
+Request Headers:
+  X-Endpoint-Id: EP-6A72C3D9
+  X-Agent-Token: agt_8f2a10b4712e48bb94553b1b6d09
+  Accept: application/json
+
+Response Body:
+{
+  "policyVersion": 1,
+  "whitelistedDevices": [
+    {
+      "vendorId": "0951",
+      "productId": "1666",
+      "serialNumber": "00187D0F55B6EC21391910A2",
+      "deviceName": "Kingston DataTraveler 3.0",
+      "fingerprintValue": "id 0951:1666 serial \"00187D0F55B6EC21391910A2\""
+    }
+  ]
+}
+
+--- 3. Local USBGuard Rule Application (M2 Gateway) ---
+[INFO] Applying new policy version 1 with 1 whitelisted devices
+[INFO] [UsbGuardPolicySynchronizer] Generating USBGuard rule with label "usbshield-managed"
+[INFO] [UsbGuardPolicySynchronizer] Executed: usbguard append-rule "allow id 0951:1666 serial \"00187D0F55B6EC21391910A2\" label \"usbshield-managed\""
+[INFO] USBGuard policy applied successfully (exitCode: 0)
+
+--- 4. Local Version Persistence & Pending ACK ---
+[INFO] Updated local applied policy version to 1 (marked as pending ACK)
+
+--- 5. POST /api/agent/policy/ack ---
+Request Headers:
+  X-Endpoint-Id: EP-6A72C3D9
+  X-Agent-Token: agt_8f2a10b4712e48bb94553b1b6d09
+  Content-Type: application/json
+Request Body:
+{
+  "appliedPolicyVersion": 1,
+  "appliedAt": "2026-10-17T15:15:30.450Z",
+  "ruleCount": 1
+}
+
+Response Status: 200 OK
+Response Body:
+{
+  "status": "ACKNOWLEDGED",
+  "appliedPolicyVersion": 1
+}
+
+[INFO] Cleared pending policy ACK
+[INFO] Policy synchronization to version 1 completed and ACK confirmed by server.

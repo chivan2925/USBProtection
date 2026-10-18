@@ -14,4 +14,5 @@ public class AgentProperties {
     private String dataDir = "/var/lib/usbshield-agent";
     private String configDir = "/etc/usbshield-agent";
     private boolean notificationEnabled = true;
+    private boolean simulationEnabled = false;
 }

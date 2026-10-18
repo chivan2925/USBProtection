@@ -1,0 +1,24 @@
+# Configuration for Ubuntu Production / Live Deployment
+spring:
+  config:
+    activate:
+      on-profile: live
+
+usbshield:
+  agent:
+    # Central Admin Server URL
+    server-url: ${USBSHIELD_SERVER_URL:http://localhost:8080}
+    # Secret enrollment bootstrap token
+    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:default-enrollment-secret}
+    # Production directories on Ubuntu Linux
+    data-dir: ${USBSHIELD_DATA_DIR:/var/lib/usbshield-agent}
+    config-dir: ${USBSHIELD_CONFIG_DIR:/etc/usbshield-agent}
+    heartbeat-interval-ms: 5000
+    notification-enabled: true
+    # Simulation must NEVER run in live/hardware profile
+    simulation-enabled: false
+
+logging:
+  level:
+    com.group.usbshield.agent: INFO
+    root: WARN
