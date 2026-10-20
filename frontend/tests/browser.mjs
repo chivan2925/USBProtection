@@ -201,7 +201,9 @@ try {
   await screenshot('m4-mobile.png')
   await cdp('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1050, deviceScaleFactor: 1, mobile: false })
   fixture.state.sessions.clear()
-  await navigate('/dashboard', 'Tổng quan bảo vệ')
+  // An expired cookie is discovered on reload, not by expecting Dashboard to
+  // render after server-side sessions have been invalidated.
+  await cdp('Page.reload')
   await until(() => evaluate(`!!document.querySelector('#password') && location.hash === '#/login'`), 'expired session redirects')
   await login()
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '2'`), 'login again')
