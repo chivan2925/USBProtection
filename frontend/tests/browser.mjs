@@ -33,7 +33,12 @@ async function until(check, label) {
   throw new Error(`Timed out: ${label}\n${output}`)
 }
 try {
-  await until(() => output.includes('http://127.0.0.1:4173'), 'preview server startup')
+  await until(async () => {
+    // Vite can colorize its startup URL. Successful HTTP is the readiness gate.
+    if (server.exitCode !== null || server.signalCode !== null) return false
+    const response = await fetch('http://127.0.0.1:4173/', { signal: AbortSignal.timeout(750) })
+    return response.ok
+  }, 'preview server HTTP readiness')
   browser = spawn(executable, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--disable-background-networking', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { windowsHide: true, stdio: 'ignore' })
   const portFile = join(profile, 'DevToolsActivePort')
   await until(() => existsSync(portFile), 'Chromium startup')

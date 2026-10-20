@@ -54,3 +54,7 @@ M5's technical review and review-ready M4 handoff package are complete. A human 
 When Ubuntu testing resumes, M3 supplies authenticated Agent/transport/outbox/apply/ACK and helper startup traces; M2 supplies physical BLOCK/active-user and notification traces; M5 correlates them with persisted IDs and Web rows. Final .deb clean install/reboot and release guides remain Week 3/4.
 
 The historical [M3 2026-10-12 simulation](../client-agent/evidence/01-agent-server-e2e-live-run.txt) is retained as historical transport evidence. No application authentication code was changed in the restart harness fix.
+
+## Windows preview startup follow-up — 2026-10-20
+
+A later Windows run reported `npm run lint` PASS, `npm run build` PASS and `npm test` **72/72 PASS**, but `npm run test:browser` and `npm run test:live` timed out while waiting for the Vite startup **log text** even though Vite printed the local URL. The outcome of `test:browser:live` was not supplied. [Browser readiness fix](WEEK2_WINDOWS_BROWSER_READINESS_FIX.md) changes the harness gate to an actual HTTP probe via an idempotent one-time migration, accompanied by four additional regression checks. The browser suites have **not** yet been rerun on the patched Windows workspace; do not infer PASS. The earlier 2026-10-18 Windows browser evidence remains historical and unaffected. Ubuntu hardware/service/desktop checks remain **DEFERRED UNTIL AFTER WEEK 4**.
