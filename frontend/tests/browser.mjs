@@ -33,7 +33,12 @@ async function until(check, label) {
   throw new Error(`Timed out: ${label}\n${output}`)
 }
 try {
-  await until(() => output.includes('http://127.0.0.1:4173'), 'preview server startup')
+  await until(async () => {
+    // Vite can colorize its startup URL. Successful HTTP is the readiness gate.
+    if (server.exitCode !== null || server.signalCode !== null) return false
+    const response = await fetch('http://127.0.0.1:4173/', { signal: AbortSignal.timeout(750) })
+    return response.ok
+  }, 'preview server HTTP readiness')
   browser = spawn(executable, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--disable-background-networking', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { windowsHide: true, stdio: 'ignore' })
   const portFile = join(profile, 'DevToolsActivePort')
   await until(() => existsSync(portFile), 'Chromium startup')
@@ -196,7 +201,9 @@ try {
   await screenshot('m4-mobile.png')
   await cdp('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1050, deviceScaleFactor: 1, mobile: false })
   fixture.state.sessions.clear()
-  await navigate('/dashboard', 'Tổng quan bảo vệ')
+  // An expired cookie is discovered on reload, not by expecting Dashboard to
+  // render after server-side sessions have been invalidated.
+  await cdp('Page.reload')
   await until(() => evaluate(`!!document.querySelector('#password') && location.hash === '#/login'`), 'expired session redirects')
   await login()
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '2'`), 'login again')
