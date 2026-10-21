@@ -18,6 +18,20 @@ test('startup fix is idempotent', () => {
   assert.equal(second.source, first.source)
 })
 
+test('already migrated Windows CRLF harness is recognized without rewriting the source', () => {
+  const source = `// Windows checkout\r\n${newCheck.replace(/\n/g, '\r\n')}\r\n// retained browser assertions\r\n`
+  assert.deepEqual(updateBrowserHarness(source), { source, changed: false })
+})
+
+test('migration preserves Windows CRLF and remains idempotent after the first run', () => {
+  const source = `// Windows checkout\r\n${oldCheck}\r\n// retained browser assertions\r\n`
+  const first = updateBrowserHarness(source)
+  assert.equal(first.changed, true)
+  assert.ok(first.source.includes(newCheck.replace(/\n/g, '\r\n')))
+  assert.equal(first.source.replace(/\r\n/g, '').includes('\n'), false)
+  assert.deepEqual(updateBrowserHarness(first.source), { source: first.source, changed: false })
+})
+
 test('unrecognized browser harness is not overwritten', () => {
   assert.throws(() => updateBrowserHarness('different startup check'), /No changes written/)
   assert.throws(() => updateBrowserHarness(`${oldCheck}\n${oldCheck}`), /No changes written/)

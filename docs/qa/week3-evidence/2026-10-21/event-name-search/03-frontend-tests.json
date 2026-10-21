@@ -1,0 +1,16 @@
+{
+  "command": [
+    "npm.cmd",
+    "test"
+  ],
+  "command_text": "npm.cmd test",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T23:08:47.947581+07:00",
+  "scope": "Frontend unit/component/adapter regression for name/ID search and aligned labels",
+  "source_manifest": "sources/7d28bf82e8d6e581a51095b9cded9f7a82cf9f653292e3ad2f27df9a3b6fa905.json",
+  "source_tree_sha256": "7d28bf82e8d6e581a51095b9cded9f7a82cf9f653292e3ad2f27df9a3b6fa905",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T23:08:50.283777+07:00"
+}

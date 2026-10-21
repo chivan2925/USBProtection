@@ -1,0 +1,20 @@
+{
+  "command": [
+    "mvn.cmd",
+    "-o",
+    "-B",
+    "-f",
+    "admin-server/pom.xml",
+    "package"
+  ],
+  "command_text": "mvn.cmd -o -B -f admin-server/pom.xml package",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T23:08:50.645762+07:00",
+  "scope": "Server regression including name/ID search, legacy hostname fallback, escaped literal patterns and global pagination; isolated test H2",
+  "source_manifest": "sources/7d28bf82e8d6e581a51095b9cded9f7a82cf9f653292e3ad2f27df9a3b6fa905.json",
+  "source_tree_sha256": "7d28bf82e8d6e581a51095b9cded9f7a82cf9f653292e3ad2f27df9a3b6fa905",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T23:09:30.554948+07:00"
+}

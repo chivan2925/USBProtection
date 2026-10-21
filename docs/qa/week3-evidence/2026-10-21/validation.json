@@ -1,0 +1,17 @@
+{
+  "captured_at": "2026-10-21T22:46:32.222033+07:00",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "copied_screenshots": 10,
+  "verified_local_links": 123,
+  "database_unchanged": true,
+  "source_and_build_hashes_verified": true,
+  "git_diff_check_exit_code": 0,
+  "documents_sha256": {
+    "docs/TEST_PLAN.md": "e74f64d72b6101b7c0d10273cc946468477aa819b3c36c268dcac9b058726d5b",
+    "docs/DEMO_SCRIPT.md": "335e39c3daf8ef73311f2563a343ebe28d1a97d46953544b3c04647970609838",
+    "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md": "13dd422ca6cbec67e541acd94982e2721c4d7181005e602324d14b95318abe29",
+    "docs/qa/WEEK3_TEST_INVENTORY.md": "1275ea5e8707cdedb2d8add5f4b5bad435dd87bf099ee750a9d0b491e3ade959",
+    "docs/qa/WEEK3_QA_SUMMARY.md": "1371224a2204dfa94eaa9221424beaa2af9585d0e3d596e18bc8bba3ff145d1e",
+    "docs/qa/week3-evidence/README.md": "249e44cf39222c4f6c7c4bc0443a343b1d6e70063767e6bd15120a1b4a02b780"
+  }
+}

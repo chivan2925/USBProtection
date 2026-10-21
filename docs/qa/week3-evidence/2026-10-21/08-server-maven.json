@@ -1,0 +1,19 @@
+{
+  "command": [
+    "mvn.cmd",
+    "-B",
+    "-f",
+    "admin-server/pom.xml",
+    "package"
+  ],
+  "command_text": "mvn.cmd -B -f admin-server/pom.xml package",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:38:18.860383+07:00",
+  "scope": "Fresh Windows server tests and JAR build; retry after offline cache miss",
+  "source_manifest": "sources/7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34.json",
+  "source_tree_sha256": "7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T22:38:50.988356+07:00"
+}

@@ -1,0 +1,28 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:browser:live"
+  ],
+  "command_text": "npm.cmd run test:browser:live",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T23:24:01.103361+07:00",
+  "scope": "Real Spring Boot/H2 browser: mixed-case partial username matches both users, partial UNKNOWN, combined endpoint/device filters and global pagination",
+  "source_manifest": "sources/91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934.json",
+  "source_tree_sha256": "91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934"
+}
+
+
+> frontend@0.0.0 test:browser:live
+> node tests/browser-live.mjs
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+PASS: Week 3 HTTP synthetic no-serial storage, UNKNOWN/source timestamp, user-switch history and endpoint A/B isolation (28 persisted events).
+PASS: Endpoint/USB searches accept visible names and IDs with server-side filtering/global pagination; Linux User accepts a case-insensitive part of the username.
+PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.
+PASS: browser-injected 403/500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png
+LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.
+
+{"finished_at": "2026-10-21T23:24:24.766802+07:00", "exit_code": 0}

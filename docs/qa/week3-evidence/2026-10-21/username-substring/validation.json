@@ -1,0 +1,56 @@
+{
+  "captured_at": "2026-10-21T23:25:52.686249+07:00",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "final_source_manifest": "sources/91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934.json",
+  "final_source_tree_sha256": "91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934",
+  "tested_sources_unchanged": true,
+  "frontend_test_lint_build_inputs_match_final_source": true,
+  "server_test_build_and_browser_sources_match": true,
+  "verified_local_links": 175,
+  "git_diff_check_exit_code": 0,
+  "artifacts": {
+    "admin-server/target/usbshield-admin-server.jar": {
+      "sha256": "e2b585a11dec593e6c02f5257859c4fa5a9858db3f94447c9a8ecbf9fecb787a",
+      "bytes": 57214355
+    },
+    "frontend/dist/favicon.svg": {
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea",
+      "bytes": 354
+    },
+    "frontend/dist/icons.svg": {
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a",
+      "bytes": 5031
+    },
+    "frontend/dist/index.html": {
+      "sha256": "10f2b3a899b715905be69bda416934d27c2495c8a4e5df35dd07463bedf2544e",
+      "bytes": 656
+    },
+    "frontend/dist/assets/index-CWwGY5jO.css": {
+      "sha256": "8472db2bdae49837d905e0ff87f0945b6b4835625a3217d89a5addffe8aa1e55",
+      "bytes": 25437
+    },
+    "frontend/dist/assets/index-vkS3dtxb.js": {
+      "sha256": "cb852ac82bd928f57ab921bae64c2f5c55aa2b8fb5672ce64571f40cefe7f8c1",
+      "bytes": 289011
+    }
+  },
+  "screenshots": {
+    "screenshots/events-username-substring.png": {
+      "sha256": "2edf9cd8a98e897d06cc775a187b6b880757bbf1144ca796a6689946dfe39d94",
+      "captured_at": "2026-10-21T23:24:21.337604+07:00",
+      "command": "05-browser-events.json"
+    }
+  },
+  "documents_sha256": {
+    "docs/API.md": "98ca8ca29a6ebe15db3b2807759fe305ccca89134c7d23085261492479d154af",
+    "docs/TEST_PLAN.md": "38dd6bb0add1800957574aad850dfc4a337c82843c3dd06079450a5e68f8e436",
+    "docs/qa/EVENT_VIEW_MODEL_MAPPING.md": "1bb1f598c6ade0e28df408ae27832df0464dfe3facd6924308e888fc8783c97e",
+    "docs/qa/WEEK3_EVENT_NAME_SEARCH_FIX.md": "ff8ace67c8a474a191cc5af632e44521e73b850d5096d4d9e8eb53d747af1e68",
+    "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md": "535d1dadb8fdcadd4aa43b93a70c10570d2db96bb9273e4528ea2dc4160105c1",
+    "docs/qa/WEEK3_TEST_INVENTORY.md": "4a073c9442a95bc29a336b2d2151881448d8aa3b6af161a6f4c4b1d78c97cc6e",
+    "docs/qa/WEEK3_QA_SUMMARY.md": "af129dc433a12fefc2e28daecee56965846720cfc5e18d338def3a5db5f47589",
+    "docs/qa/week3-evidence/README.md": "5f39a915715a1646dd9147e7b789bb0ac764a0e21a2f38f47879035018d153e0",
+    "docs/qa/week3-evidence/2026-10-21/username-substring/README.md": "c7197fa00335c26a01e2ee0aac893bc2d633d0d77d5281e72f9682fd21ed597f"
+  },
+  "application_database": "Already locked by user runtime; not opened, reset, stopped or hashed by this follow-up. Tests used isolated DBs."
+}

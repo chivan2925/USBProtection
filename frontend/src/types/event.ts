@@ -39,6 +39,9 @@ export interface EventPage {
 export interface EventQuery {
   page: number
   size: number
+  endpoint?: string
+  device?: string
+  username?: string
   endpointId?: string
   linuxUsername?: string
   deviceId?: string

@@ -84,12 +84,12 @@ test('invalid CSRF response prevents credentials from being submitted', async ()
   })
 })
 
-test('live filters use exact device/user identity and include the last nanosecond of local dates', () => {
+test('live filters send endpoint/USB/username text and the last nanosecond of local dates', () => {
   const originalTZ = process.env.TZ
   try {
     process.env.TZ = 'Asia/Bangkok'
     const query = getEventQuery({ ...emptyEventFilters, endpoint: ' endpoint-A ', username: ' student01 ', device: '9007199254740993', decision: 'blocked', eventType: 'disconnected', dateFrom: '2026-10-16', dateTo: '2026-10-16' }, 1, 20)
-    assert.deepEqual(query, { page: 1, size: 20, endpointId: 'endpoint-A', linuxUsername: 'student01', deviceId: '9007199254740993', decision: 'BLOCKED', eventType: 'DISCONNECTED', from: '2026-10-15T17:00:00.000Z', to: '2026-10-16T16:59:59.999999999Z' })
+    assert.deepEqual(query, { page: 1, size: 20, endpoint: 'endpoint-A', username: 'student01', device: '9007199254740993', decision: 'BLOCKED', eventType: 'DISCONNECTED', from: '2026-10-15T17:00:00.000Z', to: '2026-10-16T16:59:59.999999999Z' })
     process.env.TZ = 'America/New_York'
     const dst = getEventQuery({ ...emptyEventFilters, dateFrom: '2026-03-08', dateTo: '2026-03-08' })
     assert.equal(dst.from, '2026-03-08T05:00:00.000Z')
@@ -98,5 +98,42 @@ test('live filters use exact device/user identity and include the last nanosecon
 })
 
 test('invalid live filters are rejected instead of silently changing matching semantics', () => {
-  for (const filters of [{ device: 'Kingston' }, { device: '-1' }, { device: '9223372036854775808' }, { decision: 'unknown' }, { eventType: 'service' }, { dateFrom: '2026-10-17', dateTo: '2026-10-16' }]) assert.throws(() => getEventQuery({ ...emptyEventFilters, ...filters }))
+  for (const filters of [{ decision: 'unknown' }, { eventType: 'service' }, { dateFrom: '2026-10-17', dateTo: '2026-10-16' }]) assert.throws(() => getEventQuery({ ...emptyEventFilters, ...filters }))
+})
+
+test('live search accepts visible endpoint/USB names and safely encodes them without a snapshot read', async () => {
+  const query = getEventQuery({ ...emptyEventFilters, endpoint: ' DESKTOP-8STBDDD ', device: ' Kingston DataTraveler 3.0 & backup ', username: ' StuDen ' })
+  assert.equal(query.endpoint, 'DESKTOP-8STBDDD')
+  assert.equal(query.device, 'Kingston DataTraveler 3.0 & backup')
+  assert.equal(query.username, 'StuDen')
+  assert.equal(query.linuxUsername, undefined)
+  assert.equal(query.endpointId, undefined)
+  assert.equal(query.deviceId, undefined)
+  await withFetch(async path => {
+    const url = new URL(path, 'http://localhost')
+    assert.equal(url.pathname, '/api/admin/events')
+    assert.equal(url.searchParams.get('endpoint'), query.endpoint)
+    assert.equal(url.searchParams.get('device'), query.device)
+    assert.equal(url.searchParams.get('username'), 'StuDen')
+    assert.equal(url.searchParams.has('linuxUsername'), false)
+    return json({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 })
+  }, async () => {
+    assert.equal((await protectionApi.getEventPage(query, new AbortController().signal)).totalElements, 0)
+  })
+})
+
+test('live pagination accepts boundary sizes and rejects invalid pages before fetching', () => {
+  for (const size of [1, 20, 100]) {
+    const query = getEventQuery(emptyEventFilters, 0, size)
+    assert.equal(query.page, 0)
+    assert.equal(query.size, size)
+  }
+  for (const page of [-1, 0.5, NaN, Infinity]) assert.throws(() => getEventQuery(emptyEventFilters, page), /Trang/)
+  for (const size of [0, -1, 0.5, 101, NaN, Infinity]) assert.throws(() => getEventQuery(emptyEventFilters, 0, size), /Trang/)
+})
+
+test('live adapter rejects excess final-page rows rather than rendering a contradictory history', async () => {
+  await withFetch(async () => json({ ...fixture, page: 1 }), async () => {
+    await assert.rejects(protectionApi.getEventPage({ page: 1, size: 2 }, new AbortController().signal), /inconsistent page metadata/)
+  })
 })

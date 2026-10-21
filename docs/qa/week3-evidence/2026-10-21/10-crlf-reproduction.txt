@@ -1,0 +1,97 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "tests/browser-readiness.test.mjs"
+  ],
+  "command_text": "node --test tests/browser-readiness.test.mjs",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:39:03.256724+07:00",
+  "scope": "Regression reproducing Windows CRLF readiness migration failure before fix",
+  "source_manifest": "sources/4001c0bfb883d9bfbcd8a0f6dcfc74ed484ac635de76c4d5b11291eb5162d3c4.json",
+  "source_tree_sha256": "4001c0bfb883d9bfbcd8a0f6dcfc74ed484ac635de76c4d5b11291eb5162d3c4"
+}
+
+TAP version 13
+# Subtest: Vite console URL is replaced by HTTP readiness without removing browser assertions
+ok 1 - Vite console URL is replaced by HTTP readiness without removing browser assertions
+  ---
+  duration_ms: 1.8608
+  type: 'test'
+  ...
+# Subtest: startup fix is idempotent
+ok 2 - startup fix is idempotent
+  ---
+  duration_ms: 1.2434
+  type: 'test'
+  ...
+# Subtest: already migrated Windows CRLF harness is recognized without rewriting the source
+not ok 3 - already migrated Windows CRLF harness is recognized without rewriting the source
+  ---
+  duration_ms: 0.4253
+  type: 'test'
+  location: 'D:\\USBProtection\\frontend\\tests\\browser-readiness.test.mjs:21:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected exactly one known preview startup check in browser.mjs, found 0. No changes written.'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    updateBrowserHarness (file:///D:/USBProtection/frontend/tests/apply-browser-readiness-fix.mjs:23:11)
+    TestContext.<anonymous> (file:///D:/USBProtection/frontend/tests/browser-readiness.test.mjs:23:20)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: migration preserves Windows CRLF and remains idempotent after the first run
+not ok 4 - migration preserves Windows CRLF and remains idempotent after the first run
+  ---
+  duration_ms: 18.0665
+  type: 'test'
+  location: 'D:\\USBProtection\\frontend\\tests\\browser-readiness.test.mjs:26:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(first.source.includes(newCheck.replace(/\n/g, '\r\n')))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///D:/USBProtection/frontend/tests/browser-readiness.test.mjs:30:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: unrecognized browser harness is not overwritten
+ok 5 - unrecognized browser harness is not overwritten
+  ---
+  duration_ms: 1.7037
+  type: 'test'
+  ...
+# Subtest: success is based on HTTP rather than colorized startup output
+ok 6 - success is based on HTTP rather than colorized startup output
+  ---
+  duration_ms: 0.2109
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 4
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 149.1401
+
+{"finished_at": "2026-10-21T22:39:03.495344+07:00", "exit_code": 1}

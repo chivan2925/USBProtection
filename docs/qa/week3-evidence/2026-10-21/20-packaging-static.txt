@@ -1,0 +1,36 @@
+{
+  "command": [
+    "powershell.exe",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "packaging/tests/verify-week2-windows.ps1",
+    "-CheckBuiltJar"
+  ],
+  "command_text": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File packaging/tests/verify-week2-windows.ps1 -CheckBuiltJar",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:40:42.409969+07:00",
+  "scope": "Windows source/JAR static packaging checks only; no .deb install, systemd or GUI runtime",
+  "source_manifest": "sources/85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe.json",
+  "source_tree_sha256": "85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe"
+}
+
+PASS: packaging/systemd/usbshield-agent.service contains required setting
+PASS: packaging/systemd/usbshield-agent.service contains required setting
+PASS: packaging/systemd/usbshield-agent.service contains required setting
+PASS: packaging/scripts/build-deb.sh contains required setting
+PASS: packaging/scripts/build-deb.sh contains required setting
+PASS: packaging/agent-deb/etc/usbshield-agent/application.yml contains required setting
+PASS: packaging/agent-deb/etc/usbshield-agent/application.yml contains required setting
+PASS: packaging/agent-deb/etc/usbshield-agent/application.yml contains required setting
+PASS: packaging/desktop/usbshield-notifier-launcher.sh contains required setting
+PASS: packaging/desktop/usbshield-notifier-launcher.sh contains required setting
+PASS: packaging/desktop/usbshield-notifier-launcher.sh contains required setting
+PASS: executable JAR contains org/springframework/boot/loader/launch/PropertiesLauncher.class
+PASS: executable JAR contains BOOT-INF/classes/com/group/usbshield/agent/notification/DesktopNotificationClientMain.class
+PASS: Windows-only Week 2 packaging static checks.
+
+{"finished_at": "2026-10-21T22:40:43.169457+07:00", "exit_code": 0}

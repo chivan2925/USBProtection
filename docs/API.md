@@ -89,6 +89,21 @@ excludes it from policy. Unknown/cross-endpoint entry returns 404.
 
 Event filters (exact match): `endpointId,linuxUsername,deviceId,decision,eventType`;
 `from,to` are inclusive ISO-8601 instants with timezone. Range applies to occurredAt.
+Week 3 name-search extension (2026-10-21): optional `endpoint` matches a
+case-insensitive literal substring of endpoint ID or the hostname displayed in
+EventResponse. Captured event hostname takes precedence; only legacy rows with
+a null hostname fall back to the registered endpoint name. Optional `device`
+matches a case-insensitive literal substring of `device.name`, or the exact
+positive numeric `usbDeviceId` (including historical rows missing device details).
+Leading/trailing whitespace is ignored; blank search fields add no predicate.
+`%`, `_` and backslash are literal characters, not user-provided SQL wildcards.
+Name searches combine with all other filters using AND and execute before
+counting/pagination. Existing exact `endpointId`/`deviceId` semantics are unchanged.
+The live Linux User filter sends optional `username`: a case-insensitive literal
+substring of the stored Linux username, with trimmed whitespace and escaped
+wildcard characters. It is filtered/counted before pagination and combines with
+other criteria using AND. Existing `linuxUsername` remains an exact-match
+parameter for callers that need it; neither parameter searches numeric Linux UID.
 `page` zero-based default 0; `size` default 20, range 1..100. Stable sort:
 occurredAt DESC, id DESC. Invalid range/enum/size → 400. Empty page remains real empty data.
 

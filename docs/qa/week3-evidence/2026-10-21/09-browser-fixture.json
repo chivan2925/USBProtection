@@ -1,0 +1,17 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:browser"
+  ],
+  "command_text": "npm.cmd run test:browser",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:38:16.865850+07:00",
+  "scope": "Windows Chromium fixture/browser regression; no actual Agent or physical USB",
+  "source_manifest": "sources/7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34.json",
+  "source_tree_sha256": "7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34",
+  "exit_code": 1,
+  "finished_at": "2026-10-21T22:38:18.046950+07:00"
+}

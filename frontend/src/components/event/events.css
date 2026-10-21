@@ -1,2 +1,3 @@
 .event-history-table table { min-width: 780px; }
-.device-event-id { display: block; color: var(--muted, #64748b); margin-top: 4px; }
+.device-event-id, .endpoint-event-id { display: block; color: var(--muted, #64748b); margin-top: 4px; }
+.endpoint-event-id { overflow-wrap: anywhere; }
