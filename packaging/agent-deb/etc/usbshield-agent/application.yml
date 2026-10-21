@@ -1,3 +1,7 @@
+# Installed external configuration for the Ubuntu Client Agent.
+# Managed by root and readable by the usbshield service group only.
+# Set the enrollment credential in this protected file or through a dedicated
+# secure deployment mechanism; never commit real secrets.
 spring:
   application:
     name: usbshield-agent
@@ -6,12 +10,13 @@ spring:
 
 usbshield:
   agent:
-    # Set this to the actual Admin Server IP/domain in your LAN
-    server-url: http://localhost:8080
-    enrollment-token: default-enrollment-secret
+    server-url: ${USBSHIELD_SERVER_URL:http://127.0.0.1:8080}
+    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:}
     heartbeat-interval-ms: 5000
     data-dir: /var/lib/usbshield-agent
     config-dir: /etc/usbshield-agent
+    simulation-enabled: false
+    notification-enabled: true
 
 logging:
   level:

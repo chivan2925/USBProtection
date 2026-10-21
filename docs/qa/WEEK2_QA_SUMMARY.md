@@ -54,3 +54,34 @@ M5's technical review and review-ready M4 handoff package are complete. A human 
 When Ubuntu testing resumes, M3 supplies authenticated Agent/transport/outbox/apply/ACK and helper startup traces; M2 supplies physical BLOCK/active-user and notification traces; M5 correlates them with persisted IDs and Web rows. Final .deb clean install/reboot and release guides remain Week 3/4.
 
 The historical [M3 2026-10-12 simulation](../client-agent/evidence/01-agent-server-e2e-live-run.txt) is retained as historical transport evidence. No application authentication code was changed in the restart harness fix.
+
+## Windows preview startup follow-up — 2026-10-20
+
+A later Windows run reported `npm run lint` PASS, `npm run build` PASS and `npm test` **72/72 PASS**, but `npm run test:browser` and `npm run test:live` timed out while waiting for the Vite startup **log text** even though Vite printed the local URL. The outcome of `test:browser:live` was not supplied. [Browser readiness fix](WEEK2_WINDOWS_BROWSER_READINESS_FIX.md) changes the harness gate to an actual HTTP probe via an idempotent one-time migration, accompanied by four additional regression checks. The browser suites have **not** yet been rerun on the patched Windows workspace; do not infer PASS. The earlier 2026-10-18 Windows browser evidence remains historical and unaffected. Ubuntu hardware/service/desktop checks remain **DEFERRED UNTIL AFTER WEEK 4**.
+
+
+## Windows browser regression follow-up — 2026-10-20 (after latest user run)
+
+Source: user-provided `Pasted text(20261020-023044).txt` and `USBProtection(7).zip` (frontend/docs snapshot). GitHub `main` checked at `e75213b437d01b3335b952618b02705874d257dc`; follow-up fixes are an uncommitted delta applied on top of that source/snapshot.
+
+**Owner-reported results before this follow-up patch:** `npm run lint` PASS (0 issues), `npm run build` PASS, `npm test` **76/76 PASS**, `npm run test:live` **PASS** with real isolated Spring Boot/H2 and synthetic HTTP inputs. `npm run test:browser` **FAIL** at `/dashboard` following fixture-session invalidation; `npm run test:browser:live` **FAIL** with a generic `real backend readiness` timeout. Do not label the Windows browser gate fully PASS based on these logs.
+
+**Source-level corrections delivered in this patch:**
+
+- `frontend/tests/browser.mjs` (M4/M5 shared fixture harness): after invalidating fixture sessions, explicitly reload the page and assert redirect to Login. Do not require Dashboard to render with an invalid session. No application guard or test assertion is removed.
+- `frontend/tests/browser-live.mjs` (M5 Events browser harness): honor `JAVA_HOME` or use `java` from PATH instead of assuming `C:/Program Files/Java/jdk-22/bin/java.exe`; check Java launch, stop promptly on JVM exit/spawn error with diagnostic log; allocate a free loopback backend port to avoid stale-server collisions; terminate child process trees on Windows to reduce orphan JVM/H2 locks.
+
+**Patch verification:** JavaScript syntax checks PASS for both edited scripts. A controlled invalid-JAR diagnostic smoke on Linux/JDK 21 exited promptly with the expected explicit Java error; this does **not** count as a passing frontend browser suite. A fresh Windows Chrome/Edge + Spring Boot full rerun was **not performed** by the patch author. All actual Ubuntu USBGuard/hardware/GUI evidence remains **DEFERRED UNTIL AFTER WEEK 4 / NOT EXECUTED** under the owner's revised schedule.
+
+Re-run on Windows, sequentially, from `frontend/` after building `admin-server/target/usbshield-admin-server.jar`:
+
+```powershell
+npm run lint
+npm run build
+npm test
+npm run test:browser
+npm run test:live
+npm run test:browser:live
+```
+
+If `test:browser:live` still fails, its error now identifies the backend Java process and `frontend/.artifacts/live-events-server-last.log` retains backend output for diagnosis. Capture real PASS logs before changing the Windows-only gate from PENDING to PASS. See [follow-up detail](WEEK2_WINDOWS_BROWSER_FOLLOWUP_20261020.md).

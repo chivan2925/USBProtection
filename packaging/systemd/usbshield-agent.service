@@ -1,6 +1,6 @@
 [Unit]
 Description=USBShield Client Agent Protection Service
-Documentation=https://github.com/group/usbshield
+Documentation=https://github.com/chivan2925/USBProtection
 After=network-online.target usbguard.service
 Wants=network-online.target
 Requires=usbguard.service
@@ -10,7 +10,9 @@ Type=simple
 User=usbshield
 Group=usbshield
 WorkingDirectory=/opt/usbshield-agent
-ExecStart=/usr/bin/java -jar /opt/usbshield-agent/usbshield-agent.jar
+# Production profile disables synthetic USB events. The separately packaged,
+# root-managed external file supplies absolute writable data/config paths.
+ExecStart=/usr/bin/java -jar /opt/usbshield-agent/usbshield-agent.jar --spring.profiles.active=live --spring.config.additional-location=file:/etc/usbshield-agent/application.yml
 Restart=on-failure
 RestartSec=2
 StandardOutput=journal

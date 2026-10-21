@@ -2,11 +2,12 @@
 // are synthetic; this run does not represent physical Ubuntu/USBGuard evidence.
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
-import { spawn } from 'node:child_process'
+import { execFile, spawn, spawnSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createServer } from 'node:net'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const artifacts = join(root, '.artifacts')
@@ -15,7 +16,16 @@ const runtime = await mkdtemp(join(artifacts, 'live-events-'))
 const jar = resolve(root, '../admin-server/target/usbshield-admin-server.jar')
 const chrome = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(path => path && existsSync(path))
 assert.ok(chrome && existsSync(jar), 'Requires local Chromium and a built Admin Server JAR.')
-const api = 'http://127.0.0.1:18083'
+// Bind an OS-selected port: an orphaned JVM from a previous run must not
+// impersonate this run's isolated Spring Boot/H2 server.
+const portReservation = createServer()
+await new Promise((resolveListen, rejectListen) => {
+  portReservation.once('error', rejectListen)
+  portReservation.listen(0, '127.0.0.1', resolveListen)
+})
+const backendPort = portReservation.address().port
+await new Promise(resolveClose => portReservation.close(resolveClose))
+const api = `http://127.0.0.1:${backendPort}`
 const web = 'http://127.0.0.1:4174'
 const password = randomUUID()
 const enrollmentToken = randomUUID()
@@ -24,6 +34,7 @@ const profile = join(runtime, 'chrome')
 const children = []
 let socket
 let serverOutput = ''
+const spawnErrors = new WeakMap()
 const delay = ms => new Promise(resolveDelay => setTimeout(resolveDelay, ms))
 async function until(check, label, limit = 200) {
   for (let attempt = 0; attempt < limit; attempt++) {
@@ -34,6 +45,7 @@ async function until(check, label, limit = 200) {
 }
 function start(executable, args, options = {}) {
   const child = spawn(executable, args, { cwd: root, windowsHide: true, stdio: 'pipe', ...options })
+  child.on('error', error => { spawnErrors.set(child, error) })
   child.stdout?.on('data', data => { serverOutput = (serverOutput + data).slice(-16000) })
   child.stderr?.on('data', data => { serverOutput = (serverOutput + data).slice(-16000) })
   children.push(child)
@@ -45,14 +57,38 @@ async function post(path, body, headers = {}) {
   return response.json()
 }
 try {
-  const java = process.env.JAVA_HOME ? join(process.env.JAVA_HOME, 'bin/java.exe') : 'C:/Program Files/Java/jdk-22/bin/java.exe'
-  const backend = start(java, ['-jar', jar, '--server.port=18083', '--server.address=127.0.0.1', `--spring.datasource.url=jdbc:h2:file:${join(runtime, 'qa-db').replaceAll('\\', '/')};DB_CLOSE_ON_EXIT=FALSE`], {
+  // The previous hard-coded JDK 22 path broke Windows machines using JDK 21.
+  // Honor JAVA_HOME when provided; otherwise resolve `java` from PATH, like M4's live harness.
+  const java = process.env.JAVA_HOME
+    ? join(process.env.JAVA_HOME, 'bin', process.platform === 'win32' ? 'java.exe' : 'java')
+    : 'java'
+  if (process.env.JAVA_HOME && !existsSync(java)) {
+    throw new Error(`JAVA_HOME points to a missing Java executable: ${java}`)
+  }
+  const javaCheck = spawnSync(java, ['-version'], { windowsHide: true, encoding: 'utf8', timeout: 15000 })
+  if (javaCheck.error || javaCheck.status !== 0) {
+    throw new Error(`Cannot launch Java (${java}): ${javaCheck.error?.message || javaCheck.stderr || `exit ${javaCheck.status}`}`)
+  }
+  const backend = start(java, ['-jar', jar, `--server.port=${backendPort}`, '--server.address=127.0.0.1', `--spring.datasource.url=jdbc:h2:file:${join(runtime, 'qa-db').replaceAll('\\', '/')};DB_CLOSE_ON_EXIT=FALSE`], {
     env: { ...process.env, USBSHIELD_ADMIN_USERNAME: username, USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken },
   })
-  await until(async () => {
-    assert.equal(backend.exitCode, null, 'Backend must stay alive')
-    return (await fetch(`${api}/api/auth/csrf`)).ok
-  }, 'real backend readiness', 1200)
+  // Do not suppress a JVM launch error or early exit for two minutes.
+  let ready = false
+  for (let attempt = 0; attempt < 1200; attempt++) {
+    const launchError = spawnErrors.get(backend)
+    if (launchError) throw new Error(`Admin Server Java spawn failed (${java}): ${launchError.message}`)
+    if (backend.exitCode !== null || backend.signalCode !== null) {
+      throw new Error(`Admin Server exited before readiness: exit=${backend.exitCode} signal=${backend.signalCode}\n${serverOutput}`)
+    }
+    try {
+      if ((await fetch(`${api}/api/auth/csrf`, { signal: AbortSignal.timeout(1500) })).ok) {
+        ready = true
+        break
+      }
+    } catch { /* Spring Boot is not ready yet. */ }
+    await delay(100)
+  }
+  if (!ready) throw new Error(`Timed out: real backend readiness (${java}, ${api})\n${serverOutput}`)
   const endpoint = await post('/api/agent/enroll', { hostname: 'Windows-HTTP-QA', machineId: randomUUID(), enrollmentToken })
   const headers = { 'X-Endpoint-Id': endpoint.endpointId, 'X-Agent-Token': endpoint.agentToken }
   const baseEvent = {
@@ -213,7 +249,15 @@ try {
   throw error
 } finally {
   socket?.close()
-  for (const child of children.reverse()) if (child.exitCode === null) child.kill()
+  for (const child of children.reverse()) {
+    if (child.exitCode !== null || child.signalCode !== null || !child.pid) continue
+    if (process.platform === 'win32') {
+      // Windows Java/Chrome launchers may spawn additional processes.
+      await new Promise(resolveKill => {
+        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, () => resolveKill())
+      })
+    } else child.kill()
+  }
   await delay(1000)
   const runtimeRelative = relative(artifacts, resolve(runtime))
   assert.ok(runtimeRelative.startsWith('live-events-') && !runtimeRelative.includes(sep))

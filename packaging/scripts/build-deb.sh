@@ -37,8 +37,10 @@ cp "$JAR_FILE" "$DEB_STAGING/opt/usbshield-agent/usbshield-agent.jar"
 chmod 755 "$DEB_STAGING/opt/usbshield-agent/usbshield-agent.jar"
 
 # Copy config and default base rules
-cp "$ROOT_DIR/client-agent/src/main/resources/application.yml" "$DEB_STAGING/etc/usbshield-agent/application.yml"
-chmod 644 "$DEB_STAGING/etc/usbshield-agent/application.yml"
+# The installed service must load the protected, deployment-specific config,
+# NOT the developer application.yml (which defaults to ./data on Windows).
+cp "$PACKAGING_DIR/agent-deb/etc/usbshield-agent/application.yml" "$DEB_STAGING/etc/usbshield-agent/application.yml"
+chmod 640 "$DEB_STAGING/etc/usbshield-agent/application.yml"
 if [ -f "$PACKAGING_DIR/usbguard/rules-v0.1.conf" ]; then
     cp "$PACKAGING_DIR/usbguard/rules-v0.1.conf" "$DEB_STAGING/etc/usbshield-agent/rules-v0.1.conf"
     chmod 644 "$DEB_STAGING/etc/usbshield-agent/rules-v0.1.conf"
