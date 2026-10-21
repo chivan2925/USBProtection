@@ -1,0 +1,17 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:browser:live"
+  ],
+  "command_text": "npm.cmd run test:browser:live",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T23:11:31.385611+07:00",
+  "scope": "Real Spring Boot/H2 Windows Events browser regression: displayed names/IDs, exact username, global pagination, A/B and error recovery",
+  "source_manifest": "sources/7b2d5816a95e6833d4a03958428dce092a549b0cd61a95f94d767df657d21e70.json",
+  "source_tree_sha256": "7b2d5816a95e6833d4a03958428dce092a549b0cd61a95f94d767df657d21e70",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T23:11:56.189981+07:00"
+}

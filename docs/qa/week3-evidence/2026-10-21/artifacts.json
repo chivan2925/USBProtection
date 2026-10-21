@@ -1,0 +1,99 @@
+{
+  "captured_at": "2026-10-21T22:46:32.138353+07:00",
+  "timezone": "Asia/Bangkok",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "final_source_manifest": "sources/85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe.json",
+  "final_source_tree_sha256": "85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe",
+  "all_tested_sources_unchanged_after_final_tests": true,
+  "frontend_build_inputs_match_final_source": true,
+  "application_databases": {
+    "admin-server/data/usbshield.mv.db": {
+      "before_sha256": "acd86897fc9e59d02c2aa891fba4cfef5141a9f6e2d8979341598399670c06e6",
+      "after_sha256": "acd86897fc9e59d02c2aa891fba4cfef5141a9f6e2d8979341598399670c06e6",
+      "unchanged": true
+    }
+  },
+  "artifacts": {
+    "admin-server/target/usbshield-admin-server.jar": {
+      "sha256": "07bb9e55cbc7cc9f7268b442ab1354bc8cddae014561062119df07d40639a4ed",
+      "bytes": 57212978
+    },
+    "client-agent/target/usbshield-agent.jar": {
+      "sha256": "c7267ec50863ba3c42eaaa763186eb1dfde91409ba7b3742b498d446cc3d7cbb",
+      "bytes": 20166150
+    },
+    "frontend/dist/favicon.svg": {
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea",
+      "bytes": 354
+    },
+    "frontend/dist/icons.svg": {
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a",
+      "bytes": 5031
+    },
+    "frontend/dist/index.html": {
+      "sha256": "ba567782be6bc731e2b9cf3929dcbe4704549449775ce379a6d8f2d4a07dfd8f",
+      "bytes": 656
+    },
+    "frontend/dist/assets/index-BC5kQHxY.js": {
+      "sha256": "c650b3af0a0b7476fb53482f32d33adf9634db015e638fa6f228ef8b5a2ad878",
+      "bytes": 288905
+    },
+    "frontend/dist/assets/index-BeALIVYP.css": {
+      "sha256": "e3e35e251ae5dcb71c7699adaf0cbea241b4fafc51e377eeeb35d64ef3cdb9cb",
+      "bytes": 25376
+    }
+  },
+  "screenshots": {
+    "screenshots/events-real-http-desktop.png": {
+      "sha256": "6e80b11bf748ae3a3d0b535c3208f21e5c05f26966a9c65a8c46ef0d12119865",
+      "captured_at": "2026-10-21T22:41:17.640525+07:00",
+      "command_metadata": "21-browser-events.json"
+    },
+    "screenshots/events-real-http-date-filter.png": {
+      "sha256": "674da7114503ff3afe16991d5de698539390f16b31c0e92edc3c5a69d1cd2717",
+      "captured_at": "2026-10-21T22:41:19.186749+07:00",
+      "command_metadata": "21-browser-events.json"
+    },
+    "screenshots/events-real-http-mobile.png": {
+      "sha256": "42c7dd32f61cdaa788c319c346d184d33c1dad2be7f3eb337c2af3b4f39e3f17",
+      "captured_at": "2026-10-21T22:41:19.540549+07:00",
+      "command_metadata": "21-browser-events.json"
+    },
+    "screenshots/events-week3-unknown-no-serial.png": {
+      "sha256": "2a3f6f0997a7d506519be06381ba6a0ae4ac4084c5ef3d445eaab362335f1c9e",
+      "captured_at": "2026-10-21T22:41:20.653340+07:00",
+      "command_metadata": "21-browser-events.json"
+    },
+    "screenshots/events-week3-endpoint-b.png": {
+      "sha256": "88a1e886916f4c3e15bc71ac57234606f35ea5f5bd8f83e91d3a584c76379609",
+      "captured_at": "2026-10-21T22:41:21.091490+07:00",
+      "command_metadata": "21-browser-events.json"
+    },
+    "screenshots/events-week3-endpoint-a.png": {
+      "sha256": "1990b8d43846ea33c0ea719d714ac419f4c1dea071a23b234cce3cd1d8f92ea6",
+      "captured_at": "2026-10-21T22:41:21.682336+07:00",
+      "command_metadata": "21-browser-events.json"
+    },
+    "screenshots/m4-live-allow-a.png": {
+      "sha256": "09e568900b57182f8c4e120e984869f5c71821188b2974c1d43e2ef58fc0f048",
+      "captured_at": "2026-10-21T22:40:26.844928+07:00",
+      "command_metadata": "16-browser-management.json"
+    },
+    "screenshots/m4-live-revoke-a.png": {
+      "sha256": "bd3b021d315f04e4fda78850fdb540b86ff30b93dd5f68bbe49c73518932eb9a",
+      "captured_at": "2026-10-21T22:40:27.914207+07:00",
+      "command_metadata": "16-browser-management.json"
+    },
+    "screenshots/m4-live-expired-session.png": {
+      "sha256": "81895e760357295d888cd5e6f9b1cbd78d1f558eb80af840cb2dd3ecf5c85adc",
+      "captured_at": "2026-10-21T22:40:41.501388+07:00",
+      "command_metadata": "16-browser-management.json"
+    },
+    "screenshots/demo-events-mobile.png": {
+      "sha256": "da154ab5f36b09a2688a0092d859bee9ae15c95276d96c6d9429c4a049675a7b",
+      "captured_at": "2026-10-21T22:39:47.787169+07:00",
+      "command_metadata": "14-browser-fixture.json"
+    }
+  },
+  "scope": "Windows unit/mock/contract/static/browser with synthetic HTTP input; no .deb build or Ubuntu hardware/GUI runtime"
+}

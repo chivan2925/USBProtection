@@ -14,15 +14,19 @@ export const newCheck = `await until(async () => {
   }, 'preview server HTTP readiness')`
 
 export function updateBrowserHarness(source) {
-  if (source.includes(newCheck)) {
-    if (source.includes(oldCheck)) throw new Error('Conflicting preview startup checks in browser.mjs')
+  // Git commonly checks out CRLF on Windows; compare normalized line endings
+  // while returning the original bytes for an already migrated harness.
+  const normalized = source.replace(/\r\n/g, '\n')
+  if (normalized.includes(newCheck)) {
+    if (normalized.includes(oldCheck)) throw new Error('Conflicting preview startup checks in browser.mjs')
     return { source, changed: false }
   }
   const occurrences = source.split(oldCheck).length - 1
   if (occurrences !== 1) {
     throw new Error(`Expected exactly one known preview startup check in browser.mjs, found ${occurrences}. No changes written.`)
   }
-  return { source: source.replace(oldCheck, newCheck), changed: true }
+  const replacement = source.includes('\r\n') ? newCheck.replace(/\n/g, '\r\n') : newCheck
+  return { source: source.replace(oldCheck, replacement), changed: true }
 }
 
 async function main() {

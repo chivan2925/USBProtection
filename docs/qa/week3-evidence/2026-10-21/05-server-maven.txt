@@ -1,0 +1,63 @@
+{
+  "command": [
+    "mvn.cmd",
+    "-o",
+    "-B",
+    "-f",
+    "admin-server/pom.xml",
+    "clean",
+    "package"
+  ],
+  "command_text": "mvn.cmd -o -B -f admin-server/pom.xml clean package",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:35:24.131748+07:00",
+  "scope": "Fresh Windows server unit/HTTP integration tests and executable JAR build; offline Maven cache",
+  "source_manifest": "sources/7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34.json",
+  "source_tree_sha256": "7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34"
+}
+
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.group.usbshield:admin-server >------------------
+[INFO] Building USBShield Admin Server 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ admin-server ---
+[INFO] Deleting D:\USBProtection\admin-server\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ admin-server ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ admin-server ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 34 source files with javac [debug parameters release 21] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ admin-server ---
+[INFO] skip non existing resourceDirectory D:\USBProtection\admin-server\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ admin-server ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 6 source files with javac [debug parameters release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ admin-server ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[WARNING] The POM for org.apache.maven.surefire:surefire-junit-platform:jar:3.2.5 is missing, no dependency information available
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  21.611 s
+[INFO] Finished at: 2026-10-21T22:35:48+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.2.5:test (default-test) on project admin-server: The following artifacts could not be resolved: org.apache.maven.surefire:surefire-junit-platform:jar:3.2.5 (absent): Cannot access central (https://repo.maven.apache.org/maven2) in offline mode and the artifact org.apache.maven.surefire:surefire-junit-platform:jar:3.2.5 has not been downloaded from it before. -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+
+{"finished_at": "2026-10-21T22:35:48.229523+07:00", "exit_code": 1}

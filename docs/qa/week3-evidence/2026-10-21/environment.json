@@ -1,0 +1,36 @@
+{
+  "captured_at": "2026-10-21T22:33:07.410540+07:00",
+  "timezone": "Asia/Bangkok",
+  "os": "Windows-10-10.0.26200-SP0",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "initial_git_status": "M frontend/tests/m5_event_api.test.mjs\n M frontend/tests/m5_events.test.mjs\n M frontend/tests/m5_live_api.test.mjs",
+  "JAVA_HOME": "C:/Program Files/Java/jdk-22",
+  "tools": {
+    "node": {
+      "path": "C:\\Program Files\\nodejs\\node.EXE",
+      "exit_code": 0,
+      "output": "v22.20.0"
+    },
+    "npm.cmd": {
+      "path": "C:\\Program Files\\nodejs\\npm.cmd",
+      "exit_code": 0,
+      "output": "10.9.3"
+    },
+    "java": {
+      "path": "C:\\Program Files\\Java\\jdk-22\\bin\\java.EXE",
+      "exit_code": 0,
+      "output": "java version \"22.0.2\" 2024-07-16\r\nJava(TM) SE Runtime Environment (build 22.0.2+9-70)\r\nJava HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)"
+    },
+    "mvn.cmd": {
+      "path": "C:\\maven\\bin\\mvn.cmd",
+      "exit_code": 0,
+      "output": "Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\r\nMaven home: C:\\maven\r\nJava version: 22.0.2, vendor: Oracle Corporation, runtime: C:\\Program Files\\Java\\jdk-22\r\nDefault locale: en_US, platform encoding: UTF-8\r\nOS name: \"windows 11\", version: \"10.0\", arch: \"amd64\", family: \"windows\""
+    }
+  },
+  "browser": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "application_databases_before": {
+    "admin-server/data/usbshield.mv.db": "acd86897fc9e59d02c2aa891fba4cfef5141a9f6e2d8979341598399670c06e6"
+  },
+  "scope": "Windows unit/contract/static/browser; synthetic HTTP events and controlled ACK; no actual Ubuntu/USB/GUI execution"
+}

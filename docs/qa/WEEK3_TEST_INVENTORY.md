@@ -1,0 +1,51 @@
+# Week 3 test inventory — M5
+
+Updated: 2026-10-21 (Asia/Bangkok). [Plan and expected results](WEEK3_INTEGRATION_TEST_PLAN.md), [QA summary](WEEK3_QA_SUMMARY.md), [raw evidence index](week3-evidence/README.md).
+
+Execution environment: Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3 and local Chrome. Branch `huy`; base revision `dee3cf7753521c653a79e24cc848df384bf7b639` plus the working-tree M5 changes. Exact tested source is identified by per-command [source manifests](week3-evidence/2026-10-21/sources/) and [environment](week3-evidence/2026-10-21/environment.json). This is not a claim that these changes are already committed or merged to `main`.
+
+Later on the same date, [Event filter/table alignment](WEEK3_EVENT_NAME_SEARCH_FIX.md) adds W3-F11 and supersedes ID-only live UI search. Its separate capture records **88 frontend tests**, **18 server tests**, and the new name-search source/build/browser results. Earlier command results below retain their original source/scope and are not relabeled as reruns of this change.
+
+All Windows rows below were freshly run on 2026-10-21; command logs and adjacent JSON files record exact start/end times in +07:00, cwd, full base revision, source manifest and exit status. Owner means implementation owner; these reruns were collected by M5/Codex, not a human owner's acceptance.
+
+## WINDOWS_EXECUTABLE
+
+| ID | Implementation owner | Level / environment | Command or suite | Actual result | Status | Evidence / limit |
+|---|---|---|---|---|---|---|
+| W3-F01 | M5 | Unit/component / Windows | `npm test` | Required columns, source time, encoded endpoint links and escaped user/device text verified; UNKNOWN stays distinct from BLOCK | PASS | [85 tests](week3-evidence/2026-10-21/12-frontend-tests.txt); synthetic component data |
+| W3-F02 | M5/M1 | Mapper + HTTP/browser / Windows | `npm test`; `npm run test:browser:live` | Empty/null/absent serial mapping and persisted no-serial hash/device identity verified | PASS | [Unit](week3-evidence/2026-10-21/12-frontend-tests.txt), [Events browser](week3-evidence/2026-10-21/21-browser-events.txt); physical no-serial USB is U09 |
+| W3-F03 | M5/M1 | Mapper + HTTP/browser / Windows | Same as F02 | Historical UNKNOWN, A/new user and B/other user retained; exact endpoint/user intersections exclude other endpoint | PASS | [Events browser](week3-evidence/2026-10-21/21-browser-events.txt); synthetic user snapshots, not loginctl switching |
+| W3-F04 | M5/M1 | API/browser / Windows | `npm test`; `npm run test:browser:live` | Exact endpoint/user/device/type/decision filters, reset and global totals verified; baseline 25 plus 3 Week 3 events = 28 | PASS | [Events browser](week3-evidence/2026-10-21/21-browser-events.txt) |
+| W3-F05 | M5 | Unit + real browser / Windows | Same as F04 | Local whole-day filter includes final stored microsecond, excludes next midnight; DST/one-sided/invalid ranges pass unit checks | PASS | [Unit](week3-evidence/2026-10-21/12-frontend-tests.txt), [browser](week3-evidence/2026-10-21/21-browser-events.txt) |
+| W3-F06 | M5 | Mapper/component/browser / Windows | Same as F04 | 20+5 baseline paging and final-page UI verified; invalid metadata/enums and excess final-page rows rejected | PASS | [Unit](week3-evidence/2026-10-21/12-frontend-tests.txt), [browser](week3-evidence/2026-10-21/21-browser-events.txt); excess-row bug fixed |
+| W3-F07 | M5/M4 | Unit + browser fault injection / Windows | `npm test`; `npm run test:browser`; `npm run test:browser:live` | Loading/empty, malformed/HTML rejection, cancellation, injected 403/500/network and recovery pass with no mock fallback | PASS | [Unit](week3-evidence/2026-10-21/12-frontend-tests.txt), [fixture](week3-evidence/2026-10-21/14-browser-fixture.txt), [Events](week3-evidence/2026-10-21/21-browser-events.txt) |
+| W3-F08 | M4/M1/M5 | Real HTTP/browser / Windows | `npm run test:live`; `npm run test:browser:live` | Invalid/valid login, session reload, CSRF, real server restart/expired-session redirect, logout and no JS credential persistence pass | PASS | [Management](week3-evidence/2026-10-21/16-browser-management.txt), [Events](week3-evidence/2026-10-21/21-browser-events.txt) |
+| W3-F09 | M4/M5 | Fixture + real browser / Windows | `npm run test:browser`; `npm run test:browser:live` | Desktop/mobile and explicit readonly demo checks pass; live Events fits 375px | PASS | [Fixture](week3-evidence/2026-10-21/14-browser-fixture.txt), [Events](week3-evidence/2026-10-21/21-browser-events.txt); captures indexed |
+| W3-F10 | M4/M1 | Real HTTP/browser / Windows | `npm run test:live` | A Allow/duplicate/Revoke and B isolation pass; A desired/applied 1/0 → 2/0 → controlled ACK 2/2 → 3/2; restart persistence passes | PASS | [Management](week3-evidence/2026-10-21/16-browser-management.txt); actual Agent/USBGuard apply is U03 |
+| W3-F11 | M5/M1 | Component/API + real HTTP/browser / Windows | Frontend/server tests, build/lint and sequential browser suites | Endpoint/USB names or IDs work across full server-paged history; Linux username stays exact; labels/table IDs agree | PASS | [Follow-up report and scope](WEEK3_EVENT_NAME_SEARCH_FIX.md), [capture](week3-evidence/2026-10-21/event-name-search/README.md); M1 review required at handoff |
+| W3-F12 | M5/M1 | Unit/component/API + real HTTP/browser / Windows | Frontend/server tests, build/lint, Events and fixture browser | Linux User accepts a case-insensitive part of the username; server filtering/paging and UNKNOWN verified; legacy exact API preserved | PASS | [Partial-user capture](week3-evidence/2026-10-21/username-substring/README.md); 88 frontend tests, 20 server tests |
+| W3-S01 | M1 | Maven unit/HTTP integration / Windows | `mvn -B -f admin-server/pom.xml package` | Current server suite: 13 tests, 0 failures/errors/skips | PASS | [Server](week3-evidence/2026-10-21/08-server-maven.txt); no new M1 hardening implementation claimed |
+| W3-S02 | M1 | Existing status/policy tests + JAR build / Windows | Same as S01 | Existing status/UNKNOWN/version/ACK/concurrency/persistence assertions and executable JAR packaging pass | PASS | [Server](week3-evidence/2026-10-21/08-server-maven.txt); production profile/embedded React acceptance pending M1 |
+| W3-A01 | M2 | Maven mocks/unit / Windows | `mvn -o -B -f client-agent/pom.xml package` | Current parser/policy/session/notification unit tests pass within 61-test Agent suite | PASS | [Agent](week3-evidence/2026-10-21/13-agent-maven.txt); no actual daemon/session/GUI |
+| W3-A02 | M3 | Maven mocks/contract + JAR / Windows | Same as A01 | Current enrollment/heartbeat/event/outbox/apply/ACK tests and executable JAR build pass; 61 tests, 0 failures/errors/skips overall | PASS | [Agent](week3-evidence/2026-10-21/13-agent-maven.txt); additional Week 3 fault coverage needs M3 review |
+| W3-P01 | M3 | Source/archive static / Windows | `powershell -NoProfile -ExecutionPolicy Bypass -File packaging/tests/verify-week2-windows.ps1 -CheckBuiltJar` | Existing service/live YAML/helper launcher settings and required packaged classes pass | PASS | [Static checks](week3-evidence/2026-10-21/20-packaging-static.txt); not comprehensive `.deb` lifecycle validation |
+| W3-P02 | M3 | Shell parser / Windows Git Bash | Separate `bash -n` for each of four scripts | `build-deb.sh`, `postinst`, `prerm`, notifier launcher parse without execution | PASS | [Builder](week3-evidence/2026-10-21/15-shell-syntax.txt), [postinst](week3-evidence/2026-10-21/17-shell-postinst.txt), [prerm](week3-evidence/2026-10-21/18-shell-prerm.txt), [launcher](week3-evidence/2026-10-21/19-shell-launcher.txt) |
+| W3-D01 | M5 | Documentation/evidence review | Review local Markdown links, manifests, dates/statuses and Git diff | Week 3 plan/inventory/QA/evidence/demo draft prepared; historical Week 2 reports preserved | PASS | [QA summary](WEEK3_QA_SUMMARY.md), [evidence](week3-evidence/README.md); group gate still open |
+
+Dependency install (`npm ci --offline --no-audit --no-fund`), final lint and production build also exited 0: [install](week3-evidence/2026-10-21/02-npm-ci.txt), [lint](week3-evidence/2026-10-21/11-frontend-lint.txt), [build](week3-evidence/2026-10-21/07-frontend-build.txt). Build precedes the final test-only CRLF change; application/build inputs are unchanged and recorded in both manifests.
+
+## DEFERRED_UBUNTU — after Week 4
+
+| ID | Owner | Level / required environment | Actual result | Status | Evidence / follow-up |
+|---|---|---|---|---|---|
+| W3-U01 | M3/M1 | Clean `.deb` install, enrollment/ONLINE / Ubuntu 24.04 | Not run; `.deb` not built or verified in this capture | NOT EXECUTED | DEFERRED_UBUNTU; M3 package and M1 integrated server required |
+| W3-U02 | M2/M3/M1/M5 | Real unknown USB BLOCK, correct event attribution and Web correlation | Not run | NOT EXECUTED | DEFERRED_UBUNTU; physical USB/USBGuard and active GUI user |
+| W3-U03 | M1/M2/M3/M4/M5 | Actual per-endpoint Allow/Revoke/apply/ACK with A/B | Not run | NOT EXECUTED | DEFERRED_UBUNTU; Windows controlled ACK does not close this case |
+| W3-U04 | M2/M3/M5 | Actual switch/logout/ambiguous/remote/no-GUI sessions | Not run | NOT EXECUTED | DEFERRED_UBUNTU; synthetic attribution does not close this case |
+| W3-U05 | M2/M3/M1/M5 | Actual Agent server-down/fail-closed/durable spool/reconnect | Not run | NOT EXECUTED | DEFERRED_UBUNTU; unit mocks/browser faults have separate scope |
+| W3-U06 | M2/M3/M5 | Client reboot, live service and credential/policy/spool persistence | Not run | NOT EXECUTED | DEFERRED_UBUNTU; server JVM restart is a different test |
+| W3-U07 | M2/M3/M5 | Correct-UID native notification/socket/helper failures and exclusions | Not run | NOT EXECUTED | DEFERRED_UBUNTU; Windows Java notification policy tests are unit only |
+| W3-U08 | M3/M2/M5 | Install/upgrade/uninstall/reinstall and data/permission retention | Not run | NOT EXECUTED | DEFERRED_UBUNTU; shell syntax/static source is insufficient |
+| W3-U09 | M2/M3/M1/M5 | Physical no-serial USB hash identity/reconnect/enforcement | Not run | NOT EXECUTED | DEFERRED_UBUNTU; no-serial HTTP input verifies display/contract only |
+
+Open owner acceptance items and group blockers are tracked in the QA summary. No Week 1/2 status or human owner acknowledgment has been overwritten.

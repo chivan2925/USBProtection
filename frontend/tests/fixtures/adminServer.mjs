@@ -73,6 +73,12 @@ export async function startAdminFixture() {
       }
       const deviceId = url.searchParams.get('deviceId')
       if (deviceId) events = events.filter(event => String(event.usbDeviceId) === deviceId)
+      const usernameSearch = url.searchParams.get('username')?.trim().toLowerCase()
+      if (usernameSearch) events = events.filter(event => event.linuxUsername?.toLowerCase().includes(usernameSearch))
+      const endpointSearch = url.searchParams.get('endpoint')?.trim().toLowerCase()
+      if (endpointSearch) events = events.filter(event => [event.endpointId, event.hostname ?? state.endpoints.find(endpoint => endpoint.endpointId === event.endpointId)?.hostname].some(value => value?.toLowerCase().includes(endpointSearch)))
+      const deviceSearch = url.searchParams.get('device')?.trim().toLowerCase()
+      if (deviceSearch) events = events.filter(event => event.device?.name?.toLowerCase().includes(deviceSearch) || String(event.usbDeviceId) === deviceSearch)
       const from = url.searchParams.get('from')
       const to = url.searchParams.get('to')
       if (from) events = events.filter(event => Date.parse(event.occurredAt) >= Date.parse(from))

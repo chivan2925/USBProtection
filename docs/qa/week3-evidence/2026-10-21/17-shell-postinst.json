@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:/Program Files/Git/bin/bash.exe",
+    "-n",
+    "packaging/agent-deb/DEBIAN/postinst"
+  ],
+  "command_text": "\"C:/Program Files/Git/bin/bash.exe\" -n packaging/agent-deb/DEBIAN/postinst",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:40:26.906940+07:00",
+  "scope": "Windows Git Bash syntax check of packaging/agent-deb/DEBIAN/postinst; script not executed",
+  "source_manifest": "sources/85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe.json",
+  "source_tree_sha256": "85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T22:40:27.001457+07:00"
+}

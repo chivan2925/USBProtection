@@ -52,7 +52,7 @@ export function LiveEvents({ onUnauthorized }: { onUnauthorized?: () => void }) 
       <div className="refresh-actions">{updatedAt && state.status === 'ready' && <span>Cập nhật: {formatDateForEvents(updatedAt)}</span>}<button className="button" disabled={state.status === 'loading'} onClick={() => void refresh()}>Refresh dữ liệu</button></div>
     </PageHeading>
     <ResourceNotice state={state} retry={() => void refresh()} />
-    <Panel title="Event Logs" subtitle="Lọc chính xác trên toàn bộ lịch sử · Ngày theo múi giờ trình duyệt" action={<Badge>{state.status === 'ready' ? 'Dữ liệu máy chủ' : 'Chưa tải được dữ liệu'}</Badge>}>
+    <Panel title="Event Logs" subtitle="Tìm endpoint/USB theo tên hoặc ID · Ngày theo múi giờ trình duyệt" action={<Badge>{state.status === 'ready' ? 'Dữ liệu máy chủ' : 'Chưa tải được dữ liệu'}</Badge>}>
       <EventFilters live value={filters} onChange={updateFilters} onReset={() => updateFilters(emptyEventFilters)} />
       <EventTable events={data?.content ?? []} filtered={Object.values(filters).some(Boolean)} loading={state.status === 'loading'} failed={state.status === 'error'} pagination={{ page: data?.page ?? page, size, totalElements: data?.totalElements ?? 0, totalPages: data?.totalPages ?? 0, onPageChange: setPage }} />
     </Panel>

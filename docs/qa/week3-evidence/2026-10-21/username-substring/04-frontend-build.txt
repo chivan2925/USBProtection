@@ -1,0 +1,32 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "build"
+  ],
+  "command_text": "npm.cmd run build",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T23:23:02.876002+07:00",
+  "scope": "Production frontend build with partial Linux User search query and placeholder",
+  "source_manifest": "sources/91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934.json",
+  "source_tree_sha256": "91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934"
+}
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 51 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:  0.42 kB
+dist/assets/index-CWwGY5jO.css   25.43 kB │ gzip:  6.63 kB
+dist/assets/index-vkS3dtxb.js   289.01 kB │ gzip: 87.77 kB
+
+✓ built in 302ms
+
+{"finished_at": "2026-10-21T23:23:08.286073+07:00", "exit_code": 0}

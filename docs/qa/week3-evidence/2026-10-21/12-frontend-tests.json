@@ -1,0 +1,16 @@
+{
+  "command": [
+    "npm.cmd",
+    "test"
+  ],
+  "command_text": "npm.cmd test",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:39:21.856277+07:00",
+  "scope": "Final Windows unit/component/contract regression including M5 Week 3 and CRLF tests",
+  "source_manifest": "sources/85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe.json",
+  "source_tree_sha256": "85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T22:39:23.878774+07:00"
+}

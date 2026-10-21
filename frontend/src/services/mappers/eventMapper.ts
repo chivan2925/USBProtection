@@ -99,7 +99,8 @@ export function mapEventPage(value: unknown): EventPage {
   const totalElements = pageInteger(envelope.totalElements, 'totalElements')
   const totalPages = pageInteger(envelope.totalPages, 'totalPages')
   const content = mapEvents(envelope.content)
-  if (totalPages !== Math.ceil(totalElements / size) || content.length > size || content.length > totalElements || (page >= totalPages && content.length > 0)) {
+  const remainingElements = Math.max(0, totalElements - page * size)
+  if (totalPages !== Math.ceil(totalElements / size) || content.length > size || content.length > remainingElements) {
     throw new Error('Invalid event payload: inconsistent page metadata')
   }
   return { content, page, size, totalElements, totalPages }

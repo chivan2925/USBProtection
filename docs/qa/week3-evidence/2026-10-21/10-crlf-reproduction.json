@@ -1,0 +1,17 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "tests/browser-readiness.test.mjs"
+  ],
+  "command_text": "node --test tests/browser-readiness.test.mjs",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:39:03.256724+07:00",
+  "scope": "Regression reproducing Windows CRLF readiness migration failure before fix",
+  "source_manifest": "sources/4001c0bfb883d9bfbcd8a0f6dcfc74ed484ac635de76c4d5b11291eb5162d3c4.json",
+  "source_tree_sha256": "4001c0bfb883d9bfbcd8a0f6dcfc74ed484ac635de76c4d5b11291eb5162d3c4",
+  "exit_code": 1,
+  "finished_at": "2026-10-21T22:39:03.495344+07:00"
+}

@@ -125,3 +125,36 @@ test('malformed or contradictory page metadata cannot look like complete empty h
 test('one invalid event rejects the entire page without silently dropping audit rows', () => {
   assert.throws(() => mapEventPage({ ...pageFixture, content: [fixture, { ...fixture, decision: 'INVALID' }] }), /decision/)
 })
+
+test('last page cannot contain more audit rows than its remaining global total', () => {
+  assert.throws(() => mapEventPage({ ...pageFixture, page: 1 }), /inconsistent page metadata/)
+})
+
+test('no-serial storage keeps its hash and database identity without inventing a serial', () => {
+  for (const serial of ['', null, undefined]) {
+    const source = { ...pageFixture.content[1], device: { ...pageFixture.content[1].device, serial } }
+    const snapshot = structuredClone(source)
+    const event = mapEvent(source)
+    assert.equal(event.device.serial, serial ?? undefined)
+    assert.equal(event.device.hash, source.device.hash)
+    assert.equal(event.usbDeviceId, '8')
+    assert.equal(event.endpointId, source.endpointId)
+    assert.equal(event.username, 'UNKNOWN')
+    assert.deepEqual(source, snapshot)
+  }
+})
+
+test('historical attribution remains independent across user switches and endpoints sharing a hostname', () => {
+  const sources = [
+    { ...fixture, id: 103, endpointId: 'endpoint-A', hostname: 'shared-host', linuxUsername: 'UNKNOWN', linuxUid: null, sessionId: null },
+    { ...fixture, id: 102, endpointId: 'endpoint-A', hostname: 'shared-host', linuxUsername: 'student02', linuxUid: 1001, sessionId: 'new-session' },
+    { ...fixture, id: 101, endpointId: 'endpoint-B', hostname: 'shared-host', linuxUsername: 'student01', linuxUid: 1000, sessionId: 'other-endpoint-session' },
+  ]
+  const events = mapEventPage({ content: sources, page: 0, size: 20, totalElements: 3, totalPages: 1 }).content
+  assert.deepEqual(events.map(({ endpointId, username, linuxUid, sessionId }) => ({ endpointId, username, linuxUid, sessionId })), [
+    { endpointId: 'endpoint-A', username: 'UNKNOWN', linuxUid: undefined, sessionId: undefined },
+    { endpointId: 'endpoint-A', username: 'student02', linuxUid: 1001, sessionId: 'new-session' },
+    { endpointId: 'endpoint-B', username: 'student01', linuxUid: 1000, sessionId: 'other-endpoint-session' },
+  ])
+  assert.ok(events.every(event => event.timestamp === fixture.occurredAt && event.receivedAt === fixture.receivedAt))
+})

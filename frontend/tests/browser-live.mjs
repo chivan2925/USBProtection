@@ -192,11 +192,22 @@ try {
   await until(() => bodyHas('Không tìm thấy kết quả'), 'exact endpoint empty result')
   await fill('[aria-label="Endpoint"]', endpoint.endpointId)
   await until(() => bodyHas('1–20 trên 25 bản ghi'), 'exact endpoint identity')
+  await fill('[aria-label="Endpoint"]', 'missing-endpoint-name')
+  await until(() => bodyHas('Không tìm thấy kết quả'), 'unknown endpoint name')
+  await fill('[aria-label="Endpoint"]', 'windows-http-qa')
+  await until(() => bodyHas('1–20 trên 25 bản ghi'), 'visible endpoint hostname search')
+  assert.ok(requests.some(url => new URL(url).searchParams.get('endpoint') === 'windows-http-qa'))
   await reset()
   await fill('[aria-label="Device"]', '999999')
   await until(() => bodyHas('Không tìm thấy kết quả'), 'unknown device ID empty result')
   await fill('[aria-label="Device"]', deviceId)
   await until(() => bodyHas('1–20 trên 25 bản ghi'), 'persisted device ID query')
+  await fill('[aria-label="Device"]', 'missing-usb-name')
+  await until(() => bodyHas('Không tìm thấy kết quả'), 'unknown USB name')
+  await fill('[aria-label="Device"]', 'http qa storage')
+  await until(() => bodyHas('1–20 trên 25 bản ghi'), 'visible USB name search')
+  assert.ok(requests.some(url => new URL(url).searchParams.get('device') === 'http qa storage'))
+  await screenshot('events-name-search.png')
   await reset()
   await evaluate(`{ const select = document.querySelector('[aria-label="Event Type"]'); select.value = 'disconnected'; select.dispatchEvent(new Event('change', { bubbles: true })); }`)
   await until(() => bodyHas('Không tìm thấy kết quả'), 'event type global filter')
@@ -235,6 +246,63 @@ try {
   await cdp('Fetch.disable')
   await evaluate('document.querySelector(".refresh-actions button").click()')
   await until(() => bodyHas('1–20 trên 25 bản ghi'), 'recovery without demo fallback')
+
+  // Week 3 synthetic attribution and isolation regression; no Linux resolver is run.
+  const endpointB = await post('/api/agent/enroll', { hostname: 'Windows-HTTP-QA-B', machineId: randomUUID(), enrollmentToken })
+  const headersB = { 'X-Endpoint-Id': endpointB.endpointId, 'X-Agent-Token': endpointB.agentToken }
+  const noSerialDevice = { ...baseEvent.device, serial: null, name: 'Week 3 HTTP no-serial storage', hash: 'week3-http-no-serial-shared-hash' }
+  await post('/api/agent/events', {
+    ...baseEvent, device: noSerialDevice, linuxUsername: 'UNKNOWN', linuxUid: null, sessionId: null, sessionType: null, seat: null,
+    occurredAt: '2026-10-17T10:00:00.123456Z',
+  }, headers)
+  await post('/api/agent/events', {
+    ...baseEvent, device: noSerialDevice, linuxUsername: 'qa-week3-user-a', linuxUid: 1001, sessionId: 'week3-new-session',
+    occurredAt: '2026-10-17T10:00:01Z',
+  }, headers)
+  await post('/api/agent/events', {
+    ...baseEvent, endpointId: endpointB.endpointId, hostname: 'Windows-HTTP-QA-B', device: noSerialDevice,
+    linuxUsername: 'qa-week3-user-b', linuxUid: 1002, sessionId: 'week3-endpoint-b-session', occurredAt: '2026-10-17T10:00:02Z',
+  }, headersB)
+  const resetWeek3 = async () => {
+    await evaluate(`document.querySelector('[aria-label="Đặt lại tất cả bộ lọc"]').click()`)
+    // An unchanged reset may not trigger a read; Refresh always requests the current source.
+    await evaluate('document.querySelector(".refresh-actions button").click()')
+    await until(() => bodyHas('1–20 trên 28 bản ghi'), 'Week 3 global history reset')
+  }
+  await resetWeek3()
+  await fill('[aria-label="Linux Username"]', 'WEEK3-USER')
+  await until(() => bodyHas('1–2 trên 2 bản ghi'), 'partial case-insensitive username across endpoints')
+  assert.deepEqual(await evaluate('Array.from(document.querySelectorAll("tbody tr"), row => row.children[2].textContent)'), ['qa-week3-user-b', 'qa-week3-user-a'])
+  assert.ok(requests.some(url => new URL(url).searchParams.get('username') === 'WEEK3-USER'))
+  await screenshot('events-username-substring.png')
+  await fill('[aria-label="Linux Username"]', 'UnKn')
+  await until(() => bodyHas('1–1 trên 1 bản ghi'), 'partial UNKNOWN attribution')
+  assert.equal(await evaluate('document.querySelector("tbody tr td:nth-child(3)").textContent'), 'UNKNOWN')
+  assert.equal(await evaluate(`!!document.querySelector('time[datetime="2026-10-17T10:00:00.123456Z"]')`), true)
+  assert.equal(await evaluate('document.querySelector("tbody").innerText.includes("Week 3 HTTP no-serial storage")'), true)
+  const noSerialDeviceId = await evaluate(`document.querySelector('.device-event-id').textContent.match(/[0-9]+/)[0]`)
+  await screenshot('events-week3-unknown-no-serial.png')
+  await fill('[aria-label="Linux Username"]', 'qa-week3-user-a')
+  await until(async () => await bodyHas('1–1 trên 1 bản ghi') && await evaluate('document.querySelector("tbody").innerText.includes("qa-week3-user-a")'), 'synthetic user switch retains historical attribution')
+  await resetWeek3()
+  await fill('[aria-label="Endpoint"]', 'http-qa-b')
+  await until(() => bodyHas('1–1 trên 1 bản ghi'), 'endpoint B isolated history by hostname')
+  assert.equal(await evaluate('document.querySelector("tbody tr td:nth-child(3)").textContent'), 'qa-week3-user-b')
+  assert.equal(await evaluate('document.querySelector("tbody tr td:nth-child(2) a").getAttribute("href")'), `#/endpoints/${encodeURIComponent(endpointB.endpointId)}`)
+  await screenshot('events-week3-endpoint-b.png')
+  await fill('[aria-label="Linux Username"]', 'qa-week3-user-a')
+  await until(() => bodyHas('Không tìm thấy kết quả'), 'endpoint B does not expose endpoint A user history')
+  assert.equal(await evaluate('document.querySelectorAll("tbody tr").length'), 0)
+  await resetWeek3()
+  await fill('[aria-label="Device"]', noSerialDeviceId)
+  await until(() => bodyHas('1–3 trên 3 bản ghi'), 'shared no-serial hash retains three events across endpoints')
+  assert.deepEqual(await evaluate('Array.from(document.querySelectorAll("tbody tr"), row => row.children[2].textContent)'), ['qa-week3-user-b', 'qa-week3-user-a', 'UNKNOWN'])
+  await fill('[aria-label="Endpoint"]', endpoint.endpointId)
+  await until(() => bodyHas('1–2 trên 2 bản ghi'), 'endpoint A isolated history for shared no-serial device')
+  assert.deepEqual(await evaluate('Array.from(document.querySelectorAll("tbody tr"), row => row.children[2].textContent)'), ['qa-week3-user-a', 'UNKNOWN'])
+  await screenshot('events-week3-endpoint-a.png')
+  console.log('PASS: Week 3 HTTP synthetic no-serial storage, UNKNOWN/source timestamp, user-switch history and endpoint A/B isolation (28 persisted events).')
+  console.log('PASS: Endpoint/USB searches accept visible names and IDs with server-side filtering/global pagination; Linux User accepts a case-insensitive part of the username.')
   await evaluate(`document.querySelector('[aria-label="Đăng xuất"]').click()`)
   await until(() => evaluate('!!document.querySelector(".login-page")'), 'real logout')
   await evaluate(`location.hash = '/events'`)

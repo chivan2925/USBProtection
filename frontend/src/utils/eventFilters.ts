@@ -26,15 +26,13 @@ export function getEventQuery(filters: EventFilterValues, page = 0, size = 20): 
   const range = getEventDateRange(filters)
   if (!range.valid) throw new Error('Khoảng ngày không hợp lệ. Kiểm tra ngày bắt đầu và kết thúc.')
   if (!Number.isInteger(page) || page < 0 || !Number.isInteger(size) || size < 1 || size > 100) throw new Error('Trang hoặc kích thước trang không hợp lệ.')
-  const deviceId = filters.device.trim()
-  if (deviceId && (!/^[1-9]\d*$/.test(deviceId) || BigInt(deviceId) > 9223372036854775807n)) throw new Error('Device ID phải là số nguyên dương hợp lệ.')
   if (filters.decision && !['allowed', 'blocked'].includes(filters.decision)) throw new Error('API chỉ hỗ trợ lọc quyết định ALLOW hoặc BLOCK.')
   if (filters.eventType && !['connected', 'disconnected'].includes(filters.eventType)) throw new Error('API chỉ hỗ trợ sự kiện cắm hoặc tháo USB.')
   return {
     page, size,
-    endpointId: filters.endpoint.trim() || undefined,
-    linuxUsername: filters.username.trim() || undefined,
-    deviceId: deviceId || undefined,
+    endpoint: filters.endpoint.trim() || undefined,
+    username: filters.username.trim() || undefined,
+    device: filters.device.trim() || undefined,
     decision: filters.decision ? filters.decision === 'allowed' ? 'ALLOWED' : 'BLOCKED' : undefined,
     eventType: filters.eventType ? filters.eventType === 'connected' ? 'CONNECTED' : 'DISCONNECTED' : undefined,
     from: range.fromInclusive,
