@@ -5,6 +5,7 @@ interface AuthState {
   user: AdminUser | null
   loading: boolean
   error: string
+  sessionExpired: boolean
   login: (username: string, password: string) => Promise<void>
   logout: () => Promise<void>
   retry: () => void

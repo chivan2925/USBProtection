@@ -51,6 +51,7 @@ export function Login({ demo = false }: { demo?: boolean }) {
       <Badge>ADMIN CONSOLE</Badge><h2>Chào mừng trở lại</h2>
       <p>Đăng nhập để quản lý USB Protection.</p>
       {demo && <p className="notice">Demo chỉ đọc. Thoát demo để đăng nhập bằng backend thật.</p>}
+      {!demo && auth?.sessionExpired && <p className="notice" role="status">Phiên Admin đã hết hạn. Vui lòng đăng nhập lại.</p>}
       <form onSubmit={submit}>
         <label htmlFor="username">Tên đăng nhập</label>
         <input id="username" name="username" autoComplete="username" placeholder="Nhập tên đăng nhập" value={username} onChange={event => setUsername(event.target.value)} required disabled={demo || busy} />

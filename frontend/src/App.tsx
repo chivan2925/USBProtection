@@ -97,7 +97,8 @@ function Router({ demo }: { demo: boolean }) {
   </main>
   if (route === '/login' || (!demo && !auth?.user)) return <Login demo={demo} />
   if (route === '/events' && !demo) return <AdminLayout route={route}><LiveEvents /></AdminLayout>
-  return <Console route={route} demo={demo} />
+  // Mỗi trang bắt đầu bằng loading, không hiển thị snapshot của trang trước.
+  return <Console key={route} route={route} demo={demo} />
 }
 
 export default function App() {
