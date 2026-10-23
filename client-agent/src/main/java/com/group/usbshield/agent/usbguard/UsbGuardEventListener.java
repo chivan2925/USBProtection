@@ -136,13 +136,19 @@ public class UsbGuardEventListener {
         }
         sectionLines.append(value).append('\n');
         if (value.startsWith("device_rule=") && section == WatchSection.PRESENCE_CHANGED) {
-            presenceParser.parse(sectionLines.toString()).ifPresent(event -> {
-                String type = event.presenceType() == UsbGuardPresenceEvent.PresenceType.INSERT
-                        ? "CONNECTED" : "DISCONNECTED";
-                handle(event.device(), type, event.target());
-            });
-            section = WatchSection.NONE;
-            sectionLines.setLength(0);
+            try {
+                presenceParser.parse(sectionLines.toString()).ifPresent(event -> {
+                    String type = event.presenceType() == UsbGuardPresenceEvent.PresenceType.INSERT
+                            ? "CONNECTED" : "DISCONNECTED";
+                    handle(event.device(), type, event.target());
+                });
+            } catch (RuntimeException error) {
+                recent.clear();
+                log.error("USBGuard watch event processing failed; continuing to listen", error);
+            } finally {
+                section = WatchSection.NONE;
+                sectionLines.setLength(0);
+            }
         }
     }
 

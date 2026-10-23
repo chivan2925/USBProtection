@@ -119,7 +119,8 @@ public class UsbGuardPolicySynchronizer {
             }
             if ((rule.hash() == null || rule.hash().isBlank())
                     && (rule.serial() == null || rule.serial().isBlank())) {
-                continue;
+                throw new IllegalStateException("Unscoped foreign USBGuard allow rule prevents fail-closed verification: "
+                        + rule.ruleId());
             }
             try {
                 String key = builder.key(new DeviceFingerprint(rule.vendorId(), rule.productId(), rule.serial(), rule.hash()));

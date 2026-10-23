@@ -1,6 +1,7 @@
 package com.group.usbshield.agent.usbguard;
 
-/** Member 2 — Week 2: parsed USBGuard policy rule (guide section 10). */
+import java.util.regex.Pattern;
+
 public record UsbGuardRuleInfo(
         long ruleId,
         String target,
@@ -10,10 +11,12 @@ public record UsbGuardRuleInfo(
         String hash,
         String rawRule
 ) {
-    /** The baseline non-storage allow rule must survive whitelist reconciliation. */
+    private static final Pattern BASE_NON_STORAGE = Pattern.compile(
+            "^\\s*\\d+:\\s*allow\\s+with-interface\\s+none-of\\s*\\{\\s*08:\\*:\\*\\s*\\}(?:\\s+.*)?$",
+            Pattern.CASE_INSENSITIVE);
+
     public boolean isBaseNonStorageRule() {
         return "allow".equalsIgnoreCase(target) && rawRule != null
-                && rawRule.contains("none-of")
-                && rawRule.contains("08:*:*");
+                && BASE_NON_STORAGE.matcher(rawRule).matches();
     }
 }

@@ -149,3 +149,50 @@ feat(usbguard): harden active sessions and watch notification recovery
 **Local preparation checks:** Java 21 selected-core compilation PASS; 15/15 self-contained session/notification assertions PASS and 6/6 watch-loop smoke assertions PASS with temporary dependencies. Complete Maven/JUnit was not executed here; the owner must run it on Windows. These temporary harness files are not included in the ZIP.
 
 **Ubuntu acceptance:** Actual `loginctl`, user switching, physical USB/USBGuard watcher, `systemd`, `.deb`, GUI notification and reboot remain **DEFERRED UNTIL AFTER WEEK 4**. The group QA owner must not label these cases PASS based on mock tests.
+
+## 8. Independent M2 Week 3 closeout re-review (23/10/2026)
+
+**Branch reviewed:** `vinhkhang` at `c0c8be9452e7ba92d60d8f7794357222ac494190` (Parts 1–3 committed and pushed; no merge to `main`).
+
+**Result before remediation:** `REMEDIATION REQUIRED` for the three Windows-scope resilience/policy-verification defects below. The user's earlier `BUILD SUCCESS` covers Parts 1–3 before this closeout delta; the patch requires a new Maven run before it can be closed.
+
+| ID | Finding | Remediation / Windows regression |
+|---|---|---|
+| M2-W3-F01 | Baseline gate treated a generic `allow` containing text `none-of` and `08:*:*` anywhere in its raw rule as the trusted non-storage base policy. A misleading rule label could satisfy the gate. | `UsbGuardRuleInfo.isBaseNonStorageRule()` now requires the actual canonical `allow with-interface none-of { 08:*:* }` expression. Regression rejects a misleading label and an `all-of` rule. |
+| M2-W3-F02 | Reconciliation skipped foreign allow rules lacking hash/serial. A global/interface-wide or VID:PID-only foreign allow could permit unknown storage while reconcile reported success, contradicting the fail-closed verification gate. | `UsbGuardPolicySynchronizer` now refuses reconciliation when an unscoped foreign `allow` is present; it does **not** delete or rewrite foreign rules. Existing specific foreign rules with serial/hash remain preserved. M3 must not acknowledge a rejected reconciliation. |
+| M2-W3-F03 | An unexpected runtime exception while enriching a watch event could propagate out of `processWatchLine` and terminate the watch executor loop. | A per-event failure is logged and the partial section/dedup state is cleared, allowing subsequent valid `PresenceChanged` entries to be processed. Normal notification/transport failure independence remains unchanged. |
+
+**Changed files:**
+
+- `client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardRuleInfo.java`
+- `client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardPolicySynchronizer.java`
+- `client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardEventListener.java`
+- `client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek3CloseoutAuditTest.java` (6 new JUnit cases)
+- `docs/usbguard/WEEK3_CORE_HARDENING.md`
+
+### Owner Windows acceptance commands
+
+Use a clean `vinhkhang` working tree at the baseline commit above; extract the closeout delta ZIP at repository root, then run:
+
+```powershell
+git branch --show-current
+git rev-parse HEAD
+mvn -B -f client-agent/pom.xml clean test
+mvn -B -f client-agent/pom.xml -DskipTests package
+git diff --check
+git status --short
+```
+
+Only mark `M2 WEEK 3 — PASS (WINDOWS SCOPE)` once both Maven commands succeed with no test failures/errors and the delta is committed/pushed to `vinhkhang`. Do not mark Ubuntu acceptance PASS.
+
+**Local preparation evidence:** Java 21 compiled the affected core classes and listener against compatible local stubs. A temporary direct Java harness passed five policy-verification scenarios and a watch recovery scenario. This is **not** a full Maven/JUnit test run; the user's Windows Maven run remains mandatory.
+
+**M2 → M3 handoff:** If `list-rules` contains an unscoped allow rule outside USBShield ownership, review the USBGuard policy on the client. Do not silently remove it, do not loosen default-block requirements, and do not ACK the desired policy version while reconciliation rejects it. Installer permissions, `RuleFile`, notifier IPC permissions and deployment scripts remain M3-owned.
+
+**Deferred until after Week 4:** Real Ubuntu USBGuard daemon interactions, local rule persistence over reboot, physical USB insertion/removal, active user switch, systemd service recovery, package clean install and native GUI notification.
+
+**Suggested closeout commit message:**
+
+```text
+fix(usbguard): close Week 3 fail-closed and watch resilience gaps
+```
