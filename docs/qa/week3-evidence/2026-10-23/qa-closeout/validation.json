@@ -1,0 +1,1155 @@
+{
+  "captured_at": "2026-10-23T15:04:14.361670+07:00",
+  "status": "PASS",
+  "revision": "8c222a47142d7a80f75e56b8d77e5bf732797e16",
+  "branch": "huy",
+  "scope": "Documentation-only update and evidence/source consistency review; no application or test-code edits and no application-suite reruns.",
+  "source_tree_sha256": "e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d",
+  "source_manifest": "../post-pull-audit/sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json",
+  "source_files_verified": 206,
+  "source_hash_mismatches": [],
+  "all_16_existing_command_metadata_verified": true,
+  "existing_command_results": {
+    "01-npm-ci": {
+      "exit_code": 0,
+      "log_sha256": "4d2bc0943d0a495ed8ef79aaec86048122776593f058fbc272608f7684ff9acb",
+      "metadata_sha256": "1950b4a56a04e356e743b4a42ead6ac26d3caf92ede5f42e1850f0cfb4d0a193"
+    },
+    "02-frontend-tests": {
+      "exit_code": 0,
+      "log_sha256": "c7995dc97cbcba8d5f4196ea849735e6b3d688e80779d2d3d3cb35f277ba5e4a",
+      "metadata_sha256": "484e2e36363dd93ce14434107bf75f2e8694393f91a8229b8b102dcdc53a21a8"
+    },
+    "03-frontend-lint": {
+      "exit_code": 0,
+      "log_sha256": "c2c7dc40d5832382fc21cfe73fd3d031a85dda6318d62b93943ed8fa5e096c1d",
+      "metadata_sha256": "e3e164a5f4bbc0646b9e7209e2c0cb2d34e56f47e26ff2677d003b0372a40e89"
+    },
+    "04-frontend-build": {
+      "exit_code": 0,
+      "log_sha256": "419da27fb27cc7fb70c5be8d914e1b18cb9e9928aa9b2bc31648fe2dedb04adf",
+      "metadata_sha256": "a8cb36c20a3cab911f87206c1af264af57d8bd15801480a550e39699c8cca194"
+    },
+    "05-agent-tests-package": {
+      "exit_code": 0,
+      "log_sha256": "94b49d92df8b41a3f42059afbdd48d78f80e4dfa67002a8139f72291fb02c22d",
+      "metadata_sha256": "ade9a67e8399cd8f7a79a87320ff135c4bc6b8ec07f18448b54c26638e41a064"
+    },
+    "06-server-with-frontend": {
+      "exit_code": 0,
+      "log_sha256": "9f49d959eafef29282d42df64233249cce082a7f4d1d85fa6098b2393bb0a524",
+      "metadata_sha256": "8c1278196bb0e080169f674917c2692e573356c689b186cd5ba197a6f0a6f248"
+    },
+    "07-browser-fixture": {
+      "exit_code": 0,
+      "log_sha256": "22eff9a63d908a3d3224b9c08ce29cea719208b9646f64aefe85bbdb6a702e61",
+      "metadata_sha256": "e2d76ecf0edc6d96b3cb75da963cec45eeaff32b34541c374723279df1d34761"
+    },
+    "08-browser-management": {
+      "exit_code": 0,
+      "log_sha256": "0a4187adf3a23ff4c95d7285af55cb41eb1239e61719a7dc7efa562a0b9a0bcc",
+      "metadata_sha256": "0c2bcf23cb16ee14176abfa389dfcdfa57e20d0dc553bbad9901c3543d17232b"
+    },
+    "09-browser-events": {
+      "exit_code": 0,
+      "log_sha256": "8fc3433a8471ca3429eeeceb27dbf015679a5de2b47726e329b08f792db470ec",
+      "metadata_sha256": "6c9243067eb7b8ea14cc2a8d0e9cefd62c7a3d8924de598921ea0f887d033feb"
+    },
+    "10-policy-http-contract": {
+      "exit_code": 0,
+      "log_sha256": "2722c36e445e4d252bbe49afb5a3e536e9228d0b2479385f11651da2dd462e29",
+      "metadata_sha256": "491918c0f048626a21a598e18ad9c672509132c834ef01965f71b4ec22929ba1"
+    },
+    "11-packaging-static": {
+      "exit_code": 0,
+      "log_sha256": "a3b328b3a9c7091055ca3639c78cd85a23967029b6bd392694cf5c5c855c9eb1",
+      "metadata_sha256": "2e75a73910e64786b2ab1096accfe0509c3ef2b82f285b1ee41547a153cd5bc1"
+    },
+    "12-browser-packaged-jar": {
+      "exit_code": 0,
+      "log_sha256": "bad76fa27010c315702af7d0543c1529c1f9650f1cf8686fad66385f4eb32995",
+      "metadata_sha256": "e27a2b9f33fd852f815482dc6fbd06df7c54f1bbac8b226da27bf15819a3381e"
+    },
+    "13-shell-builder": {
+      "exit_code": 0,
+      "log_sha256": "ff06b586a85884ac183a1e86367859eb3b3dfd6f637352ed0f1f2375d4b85aab",
+      "metadata_sha256": "ec3f543da4afdd3a3e0bae688b9f77cd86067846bc6bb3b70f2344bf63f72f8a"
+    },
+    "14-shell-postinst": {
+      "exit_code": 0,
+      "log_sha256": "c6b764188b52f90dd3bc02d61163358a88ae9aed5f42374c96a7b55a7404d61a",
+      "metadata_sha256": "d39a074cf6ccb1754641f8d48ced735203412e88edf695a5134ce7c039dba0fc"
+    },
+    "15-shell-prerm": {
+      "exit_code": 0,
+      "log_sha256": "bfba5fd1916cd15ddef24a2a1b787c3c4897016dcd75ca4c89e610eec09b7be3",
+      "metadata_sha256": "9ae9cb5623d6a0bcb85dfcdc021a89680ef64dcd99660c19857f6c7790e55d2d"
+    },
+    "16-shell-launcher": {
+      "exit_code": 0,
+      "log_sha256": "9abf1f69818f257010c4f6bc3e26f3a38ce25e405ed74072238011135953a686",
+      "metadata_sha256": "e920e5530c68005ae4b87dc4ce50d98ac55e8894847e8e85d432f0caa589ac37"
+    }
+  },
+  "counts_verified_from_logs": {
+    "frontend": 96,
+    "server": 26,
+    "agent": 61,
+    "standalone_policy_http": 1
+  },
+  "current_windows_case_ids": [
+    "W3-F01",
+    "W3-F02",
+    "W3-F03",
+    "W3-F04",
+    "W3-F05",
+    "W3-F06",
+    "W3-F07",
+    "W3-F08",
+    "W3-F09",
+    "W3-F10",
+    "W3-F11",
+    "W3-F12",
+    "W3-S01",
+    "W3-S02",
+    "W3-A01",
+    "W3-A02",
+    "W3-P01",
+    "W3-P02",
+    "W3-D01"
+  ],
+  "current_ubuntu_case_ids_not_executed": [
+    "W3-U01",
+    "W3-U02",
+    "W3-U03",
+    "W3-U04",
+    "W3-U05",
+    "W3-U06",
+    "W3-U07",
+    "W3-U08",
+    "W3-U09"
+  ],
+  "owner_handoff_items_pending": [
+    "M5-W3-H01",
+    "M5-W3-H02",
+    "M5-W3-H03",
+    "M5-W3-H04",
+    "M5-W3-H05"
+  ],
+  "group_gate": "OPEN; no owner acknowledgment or group acceptance newly recorded.",
+  "historical_sections_verified": {
+    "docs/qa/WEEK3_TEST_INVENTORY.md": "Original 2026-10-21 body retained; headings nested beneath historical snapshot.",
+    "docs/qa/WEEK3_QA_SUMMARY.md": "Original 2026-10-21 body retained; headings nested beneath historical snapshot.",
+    "docs/qa/week3-evidence/README.md": "Original 2026-10-21 body retained; headings nested beneath historical snapshot."
+  },
+  "historical_tracked_raw_evidence_changes": [],
+  "original_post_pull_audit_documents_hashes_verified": true,
+  "git_diff_check": "PASS",
+  "tracked_changed_files": [
+    "docs/DEMO_SCRIPT.md",
+    "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+    "docs/qa/WEEK3_QA_SUMMARY.md",
+    "docs/qa/WEEK3_TEST_INVENTORY.md",
+    "docs/qa/week3-evidence/README.md"
+  ],
+  "documents_sha256": {
+    "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md": "530261aa2b9f7e60666c55c84f14c28f88d9d7bc23178081b4661c65c7e48d38",
+    "docs/qa/WEEK3_TEST_INVENTORY.md": "444389d5fb225810d38a8ca1a8d4e9037000eb6938e8b3bdde22ee467480ae30",
+    "docs/qa/WEEK3_QA_SUMMARY.md": "7aa7dd16b4dac83a0b195495387a2576b575b9eccd74c802de9bab3c44d9f5d8",
+    "docs/qa/week3-evidence/README.md": "1e9ebd99abd45bd5a414e517e62e9893fbd199ae96ce8a7bc3a8b3d91c5c2cbe",
+    "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md": "7c84a5bc404433d1e2b3cef59e3b4cf9075313b83e6fba69174b625c12ddb4de",
+    "docs/DEMO_SCRIPT.md": "d17328ecfd6a32abe9bcac2bae92c52eaafeba88bad121e0b838b0bd0526d861"
+  },
+  "local_links_checked": 247,
+  "broken_local_links": [],
+  "local_links": [
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "WEEK3_M5_POST_PULL_REVIEW_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/qa-closeout/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../member1/WEEK3_SERVER_HARDENING.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/06-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/12-browser-packaged-jar.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../admin-web/WEEK3_UI_UX_HARDENING.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/08-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/10-policy-http-contract.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardOutputParserTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardPolicySynchronizerTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardEventListenerTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/session/LoginctlActiveUserResolverTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/session/LinuxActiveUserResolverTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/endpoint/EndpointManagerTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/sync/PolicyAckRecoveryTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../client-agent/src/test/java/com/group/usbshield/agent/outbox/OutboxSpoolServiceTest.java"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../packaging/agent-deb/DEBIAN/control"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../packaging/systemd/usbshield-agent.service"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../packaging/scripts/build-deb.sh"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/11-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../packaging/agent-deb/DEBIAN/postinst"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "../../packaging/agent-deb/DEBIAN/prerm"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/06-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/07-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/08-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/07-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/screenshots/events-real-http-mobile.png"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/08-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/10-policy-http-contract.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/06-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/06-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/screenshots/events-username-substring.png"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/06-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/06-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/12-browser-packaged-jar.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/05-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/05-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/11-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/13-shell-builder.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/14-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/15-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/16-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/qa-closeout/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/01-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/03-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/04-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/sources/"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_EVENT_NAME_SEARCH_FIX.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_EVENT_NAME_SEARCH_FIX.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/event-name-search/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/username-substring/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/20-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/15-shell-syntax.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/17-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/18-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/19-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/02-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/11-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/07-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/01-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/03-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/04-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/02-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/06-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/05-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/07-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/08-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/09-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/10-policy-http-contract.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/12-browser-packaged-jar.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/11-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/13-shell-builder.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/14-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/15-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/16-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "../member1/WEEK3_SERVER_HARDENING.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-23/qa-closeout/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_M5_POST_PULL_REVIEW_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_EVENT_NAME_SEARCH_FIX.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/username-substring/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/02-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/11-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/07-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/20-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/15-shell-syntax.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/17-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/18-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/19-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/01-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/09-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/10-crlf-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/00-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/05-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/06-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/README.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/environment.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/screenshots/events-real-http-desktop.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/screenshots/events-username-substring.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/screenshots/events-real-http-mobile.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/screenshots/m4-live-expired-session.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/qa-closeout/validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_M5_POST_PULL_REVIEW_20261023.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/event-name-search/README.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/environment.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/artifacts.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/sources/"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/username-substring/README.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/00-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/01-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/02-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/03-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/04-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/05-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/06-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/07-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/09-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/10-crlf-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/11-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/15-shell-syntax.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/17-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/18-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/19-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/20-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-real-http-desktop.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-real-http-date-filter.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-real-http-mobile.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-week3-unknown-no-serial.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-week3-endpoint-b.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-week3-endpoint-a.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/m4-live-allow-a.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/m4-live-revoke-a.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/m4-live-expired-session.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/demo-events-mobile.png"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "week3-evidence/2026-10-23/post-pull-audit/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/week3-evidence/README.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/week3-evidence/2026-10-23/post-pull-audit/README.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/week3-evidence/2026-10-23/post-pull-audit/screenshots/events-username-substring.png"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    }
+  ]
+}

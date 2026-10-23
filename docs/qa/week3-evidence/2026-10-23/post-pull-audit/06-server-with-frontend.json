@@ -1,0 +1,22 @@
+{
+  "command": [
+    "mvn.cmd",
+    "-o",
+    "-B",
+    "-f",
+    "admin-server/pom.xml",
+    "-Pwith-frontend",
+    "clean",
+    "package"
+  ],
+  "command_text": "mvn.cmd -o -B -f admin-server/pom.xml -Pwith-frontend clean package",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "8c222a47142d7a80f75e56b8d77e5bf732797e16",
+  "started_at": "2026-10-23T14:36:29.780617+07:00",
+  "scope": "Fresh integrated M1+M5 server regression and combined React/server JAR from current frontend build; isolated test H2",
+  "source_manifest": "sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json",
+  "source_tree_sha256": "e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d",
+  "exit_code": 0,
+  "finished_at": "2026-10-23T14:37:20.936724+07:00"
+}

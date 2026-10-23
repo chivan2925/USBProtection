@@ -1,0 +1,17 @@
+{
+  "command": [
+    "C:/Program Files/Git/bin/bash.exe",
+    "-n",
+    "packaging/scripts/build-deb.sh"
+  ],
+  "command_text": "\"C:/Program Files/Git/bin/bash.exe\" -n packaging/scripts/build-deb.sh",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "8c222a47142d7a80f75e56b8d77e5bf732797e16",
+  "started_at": "2026-10-23T14:41:27.255795+07:00",
+  "scope": "Post-pull Windows Git Bash syntax only: packaging/scripts/build-deb.sh",
+  "source_manifest": "sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json",
+  "source_tree_sha256": "e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d",
+  "exit_code": 0,
+  "finished_at": "2026-10-23T14:41:27.331954+07:00"
+}
