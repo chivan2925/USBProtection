@@ -183,3 +183,13 @@ erDiagram
 - **Week 2:** Kết nối Agent ↔ Server thực tế, xử lý outbox spool khi mất mạng, triển khai logic Per-endpoint Whitelist Admin CRUD.
 - **Week 3:** Hoàn thiện giao diện Admin Web Console (React), xác thực Admin Session, hoàn thiện gói `.deb` cài đặt Ubuntu.
 - **Week 4:** Kiểm thử toàn diện trên phần cứng thật (Flash Disk, Chuột, Bàn phím), đóng gói tài liệu báo cáo và chuẩn bị kịch bản Demo.
+
+
+## Week 3 M1 handoff — 2026-10-23
+
+Contract unchanged: v0.2 routes/JSON and desired/applied/ACK semantics remain.
+Server adds a production profile, packaged React same-origin delivery and known-path
+redirects to the existing hash router. Fresh endpoints remain OFFLINE until heartbeat;
+corrupt Agent credentials fail closed. See [API deployment addendum](API.md) and
+[Week 3 server report](member1/WEEK3_SERVER_HARDENING.md). Windows verification and
+Ubuntu/USB/GUI/systemd/install/reboot deferred work are recorded separately.

@@ -197,3 +197,13 @@ Ví dụ trên lấy từ `docs/agent-contract/sample-usb-event.json` của M2: 
 | `401 Unauthorized` | Sai hoặc thiếu Agent Token. | Yêu cầu đăng ký lại enrollment. |
 | `404 Not Found` | Endpoint không tồn tại trong DB. | Chuyển sang trạng thái un-enrolled. |
 | `500 / 503` | Lỗi nội bộ server hoặc server offline. | Lưu trữ sự kiện vào Outbox Spool cục bộ để retry sau. |
+
+
+## Week 3 M1 handoff — 2026-10-23
+
+Contract unchanged: v0.2 routes/JSON and desired/applied/ACK semantics remain.
+Server adds a production profile, packaged React same-origin delivery and known-path
+redirects to the existing hash router. Fresh endpoints remain OFFLINE until heartbeat;
+corrupt Agent credentials fail closed. See [API deployment addendum](API.md) and
+[Week 3 server report](member1/WEEK3_SERVER_HARDENING.md). Windows verification and
+Ubuntu/USB/GUI/systemd/install/reboot deferred work are recorded separately.

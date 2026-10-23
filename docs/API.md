@@ -113,3 +113,33 @@ response; retry is owned by Agent. Ingestion success means persisted, not USB al
 M3 must review policy field and ACK semantics; M4/M5 consume explicit DTO/paging and
 CSRF lifecycle. Cross-member sign-off and physical Ubuntu E2E must be recorded by
 those members; this document is not their approval.
+
+
+## Week 3 deployment/status addendum (2026-10-23)
+
+Wire routes and DTOs **unchanged from v0.2**. New endpoints start OFFLINE with
+`lastSeen=null` until an authenticated heartbeat. No synthetic enrollment timestamp.
+Existing rows retain their lastSeen and age out by the configured timeout.
+Malformed stored Agent hash, unsupported BCrypt cost, missing/oversized credentials
+fail with 401. Admin session and Agent credential boundaries remain separate.
+
+Build with `admin-server/build-release.ps1` (JDK 21/22, Maven, Node/npm with installed
+frontend dependencies), or run `npm run build` in frontend then
+`mvn -B -f admin-server/pom.xml -Pwith-frontend clean package` from root.
+The Maven profile copies dist into target/classes/static, not source-controlled static.
+The resulting JAR serves React and API at the same origin. The current frontend uses
+hash routes (`/#/events`); known plain navigation paths redirect to those routes.
+API paths and missing asset paths never fall back to index.html.
+
+Use `--spring.profiles.active=prod` with `USBSHIELD_DB_URL` (H2 file JDBC URL),
+`USBSHIELD_DB_PASSWORD`, `USBSHIELD_ENROLLMENT_TOKEN`, and first-account
+`USBSHIELD_ADMIN_PASSWORD` configured outside source. Optional username defaults admin.
+Bind defaults 127.0.0.1, PORT defaults 8080; change USBSHIELD_BIND_ADDRESS explicitly
+for LAN. Secure cookie defaults true; use HTTPS directly or via trusted local reverse
+proxy. Forwarded headers are not trusted by default. Only isolated HTTP tests should
+use `--server.servlet.session.cookie.secure=false`. No default production password
+is created. Existing account passwords are not overwritten by bootstrap.
+
+See [Week 3 M1 report](member1/WEEK3_SERVER_HARDENING.md) for Windows evidence and
+Ubuntu tests deferred until after Week 4. Bundling current frontend does not claim
+its live API adapter/auth UI integration is completed by M4/M5.

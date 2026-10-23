@@ -1,0 +1,30 @@
+# Explicit deployment profile; secrets and database location are external.
+server:
+  address: ${USBSHIELD_BIND_ADDRESS:127.0.0.1}
+  port: ${PORT:8080}
+  forward-headers-strategy: none
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        secure: ${USBSHIELD_COOKIE_SECURE:true}
+        http-only: true
+        same-site: strict
+spring:
+  datasource:
+    url: ${USBSHIELD_DB_URL}
+    username: ${USBSHIELD_DB_USERNAME:sa}
+    password: ${USBSHIELD_DB_PASSWORD}
+  jpa:
+    open-in-view: false
+  h2:
+    console:
+      enabled: false
+logging:
+  level:
+    root: INFO
+    com.group.usbshield.server: INFO
+    org.hibernate.SQL: WARN
+usbshield:
+  enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN}
+  offline-after-seconds: ${USBSHIELD_OFFLINE_AFTER_SECONDS:90}

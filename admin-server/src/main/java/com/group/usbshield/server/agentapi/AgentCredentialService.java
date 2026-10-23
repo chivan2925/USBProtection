@@ -10,9 +10,9 @@ public class AgentCredentialService {
     private final EndpointRepository endpoints;
     private final PasswordEncoder encoder;
     public Endpoint authenticate(String id,String token) {
-        if(id==null || token==null || token.isBlank()) throw new ResponseStatusException(UNAUTHORIZED,"Agent credentials required");
+        if(id==null || id.isBlank() || id.length()>100 || token==null || token.isBlank() || token.length()>72) throw new ResponseStatusException(UNAUTHORIZED,"Agent credentials required");
         Endpoint e=endpoints.findByEndpointId(id).orElseThrow(()->new ResponseStatusException(UNAUTHORIZED,"Invalid Agent credentials"));
-        if(e.getAgentTokenHash()==null || !encoder.matches(token,e.getAgentTokenHash())) throw new ResponseStatusException(UNAUTHORIZED,"Invalid Agent credentials");
+        if(e.getAgentTokenHash()==null || !e.getAgentTokenHash().matches("\\$2[aby]\\$(0[4-9]|1[0-6])\\$[./A-Za-z0-9]{53}") || !encoder.matches(token,e.getAgentTokenHash())) throw new ResponseStatusException(UNAUTHORIZED,"Invalid Agent credentials");
         return e;
     }
     public static void bind(String authenticatedId,String claimedId) {

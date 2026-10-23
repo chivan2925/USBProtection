@@ -38,7 +38,7 @@ public class Endpoint {
 
     @Column(nullable = false, length = 30)
     @Builder.Default
-    private String status = "ONLINE";
+    private String status = "OFFLINE";
 
     private Instant lastSeen;
 
@@ -52,9 +52,6 @@ public class Endpoint {
 
     @PrePersist
     public void prePersist() {
-        if (this.lastSeen == null) {
-            this.lastSeen = Instant.now();
-        }
         if (this.policyVersion == null) {
             this.policyVersion = 1L;
         }
