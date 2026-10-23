@@ -15,6 +15,7 @@ export function EmptyState({ title = 'Chưa có dữ liệu', description = 'D�
 export function ResourceNotice<T>({ state, retry }: { state: ResourceState<T>; retry: () => void }) {
   if (state.status === 'ready' || state.status === 'loading') return null
   const failed = state.status === 'error'
+  if (failed && state.statusCode === 401) return <div className="notice" role="alert"><Icon name="user" /><div><strong>Cần đăng nhập quản trị</strong><p>{state.error}</p></div><a className="button small" href="#/login">Đăng nhập</a></div>
   return <div className={`notice ${failed ? 'error-notice' : ''}`} role={failed ? 'alert' : 'status'}><Icon name="info" /><div><strong>{failed ? 'Không thể tải dữ liệu' : 'Đang chờ kết nối backend'}</strong><p>{failed ? state.error : 'Backend chưa có API quản lý USB. Trạng thái bảo vệ và số liệu chưa được xác định; thao tác quản lý hiện chưa khả dụng.'}</p></div>{failed ? <button className="button small" onClick={retry}>Thử lại</button> : <a href="#/settings">Chi tiết <Icon name="arrow" size={15} /></a>}</div>
 }
 export function LoadingState() {

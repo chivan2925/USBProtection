@@ -2,6 +2,7 @@ package com.group.usbshield.agent.event;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "usbshield.agent.simulation-enabled", havingValue = "true")
 public class EventSimulationRunner implements CommandLineRunner {
 
     private final EventSenderService eventSenderService;

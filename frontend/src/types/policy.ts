@@ -9,7 +9,9 @@ export interface WhitelistEntry {
   serial?: string
   name?: string
   hash?: string
-  addedAt: string
+  fingerprintType?: string
+  fingerprintValue?: string
+  addedAt?: string
   addedBy?: string
 }
 

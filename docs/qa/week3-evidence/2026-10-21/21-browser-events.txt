@@ -1,0 +1,27 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:browser:live"
+  ],
+  "command_text": "npm.cmd run test:browser:live",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:41:00.169564+07:00",
+  "scope": "Windows Chromium plus fresh Spring Boot/H2; 25 baseline and 3 Week 3 synthetic HTTP events; no actual Linux user switch",
+  "source_manifest": "sources/85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe.json",
+  "source_tree_sha256": "85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe"
+}
+
+
+> frontend@0.0.0 test:browser:live
+> node tests/browser-live.mjs
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+PASS: Week 3 HTTP synthetic no-serial storage, UNKNOWN/source timestamp, user-switch history and exact endpoint A/B isolation (28 persisted events).
+PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.
+PASS: browser-injected 403/500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png
+LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.
+
+{"finished_at": "2026-10-21T22:41:23.676905+07:00", "exit_code": 0}

@@ -1,0 +1,80 @@
+{
+  "command": [
+    "mvn.cmd",
+    "-o",
+    "-B",
+    "-f",
+    "client-agent/pom.xml",
+    "clean",
+    "package"
+  ],
+  "command_text": "mvn.cmd -o -B -f client-agent/pom.xml clean package",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:35:26.419804+07:00",
+  "scope": "Fresh Windows client-agent unit/mock/contract tests and JAR build; no actual Ubuntu runtime",
+  "source_manifest": "sources/7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34.json",
+  "source_tree_sha256": "7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34"
+}
+
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.group.usbshield:client-agent >------------------
+[INFO] Building USBShield Client Agent 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ client-agent ---
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ client-agent ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ client-agent ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 56 source files with javac [debug parameters release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] /D:/USBProtection/client-agent/src/main/java/com/group/usbshield/agent/event/EventSenderService.java: D:\USBProtection\client-agent\src\main\java\com\group\usbshield\agent\event\EventSenderService.java uses or overrides a deprecated API.
+[INFO] /D:/USBProtection/client-agent/src/main/java/com/group/usbshield/agent/event/EventSenderService.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ client-agent ---
+[INFO] skip non existing resourceDirectory D:\USBProtection\client-agent\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ client-agent ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 20 source files with javac [debug parameters release 21] to target\test-classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] /D:/USBProtection/client-agent/src/test/java/com/group/usbshield/agent/session/ActiveUserInfoTest.java: D:\USBProtection\client-agent\src\test\java\com\group\usbshield\agent\session\ActiveUserInfoTest.java uses or overrides a deprecated API.
+[INFO] /D:/USBProtection/client-agent/src/test/java/com/group/usbshield/agent/session/ActiveUserInfoTest.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- surefire:3.2.5:test (default-test) @ client-agent ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[WARNING] The POM for org.apache.maven.surefire:surefire-junit-platform:jar:3.2.5 is missing, no dependency information available
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  19.059 s
+[INFO] Finished at: 2026-10-21T22:35:47+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.2.5:test (default-test) on project client-agent: The following artifacts could not be resolved: org.apache.maven.surefire:surefire-junit-platform:jar:3.2.5 (absent): Cannot access central (https://repo.maven.apache.org/maven2) in offline mode and the artifact org.apache.maven.surefire:surefire-junit-platform:jar:3.2.5 has not been downloaded from it before. -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+
+{"finished_at": "2026-10-21T22:35:48.027163+07:00", "exit_code": 1}

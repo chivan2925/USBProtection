@@ -1,0 +1,24 @@
+﻿M5 frontend browser regression and explicit demo
+Started: 2026-10-16T15:30:26.0049091+07:00
+Command: npm run test:browser
+API target: deliberately unavailable local test port
+
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+PASS: routes, 404, refresh toast, filters, login safety, mobile navigation, responsive overflow and browser errors. Screenshots: .artifacts/
+
+Exit code: 0
+
+Final bundle browser regression
+Started: 2026-10-16T15:36:59.7069595+07:00
+Command: npm run test:browser
+
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+PASS: routes, 404, refresh toast, filters, login safety, mobile navigation, responsive overflow and browser errors. Screenshots: .artifacts/
+
+Exit code: 0

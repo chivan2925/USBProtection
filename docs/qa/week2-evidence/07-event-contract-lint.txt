@@ -1,0 +1,14 @@
+M5 Admin Events v0.2 frontend lint
+Timezone: Asia/Bangkok
+Started: 2026-10-16T15:03:05.8160372+07:00
+Base revision: cd81060b8f5f32e4ffa42e9120e2827d92219204
+Source: working tree; see 09-event-contract-source-state.txt
+Command: npm run lint
+
+
+> frontend@0.0.0 lint
+> oxlint
+
+
+Finished: 2026-10-16T15:03:06.8434826+07:00
+Exit code: 0

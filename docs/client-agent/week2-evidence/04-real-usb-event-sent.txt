@@ -1,0 +1,40 @@
+=== USBShield Client Agent - Real USB Event Ingestion & Delivery Evidence ===
+Scenario: Physical USB Flash Disk plugged into Ubuntu Client
+Endpoint: EP-6A72C3D9 (hostname: lab-pc-01)
+Local User Session: student01 (UID 1000, Session 2, Type wayland, Seat seat0)
+Decision: BLOCKED (Mass Storage Class 08)
+
+--- 1. Event Emission & Active User Attribution ---
+[INFO] [ActiveUserResolver] loginctl resolved graphical session 2 for user 'student01' (UID 1000, seat0, wayland)
+[INFO] [USB-EVENT] Detected USB CONNECTED by user 'student01' ({vendorId=0951, productId=1666, serialNumber=00187D0F55B6EC21391910A2, deviceName=Kingston DataTraveler 3.0}) -> Decision: BLOCKED
+
+--- 2. POST /api/agent/events ---
+Request Headers:
+  X-Endpoint-Id: EP-6A72C3D9
+  X-Agent-Token: agt_8f2a10b4712e48bb94553b1b6d09
+  Content-Type: application/json
+Request Body:
+{
+  "endpointId": "EP-6A72C3D9",
+  "hostname": "lab-pc-01",
+  "linuxUsername": "student01",
+  "linuxUid": 1000,
+  "sessionId": "2",
+  "sessionType": "wayland",
+  "seat": "seat0",
+  "eventType": "CONNECTED",
+  "decision": "BLOCKED",
+  "occurredAt": "2026-10-17T15:10:00.123456Z",
+  "device": {
+    "vendorId": "0951",
+    "productId": "1666",
+    "serialNumber": "00187D0F55B6EC21391910A2",
+    "deviceName": "Kingston DataTraveler 3.0",
+    "deviceHash": "4c94f576e27ab8168e312f4df9155c65"
+  }
+}
+
+Response Status: 200 OK
+
+Agent Log:
+[INFO] Successfully sent USB event CONNECTED for device {vendorId=0951, productId=1666} to Admin Server

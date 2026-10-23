@@ -1,0 +1,54 @@
+{
+  "content": [
+    {
+      "id": 101,
+      "endpointId": "POC-UNENROLLED-LAB-PC-01",
+      "hostname": "usbshield-lab",
+      "linuxUsername": "usbdev",
+      "linuxUid": 1000,
+      "sessionId": "21",
+      "sessionType": "wayland",
+      "seat": "seat0",
+      "usbDeviceId": 7,
+      "device": {
+        "vendorId": "093a",
+        "productId": "2510",
+        "serial": "",
+        "name": "USB Optical Mouse",
+        "hash": "L46bZEAKg59EA+puzjHMh8D4jLliJqK4sYxKSd/DRz8=",
+        "interfaceClass": "03:01:02"
+      },
+      "eventType": "CONNECTED",
+      "decision": "ALLOWED",
+      "occurredAt": "2026-09-28T07:10:16Z",
+      "receivedAt": "2026-09-28T07:10:17.123456789Z"
+    },
+    {
+      "id": 100,
+      "endpointId": "QA-FIXTURE-ENDPOINT-B",
+      "hostname": "qa-fixture-host-b",
+      "linuxUsername": "UNKNOWN",
+      "linuxUid": null,
+      "sessionId": null,
+      "sessionType": null,
+      "seat": null,
+      "usbDeviceId": 8,
+      "device": {
+        "vendorId": "0951",
+        "productId": "1666",
+        "serial": "QA-FIXTURE-USB",
+        "name": "QA fixture storage",
+        "hash": "qa-fixture-storage-hash",
+        "interfaceClass": "08:06:50"
+      },
+      "eventType": "CONNECTED",
+      "decision": "BLOCKED",
+      "occurredAt": "2026-09-28T07:10:15Z",
+      "receivedAt": "2026-09-28T07:10:18Z"
+    }
+  ],
+  "page": 0,
+  "size": 2,
+  "totalElements": 3,
+  "totalPages": 2
+}

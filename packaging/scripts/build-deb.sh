@@ -37,8 +37,10 @@ cp "$JAR_FILE" "$DEB_STAGING/opt/usbshield-agent/usbshield-agent.jar"
 chmod 755 "$DEB_STAGING/opt/usbshield-agent/usbshield-agent.jar"
 
 # Copy config and default base rules
-cp "$ROOT_DIR/client-agent/src/main/resources/application.yml" "$DEB_STAGING/etc/usbshield-agent/application.yml"
-chmod 644 "$DEB_STAGING/etc/usbshield-agent/application.yml"
+# The installed service must load the protected, deployment-specific config,
+# NOT the developer application.yml (which defaults to ./data on Windows).
+cp "$PACKAGING_DIR/agent-deb/etc/usbshield-agent/application.yml" "$DEB_STAGING/etc/usbshield-agent/application.yml"
+chmod 640 "$DEB_STAGING/etc/usbshield-agent/application.yml"
 if [ -f "$PACKAGING_DIR/usbguard/rules-v0.1.conf" ]; then
     cp "$PACKAGING_DIR/usbguard/rules-v0.1.conf" "$DEB_STAGING/etc/usbshield-agent/rules-v0.1.conf"
     chmod 644 "$DEB_STAGING/etc/usbshield-agent/rules-v0.1.conf"
@@ -47,6 +49,17 @@ fi
 # Copy systemd service file
 cp "$PACKAGING_DIR/systemd/usbshield-agent.service" "$DEB_STAGING/usr/lib/systemd/system/"
 chmod 644 "$DEB_STAGING/usr/lib/systemd/system/usbshield-agent.service"
+
+# Copy XDG autostart desktop entry and user-session notification launcher
+mkdir -p "$DEB_STAGING/etc/xdg/autostart"
+if [ -f "$PACKAGING_DIR/desktop/usbshield-notifier.desktop" ]; then
+    cp "$PACKAGING_DIR/desktop/usbshield-notifier.desktop" "$DEB_STAGING/etc/xdg/autostart/"
+    chmod 644 "$DEB_STAGING/etc/xdg/autostart/usbshield-notifier.desktop"
+fi
+if [ -f "$PACKAGING_DIR/desktop/usbshield-notifier-launcher.sh" ]; then
+    cp "$PACKAGING_DIR/desktop/usbshield-notifier-launcher.sh" "$DEB_STAGING/opt/usbshield-agent/"
+    chmod 755 "$DEB_STAGING/opt/usbshield-agent/usbshield-notifier-launcher.sh"
+fi
 
 echo "=== Packaging DEB with dpkg-deb ==="
 dpkg-deb --build "$DEB_STAGING" "$OUTPUT_DIR/usbshield-agent_1.0.0_amd64.deb"

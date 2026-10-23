@@ -2,6 +2,8 @@
 
 Owner: M5. Created: 2026-10-13 (Asia/Bangkok). Baseline: `8b644eafc7aa3651b92e7a6746f4f22a4f1ba65e`.
 
+Current execution scope (2026-10-18): M5 completion excluding Ubuntu on `huy`, working tree based on `e7b05fe972f07aa2d304dcd8e6cf21c664f4d085`. [Current verification](week2-evidence/M5_NON_UBUNTU_COMPLETION_20261018.md) records 72 tests, lint/build and all three browser suites. The shared harness stops Windows Java launcher descendants before restart and verifies old-session HTTP 401, cleared rows and reauthentication. Web Allow/Revoke, A/B isolation, controlled ACK, H2 persistence and Backend to Web Events use synthetic HTTP inputs; browser faults are explicitly injected. M3 61-test owner evidence from 2026-10-17 is indexed separately. Physical Ubuntu/GUI scenarios remain NOT EXECUTED; [handoff](M4_M5_WEEK2_HANDOFF.md) separates technical completion from pending human M4 acknowledgment.
+
 Source: the provided `USBShield_Week2_File_Ownership_M1_M3_M4_M5.md`, sections 1, 3 and 7. This document is an execution plan, not evidence that Week 2 has passed. [Inventory](WEEK2_TEST_INVENTORY.md) records runs; [summary](WEEK2_QA_SUMMARY.md) records gates/blockers.
 
 ## Scope and prerequisites
@@ -36,12 +38,12 @@ Record commit/tag for each module, exact environment, Asia/Bangkok timestamp/off
 | W2-T12 — M2/M5 | P2/P3. Exercise ALLOWED storage, HID mouse, Remove, PolicyChanged and PolicyApplied separately. | No blocked-USB popup for any excluded trigger; normal event processing continues. | Per-trigger traces and observation/video; mark injected/unit variants separately |
 | W2-T13 — M2/M3/M5 | P1–P3. Exercise UNKNOWN user, no graphical session and notifier/helper failure. | No wrong-user notification; no crash/stall; USBGuard decision unchanged and event persisted/queued. | Session/helper failure logs, USBGuard target, Server row or outbox |
 | W2-T14 — M4/M5 | P1/P5. Use live 200 empty, 401, 403, 500 and network failure; refresh/retry. | Empty/error/auth states truthful; no mock fallback, fake success or stale attribution. | Actual HTTP/browser traces; fixture-only checks listed separately |
-| W2-T15 — M5 | Complete fixture dataset now; P1/P5 for live. Combine endpoint/user/name/VID/PID/serial/hash/type/decision/date filters; reset; paginate beyond first page. | Correct result set; UNKNOWN differs from no decision; local date bounds inclusive, UTC instants sorted; live server filtering covers entire dataset. | Unit/fixture logs, browser captures and live query/results when available |
+| W2-T15 — M5 | Demo: endpoint/user/name/VID/PID/serial/hash/type/decision/date filters. Live P1/P5: exact endpointId/linuxUsername/deviceId, canonical type/decision and inclusive local dates; reset; page beyond first page. | Correct full-dataset server result and totals; demo UNKNOWN differs from no decision; local dates include final persisted sub-millisecond value, exclude next midnight. | Unit/fixture logs and actual HTTP/browser query/results, with source/fault injection labeled |
 | W2-T16 — M1/M3 | P1/P2. Force apply failure, then ACK network failure; test invalid/negative/future/cross-endpoint ACK. | No false applied success; ACK only after apply succeeds; retry/recovery and validation match contract. | Failing mock/real runs clearly labeled, HTTP/DB versions, apply/ACK logs |
 | W2-T17 — M4/M5 | Installed frontend dependencies/local Chromium. Run build/lint/unit/browser commands below. | All commands exit 0; live unavailable has no fixture rows; explicit demo filters/routes/mobile regressions pass. | Fresh terminal logs, environment/time/revision and screenshots |
 | W2-T18 — M1/M3/M2 | Maven/Java toolchain; P2/P3 for startup smoke. Run Maven tests; verify non-root service, USBGuard IPC and desktop helper startup on Ubuntu. | Tests pass; services/helper ready with correct access; separate Java-only results from Linux smoke. | Maven output and systemd/IPC/helper evidence |
 
-W2-T15 fixture execution does not imply its live query portion passed. W2-T17 browser smoke currently uses unavailable live state and explicit demo, not a live Admin API. Keep canonical IDs intact; label sub-runs `W2-T14-FE`, `W2-T15-FE`, etc., without replacing the canonical real scenarios or M2-W2-* IDs.
+W2-T15 has fixture and real HTTP/browser query evidence recorded separately. W2-T17 now includes HTTP fixture regression and both real Spring Boot/H2 browser suites. Full physical scenarios retain their complete acceptance criteria even when Windows sub-runs pass. Keep canonical IDs intact; label sub-runs without replacing the canonical real scenarios or M2-W2-* IDs.
 
 ## Runnable frontend checks
 
@@ -52,9 +54,11 @@ npm run build
 npm run lint
 npm test
 npm run test:browser
+npm run test:live
+npm run test:browser:live
 ```
 
-Use existing dependencies; `npm ci` only if dependency installation is needed. Browser smoke requires local Chrome/Chromium/Edge (`CHROME_PATH` can select executable), built dist and free port 4173. Script fixes browser timezone to Asia/Bangkok. It launches preview and headless browser and cleans up its own temporary profile. Screenshots under `frontend/.artifacts/` are runtime outputs; selected copies can be kept in QA evidence.
+Use existing dependencies; `npm ci` only if installation is needed. Browser tests require local Chrome/Chromium/Edge (`CHROME_PATH`), built dist and run sequentially. Fixture/management uses preview 4173; real Events uses backend 18083 and preview 4174. Real suites also require the built Admin Server JAR and JDK 21+ (`JAVA_HOME`); tested binaries are identified by the environment/manifest. Both suites use isolated H2, synthetic HTTP input and Asia/Bangkok browser timezone; temporary profiles/processes are cleaned up. Selected screenshots are copied from `frontend/.artifacts/` into the new evidence folder.
 
 From repo root, when executing M1/M3 tests:
 
@@ -69,7 +73,7 @@ These commands are a plan, not a recorded Maven run in this handoff.
 
 Classify each run: UNIT, FRONTEND FIXTURE, BROWSER DEMO, HTTP CONTRACT, REAL USB, GUI NOTIFICATION or FULL E2E. PASS requires matching expected/actual with fresh evidence and exit codes. FAIL means executed but expectation failed. NOT EXECUTED means not run. BLOCKED means an identified prerequisite prevents execution; name follow-up owner. Never promote old Windows/simulation evidence to physical Ubuntu E2E.
 
-For each canonical test, record owner/environment/revision/date-time/steps/expected/actual/status/evidence/limitation/follow-up. Preserve initial failed attempts and explain successful retries. Keep secrets and raw tokens/passwords out of evidence. Link M1 `docs/member1/week2-evidence/`, M3 `docs/client-agent/week2-evidence/`, M4 `docs/admin-web/week2-evidence/` and actual M2 owner artifacts when delivered; proposed locations are not proof of delivery.
+For each canonical test, record owner/environment/revision/date-time/steps/expected/actual/status/evidence/limitation/follow-up. Preserve initial attempts and explain retries. Keep secrets and raw tokens/passwords out of evidence. Current owner artifacts are linked from the inventory: M1 `docs/member1/week2-evidence/`, M2 `docs/usbguard/week2-evidence/`, M3 historical Windows runtime in `docs/client-agent/evidence/`, and M4 `docs/admin-web/week2-evidence/`. No current Ubuntu M3 Week 2 runtime package is claimed; a proposed folder is not proof of delivery.
 
 ## Contract and ownership boundaries
 

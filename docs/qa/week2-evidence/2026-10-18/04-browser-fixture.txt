@@ -1,0 +1,20 @@
+M5 Week 2 non-Ubuntu completion verification
+Started: 2026-10-18T14:40:59.789570+07:00
+Timezone: Asia/Bangkok
+Base revision: e7b05fe972f07aa2d304dcd8e6cf21c664f4d085
+Branch: huy
+Source: working tree; current file hashes are in source-manifest.json.
+Command: npm run test:browser
+Working directory: D:\USBProtection\frontend
+Scope: Windows; isolated H2 and synthetic HTTP inputs. Ubuntu/physical USB/GUI not executed.
+
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+PASS: M4 browser with HTTP fixture; protected routes, invalid/valid login, refresh /me, CSRF, A/B Allow/Revoke, duplicate/error/empty states, M5 events/filter, expired session/logout, demo read-only, network error, responsive routes.
+Scope: HTTP fixture regression. Run npm run test:live for Spring Security/H2 evidence. Physical USB and actual Agent apply/ACK require Ubuntu.
+Screenshots: frontend/.artifacts/m4-*.png; demo regression screenshots.
+
+Finished: 2026-10-18T14:41:08.594781+07:00
+Exit code: 0

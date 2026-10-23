@@ -9,11 +9,13 @@ import { createServer } from 'vite'
 let vite
 let Events
 let EventTable
+let EventFilters
 
 before(async () => {
   vite = await createServer({ server: { middlewareMode: true, ws: false }, appType: 'custom' })
   ;({ Events } = await vite.ssrLoadModule('/src/pages/Events.tsx'))
   ;({ EventTable } = await vite.ssrLoadModule('/src/components/event/EventTable.tsx'))
+  ;({ EventFilters } = await vite.ssrLoadModule('/src/components/event/EventFilters.tsx'))
 })
 
 test('Events loading, unavailable and error states never display fixture rows', () => {
@@ -111,4 +113,41 @@ test('Events page uses the tested table for ready data and preserves frontend fi
   }))
   for (const value of ['student01', 'employee07', 'Kingston', 'SanDisk', 'BLOCK', 'ALLOW', 'href="#/endpoints/POC-LAB-PC-01"']) assert.ok(html.includes(value), value)
   assert.ok(!html.includes('Dữ liệu mock'))
+})
+
+test('EventTable preserves source time, escaped attribution and encoded endpoint identity', () => {
+  const event = { ...mockEvents[0], endpointId: 'endpoint A/&B', username: '<script>user</script>', deviceName: '<USB>', timestamp: '2026-10-21T10:11:12.123456789Z' }
+  const html = renderToStaticMarkup(createElement(EventTable, { events: [event] }))
+  assert.ok(html.includes('href="#/endpoints/endpoint%20A%2F%26B"'))
+  assert.ok(html.includes('dateTime="2026-10-21T10:11:12.123456789Z"'))
+  assert.ok(html.includes('&lt;script&gt;user&lt;/script&gt;'))
+  assert.ok(html.includes('&lt;USB&gt;'))
+  assert.ok(!html.includes('<script>'))
+})
+
+test('EventTable last server page retains all rows, their order and global pagination', () => {
+  const events = Array.from({ length: 5 }, (_, index) => ({ ...mockEvents[0], id: String(25 - index), username: `page-two-user-${index}`, usbDeviceId: String(index + 1) }))
+  const html = renderToStaticMarkup(createElement(EventTable, {
+    events, pagination: { page: 1, size: 20, totalElements: 25, totalPages: 2, onPageChange() {} },
+  }))
+  assert.equal((html.match(/<tbody><tr>|<\/tr><tr>/g) ?? []).length, 5)
+  assert.ok(html.includes('21–25 trên 25 bản ghi'))
+  assert.ok(html.includes('Trang 2 / 2'))
+  assert.ok(html.indexOf('page-two-user-0') < html.indexOf('page-two-user-4'))
+  assert.ok(html.includes('ID: 5'))
+})
+
+test('live filters match table labels and accept endpoint/USB names on a text keyboard', () => {
+  const html = renderToStaticMarkup(createElement(EventFilters, { live: true, value: { endpoint: '', username: '', device: '', eventType: '', decision: '', dateFrom: '', dateTo: '' }, onChange() {}, onReset() {} }))
+  for (const label of ['Endpoint', 'Linux User', 'USB']) assert.ok(html.includes(`<label>${label}<input`))
+  for (const placeholder of ['Tên hoặc ID endpoint', 'Tên hoặc một phần tên', 'Tên hoặc ID USB']) assert.ok(html.includes(`placeholder="${placeholder}"`))
+  assert.ok(!html.includes('inputMode="numeric"'))
+})
+
+test('live endpoint cell displays the name and its searchable ID together', () => {
+  const html = renderToStaticMarkup(createElement(EventTable, {
+    events: mockEvents, pagination: { page: 0, size: 20, totalElements: 2, totalPages: 1, onPageChange() {} },
+  }))
+  assert.ok(html.includes('lab-pc-01.local'))
+  assert.ok(html.includes('class="endpoint-event-id">ID: POC-LAB-PC-01'))
 })

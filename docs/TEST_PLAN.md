@@ -130,3 +130,17 @@ Week 2 uses a separate [integration plan](qa/WEEK2_INTEGRATION_TEST_PLAN.md), [e
 Per the Week 2 ownership handoff, the group's accepted Week 1 scope is CLOSED/PASS; the historical evidence and limitations above remain intact. Physical keyboard testing is not a prerequisite for reopening Week 1. Native Ubuntu client BLOCK notification is a Week 2 requirement. Final .deb clean install/reboot and release guides remain Week 3/4.
 
 Frontend unit/fixture and browser-demo results are recorded separately from real HTTP, physical USB, GUI notification and full E2E results. Unexecuted cases stay NOT EXECUTED; new reports link owner evidence rather than copying or rewriting historical evidence.
+
+## 7. Week 3 Windows execution plan (2026-10-21)
+
+Week 3 tracks productization, Event History hardening and Windows regression in a separate [integration test plan](qa/WEEK3_INTEGRATION_TEST_PLAN.md), [test inventory](qa/WEEK3_TEST_INVENTORY.md), [QA summary](qa/WEEK3_QA_SUMMARY.md) and [evidence index](qa/week3-evidence/README.md). Canonical IDs are **W3-F01–W3-F10**, **W3-S01–W3-S02**, **W3-A01–W3-A02**, **W3-P01–W3-P02**, **W3-D01** and **W3-U01–W3-U09**. Earlier IDs and execution records above remain historical.
+
+The 2026-10-21 Event filter/table follow-up adds **W3-F11** for endpoint/USB name-or-ID search, exact Linux username and server-side filtered pagination. Its [separate report](qa/WEEK3_EVENT_NAME_SEARCH_FIX.md) links the new source manifests and reruns; earlier Week 3 execution artifacts remain unchanged.
+
+`WINDOWS_EXECUTABLE` covers Node/npm unit/component/fixture tests, real Spring Boot/H2 HTTP/browser tests using synthetic events and controlled ACK, Maven unit/contract tests, and package/script static validation. Every result records command, date/time in Asia/Bangkok, OS, base Git revision, source hashes, exit status and evidence. A prior Week 2 PASS is not a Week 3 execution result.
+
+All actual Ubuntu USBGuard/physical USB/session switching/native notification/IPC/systemd/clean install/uninstall/reinstall/reboot tests are **DEFERRED UNTIL AFTER WEEK 4**, recorded as `NOT EXECUTED / DEFERRED_UBUNTU`. Unit mocks and HTTP-seeded events do not establish their runtime behavior. The [Demo Script](DEMO_SCRIPT.md) is a Week 3 draft with separate Windows and deferred Ubuntu paths.
+
+M5 may complete its owned implementation/tests and prepare documentation independently. M1–M4 still own contract and implementation acceptance for their components; M1 coordinates the integrated revision and the group decision. The allowed group label is `WEEK 3 — PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED` only after all Windows P0 items are demonstrated. This M5 execution does not automatically close that group gate or declare a final release.
+
+The later Linux User substring correction adds **W3-F12** for partial/case-insensitive username search before counting/pagination, with backward-compatible exact `linuxUsername` API filtering. See the [separate capture](qa/week3-evidence/2026-10-21/username-substring/README.md).

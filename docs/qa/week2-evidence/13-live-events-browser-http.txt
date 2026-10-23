@@ -1,0 +1,138 @@
+﻿M5 real Spring Boot/H2 and Chromium verification
+Started: 2026-10-16T15:30:28.4898230+07:00
+Command: npm run test:browser:live
+Classification: real HTTP/browser, isolated H2, synthetic QA event source; no physical USB
+
+
+> frontend@0.0.0 test:browser:live
+> node tests/browser-live.mjs
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+file:///D:/USBProtection/frontend/tests/browser-live.mjs:33
+  throw new Error(`Timed out: ${label}`)
+        ^
+System.Management.Automation.RemoteException
+Error: Timed out: inclusive calendar date query
+    at until (file:///D:/USBProtection/frontend/tests/browser-live.mjs:33:9)
+    at async file:///D:/USBProtection/frontend/tests/browser-live.mjs:157:3
+System.Management.Automation.RemoteException
+Node.js v22.20.0
+
+Finished: 2026-10-16T15:31:08.0898734+07:00
+Exit code: 1
+
+Retry: timestamp fixture uses persisted H2 microsecond precision
+Started: 2026-10-16T15:32:06.9231236+07:00
+Command: npm run test:browser:live
+
+
+> frontend@0.0.0 test:browser:live
+> node tests/browser-live.mjs
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.
+PASS: browser-injected 500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png
+LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.
+
+Finished: 2026-10-16T15:32:25.5309557+07:00
+Exit code: 0
+
+Final bundle: complete exact filters and injected 403/500/network
+Started: 2026-10-16T15:36:53.5650090+07:00
+Command: npm run test:browser:live
+
+
+> frontend@0.0.0 test:browser:live
+> node tests/browser-live.mjs
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+System.Management.Automation.RemoteException
+AssertionError [ERR_ASSERTION]: No exception in browser evaluation
++ actual - expected
+System.Management.Automation.RemoteException
++ {
++   columnNumber: 42,
++   exception: {
++     className: 'TypeError',
++     description: "TypeError: Cannot read properties of null (reading 'textContent')\n" +
++       '    at <anonymous>:1:43',
++     objectId: '8215108630459969972.2.2',
++     subtype: 'error',
++     type: 'object'
++   },
++   exceptionId: 1,
++   lineNumber: 0,
++   scriptId: '23',
++   stackTrace: {
++     callFrames: [
++       {
++         columnNumber: 42,
++         functionName: '',
++         lineNumber: 0,
++         scriptId: '23',
++         url: ''
++       }
++     ]
++   },
++   text: 'Uncaught'
++ }
+- undefined
+System.Management.Automation.RemoteException
+    at evaluate (file:///D:/USBProtection/frontend/tests/browser-live.mjs:111:12)
+    at async file:///D:/USBProtection/frontend/tests/browser-live.mjs:157:20 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: {
+    exceptionId: 1,
+    text: 'Uncaught',
+    lineNumber: 0,
+    columnNumber: 42,
+    scriptId: '23',
+    stackTrace: {
+      callFrames: [
+        {
+          functionName: '',
+          scriptId: '23',
+          url: '',
+          lineNumber: 0,
+          columnNumber: 42
+        }
+      ]
+    },
+    exception: {
+      type: 'object',
+      subtype: 'error',
+      className: 'TypeError',
+      description: "TypeError: Cannot read properties of null (reading 'textContent')\n" +
+        '    at <anonymous>:1:43',
+      objectId: '8215108630459969972.2.2'
+    }
+  },
+  expected: undefined,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+System.Management.Automation.RemoteException
+Node.js v22.20.0
+
+Finished: 2026-10-16T15:37:17.6361646+07:00
+Exit code: 1
+
+Retry: read Device ID from settled first page before reset/loader transition
+Started: 2026-10-16T15:38:46.4869963+07:00
+Command: npm run test:browser:live
+
+
+> frontend@0.0.0 test:browser:live
+> node tests/browser-live.mjs
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.
+PASS: browser-injected 403/500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png
+LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.
+
+Finished: 2026-10-16T15:39:05.1180322+07:00
+Exit code: 0

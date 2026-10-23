@@ -1,0 +1,10 @@
+Pre-fix diagnostic on 2026-10-18, branch huy.
+Source: frontend/.artifacts/live-r3SKrZ/server.log
+Extracted startup and H2 lock failure lines; other debug output omitted.
+This is pre-fix diagnostic evidence, not the final PASS run.
+
+2026-10-18 14:37:07.907 [main] INFO  c.g.u.s.UsbShieldServerApplication - Starting UsbShieldServerApplication v1.0.0-SNAPSHOT using Java 22.0.2 with PID 12088 (D:\USBProtection\admin-server\target\usbshield-admin-server.jar started by lekha in D:\USBProtection)
+2026-10-18 14:37:17.697 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 14748 (http) with context path '/'
+2026-10-18 14:37:25.982 [main] INFO  c.g.u.s.UsbShieldServerApplication - Starting UsbShieldServerApplication v1.0.0-SNAPSHOT using Java 22.0.2 with PID 23044 (D:\USBProtection\admin-server\target\usbshield-admin-server.jar started by lekha in D:\USBProtection)
+2026-10-18 14:37:31.281 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - Database may be already in use: "D:/USBProtection/frontend/.artifacts/live-r3SKrZ/db.mv.db". Possible solutions: close all other connection(s); use the server mode [90020-224]
+org.hibernate.exception.GenericJDBCException: unable to obtain isolated JDBC connection [Database may be already in use: "D:/USBProtection/frontend/.artifacts/live-r3SKrZ/db.mv.db". Possible solutions: close all other connection(s); use the server mode [90020-224]] [n/a]

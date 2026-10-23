@@ -30,10 +30,22 @@ if getent group usbguard >/dev/null; then
     usermod -aG usbguard usbshield
 fi
 
-# Allow usbshield user to dispatch desktop notifications via notify-send without password
-if [ -d /etc/sudoers.d ]; then
-    echo "usbshield ALL=(ALL) NOPASSWD: /usr/bin/notify-send" > /etc/sudoers.d/usbshield
-    chmod 440 /etc/sudoers.d/usbshield
+# 4. Setup runtime notifier socket directory and tmpfiles.d (Week 2 Unix Socket IPC)
+mkdir -p /run/usbshield-notifier
+chmod 1777 /run/usbshield-notifier
+
+if [ -d /etc/tmpfiles.d ]; then
+    echo "d /run/usbshield-notifier 1777 root root -" > /etc/tmpfiles.d/usbshield-notifier.conf
+fi
+
+# Clean up deprecated sudoers rule from Week 1 prototype if present
+if [ -f /etc/sudoers.d/usbshield ]; then
+    rm -f /etc/sudoers.d/usbshield
+fi
+
+# Ensure launcher script executable if installed
+if [ -f /opt/usbshield-agent/usbshield-notifier-launcher.sh ]; then
+    chmod 755 /opt/usbshield-agent/usbshield-notifier-launcher.sh
 fi
 
 # 4. Initialize default USBGuard rules if not present or empty
