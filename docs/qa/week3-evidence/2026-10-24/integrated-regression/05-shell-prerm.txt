@@ -1,0 +1,19 @@
+{
+  "command": [
+    "bash",
+    "-n",
+    "packaging/agent-deb/DEBIAN/prerm"
+  ],
+  "command_text": "bash -n packaging/agent-deb/DEBIAN/prerm",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:22:00.524224+07:00",
+  "scope": "Parse prerm only; no uninstall/upgrade/service execution",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6"
+}
+
+      0 [main] bash (2092) C:\Program Files\Git\bin\..\usr\bin\bash.exe: *** fatal error - couldn't create signal pipe, Win32 error 5
+
+{"finished_at": "2026-10-24T00:22:00.677732+07:00", "exit_code": 3221225794}

@@ -1,0 +1,1473 @@
+{
+  "captured_at": "2026-10-24T00:32:47.419301+07:00",
+  "status": "PASS_QA_RECORD_VALIDATION",
+  "revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "branch": "huy",
+  "scope": "M5 Windows regression/evidence completion; immutable tested product/test/packaging source. This validation PASS is not group/product gate PASS.",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6",
+  "source_files_verified": 214,
+  "source_hash_mismatches": [],
+  "command_attempts": 21,
+  "positive_checks_passed": [
+    "01-npm-ci",
+    "02-agent-tests-package",
+    "07-shell-builder-retry",
+    "08-shell-postinst-retry",
+    "09-shell-prerm-retry",
+    "10-shell-launcher-retry",
+    "11-frontend-tests",
+    "12-frontend-lint",
+    "13-frontend-build",
+    "14-server-with-frontend",
+    "15-packaging-static",
+    "16-browser-fixture",
+    "18-browser-management",
+    "19-policy-http-contract",
+    "20-browser-events",
+    "21-browser-packaged-jar"
+  ],
+  "resolved_environment_launch_failures": [
+    "03-shell-builder",
+    "04-shell-postinst",
+    "05-shell-prerm",
+    "06-shell-launcher"
+  ],
+  "negative_assertion_failures": [
+    "17-staging-negative-probe"
+  ],
+  "command_results": {
+    "01-npm-ci": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:21:50.633801+07:00",
+      "finished_at": "2026-10-24T00:22:14.459474+07:00",
+      "log_sha256": "d14f1f58c998d915cf57a0c00a6dca4e7bbc564bde655001858aff3307421125",
+      "metadata_sha256": "d2802fe6be84202b5d7df54fc9d18e7cc092ea3aebcc7ee7110cd6fc1eab91e1"
+    },
+    "02-agent-tests-package": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:00.178668+07:00",
+      "finished_at": "2026-10-24T00:22:29.989256+07:00",
+      "log_sha256": "530ce6427a94701df3f8269bc99abf2d99f35259700f8c16a46c2dad7ef84987",
+      "metadata_sha256": "5a9966c7fa515e418354b8b5e069dee6008a5e6416159d5d89163d473d55cccb"
+    },
+    "03-shell-builder": {
+      "exit_code": 3221225794,
+      "interpretation": "ENVIRONMENT_LAUNCH_FAILURE_RESOLVED",
+      "started_at": "2026-10-24T00:22:00.236841+07:00",
+      "finished_at": "2026-10-24T00:22:00.492624+07:00",
+      "log_sha256": "d52435a0d9c9269666237aaf257fadaed053f1d98cee8ce4cf3b410c8131dcad",
+      "metadata_sha256": "31d3a4a1403af5d65aabd5e0d7e6b9b6d607e9267903ab5e1aa9e3d200ee6539"
+    },
+    "04-shell-postinst": {
+      "exit_code": 3221225794,
+      "interpretation": "ENVIRONMENT_LAUNCH_FAILURE_RESOLVED",
+      "started_at": "2026-10-24T00:22:00.329158+07:00",
+      "finished_at": "2026-10-24T00:22:00.524224+07:00",
+      "log_sha256": "303f3ea89c911794b3ebca46bd9519f8def12a549cd781e3f3678d9805b729f7",
+      "metadata_sha256": "6157a8d79c1bbf6a14a0b86c77965ed5fa7b4df6189bafe36080cb6bb616ef55"
+    },
+    "05-shell-prerm": {
+      "exit_code": 3221225794,
+      "interpretation": "ENVIRONMENT_LAUNCH_FAILURE_RESOLVED",
+      "started_at": "2026-10-24T00:22:00.524224+07:00",
+      "finished_at": "2026-10-24T00:22:00.677732+07:00",
+      "log_sha256": "2ac1dd05ec75f83a5040f46ad0daba525d9852df9efa3bbf64b525d929a6135c",
+      "metadata_sha256": "163ace9cc0d474e4f329c01834f37832e37e6cf3e6ee8f3e4153e2f05521f524"
+    },
+    "06-shell-launcher": {
+      "exit_code": 3221225794,
+      "interpretation": "ENVIRONMENT_LAUNCH_FAILURE_RESOLVED",
+      "started_at": "2026-10-24T00:22:00.619046+07:00",
+      "finished_at": "2026-10-24T00:22:00.727384+07:00",
+      "log_sha256": "e798c61aec7df751853275b58bceb60dfe977968589087526d558679522611d1",
+      "metadata_sha256": "9855b4d587d5aa87841271f53d54fa038a570e467923989e614fabb727afd1eb"
+    },
+    "07-shell-builder-retry": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:22.983710+07:00",
+      "finished_at": "2026-10-24T00:22:23.084473+07:00",
+      "log_sha256": "e79c077269422f635de9e4f2c981a93d3522d50d04dde723f220c0ec424133fa",
+      "metadata_sha256": "14fc439628d09fc82e03e3f7020b4111e74ed0b7031828e82e98826bbaaded75"
+    },
+    "08-shell-postinst-retry": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:49.063398+07:00",
+      "finished_at": "2026-10-24T00:22:49.139087+07:00",
+      "log_sha256": "51e99a7318bd4391b90a3997f04e5a21f3482361adc4434f06084e3b7dce412a",
+      "metadata_sha256": "0ed0e26eaa3b5b614dcc7bbd50dd76c33180f00319dbf2c3cf8ff5017404d8ed"
+    },
+    "09-shell-prerm-retry": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:49.492183+07:00",
+      "finished_at": "2026-10-24T00:22:49.563341+07:00",
+      "log_sha256": "5a9d28b1f0b66cc1981877e6b86d6524181c231a584e4b10ef06f08f83a45659",
+      "metadata_sha256": "62eab70fd0c1cad204973249c8f89629b47e772810d48273fcec5eb3674d9346"
+    },
+    "10-shell-launcher-retry": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:49.384856+07:00",
+      "finished_at": "2026-10-24T00:22:49.456580+07:00",
+      "log_sha256": "f47bbbb594a116529ef4ca14b5b92016fd5be7e5f3e69a826052b39e1ff20ef0",
+      "metadata_sha256": "3afe8254107fdd46420d824660282e34f2f0a999c82f5f915fb1a85034714ec0"
+    },
+    "11-frontend-tests": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:50.053298+07:00",
+      "finished_at": "2026-10-24T00:22:52.924355+07:00",
+      "log_sha256": "495e7838e37910586e7f3e090466bfba43c2538290e8fcc13e05f4940bc3f934",
+      "metadata_sha256": "ae1b62a8c3efe4070e3a50574b1fa9d89e27dc95d7a85862a99711891a595f0f"
+    },
+    "12-frontend-lint": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:46.854679+07:00",
+      "finished_at": "2026-10-24T00:22:47.966990+07:00",
+      "log_sha256": "b665fb7e520dc7a33a256f9314893e34c6aa7095a684c7c1696477392a810c67",
+      "metadata_sha256": "83c9a3049428563017fb05639a1e1b0e9d3854b1ba7ac5f58547b1ae395bf432"
+    },
+    "13-frontend-build": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:22:49.863482+07:00",
+      "finished_at": "2026-10-24T00:22:56.823324+07:00",
+      "log_sha256": "c6d06a6082f011c7b140dcb489abdf8c47e4d83ae1226882143188398146ce74",
+      "metadata_sha256": "f50de2a376515da16ac58f12656f120121aef1318692afdc51f2652e4b15d1b3"
+    },
+    "14-server-with-frontend": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:23:08.294709+07:00",
+      "finished_at": "2026-10-24T00:24:06.072654+07:00",
+      "log_sha256": "ac27b2a3f7966374902c8615a97e5a0d14a7c3d705a4a4861db3f264ad408295",
+      "metadata_sha256": "ebd7cf916f9424ad1bcc48181b1114c706ae90d0ed16fad1899576144107fb3a"
+    },
+    "15-packaging-static": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:23:56.697694+07:00",
+      "finished_at": "2026-10-24T00:23:57.771728+07:00",
+      "log_sha256": "da452bf4c5fcd0f4508cc920e9aa0c357e3e14ec712b88399884536f54a2c5d3",
+      "metadata_sha256": "4d8ccb29121be6a85074c577f932674f536abb61a329ccd38a92c90b71d32888"
+    },
+    "16-browser-fixture": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:23:59.346879+07:00",
+      "finished_at": "2026-10-24T00:24:10.569527+07:00",
+      "log_sha256": "17ec7a47e7ab60cb42b9ff2f8e337a3aabf4d54a493bd9ca31ae0ac463b7bde0",
+      "metadata_sha256": "13e47071268816fd1a02af02ae9ff8a62899ba9ecbeb2f8ad284e1e24623dd0f"
+    },
+    "17-staging-negative-probe": {
+      "exit_code": 0,
+      "interpretation": "ASSERTION_FAIL_M5-W3-06",
+      "started_at": "2026-10-24T00:23:57.610616+07:00",
+      "finished_at": "2026-10-24T00:23:58.408385+07:00",
+      "log_sha256": "515d04a0d95ab6333139530ea7fe2d85a673a596106296aa9b3547dbbcb44b28",
+      "metadata_sha256": "8da411a5c8ffb676fa0ca1d09c715a4bb5d060304b09da012ff6c249ce87ca3f"
+    },
+    "18-browser-management": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:24:44.649383+07:00",
+      "finished_at": "2026-10-24T00:25:22.208637+07:00",
+      "log_sha256": "ef869f9a88aa7d79d2d3e98b8fcb7874c4cedb88f46b1f20072d8d6da4efc72e",
+      "metadata_sha256": "d8722b35ae98c0247c71c69bbf68c2b6487cc2692d99fed34d385e5631f1cc9b"
+    },
+    "19-policy-http-contract": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:25:38.378032+07:00",
+      "finished_at": "2026-10-24T00:25:52.425166+07:00",
+      "log_sha256": "8ce899047a8d1fd1360cf183a9fb359824662d2aef04dad73239f72d4c0e6268",
+      "metadata_sha256": "2c34edc6301f291069514042442767c7108ab72da137b7150f9e876c2646aa19"
+    },
+    "20-browser-events": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:26:13.031134+07:00",
+      "finished_at": "2026-10-24T00:26:37.972730+07:00",
+      "log_sha256": "e8243594c06d5ff4e7d627718f7c70947c0f4948498bb69c29b78d75af187234",
+      "metadata_sha256": "f5831f779b5d832476b06fa437d700cbc2f1eba05702cc0cfc4b82dcad3e3460"
+    },
+    "21-browser-packaged-jar": {
+      "exit_code": 0,
+      "interpretation": "PASS",
+      "started_at": "2026-10-24T00:27:06.278934+07:00",
+      "finished_at": "2026-10-24T00:27:29.552252+07:00",
+      "log_sha256": "1c028862f4231dc7c381d25de515db47be7076c06f330e4c91a5aae096838a31",
+      "metadata_sha256": "47e996701bcfa65e34f749181028e672dedc91bc0d47079e2e012380e303b9ba"
+    }
+  },
+  "test_counts": {
+    "frontend": 96,
+    "server": 26,
+    "agent": 117,
+    "standalone_policy_http": 1
+  },
+  "inventory_counts": {
+    "windows_pass": 19,
+    "windows_fail": 1,
+    "ubuntu_not_executed": 9
+  },
+  "open_reproduced_findings": [
+    {
+      "id": "M5-W3-06",
+      "owner": "M3",
+      "case": "W3-P03",
+      "status": "OPEN",
+      "evidence": "staging-probe.json"
+    }
+  ],
+  "m5_feasible_windows_qa_work": "COMPLETE; external owner correction/reviews and group decision remain open",
+  "h03_m2_review_execution": "DONE",
+  "h04_m3_review": "REPORT_RECEIVED_TESTED_WITH_OPEN_FINDING_AND_QUESTIONS",
+  "group_gate": "OPEN",
+  "artifacts": {
+    "admin-server/target/usbshield-admin-server.jar": {
+      "sha256": "8728046a5cfe04b105517ec5b1e2f15603c3e9deaf22d47f70a907a823d495f9",
+      "bytes": 57314882
+    },
+    "client-agent/target/usbshield-agent.jar": {
+      "sha256": "9e025f6d9432d3a26ec3815fcfe5b2b5782aa75aed58071a930d6b76631bd9be",
+      "bytes": 20172123
+    },
+    "frontend/dist/assets/index-Bsv2V3We.css": {
+      "sha256": "1130c64799639636632664b983ec455b37eea0f1e52178333375cd895a2efee6",
+      "bytes": 25533
+    },
+    "frontend/dist/assets/index-DMSlTEoj.js": {
+      "sha256": "f1857cbe5bcd1e6a9ae4e1e101eb171917d18b0c5eda6cdf59e40756b9ce7191",
+      "bytes": 290397
+    },
+    "frontend/dist/favicon.svg": {
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea",
+      "bytes": 354
+    },
+    "frontend/dist/icons.svg": {
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a",
+      "bytes": 5031
+    },
+    "frontend/dist/index.html": {
+      "sha256": "76ededc5aabca7bc4b382f67a00dcafa710343f8002d2fa24be685ce6c18c628",
+      "bytes": 656
+    }
+  },
+  "bundled_assets_match_frontend_build": [
+    "BOOT-INF/classes/static/assets/index-Bsv2V3We.css",
+    "BOOT-INF/classes/static/assets/index-DMSlTEoj.js",
+    "BOOT-INF/classes/static/favicon.svg",
+    "BOOT-INF/classes/static/icons.svg",
+    "BOOT-INF/classes/static/index.html"
+  ],
+  "agent_jar_contains_fresh_active_session_selector": true,
+  "browser_variant_verified": true,
+  "screenshots_verified": {
+    "screenshots/m4-live-expired-session.png": {
+      "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6",
+      "captured_at": "2026-10-24T00:25:20.764760+07:00",
+      "command": "18-browser-management.json"
+    },
+    "screenshots/events-real-http-desktop.png": {
+      "sha256": "aec4aeb0819ea7b155b678e9da3ba5dc450f4ab42f954c3ed642059591a05541",
+      "captured_at": "2026-10-24T00:27:22.443248+07:00",
+      "command": "21-browser-packaged-jar.json"
+    },
+    "screenshots/events-real-http-mobile.png": {
+      "sha256": "d53c27684552697e2b1e1ce3e0247b520e93dd5408fdea548940ea3ccf92f3a9",
+      "captured_at": "2026-10-24T00:27:25.265620+07:00",
+      "command": "21-browser-packaged-jar.json"
+    },
+    "screenshots/events-real-http-date-filter.png": {
+      "sha256": "305261a575873420c68cc33c55bbd56d6a602e0705ea0c8b6e3cb459d0fd54fa",
+      "captured_at": "2026-10-24T00:27:24.623082+07:00",
+      "command": "21-browser-packaged-jar.json"
+    },
+    "screenshots/events-username-substring.png": {
+      "sha256": "fa51eff0d967ee26a9fbae398210bb5cb8c4cc08d22bac9cfaf198e3ae55c422",
+      "captured_at": "2026-10-24T00:27:26.500820+07:00",
+      "command": "21-browser-packaged-jar.json"
+    },
+    "screenshots/events-week3-unknown-no-serial.png": {
+      "sha256": "973d6759c8ec55b86df2480efa973014b6fd3f1df7b95a0aa32e3102736f68e2",
+      "captured_at": "2026-10-24T00:27:26.697217+07:00",
+      "command": "21-browser-packaged-jar.json"
+    },
+    "screenshots/events-week3-endpoint-a.png": {
+      "sha256": "39d4a338ee8cf9a30fccdaa3aa2bc27a9d1cffee018a6f685ecd5a348531847c",
+      "captured_at": "2026-10-24T00:27:27.711799+07:00",
+      "command": "21-browser-packaged-jar.json"
+    },
+    "screenshots/events-week3-endpoint-b.png": {
+      "sha256": "81a2b6d5e9a4b7e6bb8ca222b736128d220a5ff24d74c80a51c4d6da600e6ba2",
+      "captured_at": "2026-10-24T00:27:27.168747+07:00",
+      "command": "21-browser-packaged-jar.json"
+    }
+  },
+  "local_staging_exists": false,
+  "local_deb_artifacts_found": [],
+  "historical_sections_and_protected_evidence_unchanged": true,
+  "tracked_changed_files": [
+    "docs/DEMO_SCRIPT.md",
+    "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+    "docs/qa/WEEK3_QA_SUMMARY.md",
+    "docs/qa/WEEK3_TEST_INVENTORY.md",
+    "docs/qa/week3-evidence/README.md"
+  ],
+  "git_diff_check": "PASS",
+  "documents_sha256": {
+    "docs/DEMO_SCRIPT.md": "af931b6d93b59b8774dfabc51610bd6279ba2ae3bb11610e5103e76d99f32ff1",
+    "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md": "1e36386a9dc4293834e7b3f855c35cab5c03625969d20f953e4624196ec850d1",
+    "docs/qa/WEEK3_QA_SUMMARY.md": "fe40ee99311d11da62ee6a1ed5a804054a6e8cb3d613bbdb2917409e11a61f92",
+    "docs/qa/WEEK3_TEST_INVENTORY.md": "6b56379e41fe276c280ef4ba308995f58c11560c8ec9e8f668d30e01edcfb5c9",
+    "docs/qa/week3-evidence/README.md": "3f6adcd720b1d7fd802ebc0bd56deb36a740b9ce8dcfe5825b186f2a2570ac45",
+    "docs/qa/WEEK3_M5_COMPLETION_20261024.md": "819991d71b506b1c1dea506c73dd1a25c7708be81db9aa89b8e80588f82e637d",
+    "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md": "53bc20befc8599f1dd0999e208bc27f2de719b380eaf66a0741b41ff83e7af04"
+  },
+  "local_links_checked": 284,
+  "broken_local_links": [],
+  "local_links": [
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/week3-evidence/README.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/week3-evidence/2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/week3-evidence/2026-10-24/integrated-regression/screenshots/events-username-substring.png"
+    },
+    {
+      "document": "docs/DEMO_SCRIPT.md",
+      "target": "qa/WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md",
+      "target": "WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/01-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/12-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/13-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/02-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/junit-summary.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/16-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/18-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/19-policy-http-contract.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/21-browser-packaged-jar.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/15-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/17-staging-negative-probe.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/staging-probe.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "WEEK3_EVENT_NAME_SEARCH_FIX.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/username-substring/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/02-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/11-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/07-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/20-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/15-shell-syntax.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/17-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/18-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/19-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/01-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/09-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/10-crlf-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/00-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/05-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_QA_SUMMARY.md",
+      "target": "week3-evidence/2026-10-21/06-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/16-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/18-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/16-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/screenshots/events-real-http-mobile.png"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/18-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/19-policy-http-contract.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/screenshots/events-username-substring.png"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/21-browser-packaged-jar.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/02-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/junit-summary.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/02-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/15-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/07-shell-builder-retry.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/08-shell-postinst-retry.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/09-shell-prerm-retry.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/10-shell-launcher-retry.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/17-staging-negative-probe.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/staging-probe.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/validation.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/01-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/12-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/13-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/sources/"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_EVENT_NAME_SEARCH_FIX.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_EVENT_NAME_SEARCH_FIX.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/event-name-search/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/username-substring/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/20-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/15-shell-syntax.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/17-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/18-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/19-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/02-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/11-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_TEST_INVENTORY.md",
+      "target": "week3-evidence/2026-10-21/07-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/environment.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/junit-summary.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/staging-probe.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/screenshots.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/screenshots/events-real-http-desktop.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/screenshots/events-username-substring.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/screenshots/events-real-http-mobile.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/screenshots/events-week3-unknown-no-serial.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-24/integrated-regression/screenshots/m4-live-expired-session.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/post-pull-audit/README.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-23/qa-closeout/validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_INTEGRATION_TEST_PLAN.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "../../DEMO_SCRIPT.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/event-name-search/README.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/environment.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/artifacts.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/sources/"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/username-substring/README.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/00-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/01-final-page-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/02-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/03-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/04-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/05-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/06-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/07-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/08-server-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/09-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/10-crlf-reproduction.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/11-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/12-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/13-agent-maven.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/14-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/15-shell-syntax.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/16-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/17-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/18-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/19-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/20-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/21-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-real-http-desktop.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-real-http-date-filter.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-real-http-mobile.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-week3-unknown-no-serial.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-week3-endpoint-b.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/events-week3-endpoint-a.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/m4-live-allow-a.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/m4-live-revoke-a.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/m4-live-expired-session.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/README.md",
+      "target": "2026-10-21/screenshots/demo-events-mobile.png"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "WEEK3_QA_SUMMARY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/02-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/01-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/12-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/13-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/15-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/README.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/16-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/18-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/19-policy-http-contract.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/21-browser-packaged-jar.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/17-staging-negative-probe.txt"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/staging-probe.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "../usbguard/WEEK3_CORE_HARDENING.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "../usbguard/WEEK3_PART3_SESSION_NOTIFICATION_HANDOFF.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/junit-summary.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "../client-agent/WEEK3_PACKAGING_AND_RETRY.md"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/environment.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json"
+    },
+    {
+      "document": "docs/qa/WEEK3_M5_COMPLETION_20261024.md",
+      "target": "week3-evidence/2026-10-24/integrated-regression/validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "../../../WEEK3_M5_COMPLETION_20261024.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "../../../WEEK3_TEST_INVENTORY.md"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "environment.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "junit-summary.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "validation.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "01-npm-ci.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "02-agent-tests-package.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "03-shell-builder.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "04-shell-postinst.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "05-shell-prerm.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "06-shell-launcher.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "07-shell-builder-retry.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "08-shell-postinst-retry.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "09-shell-prerm-retry.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "10-shell-launcher-retry.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "11-frontend-tests.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "12-frontend-lint.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "13-frontend-build.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "14-server-with-frontend.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "15-packaging-static.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "16-browser-fixture.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "17-staging-negative-probe.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "18-browser-management.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "19-policy-http-contract.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "20-browser-events.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "21-browser-packaged-jar.txt"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "staging-probe.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "packaged-browser-variant.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots.json"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/events-real-http-desktop.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/events-real-http-mobile.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/events-username-substring.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/events-week3-unknown-no-serial.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/events-week3-endpoint-a.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/events-week3-endpoint-b.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/events-real-http-date-filter.png"
+    },
+    {
+      "document": "docs/qa/week3-evidence/2026-10-24/integrated-regression/README.md",
+      "target": "screenshots/m4-live-expired-session.png"
+    }
+  ]
+}

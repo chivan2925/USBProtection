@@ -1,0 +1,607 @@
+{
+  "command": [
+    "npm.cmd",
+    "test"
+  ],
+  "command_text": "npm.cmd test",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:22:50.053298+07:00",
+  "scope": "Fresh integrated frontend M4/M5 regression; actual Node test runner",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6"
+}
+
+
+> frontend@0.0.0 test
+> node --experimental-strip-types --test tests/core.test.mjs tests/components.test.mjs tests/eventFilters.test.mjs tests/m4_endpoints.test.mjs tests/m4_admin_api.test.mjs tests/m4_auth.test.mjs tests/m5_events.test.mjs tests/m5_event_api.test.mjs tests/m5_live_api.test.mjs tests/browser-readiness.test.mjs
+
+TAP version 13
+# Subtest: Vite console URL is replaced by HTTP readiness without removing browser assertions
+ok 1 - Vite console URL is replaced by HTTP readiness without removing browser assertions
+  ---
+  duration_ms: 3.1059
+  type: 'test'
+  ...
+# Subtest: startup fix is idempotent
+ok 2 - startup fix is idempotent
+  ---
+  duration_ms: 2.3862
+  type: 'test'
+  ...
+# Subtest: already migrated Windows CRLF harness is recognized without rewriting the source
+ok 3 - already migrated Windows CRLF harness is recognized without rewriting the source
+  ---
+  duration_ms: 1.9517
+  type: 'test'
+  ...
+# Subtest: migration preserves Windows CRLF and remains idempotent after the first run
+ok 4 - migration preserves Windows CRLF and remains idempotent after the first run
+  ---
+  duration_ms: 0.4943
+  type: 'test'
+  ...
+# Subtest: unrecognized browser harness is not overwritten
+ok 5 - unrecognized browser harness is not overwritten
+  ---
+  duration_ms: 1.1412
+  type: 'test'
+  ...
+# Subtest: success is based on HTTP rather than colorized startup output
+ok 6 - success is based on HTTP rather than colorized startup output
+  ---
+  duration_ms: 0.2615
+  type: 'test'
+  ...
+# Subtest: whitelist uses rules rather than event ALLOWED states; blocked list uses observations
+ok 7 - whitelist uses rules rather than event ALLOWED states; blocked list uses observations
+  ---
+  duration_ms: 992.3591
+  type: 'test'
+  ...
+# Subtest: endpoint detail does not display devices belonging to another endpoint
+ok 8 - endpoint detail does not display devices belonging to another endpoint
+  ---
+  duration_ms: 10.1864
+  type: 'test'
+  ...
+# Subtest: event page shows only the newest ten records on the first page
+ok 9 - event page shows only the newest ten records on the first page
+  ---
+  duration_ms: 13.8812
+  type: 'test'
+  ...
+# Subtest: table distinguishes empty, filtered, loading, unavailable and API failure
+ok 10 - table distinguishes empty, filtered, loading, unavailable and API failure
+  ---
+  duration_ms: 8.2357
+  type: 'test'
+  ...
+# Subtest: device names are rendered as text, never injected as HTML
+ok 11 - device names are rendered as text, never injected as HTML
+  ---
+  duration_ms: 1.8163
+  type: 'test'
+  ...
+# Subtest: unavailable events preserve columns and filters without mock records
+ok 12 - unavailable events preserve columns and filters without mock records
+  ---
+  duration_ms: 6.1762
+  type: 'test'
+  ...
+# Subtest: ready empty event response does not display mock records
+ok 13 - ready empty event response does not display mock records
+  ---
+  duration_ms: 4.8123
+  type: 'test'
+  ...
+# Subtest: server pagination displays the full received page and global totals
+ok 14 - server pagination displays the full received page and global totals
+  ---
+  duration_ms: 3.7237
+  type: 'test'
+  ...
+# Subtest: unknown statistics are not represented as zero or protected
+ok 15 - unknown statistics are not represented as zero or protected
+  ---
+  duration_ms: 56.1246
+  type: 'test'
+  ...
+# Subtest: search accepts Vietnamese without accents, case differences and USB identifiers
+ok 16 - search accepts Vietnamese without accents, case differences and USB identifiers
+  ---
+  duration_ms: 0.7723
+  type: 'test'
+  ...
+# Subtest: event sorting compares timestamps across timezone offsets and does not mutate input
+ok 17 - event sorting compares timestamps across timezone offsets and does not mutate input
+  ---
+  duration_ms: 5.2454
+  type: 'test'
+  ...
+# Subtest: pagination clamps stale page numbers after filtering and handles empty results
+ok 18 - pagination clamps stale page numbers after filtering and handles empty results
+  ---
+  duration_ms: 0.6565
+  type: 'test'
+  ...
+# Subtest: live adapter attempts HTTP and reports unavailable network without mock data
+ok 19 - live adapter attempts HTTP and reports unavailable network without mock data
+  ---
+  duration_ms: 2.8324
+  type: 'test'
+  ...
+# Subtest: cancelled reads stay cancelled instead of reporting backend errors
+ok 20 - cancelled reads stay cancelled instead of reporting backend errors
+  ---
+  duration_ms: 0.5361
+  type: 'test'
+  ...
+# Subtest: event field filters combine and reset
+ok 21 - event field filters combine and reset
+  ---
+  duration_ms: 5.7396
+  type: 'test'
+  ...
+# Subtest: date uses browser local day and no-decision filter excludes policy decisions
+ok 22 - date uses browser local day and no-decision filter excludes policy decisions
+  ---
+  duration_ms: 0.7861
+  type: 'test'
+  ...
+# Subtest: UNKNOWN differs from no decision and device identity fields are searchable
+ok 23 - UNKNOWN differs from no decision and device identity fields are searchable
+  ---
+  duration_ms: 0.5415
+  type: 'test'
+  ...
+# Subtest: bad dates, reversed ranges and invalid event timestamps do not match
+ok 24 - bad dates, reversed ranges and invalid event timestamps do not match
+  ---
+  duration_ms: 0.8878
+  type: 'test'
+  ...
+# Subtest: Bangkok range includes both selected days and excludes the next midnight
+ok 25 - Bangkok range includes both selected days and excludes the next midnight
+  ---
+  duration_ms: 234.0724
+  type: 'test'
+  ...
+# Subtest: one-sided dates work in UTC and DST days use calendar boundaries
+ok 26 - one-sided dates work in UTC and DST days use calendar boundaries
+  ---
+  duration_ms: 802.8166
+  type: 'test'
+  ...
+# Subtest: loads all event pages, real endpoint IDs, unknown users and distinct desired/applied versions
+ok 27 - loads all event pages, real endpoint IDs, unknown users and distinct desired/applied versions
+  ---
+  duration_ms: 110.4196
+  type: 'test'
+  ...
+# Subtest: Allow/Revoke updates only A desired version; applied and B remain unchanged
+ok 28 - Allow/Revoke updates only A desired version; applied and B remain unchanged
+  ---
+  duration_ms: 44.5606
+  type: 'test'
+  ...
+# Subtest: empty response stays empty with zero counts, not demo data
+ok 29 - empty response stays empty with zero counts, not demo data
+  ---
+  duration_ms: 8.3829
+  type: 'test'
+  ...
+# Subtest: 403/409/500 and malformed pagination reject reads or mutations, never succeed
+ok 30 - 403/409/500 and malformed pagination reject reads or mutations, never succeed
+  ---
+  duration_ms: 19.2265
+  type: 'test'
+  ...
+# Subtest: invalid device IDs are rejected before HTTP and unsafe endpoint IDs are URL-encoded
+ok 31 - invalid device IDs are rejected before HTTP and unsafe endpoint IDs are URL-encoded
+  ---
+  duration_ms: 3.6565
+  type: 'test'
+  ...
+# Subtest: duplicate events/endpoints fail rather than inflating rows and counts
+ok 32 - duplicate events/endpoints fail rather than inflating rows and counts
+  ---
+  duration_ms: 3.4274
+  type: 'test'
+  ...
+# Subtest: cross-endpoint whitelist and detail responses fail rather than being reassigned
+ok 33 - cross-endpoint whitelist and detail responses fail rather than being reassigned
+  ---
+  duration_ms: 1.8523
+  type: 'test'
+  ...
+# Subtest: endpoint mapper preserves offline/no-heartbeat and rejects impossible policy versions
+ok 34 - endpoint mapper preserves offline/no-heartbeat and rejects impossible policy versions
+  ---
+  duration_ms: 0.8864
+  type: 'test'
+  ...
+# Subtest: whitelist mapper accepts no-serial HASH and rejects weak or malformed identities
+ok 35 - whitelist mapper accepts no-serial HASH and rejects weak or malformed identities
+  ---
+  duration_ms: 1.2233
+  type: 'test'
+  ...
+# Subtest: fixture rejects duplicate Revoke without changing desired version again
+ok 36 - fixture rejects duplicate Revoke without changing desired version again
+  ---
+  duration_ms: 15.3085
+  type: 'test'
+  ...
+# Subtest: invalid credentials do not create a session; login verifies /me and rotated CSRF
+ok 37 - invalid credentials do not create a session; login verifies /me and rotated CSRF
+  ---
+  duration_ms: 110.4602
+  type: 'test'
+  ...
+# Subtest: logout invalidates server session and protected reads return 401
+ok 38 - logout invalidates server session and protected reads return 401
+  ---
+  duration_ms: 13.1393
+  type: 'test'
+  ...
+# Subtest: missing CSRF prevents mutation HTTP calls
+ok 39 - missing CSRF prevents mutation HTTP calls
+  ---
+  duration_ms: 0.6607
+  type: 'test'
+  ...
+# Subtest: HTML fallback cannot impersonate a valid Admin API or session
+ok 40 - HTML fallback cannot impersonate a valid Admin API or session
+  ---
+  duration_ms: 1.5027
+  type: 'test'
+  ...
+# Subtest: network failure, timeout and caller cancellation stay distinguishable
+ok 41 - network failure, timeout and caller cancellation stay distinguishable
+  ---
+  duration_ms: 9.4512
+  type: 'test'
+  ...
+# Subtest: protected 401 notifies session expiry; session probes can opt out
+ok 42 - protected 401 notifies session expiry; session probes can opt out
+  ---
+  duration_ms: 2.5949
+  type: 'test'
+  ...
+# Subtest: endpoint rows render with hostname, status, and policy version
+ok 43 - endpoint rows render with hostname, status, and policy version
+  ---
+  duration_ms: 978.5734
+  type: 'test'
+  ...
+# Subtest: endpoint list shows ID and distinct policy and applied versions, with a fallback when unapplied
+ok 44 - endpoint list shows ID and distinct policy and applied versions, with a fallback when unapplied
+  ---
+  duration_ms: 6.9211
+  type: 'test'
+  ...
+# Subtest: endpoint list has links to detail pages
+ok 45 - endpoint list has links to detail pages
+  ---
+  duration_ms: 5.1816
+  type: 'test'
+  ...
+# Subtest: endpoint detail does not show devices from other endpoints
+ok 46 - endpoint detail does not show devices from other endpoints
+  ---
+  duration_ms: 9.0994
+  type: 'test'
+  ...
+# Subtest: endpoint detail shows devices that belong to the endpoint
+ok 47 - endpoint detail shows devices that belong to the endpoint
+  ---
+  duration_ms: 17.5734
+  type: 'test'
+  ...
+# Subtest: whitelist panel renders "Allow on this endpoint" button
+ok 48 - whitelist panel renders "Allow on this endpoint" button
+  ---
+  duration_ms: 2.9724
+  type: 'test'
+  ...
+# Subtest: whitelist panel renders "Revoke on this endpoint" button per entry
+ok 49 - whitelist panel renders "Revoke on this endpoint" button per entry
+  ---
+  duration_ms: 3.087
+  type: 'test'
+  ...
+# Subtest: whitelist panel shows empty state when endpoint has no whitelist entries
+ok 50 - whitelist panel shows empty state when endpoint has no whitelist entries
+  ---
+  duration_ms: 1.5593
+  type: 'test'
+  ...
+# Subtest: real endpoint detail integrates whitelist and keeps rules isolated by endpoint
+ok 51 - real endpoint detail integrates whitelist and keeps rules isolated by endpoint
+  ---
+  duration_ms: 23.7266
+  type: 'test'
+  ...
+# Subtest: missing or unavailable endpoint does not claim an empty whitelist
+ok 52 - missing or unavailable endpoint does not claim an empty whitelist
+  ---
+  duration_ms: 23.3237
+  type: 'test'
+  ...
+# Subtest: demo snapshot maps endpoint IDs, preserves per-endpoint policy and returns independent fixtures
+ok 53 - demo snapshot maps endpoint IDs, preserves per-endpoint policy and returns independent fixtures
+  ---
+  duration_ms: 3.0638
+  type: 'test'
+  ...
+# Subtest: policy sync distinguishes offline pending, missing ACK and reported applied version
+ok 54 - policy sync distinguishes offline pending, missing ACK and reported applied version
+  ---
+  duration_ms: 29.557
+  type: 'test'
+  ...
+# Subtest: management pages clear protected rows during loading, empty, unavailable and failure
+ok 55 - management pages clear protected rows during loading, empty, unavailable and failure
+  ---
+  duration_ms: 63.7414
+  type: 'test'
+  ...
+# Subtest: Settings explains unavailable service API instead of offering fake controls
+ok 56 - Settings explains unavailable service API instead of offering fake controls
+  ---
+  duration_ms: 2.7772
+  type: 'test'
+  ...
+# Subtest: expired session shows a persistent login message; fresh login and demo do not
+ok 57 - expired session shows a persistent login message; fresh login and demo do not
+  ---
+  duration_ms: 15.1904
+  type: 'test'
+  ...
+# Subtest: Admin read DTO preserves M2 mouse attribution, device ID and canonical interfaceClass
+ok 58 - Admin read DTO preserves M2 mouse attribution, device ID and canonical interfaceClass
+  ---
+  duration_ms: 6.738
+  type: 'test'
+  ...
+# Subtest: BLOCKED decision and UNKNOWN Linux user remain independent
+ok 59 - BLOCKED decision and UNKNOWN Linux user remain independent
+  ---
+  duration_ms: 0.4945
+  type: 'test'
+  ...
+# Subtest: nullable legacy device/hostname and defensive UNKNOWN decision do not invent attribution
+ok 60 - nullable legacy device/hostname and defensive UNKNOWN decision do not invent attribution
+  ---
+  duration_ms: 0.6573
+  type: 'test'
+  ...
+# Subtest: array helper preserves empty results and rejects a page envelope or invalid item
+ok 61 - array helper preserves empty results and rejects a page envelope or invalid item
+  ---
+  duration_ms: 1.3595
+  type: 'test'
+  ...
+# Subtest: bad identity, enums, sessions and canonical device fields fail the read
+ok 62 - bad identity, enums, sessions and canonical device fields fail the read
+  ---
+  duration_ms: 4.4145
+  type: 'test'
+  ...
+# Subtest: large string IDs retain precision for event links and device selection
+ok 63 - large string IDs retain precision for event links and device selection
+  ---
+  duration_ms: 0.4307
+  type: 'test'
+  ...
+# Subtest: occurredAt and receivedAt require offset-bearing instants and preserve source precision
+ok 64 - occurredAt and receivedAt require offset-bearing instants and preserve source precision
+  ---
+  duration_ms: 1.15
+  type: 'test'
+  ...
+# Subtest: Admin page mapping retains server totals, order and input without local pagination
+ok 65 - Admin page mapping retains server totals, order and input without local pagination
+  ---
+  duration_ms: 1.0712
+  type: 'test'
+  ...
+# Subtest: last partial page keeps its zero-based page and global totals
+ok 66 - last partial page keeps its zero-based page and global totals
+  ---
+  duration_ms: 0.7374
+  type: 'test'
+  ...
+# Subtest: empty results and out-of-range empty pages retain actual server metadata
+ok 67 - empty results and out-of-range empty pages retain actual server metadata
+  ---
+  duration_ms: 0.7596
+  type: 'test'
+  ...
+# Subtest: malformed or contradictory page metadata cannot look like complete empty history
+ok 68 - malformed or contradictory page metadata cannot look like complete empty history
+  ---
+  duration_ms: 1.2358
+  type: 'test'
+  ...
+# Subtest: one invalid event rejects the entire page without silently dropping audit rows
+ok 69 - one invalid event rejects the entire page without silently dropping audit rows
+  ---
+  duration_ms: 0.244
+  type: 'test'
+  ...
+# Subtest: last page cannot contain more audit rows than its remaining global total
+ok 70 - last page cannot contain more audit rows than its remaining global total
+  ---
+  duration_ms: 0.2175
+  type: 'test'
+  ...
+# Subtest: no-serial storage keeps its hash and database identity without inventing a serial
+ok 71 - no-serial storage keeps its hash and database identity without inventing a serial
+  ---
+  duration_ms: 0.3687
+  type: 'test'
+  ...
+# Subtest: historical attribution remains independent across user switches and endpoints sharing a hostname
+ok 72 - historical attribution remains independent across user switches and endpoints sharing a hostname
+  ---
+  duration_ms: 0.4689
+  type: 'test'
+  ...
+# Subtest: Events loading, unavailable and error states never display fixture rows
+ok 73 - Events loading, unavailable and error states never display fixture rows
+  ---
+  duration_ms: 915.1882
+  type: 'test'
+  ...
+# Subtest: Events ready empty data stays empty, and UNKNOWN is never displayed as BLOCK
+ok 74 - Events ready empty data stays empty, and UNKNOWN is never displayed as BLOCK
+  ---
+  duration_ms: 27.4045
+  type: 'test'
+  ...
+# Subtest: EventTable renders required columns: Endpoint, Linux User, USB, Event, Decision
+ok 75 - EventTable renders required columns: Endpoint, Linux User, USB, Event, Decision
+  ---
+  duration_ms: 3.6038
+  type: 'test'
+  ...
+# Subtest: EventTable renders username for each event
+ok 76 - EventTable renders username for each event
+  ---
+  duration_ms: 4.0891
+  type: 'test'
+  ...
+# Subtest: EventTable renders device names
+ok 77 - EventTable renders device names
+  ---
+  duration_ms: 3.9901
+  type: 'test'
+  ...
+# Subtest: EventTable renders BLOCK and ALLOW decisions visibly
+ok 78 - EventTable renders BLOCK and ALLOW decisions visibly
+  ---
+  duration_ms: 4.8853
+  type: 'test'
+  ...
+# Subtest: EventTable shows empty state when no events match
+ok 79 - EventTable shows empty state when no events match
+  ---
+  duration_ms: 2.3563
+  type: 'test'
+  ...
+# Subtest: EventTable shows loading state when loading=true
+ok 80 - EventTable shows loading state when loading=true
+  ---
+  duration_ms: 2.5486
+  type: 'test'
+  ...
+# Subtest: EventTable links endpoint to /endpoints/:id detail page
+ok 81 - EventTable links endpoint to /endpoints/:id detail page
+  ---
+  duration_ms: 4.2934
+  type: 'test'
+  ...
+# Subtest: Events page uses the tested table for ready data and preserves frontend fields
+ok 82 - Events page uses the tested table for ready data and preserves frontend fields
+  ---
+  duration_ms: 7.0255
+  type: 'test'
+  ...
+# Subtest: EventTable preserves source time, escaped attribution and encoded endpoint identity
+ok 83 - EventTable preserves source time, escaped attribution and encoded endpoint identity
+  ---
+  duration_ms: 2.6638
+  type: 'test'
+  ...
+# Subtest: EventTable last server page retains all rows, their order and global pagination
+ok 84 - EventTable last server page retains all rows, their order and global pagination
+  ---
+  duration_ms: 7.9306
+  type: 'test'
+  ...
+# Subtest: live filters match table labels and accept endpoint/USB names on a text keyboard
+ok 85 - live filters match table labels and accept endpoint/USB names on a text keyboard
+  ---
+  duration_ms: 1.7732
+  type: 'test'
+  ...
+# Subtest: live endpoint cell displays the name and its searchable ID together
+ok 86 - live endpoint cell displays the name and its searchable ID together
+  ---
+  duration_ms: 3.6633
+  type: 'test'
+  ...
+# Subtest: live event adapter uses exact canonical query, session cookie and server page totals
+ok 87 - live event adapter uses exact canonical query, session cookie and server page totals
+  ---
+  duration_ms: 60.3255
+  type: 'test'
+  ...
+# Subtest: empty HTTP result stays empty; auth/server/network/HTML failures never become fixtures
+ok 88 - empty HTTP result stays empty; auth/server/network/HTML failures never become fixtures
+  ---
+  duration_ms: 6.0765
+  type: 'test'
+  ...
+# Subtest: cancelled live read makes no HTTP request
+ok 89 - cancelled live read makes no HTTP request
+  ---
+  duration_ms: 0.4562
+  type: 'test'
+  ...
+# Subtest: login verifies me and rotates CSRF; restored session supplies the logout token
+ok 90 - login verifies me and rotates CSRF; restored session supplies the logout token
+  ---
+  duration_ms: 4.2096
+  type: 'test'
+  ...
+# Subtest: invalid CSRF response prevents credentials from being submitted
+ok 91 - invalid CSRF response prevents credentials from being submitted
+  ---
+  duration_ms: 0.6811
+  type: 'test'
+  ...
+# Subtest: live filters send endpoint/USB/username text and the last nanosecond of local dates
+ok 92 - live filters send endpoint/USB/username text and the last nanosecond of local dates
+  ---
+  duration_ms: 2.4316
+  type: 'test'
+  ...
+# Subtest: invalid live filters are rejected instead of silently changing matching semantics
+ok 93 - invalid live filters are rejected instead of silently changing matching semantics
+  ---
+  duration_ms: 0.4918
+  type: 'test'
+  ...
+# Subtest: live search accepts visible endpoint/USB names and safely encodes them without a snapshot read
+ok 94 - live search accepts visible endpoint/USB names and safely encodes them without a snapshot read
+  ---
+  duration_ms: 1.0888
+  type: 'test'
+  ...
+# Subtest: live pagination accepts boundary sizes and rejects invalid pages before fetching
+ok 95 - live pagination accepts boundary sizes and rejects invalid pages before fetching
+  ---
+  duration_ms: 0.9793
+  type: 'test'
+  ...
+# Subtest: live adapter rejects excess final-page rows rather than rendering a contradictory history
+ok 96 - live adapter rejects excess final-page rows rather than rendering a contradictory history
+  ---
+  duration_ms: 1.2949
+  type: 'test'
+  ...
+1..96
+# tests 96
+# suites 0
+# pass 96
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1968.5795
+
+{"finished_at": "2026-10-24T00:22:52.924355+07:00", "exit_code": 0}
