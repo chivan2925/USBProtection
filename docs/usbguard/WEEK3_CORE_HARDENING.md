@@ -1,7 +1,8 @@
 # USBShield — Member 2, Week 3: Core Hardening
 
 **Repository:** `chivan2925/USBProtection`  
-**Base `main`:** `fc7aea53398c085b671efca80693da0adeb74f40` (23/10/2026)  
+**Original Part 1 base `main`:** `fc7aea53398c085b671efca80693da0adeb74f40` (23/10/2026)  
+**Part 2 base `vinhkhang`:** `5653d9eb4be45bd24c8fed0667da1286de32f3cd` (23/10/2026)  
 **Owner:** M2 — `usbguard/`, `session/`, `notification/` and associated tests  
 **Acceptance scope:** Windows Maven tests; Ubuntu daemon/hardware/GUI/systemd verification postponed until **after Week 4**.
 
@@ -10,10 +11,10 @@
 | Part | Work | Source area | Owner gate |
 |---|---|---|---|
 | **1 — Parser + serialless identity** | Harden USBGuard device/watch parsing, malformed IDs/sections, class-08/composite detection, and strict fingerprint parsing. Hash-only is valid; VID:PID without hash/serial is not an individual USB identity. | `usbguard/UsbGuardEventParser.java`, `UsbGuardPresenceParser.java`, `UsbGuardRuleBuilder.java`, new regression tests | **This package**; owner tests, commits, and pushes first |
-| **2 — Policy/gateway + reconnect** | Review subprocess timeout/exit handling, daemon-unavailable and restart/reconcile, base/foreign-rule preservation, idempotent allow/revoke, fail-closed and no false ACK contract. Preserve existing `UsbGuardGateway` API for M3. | `usbguard/UsbGuardCommandRunner.java`, `UsbGuardCliGateway.java`, `AdaptiveUsbGuardGateway.java`, `UsbGuardPolicySynchronizer.java`, tests | Start only after Part 1 has been pushed; rebase on new `main` |
+| **2 — Policy/gateway + reconnect** | Harden subprocess input/output, exact fail-closed policy parameter, daemon restart reconciliation, base/foreign-rule preservation, safe revoke-before-grant, no false ACK, and best-effort rollback. Preserve existing `UsbGuardGateway` API for M3. | `usbguard/UsbGuardCommandRunner.java`, `UsbGuardCliGateway.java`, `UsbGuardPolicySynchronizer.java`, tests | **Part 2 package based on `vinhkhang` at `5653d9e`** |
 | **3 — Sessions + notifications + handoff** | Strengthen `loginctl` active-local session handling, switch/logout/remote/no GUI/ambiguity; review listener dedup and notifier fail-independence; complete M3 IPC/installer contract notes. | `session/`, `usbguard/UsbGuardEventListener.java`, `notification/` where necessary, `packaging/usbguard/`, unit tests, M2 documentation | Start only after Part 2 has been pushed; rebase on new `main` |
 
-No Java files owned by M3 (`sync/`, `endpoint/`, `outbox/`, `packaging/systemd/`, `packaging/desktop/`) are changed in Part 1.
+No Java files owned by M3 (`sync/`, `endpoint/`, `outbox/`, `packaging/systemd/`, `packaging/desktop/`) are changed in Parts 1–2.
 
 ## 2. Part 1 — changes
 
@@ -59,3 +60,61 @@ feat(usbguard): harden Week 3 parsing and serialless identity
 ```
 
 After the Windows Maven tests succeed, commit/push **Part 1 only**, then use the new `main` commit as the baseline for **Part 2**. Do not reapply this package after other owners have edited the same files; review the diff first.
+
+## 6. Part 2 — Gateway, policy reconciliation and daemon recovery
+
+**Baseline:** `vinhkhang` at `5653d9eb4be45bd24c8fed0667da1286de32f3cd` (Part 1 already pushed). This is a **source change prepared for owner verification**, not an Ubuntu runtime PASS claim.
+
+| File | Changes |
+|---|---|
+| `usbguard/UsbGuardCommandRunner.java` | Validate CLI arguments before spawning; retain argv-only `ProcessBuilder`, no shell/sudo; keep deadline/exit handling; bound combined output to 1 MiB and fail if excessive. |
+| `usbguard/UsbGuardCliGateway.java` | Do not equate `unblock` or other text containing `block` with safe default; require exact `block`; retain M3's boolean `applyWhitelist(List<String>)` and exceptional failure behavior. |
+| `usbguard/UsbGuardPolicySynchronizer.java` | Serialize local reconciliations; validate all desired identities before mutation; require exact implicit block + non-storage base rule; abort on unparseable/duplicate managed rules and conflicting foreign allow; revoke stale entries **before** granting new entries; re-read and verify the exact managed key set and default block before returning; try removing newly added rules if the apply/verification fails. |
+| `usbguard/UsbGuardWeek3PolicyAndGatewayTest.java` | Eleven JUnit tests for daemon restart/reapply, idempotency, base/foreign policy preservation, fail-closed parameter validation, invalid/duplicate rules, remove/apply/list failures, revoke-before-grant, ambiguous append response and argument validation. |
+
+**Conservative behavior and limitations:** If USBGuard is unreachable, reports an unsafe implicit target, changes its policy unexpectedly, or rejects a mutation, reconciliation throws; M3 must **not ACK**. A partial revoke can leave a previously allowed device blocked until retry, which is safer than granting an unverified device. Rollback is best-effort and itself may fail during an IPC outage: the exception remains visible, not a successful apply. The existing baseline rule `allow with-interface none-of { 08:*:* }` must remain. Foreign rules are never rewritten or deleted.
+
+**Persistence contract for M3:** USBGuard's `append-rule` creates permanent rules by default (unless `--temporary` is specified in versions supporting it); `remove-rule` removes a rule from the policy. M3 is responsible for setting `RuleFile`, writable policy storage for the daemon, correct IPC authorization (`Policy=list,modify` and `Parameters=list`), daemon restarts and packaging. No direct edits of `/etc/usbguard/rules.conf` and no privileged `sudo` are introduced in Java. Verify persistence on real Ubuntu after Week 4.
+
+### Part 2 test and commit commands (PowerShell, repository root)
+
+Start from the **`vinhkhang` branch**, not `main`; verify the base before extracting this delta ZIP:
+
+```powershell
+git switch vinhkhang
+git fetch origin
+git status --short
+git rev-parse HEAD
+```
+
+Expected starting HEAD: `5653d9eb4be45bd24c8fed0667da1286de32f3cd`. The working tree should be clean. Extract Part 2 ZIP over repository root, then run:
+
+```powershell
+mvn -B -f client-agent/pom.xml clean test
+mvn -B -f client-agent/pom.xml -DskipTests package
+git diff --check
+git status --short
+```
+
+After successful verification, commit only Part 2:
+
+```powershell
+git add client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardCommandRunner.java
+git add client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardCliGateway.java
+git add client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardPolicySynchronizer.java
+git add client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek3PolicyAndGatewayTest.java
+git add docs/usbguard/WEEK3_CORE_HARDENING.md
+git commit -m "feat(usbguard): harden Week 3 policy reconciliation and recovery"
+git push origin vinhkhang
+```
+
+### Verification performed while preparing Part 2
+
+- Java 21 `javac` compiled the changed gateway/synchronizer/command runner, Part 1 parser dependencies and new test class.
+- Temporary, self-contained JUnit-compatible smoke harness executed **16/16 selected methods PASS** (11 new Part 2 and 5 existing policy tests) on simulated USBGuard CLI responses.
+- **Not run here:** complete Maven/Spring/JUnit suite, actual daemon IPC, Linux reconnect, reboot persistence, and hardware USB tests. The owner must run the Maven commands above on Windows; Ubuntu tests remain **DEFERRED UNTIL AFTER WEEK 4**.
+- No `//` comments were added to the Java files in Part 2.
+
+### Part 3 handoff boundary
+
+Part 3 will cover `session/` user-switch/ambiguity, `UsbGuardEventListener` watch reconnect/dedup and `notification/` fail-independent behavior. Begin only after Part 2 is committed and pushed to `vinhkhang`; use its **new HEAD** as the next baseline.
