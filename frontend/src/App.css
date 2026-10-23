@@ -27,3 +27,14 @@
 .policy-form p,.policy-form code,.fingerprint-cell{overflow-wrap:anywhere;word-break:break-word}
 .fingerprint-cell{display:inline-block;max-width:280px}.policy-form details{display:block}
 .session-page .panel>p{padding:16px}.policy-form .row-actions{flex-wrap:wrap}
+
+/* Trạng thái đồng bộ cần xuống dòng trên màn hình nhỏ. */
+.policy-sync {
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.policy-sync p {
+  flex-basis: 100%;
+  color: #6b7c70;
+}

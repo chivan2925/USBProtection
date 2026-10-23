@@ -54,3 +54,23 @@ test('network failure, timeout and caller cancellation stay distinguishable', as
   controller.abort()
   await assert.rejects(protectionApi.getSnapshot(controller.signal), { name: 'AbortError' })
 })
+
+test('protected 401 notifies session expiry; session probes can opt out', async () => {
+  const previousWindow = globalThis.window
+  const previousFetch = globalThis.fetch
+  const events = new EventTarget()
+  let expired = 0
+  events.addEventListener('usbshield:session-expired', () => { expired++ })
+  globalThis.window = events
+  globalThis.fetch = async () => Response.json({}, { status: 401 })
+  try {
+    await assert.rejects(request('/api/admin/endpoints'), { status: 401 })
+    assert.equal(expired, 1)
+    await assert.rejects(request('/api/auth/me', { notifyUnauthorized: false }), { status: 401 })
+    assert.equal(expired, 1)
+  } finally {
+    globalThis.fetch = previousFetch
+    if (previousWindow === undefined) delete globalThis.window
+    else globalThis.window = previousWindow
+  }
+})

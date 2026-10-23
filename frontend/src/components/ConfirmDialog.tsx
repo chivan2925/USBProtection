@@ -6,6 +6,7 @@ export function ConfirmDialog({ title, description, confirmLabel, onConfirm, onC
   const ref = useRef<HTMLDialogElement>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const submitting = useRef(false)
   const titleId = useId()
   const descriptionId = useId()
   useEffect(() => {
@@ -14,5 +15,34 @@ export function ConfirmDialog({ title, description, confirmLabel, onConfirm, onC
     dialog?.showModal()
     return () => { dialog?.close(); previous?.focus() }
   }, [])
-  return <dialog ref={ref} className="confirm-dialog" aria-labelledby={titleId} aria-describedby={descriptionId} onCancel={event => { event.preventDefault(); if (!busy) onClose() }}><div className="empty-icon"><Icon name="shield" size={28} /></div><h2 id={titleId}>{title}</h2><p id={descriptionId}>{description}</p>{error && <p role="alert" className="field-error">{error}</p>}<div className="dialog-actions"><button className="button" disabled={busy} autoFocus onClick={onClose}>Hủy</button><button className="button primary" disabled={busy} onClick={async () => { setBusy(true); setError(''); try { await onConfirm(); onClose() } catch (problem) { setError(problem instanceof Error ? problem.message : 'Thao tác chưa hoàn tất. Vui lòng thử lại.'); setBusy(false) } }}>{busy ? 'Đang cập nhật…' : confirmLabel}</button></div></dialog>
+
+  async function confirm() {
+    // Ref khóa ngay lập tức, kể cả hai lần nhấn trước khi React cập nhật nút.
+    if (submitting.current) return
+    submitting.current = true
+    setBusy(true)
+    setError('')
+    try {
+      await onConfirm()
+      onClose()
+    } catch (problem) {
+      setError(problem instanceof Error ? problem.message : 'Thao tác chưa hoàn tất. Vui lòng thử lại.')
+      submitting.current = false
+      setBusy(false)
+    }
+  }
+
+  return <dialog ref={ref} className="confirm-dialog" aria-labelledby={titleId} aria-describedby={descriptionId}
+    aria-busy={busy} onCancel={event => { event.preventDefault(); if (!submitting.current) onClose() }}>
+    <div className="empty-icon"><Icon name="shield" size={28} /></div>
+    <h2 id={titleId}>{title}</h2>
+    <p id={descriptionId}>{description}</p>
+    {error && <p role="alert" className="field-error">{error}</p>}
+    <div className="dialog-actions">
+      <button className="button" disabled={busy} autoFocus onClick={onClose}>Hủy</button>
+      <button className="button primary" disabled={busy} onClick={() => void confirm()}>
+        {busy ? 'Đang cập nhật…' : confirmLabel}
+      </button>
+    </div>
+  </dialog>
 }

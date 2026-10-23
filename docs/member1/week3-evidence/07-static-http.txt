@@ -1,0 +1,1 @@
+PASS: production profile JAR serves React index and assets; /events redirects to hash route; missing assets 404.

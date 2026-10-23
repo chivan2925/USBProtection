@@ -1,0 +1,1 @@
+PASS: enrollment; missing token 401; A token/B identity 401; spoofed heartbeat 403; heartbeat does not ACK.
