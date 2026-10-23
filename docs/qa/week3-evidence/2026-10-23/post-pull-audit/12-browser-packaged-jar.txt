@@ -1,0 +1,24 @@
+{
+  "command": [
+    "node",
+    ".artifacts/audit-packaged-events-20261023.mjs"
+  ],
+  "command_text": "node .artifacts/audit-packaged-events-20261023.mjs",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "8c222a47142d7a80f75e56b8d77e5bf732797e16",
+  "started_at": "2026-10-23T14:41:12.428439+07:00",
+  "scope": "Additional audit: unchanged M5 browser assertions via temporary variant using same-origin combined JAR UI/API without Vite; HTTP/default runtime profile, synthetic input",
+  "source_manifest": "sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json",
+  "source_tree_sha256": "e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d"
+}
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+PASS: Week 3 HTTP synthetic no-serial storage, UNKNOWN/source timestamp, user-switch history and endpoint A/B isolation (28 persisted events).
+PASS: Endpoint/USB searches accept visible names and IDs with server-side filtering/global pagination; Linux User accepts a case-insensitive part of the username.
+PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.
+PASS: browser-injected 403/500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png
+LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.
+PASS: packaged-JAR audit: browser loaded React and /api from the same Spring Boot origin; Vite was not launched.
+
+{"finished_at": "2026-10-23T14:41:37.304003+07:00", "exit_code": 0}

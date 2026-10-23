@@ -1,0 +1,176 @@
+{
+  "captured_at": "2026-10-23T14:45:23.293531+07:00",
+  "revision": "8c222a47142d7a80f75e56b8d77e5bf732797e16",
+  "source_manifest": "sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json",
+  "source_tree_sha256": "e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d",
+  "all_16_commands_exit_zero": true,
+  "command_results": {
+    "01-npm-ci": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:34:30.317732+07:00",
+      "finished_at": "2026-10-23T14:34:48.778772+07:00"
+    },
+    "02-frontend-tests": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:35:55.340581+07:00",
+      "finished_at": "2026-10-23T14:35:58.111818+07:00"
+    },
+    "03-frontend-lint": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:35:57.334558+07:00",
+      "finished_at": "2026-10-23T14:35:58.507811+07:00"
+    },
+    "04-frontend-build": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:35:56.137138+07:00",
+      "finished_at": "2026-10-23T14:36:02.449910+07:00"
+    },
+    "05-agent-tests-package": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:35:56.677156+07:00",
+      "finished_at": "2026-10-23T14:36:25.066366+07:00"
+    },
+    "06-server-with-frontend": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:36:29.780617+07:00",
+      "finished_at": "2026-10-23T14:37:20.936724+07:00"
+    },
+    "07-browser-fixture": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:36:28.859978+07:00",
+      "finished_at": "2026-10-23T14:36:42.713463+07:00"
+    },
+    "08-browser-management": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:38:34.579389+07:00",
+      "finished_at": "2026-10-23T14:39:10.813966+07:00"
+    },
+    "09-browser-events": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:39:58.889536+07:00",
+      "finished_at": "2026-10-23T14:40:27.285565+07:00"
+    },
+    "10-policy-http-contract": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:40:10.956669+07:00",
+      "finished_at": "2026-10-23T14:40:30.063251+07:00"
+    },
+    "11-packaging-static": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:40:12.736910+07:00",
+      "finished_at": "2026-10-23T14:40:13.654658+07:00"
+    },
+    "12-browser-packaged-jar": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:41:12.428439+07:00",
+      "finished_at": "2026-10-23T14:41:37.304003+07:00"
+    },
+    "13-shell-builder": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:41:27.255795+07:00",
+      "finished_at": "2026-10-23T14:41:27.331954+07:00"
+    },
+    "14-shell-postinst": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:41:24.691031+07:00",
+      "finished_at": "2026-10-23T14:41:24.777220+07:00"
+    },
+    "15-shell-prerm": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:41:26.326860+07:00",
+      "finished_at": "2026-10-23T14:41:26.395517+07:00"
+    },
+    "16-shell-launcher": {
+      "exit_code": 0,
+      "started_at": "2026-10-23T14:41:25.729393+07:00",
+      "finished_at": "2026-10-23T14:41:25.818647+07:00"
+    }
+  },
+  "tested_product_sources_unchanged": true,
+  "m5_sources_unchanged_since_last_run": [
+    "frontend/src/pages/Events.tsx",
+    "frontend/src/components/event/EventFilters.tsx",
+    "frontend/src/components/event/EventTable.tsx",
+    "frontend/src/components/event/events.css",
+    "frontend/src/services/mappers/eventMapper.ts",
+    "frontend/src/types/event.ts",
+    "frontend/src/utils/eventFilters.ts",
+    "frontend/tests/m5_events.test.mjs",
+    "frontend/tests/m5_event_api.test.mjs",
+    "frontend/tests/m5_live_api.test.mjs",
+    "frontend/tests/eventFilters.test.mjs",
+    "frontend/tests/browser-live.mjs"
+  ],
+  "unchanged_module_file_counts_since_last_M5_run": {
+    "client-agent/": 80,
+    "packaging/": 10
+  },
+  "combined_jar_assets_match_current_frontend_build": [
+    "BOOT-INF/classes/static/favicon.svg",
+    "BOOT-INF/classes/static/icons.svg",
+    "BOOT-INF/classes/static/index.html",
+    "BOOT-INF/classes/static/assets/index-Bsv2V3We.css",
+    "BOOT-INF/classes/static/assets/index-DMSlTEoj.js"
+  ],
+  "variant_hashes_verified": true,
+  "artifacts": {
+    "admin-server/target/usbshield-admin-server.jar": {
+      "sha256": "da359823496f80cdf0b344b4cbbaa43782bdaa5810419305f20fc9fce81ab418",
+      "bytes": 57314882
+    },
+    "client-agent/target/usbshield-agent.jar": {
+      "sha256": "c60fe7ee530dabf23bc5ac06cf3fe9a99116aa195977e2870b1978f4da366d0b",
+      "bytes": 20166150
+    },
+    "frontend/dist/favicon.svg": {
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea",
+      "bytes": 354
+    },
+    "frontend/dist/icons.svg": {
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a",
+      "bytes": 5031
+    },
+    "frontend/dist/index.html": {
+      "sha256": "76ededc5aabca7bc4b382f67a00dcafa710343f8002d2fa24be685ce6c18c628",
+      "bytes": 656
+    },
+    "frontend/dist/assets/index-Bsv2V3We.css": {
+      "sha256": "1130c64799639636632664b983ec455b37eea0f1e52178333375cd895a2efee6",
+      "bytes": 25533
+    },
+    "frontend/dist/assets/index-DMSlTEoj.js": {
+      "sha256": "f1857cbe5bcd1e6a9ae4e1e101eb171917d18b0c5eda6cdf59e40756b9ce7191",
+      "bytes": 290397
+    }
+  },
+  "screenshots": {
+    "screenshots/events-real-http-desktop.png": {
+      "sha256": "d57f2384692dbdbcdaaae7fe3deda67e251e76f5f2fa685e509d7718301c725d",
+      "captured_at": "2026-10-23T14:41:29.915399+07:00",
+      "command": "12-browser-packaged-jar.json"
+    },
+    "screenshots/events-username-substring.png": {
+      "sha256": "87fb352a3e946bef7cac43e01c974a0ab37ad3f85c4fad5f4505bf9daef991c5",
+      "captured_at": "2026-10-23T14:41:34.337446+07:00",
+      "command": "12-browser-packaged-jar.json"
+    },
+    "screenshots/events-real-http-mobile.png": {
+      "sha256": "3c35c30d0be5037b326582f2fe098ba6e0d4bd974ff96847be7a72f3fddfc1d0",
+      "captured_at": "2026-10-23T14:41:32.926895+07:00",
+      "command": "12-browser-packaged-jar.json"
+    },
+    "screenshots/m4-live-expired-session.png": {
+      "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6",
+      "captured_at": "2026-10-23T14:39:09.349607+07:00",
+      "command": "08-browser-management.json"
+    }
+  },
+  "verified_local_links": 45,
+  "documents_sha256": {
+    "docs/qa/WEEK3_M5_POST_PULL_REVIEW_20261023.md": "f6b832f27cc564ce28a9fe489c4dcc02a3221eb073d705257578c7a3778bbe48",
+    "docs/qa/week3-evidence/2026-10-23/post-pull-audit/README.md": "79291cffb5b9d9baa5d69c6f03f51d7307f5049046c0bc7308d3a6a157bf9c0e"
+  },
+  "tracked_working_tree_changes": [],
+  "local_deb_artifacts_found": [],
+  "scope": "Windows unit/mock/contract/static and synthetic HTTP/browser, including combined-JAR default-profile same-origin browser. Actual Ubuntu/USB/GUI/install/reboot not executed. No user database access/reset."
+}

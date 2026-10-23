@@ -1,0 +1,17 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:live"
+  ],
+  "command_text": "npm.cmd run test:live",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "8c222a47142d7a80f75e56b8d77e5bf732797e16",
+  "started_at": "2026-10-23T14:38:34.579389+07:00",
+  "scope": "Fresh integrated Windows browser against real Spring Boot/H2; auth/session/A-B policy and restart regression after M1/M4 pull",
+  "source_manifest": "sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json",
+  "source_tree_sha256": "e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d",
+  "exit_code": 0,
+  "finished_at": "2026-10-23T14:39:10.813966+07:00"
+}

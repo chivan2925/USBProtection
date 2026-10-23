@@ -1,0 +1,30 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:browser"
+  ],
+  "command_text": "npm.cmd run test:browser",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "8c222a47142d7a80f75e56b8d77e5bf732797e16",
+  "started_at": "2026-10-23T14:36:28.859978+07:00",
+  "scope": "Fresh integrated Windows fixture/browser regression for M4/M5 after pull",
+  "source_manifest": "sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json",
+  "source_tree_sha256": "e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d"
+}
+
+
+> frontend@0.0.0 pretest:browser
+> node tests/apply-browser-readiness-fix.mjs
+
+frontend/tests/browser.mjs: HTTP readiness fix already applied.
+
+> frontend@0.0.0 test:browser
+> node tests/browser.mjs
+
+PASS: M4 browser with HTTP fixture; protected routes, invalid/valid login, refresh /me, CSRF, A/B Allow/Revoke, duplicate/error/empty states, M5 events/filter, expired session/logout, demo read-only, network error, responsive routes.
+Scope: HTTP fixture regression. Run npm run test:live for Spring Security/H2 evidence. Physical USB and actual Agent apply/ACK require Ubuntu.
+Screenshots: frontend/.artifacts/m4-*.png; demo regression screenshots.
+
+{"finished_at": "2026-10-23T14:36:42.713463+07:00", "exit_code": 0}

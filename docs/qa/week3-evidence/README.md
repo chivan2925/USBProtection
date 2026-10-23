@@ -1,5 +1,25 @@
 # Week 3 evidence index — M5
 
+## Current status — 2026-10-23
+
+Branch `huy`; tested revision `8c222a47142d7a80f75e56b8d77e5bf732797e16`. Windows 11 amd64; JDK 22.0.2; Maven 3.9.11; Node 22.20.0; npm 10.9.3; Chrome. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [completed work and pending handoffs](../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md).
+
+- [Post-pull execution index](2026-10-23/post-pull-audit/README.md): **16 commands, all exit 0**. Frontend **96/96**, server **26**, Agent **61**; install/lint/build, fixture/management/Events browser, separate policy HTTP **1/1**, combined-JAR browser and packaging static/four shell syntax checks.
+- [Environment](2026-10-23/post-pull-audit/environment.json), [source manifest](2026-10-23/post-pull-audit/sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json), [execution/artifact validation](2026-10-23/post-pull-audit/validation.json): exact provenance. Source tree SHA-256 `e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d`.
+- [Same-origin browser variant provenance](2026-10-23/post-pull-audit/packaged-browser-variant.json): temporary harness derived from unchanged M5 browser assertions, HTTP/default profile. [Desktop](2026-10-23/post-pull-audit/screenshots/events-real-http-desktop.png), [partial username](2026-10-23/post-pull-audit/screenshots/events-username-substring.png), [mobile](2026-10-23/post-pull-audit/screenshots/events-real-http-mobile.png), [management session expiry](2026-10-23/post-pull-audit/screenshots/m4-live-expired-session.png).
+- [Documentation-update validation](2026-10-23/qa-closeout/validation.json): local links, source hashes, current inventory/status consistency, document hashes and unchanged historical raw evidence. No application suite is rerun for this documentation update.
+- [Original post-pull review](../WEEK3_M5_POST_PULL_REVIEW_20261023.md) is preserved as a point-in-time audit; its primary-document gaps are addressed by the current inventory/summary and [handoff packet](../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md).
+
+Every executed command has a UTF-8 text log and adjacent JSON with argv/cwd, start/end +07:00, revision, source manifest and exit code. Exact times are in that metadata; older captures below keep their original scope. Runtime data was isolated for QA; the user's application database was not used or reset.
+
+**Tested Windows scopes PASS; group gate OPEN; Ubuntu U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No physical USB/USBGuard/native GUI/systemd/install/reboot PASS is implied. No `.deb` binary/build provenance is available in this audit.
+
+---
+
+## Historical snapshot — 2026-10-21
+
+The following snapshot retains its original revision, counts and scope. Use the current section above for the integrated 2026-10-23 status.
+
 Captured: 2026-10-21 (Asia/Bangkok). [Plan](../WEEK3_INTEGRATION_TEST_PLAN.md), [inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [demo draft](../../DEMO_SCRIPT.md).
 
 Later same-day follow-up: [Event filter/table name-search capture](2026-10-21/event-name-search/README.md), with 88 frontend tests, 18 server tests and new browser/build evidence. The initial capture below remains unchanged and identifies its earlier source snapshot.
@@ -10,7 +30,7 @@ Each command has a UTF-8 `.txt` log and same-stem `.json` metadata with argv/cwd
 
 Latest same-day correction: [partial Linux User search](2026-10-21/username-substring/README.md). This has a separate source manifest and execution logs; previous captures remain historical.
 
-## Executions
+### Executions
 
 All dates below are 2026-10-21. Exact times are in the raw metadata. npm commands run from `frontend/`; Maven/package/shell commands run from repository root.
 
@@ -39,7 +59,7 @@ All dates below are 2026-10-21. Exact times are in the raw metadata. npm command
 | [20](2026-10-21/20-packaging-static.txt) | Existing Windows verifier with `-CheckBuiltJar` | 0; source/JAR static checks PASS |
 | [21](2026-10-21/21-browser-events.txt) | `npm run test:browser:live` | 0; 25 baseline + 3 Week 3 synthetic HTTP events, no-serial/UNKNOWN/source time/A–B isolation/errors/recovery PASS |
 
-## Screenshots from this run
+### Screenshots from this run
 
 Only captures whose timestamps fall in their successful browser run are copied into the new Week 3 directory. Historical `.artifacts` captures were not reused.
 
