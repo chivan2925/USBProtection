@@ -12,7 +12,7 @@
 |---|---|---|---|
 | **1 — Parser + serialless identity** | Harden USBGuard device/watch parsing, malformed IDs/sections, class-08/composite detection, and strict fingerprint parsing. Hash-only is valid; VID:PID without hash/serial is not an individual USB identity. | `usbguard/UsbGuardEventParser.java`, `UsbGuardPresenceParser.java`, `UsbGuardRuleBuilder.java`, new regression tests | **This package**; owner tests, commits, and pushes first |
 | **2 — Policy/gateway + reconnect** | Harden subprocess input/output, exact fail-closed policy parameter, daemon restart reconciliation, base/foreign-rule preservation, safe revoke-before-grant, no false ACK, and best-effort rollback. Preserve existing `UsbGuardGateway` API for M3. | `usbguard/UsbGuardCommandRunner.java`, `UsbGuardCliGateway.java`, `UsbGuardPolicySynchronizer.java`, tests | **Part 2 package based on `vinhkhang` at `5653d9e`** |
-| **3 — Sessions + notifications + handoff** | Strengthen `loginctl` active-local session handling, switch/logout/remote/no GUI/ambiguity; review listener dedup and notifier fail-independence; complete M3 IPC/installer contract notes. | `session/`, `usbguard/UsbGuardEventListener.java`, `notification/` where necessary, `packaging/usbguard/`, unit tests, M2 documentation | Start only after Part 2 has been pushed; rebase on new `main` |
+| **3 — Sessions + notifications + handoff** | Strengthen `loginctl` session selection, switch/logout/remote/no GUI/ambiguity; isolate watch reconnect and notification failure; complete M3 handoff. | `session/`, `usbguard/UsbGuardEventListener.java`, `notification/`, unit tests, M2 docs | **Part 3 package based on `vinhkhang` at `9e4cd23`** |
 
 No Java files owned by M3 (`sync/`, `endpoint/`, `outbox/`, `packaging/systemd/`, `packaging/desktop/`) are changed in Parts 1–2.
 
@@ -118,3 +118,34 @@ git push origin vinhkhang
 ### Part 3 handoff boundary
 
 Part 3 will cover `session/` user-switch/ambiguity, `UsbGuardEventListener` watch reconnect/dedup and `notification/` fail-independent behavior. Begin only after Part 2 is committed and pushed to `vinhkhang`; use its **new HEAD** as the next baseline.
+
+## 7. Part 3 — Active-session attribution, watch recovery, notification
+
+**Baseline:** branch `vinhkhang` at `9e4cd2317fd2f1714d3a3ab73c2991db0d61edff` (Parts 1 and 2 already pushed). Part 3 completes M2's **Windows verification scope** pending owner Maven tests. Do not report Ubuntu/hardware PASS.
+
+- `ActiveSessionSelector` provides one shared selection algorithm for `LoginctlActiveUserResolver` and `LinuxActiveUserResolver` compatibility candidates. It preserves unique local active attribution, prefers a unique graphical `seat0` when multiple sessions exist, rejects ambiguity, duplicate session IDs, invalid UID and malformed identity, and does not keep an old user after logout or switch.
+- `UsbGuardEventListener` discards incomplete watch sections after reconnect, caps section memory, never emits telemetry from `PolicyChanged` or `PolicyApplied`, and distinguishes an immediate Insert–Remove–Insert sequence from duplicate watch entries. On `UNKNOWN` it still sends telemetry but does not initiate popup delivery. Notification failure does not block event sending.
+- `BlockNotificationPolicy` and `DesktopNotificationService` reset per-device cooldown upon Remove, including removals without a resolvable user. Valid graphical sessions are routed by their actual UID; a unique resolved non-`seat0` session is not arbitrarily rejected.
+- New Windows JUnit tests: `Week3ActiveSessionTransitionTest` (9 tests), `Week3NotificationPolicyTest` (6 tests), `UsbGuardWeek3WatchRecoveryTest` (7 tests).
+- Detailed M3 contract and deferred Ubuntu scenarios: [`WEEK3_PART3_SESSION_NOTIFICATION_HANDOFF.md`](WEEK3_PART3_SESSION_NOTIFICATION_HANDOFF.md).
+
+### Owner gate for Part 3
+
+```powershell
+git switch vinhkhang
+git rev-parse HEAD
+mvn -B -f client-agent/pom.xml clean test
+mvn -B -f client-agent/pom.xml -DskipTests package
+git diff --check
+git status --short
+```
+
+Commit only Part 3 files after `BUILD SUCCESS`:
+
+```text
+feat(usbguard): harden active sessions and watch notification recovery
+```
+
+**Local preparation checks:** Java 21 selected-core compilation PASS; 15/15 self-contained session/notification assertions PASS and 6/6 watch-loop smoke assertions PASS with temporary dependencies. Complete Maven/JUnit was not executed here; the owner must run it on Windows. These temporary harness files are not included in the ZIP.
+
+**Ubuntu acceptance:** Actual `loginctl`, user switching, physical USB/USBGuard watcher, `systemd`, `.deb`, GUI notification and reboot remain **DEFERRED UNTIL AFTER WEEK 4**. The group QA owner must not label these cases PASS based on mock tests.
