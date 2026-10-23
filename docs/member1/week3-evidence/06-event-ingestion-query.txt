@@ -1,0 +1,1 @@
+PASS: enrolled-reference M2 payload persisted, filtered, paged; session 21, mouse ALLOWED. Sample file unchanged; no physical USB test.
