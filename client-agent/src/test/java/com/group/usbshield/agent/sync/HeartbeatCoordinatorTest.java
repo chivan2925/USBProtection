@@ -131,4 +131,51 @@ class HeartbeatCoordinatorTest {
         assertEquals(4L, captor.getValue().getAppliedPolicyVersion());
         verify(endpointManager).clearPendingAck();
     }
+
+    @Test
+    @DisplayName("performHeartbeatCycle retains pending ACK when retry ACK fails")
+    void retainPendingAckIfRetryFails() {
+        EndpointRegistration reg = EndpointRegistration.builder()
+                .endpointId("EP-01")
+                .agentToken("tok-01")
+                .currentPolicyVersion(4L)
+                .pendingAckVersion(4L)
+                .build();
+
+        when(endpointManager.ensureEnrolled()).thenReturn(true);
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+
+        HeartbeatResponse hbResp = HeartbeatResponse.builder()
+                .status("ONLINE")
+                .serverPolicyVersion(4L)
+                .build();
+        when(adminServerClient.sendHeartbeat(any(), eq("tok-01")))
+                .thenReturn(Optional.of(hbResp));
+        when(adminServerClient.acknowledgePolicy(eq("EP-01"), eq("tok-01"), any(PolicyAckRequest.class)))
+                .thenReturn(false);
+
+        coordinator.performHeartbeatCycle();
+
+        verify(adminServerClient).acknowledgePolicy(eq("EP-01"), eq("tok-01"), any(PolicyAckRequest.class));
+        verify(endpointManager, never()).clearPendingAck();
+    }
+
+    @Test
+    @DisplayName("performHeartbeatCycle handles server unreachable gracefully without throwing exception")
+    void serverUnreachableHandledGracefully() {
+        EndpointRegistration reg = EndpointRegistration.builder()
+                .endpointId("EP-01")
+                .agentToken("tok-01")
+                .currentPolicyVersion(2L)
+                .build();
+
+        when(endpointManager.ensureEnrolled()).thenReturn(true);
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+        when(adminServerClient.sendHeartbeat(any(), eq("tok-01"))).thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() -> coordinator.performHeartbeatCycle());
+
+        verify(policySyncService, never()).syncPolicy(any());
+        verify(outboxSpoolService, never()).drainOutbox(any(), any(), any());
+    }
 }

@@ -113,4 +113,24 @@ class EndpointManagerTest {
         assertEquals(2L, endpointManager.getCurrentRegistration().getCurrentPolicyVersion());
         assertNull(endpointManager.getCurrentRegistration().getPendingAckVersion());
     }
+
+    @Test
+    @DisplayName("loadLocalRegistration with corrupted file handles error gracefully and allows fresh enrollment")
+    void corruptedStorageFileReEnrolls() throws Exception {
+        Path storageFile = tempDir.resolve("endpoint.json");
+        Files.writeString(storageFile, "{ corrupted invalid json content !!!");
+
+        EndpointManager reloaded = new EndpointManager(properties, systemInfoProvider, adminServerClient, objectMapper);
+        reloaded.init();
+
+        EnrollmentResponse response = EnrollmentResponse.builder()
+                .endpointId("EP-RECOVERED")
+                .agentToken("token-recovered")
+                .currentPolicyVersion(0L)
+                .build();
+        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+
+        assertTrue(reloaded.ensureEnrolled(), "Should enroll afresh when storage file is corrupted");
+        assertEquals("EP-RECOVERED", reloaded.getEndpointId());
+    }
 }
