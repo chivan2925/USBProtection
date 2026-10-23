@@ -11,12 +11,22 @@ let Endpoints
 let EndpointDetail
 let EndpointWhitelistPanel
 let getDemoSnapshot
+let Dashboard
+let Devices
+let Settings
+let Login
+let AuthContext
 
 before(async () => {
   vite = await createServer({ server: { middlewareMode: true, ws: false }, appType: 'custom' })
   ;({ Endpoints, EndpointDetail } = await vite.ssrLoadModule('/src/pages/Endpoints.tsx'))
   ;({ EndpointWhitelistPanel } = await vite.ssrLoadModule('/src/components/endpoint/EndpointWhitelistPanel.tsx'))
   ;({ getDemoSnapshot } = await vite.ssrLoadModule('/src/services/demo.ts'))
+  ;({ Dashboard } = await vite.ssrLoadModule('/src/pages/Dashboard.tsx'))
+  ;({ Devices } = await vite.ssrLoadModule('/src/pages/Devices.tsx'))
+  ;({ Settings } = await vite.ssrLoadModule('/src/pages/Settings.tsx'))
+  ;({ Login } = await vite.ssrLoadModule('/src/pages/Login.tsx'))
+  ;({ AuthContext } = await vite.ssrLoadModule('/src/hooks/useAuth.ts'))
 })
 after(async () => { await vite?.close() })
 
@@ -137,4 +147,63 @@ test('demo snapshot maps endpoint IDs, preserves per-endpoint policy and returns
   const controller = new AbortController()
   controller.abort()
   await assert.rejects(getDemoSnapshot(controller.signal), { name: 'AbortError' })
+})
+
+test('policy sync distinguishes offline pending, missing ACK and reported applied version', () => {
+  const cases = [
+    { status: 'offline', policyVersion: '3', appliedPolicyVersion: '1', message: 'Endpoint offline · Chờ Agent áp dụng chính sách' },
+    { status: 'online', policyVersion: '3', appliedPolicyVersion: '1', message: 'Chờ Agent áp dụng chính sách' },
+    { status: 'online', policyVersion: '3', appliedPolicyVersion: undefined, message: 'Chưa có dữ liệu ACK' },
+    { status: 'online', policyVersion: '3', appliedPolicyVersion: '3', message: 'Agent đã ACK phiên bản này' },
+  ]
+  for (const example of cases) {
+    const endpoint = { ...mockEndpoints[0], ...example }
+    const state = { status: 'ready', data: { ...baseProps.state.data, endpoints: [endpoint] } }
+    const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, state, endpointId: endpoint.id }))
+    assert.ok(html.includes(example.message), example.message)
+    assert.equal(html.includes('Agent đã ACK phiên bản này'), example.policyVersion === example.appliedPolicyVersion)
+    assert.ok(!html.includes('Hệ thống đang được bảo vệ'))
+  }
+})
+
+test('management pages clear protected rows during loading, empty, unavailable and failure', () => {
+  for (const state of [
+    { status: 'loading' },
+    { status: 'unavailable' },
+    { status: 'error', error: 'Mất kết nối', statusCode: 403 },
+    { status: 'ready', data: { endpoints: [], devices: [], events: [], whitelist: [] } },
+  ]) {
+    for (const page of [Endpoints, Dashboard, Devices]) {
+      const html = renderToStaticMarkup(createElement(page, { ...baseProps, state, mode: 'devices' }))
+      assert.ok(!html.includes('LAB-PC-01'))
+      assert.ok(!html.includes('Kingston'))
+      assert.ok(!html.includes('Hệ thống đang được bảo vệ'))
+    }
+  }
+})
+
+test('Settings explains unavailable service API instead of offering fake controls', () => {
+  const html = renderToStaticMarkup(createElement(Settings))
+  assert.ok(html.includes('API cài đặt dịch vụ chưa có'))
+  assert.ok(html.includes('Chưa xác định'))
+  assert.ok(!html.includes('<input'))
+  assert.ok(!html.includes('<button'))
+})
+
+test('expired session shows a persistent login message; fresh login and demo do not', () => {
+  function render(sessionExpired, demo = false) {
+    return renderToStaticMarkup(createElement(AuthContext.Provider, {
+      value: { user: null, loading: false, error: '', sessionExpired },
+    }, createElement(Login, { demo })))
+  }
+  const previousWindow = globalThis.window
+  globalThis.window = { location: { pathname: '/' } }
+  try {
+    assert.ok(render(true).includes('Phiên Admin đã hết hạn. Vui lòng đăng nhập lại.'))
+    assert.ok(!render(false).includes('Phiên Admin đã hết hạn'))
+    assert.ok(!render(true, true).includes('Phiên Admin đã hết hạn'))
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window
+    else globalThis.window = previousWindow
+  }
 })

@@ -2,6 +2,8 @@ import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import { protectionApi } from '../src/services/api.ts'
 import { ApiError } from '../src/services/http.ts'
+import { mapEndpoint } from '../src/services/mappers/endpointMapper.ts'
+import { mapWhitelistEntry } from '../src/services/mappers/policyMapper.ts'
 import { startAdminFixture, useFixtureFetch } from './fixtures/adminServer.mjs'
 
 let fixture
@@ -106,4 +108,42 @@ test('cross-endpoint whitelist and detail responses fail rather than being reass
   globalThis.fetch = async () => new Response(JSON.stringify(fixture.state.endpoints[1]), { headers: { 'Content-Type': 'application/json' } })
   try { await assert.rejects(protectionApi.getEndpoint('A', signal()), /endpoint khác/) }
   finally { globalThis.fetch = original }
+})
+
+test('endpoint mapper preserves offline/no-heartbeat and rejects impossible policy versions', () => {
+  const endpoint = { endpointId: 'A', hostname: 'lab-a', status: 'OFFLINE', lastSeen: null, policyVersion: 2, appliedPolicyVersion: 0 }
+  const mapped = mapEndpoint(endpoint)
+  assert.equal(mapped.status, 'offline')
+  assert.equal(mapped.lastSeenAt, undefined)
+  assert.equal(mapped.policyVersion, '2')
+  assert.equal(mapped.appliedPolicyVersion, '0')
+  assert.equal(mapEndpoint({ ...endpoint, appliedPolicyVersion: null }).appliedPolicyVersion, undefined)
+  assert.equal(mapEndpoint({ ...endpoint, status: 'UNKNOWN' }).status, 'unknown')
+  for (const version of [-1, 1.5, '2', Number.MAX_SAFE_INTEGER + 1]) {
+    assert.throws(() => mapEndpoint({ ...endpoint, policyVersion: version }), /policy version/)
+  }
+  assert.throws(() => mapEndpoint({ ...endpoint, appliedPolicyVersion: 3 }), /applied.*desired/)
+  assert.throws(() => mapEndpoint({ ...endpoint, lastSeen: 'bad-date' }), /lastSeen/)
+})
+
+test('whitelist mapper accepts no-serial HASH and rejects weak or malformed identities', () => {
+  const entry = { id: 1, endpointId: 'A', fingerprintType: 'HASH', fingerprintValue: 'usbguard-hash', enabled: true }
+  const mapped = mapWhitelistEntry(entry, 'A')
+  assert.equal(mapped.fingerprintValue, 'usbguard-hash')
+  assert.equal(mapped.serial, undefined)
+  for (const fingerprintType of ['SERIAL', 'VID_PID', '', null]) {
+    assert.throws(() => mapWhitelistEntry({ ...entry, fingerprintType }, 'A'), /HASH/)
+  }
+  assert.throws(() => mapWhitelistEntry({ ...entry, fingerprintValue: ' ' }, 'A'), /văn bản/)
+  assert.throws(() => mapWhitelistEntry({ ...entry, enabled: 'false' }, 'A'), /trạng thái whitelist/)
+  assert.throws(() => mapWhitelistEntry({ ...entry, endpointId: 'B' }, 'A'), /endpoint khác/)
+})
+
+test('fixture rejects duplicate Revoke without changing desired version again', async () => {
+  await protectionApi.allowOnEndpoint('A', { usbDeviceId: 1 })
+  const [entry] = await protectionApi.getWhitelist('A', signal())
+  await protectionApi.revokeOnEndpoint('A', entry.id)
+  const afterFirstRevoke = await protectionApi.getEndpoint('A', signal())
+  await assert.rejects(protectionApi.revokeOnEndpoint('A', entry.id), { status: 404 })
+  assert.deepEqual(await protectionApi.getEndpoint('A', signal()), afterFirstRevoke)
 })

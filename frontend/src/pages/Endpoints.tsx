@@ -58,6 +58,13 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
   const latestUser = events.find(event => event.username)?.username
   const versionsKnown = endpoint?.policyVersion !== undefined && endpoint?.appliedPolicyVersion !== undefined
   const synced = versionsKnown && endpoint.policyVersion === endpoint.appliedPolicyVersion
+  let syncMessage = 'Chưa có dữ liệu ACK'
+  if (synced) syncMessage = 'Agent đã ACK phiên bản này'
+  if (versionsKnown && !synced) {
+    syncMessage = endpoint.status === 'offline'
+      ? 'Endpoint offline · Chờ Agent áp dụng chính sách'
+      : 'Chờ Agent áp dụng chính sách'
+  }
 
   async function confirmPolicy() {
     if (!pending || disabled) throw new Error('Phiên Admin không hợp lệ hoặc dữ liệu đang tải.')
@@ -86,7 +93,13 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
             ['Policy version', endpoint?.policyVersion], ['Last Applied Version', endpoint?.appliedPolicyVersion],
             ['Kết nối gần nhất', formatDate(endpoint?.lastSeenAt)], ['Endpoint ID', endpoint?.id],
           ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>)}</dl>
-          {endpoint && <div className="panel-bottom"><Badge tone={synced ? 'green' : 'amber'}>{!versionsKnown ? 'Chưa có dữ liệu ACK' : synced ? 'Agent đã ACK phiên bản này' : 'Chờ Agent áp dụng chính sách'}</Badge></div>}
+          {endpoint && <div className="panel-bottom policy-sync" role="status">
+            <Badge tone={synced ? 'green' : 'amber'}>{syncMessage}</Badge>
+            <p>Desired là phiên bản server muốn áp dụng; Last Applied Version là phiên bản Agent đã ACK.
+              {!synced && ' Bấm Refresh dữ liệu để kiểm tra tiến độ. Chưa có ACK không đồng nghĩa áp dụng thất bại.'}
+              {endpoint.status === 'offline' && ' Endpoint đang offline; trạng thái bảo vệ hiện tại chưa được xác minh.'}
+            </p>
+          </div>}
         </Panel>
         {endpoint && <EndpointWhitelistPanel endpointId={endpointId} entries={entries} disabled={disabled} disabledReason={demo ? 'Demo chỉ đọc; không thay đổi whitelist.' : 'Cần phiên Admin hợp lệ và dữ liệu đã tải.'} onAllow={() => setShowForm(true)} onRevoke={entryId => setPending({ action: 'revoke', entryId })} />}
         {endpoint && showForm && !disabled && <Panel title="Cho phép USB trên endpoint này">

@@ -1,0 +1,14 @@
+{
+  "Date": "2026-10-22",
+  "Timezone": "Asia/Saigon",
+  "BaseRevision": "559d0b6a9662baa3291511763d043b7ffed702d5",
+  "WorkingTree": "Uncommitted M4 changes",
+  "OS": "Microsoft Windows NT 10.0.26200.0",
+  "Node": "v24.21.0",
+  "Npm": "11.19.0",
+  "Java": "java version \"21.0.9\" 2025-10-21 LTS\r\nJava(TM) SE Runtime Environment (build 21.0.9+7-LTS-338)\r\nJava HotSpot(TM) 64-Bit Server VM (build 21.0.9+7-LTS-338, mixed mode, sharing)",
+  "Vite": "8.3.5",
+  "CleanInstallVite": "8.3.1",
+  "TestRoot": "D:\\USBProtection\\frontend\\.artifacts\\week3-clean-install",
+  "VerifiedVite": "8.3.1 (npm ci lockfile)"
+}

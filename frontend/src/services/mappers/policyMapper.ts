@@ -6,11 +6,18 @@ export function mapWhitelistEntry(value: unknown, endpointId: string): Whitelist
   if (data.endpointId != null && data.endpointId !== endpointId) {
     throw new Error('Server trả whitelist của endpoint khác. Đã dừng tải dữ liệu.')
   }
+  if (data.enabled != null && typeof data.enabled !== 'boolean') {
+    throw new Error('API trả trạng thái whitelist không hợp lệ.')
+  }
+  // Contract hiện tại chỉ hỗ trợ HASH; không suy ra quyền từ serial hoặc tên USB.
+  if (data.fingerprintType !== 'HASH') {
+    throw new Error('API trả loại fingerprint chưa được hỗ trợ; cần HASH.')
+  }
   return {
     id: readId(data.id), endpointId,
     vendorId: readText(data.vendorId) ?? '', productId: readText(data.productId) ?? '',
     serial: readText(data.serial), name: readText(data.name), hash: readText(data.hash),
-    fingerprintType: readText(data.fingerprintType, true)!, fingerprintValue: readText(data.fingerprintValue, true)!,
+    fingerprintType: 'HASH', fingerprintValue: readText(data.fingerprintValue, true)!,
     addedAt: readText(data.createdAt), addedBy: readText(data.addedBy),
   }
 }
