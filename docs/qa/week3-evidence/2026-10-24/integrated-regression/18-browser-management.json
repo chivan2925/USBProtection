@@ -1,0 +1,17 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:live"
+  ],
+  "command_text": "npm.cmd run test:live",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:24:44.649383+07:00",
+  "scope": "Fresh real Spring Security/H2 management/browser, controlled HTTP ACK, A/B, real JVM restart/session persistence; no Agent USB apply",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6",
+  "exit_code": 0,
+  "finished_at": "2026-10-24T00:25:22.208637+07:00"
+}

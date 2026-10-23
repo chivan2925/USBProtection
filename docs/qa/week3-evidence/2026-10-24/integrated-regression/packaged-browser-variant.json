@@ -1,0 +1,18 @@
+{
+  "created_at": "2026-10-24T00:23:56.530203+07:00",
+  "base_script": "frontend/tests/browser-live.mjs",
+  "base_script_sha256": "d7679a7cc6b5f8bab971d9d2fae2a67588e681f04e3dafccb8d604a8df4e083b",
+  "derived_script": "frontend/.artifacts/audit-packaged-events-20261024.mjs",
+  "derived_script_sha256": "97dee89042bca3b040feeeee28230f332ee6166c0369718ab90062a7bfcc4f90",
+  "changes": [
+    {
+      "old": "const web = 'http://127.0.0.1:4174'",
+      "new": "const web = api"
+    },
+    {
+      "old": "  start(process.execPath, [join(root, 'node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', '4174', '--strictPort'], { env: { ...process.env, USBSHIELD_API_TARGET: api } })",
+      "new": "  // QA: serve bundled UI and API from the combined JAR without Vite."
+    }
+  ],
+  "purpose": "All original Events assertions retained; HTTP/default-profile packaged same-origin UI/API, no production HTTPS claim."
+}

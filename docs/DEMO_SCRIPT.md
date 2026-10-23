@@ -1,6 +1,6 @@
 # USBShield Week 3 demo script — DRAFT
 
-Owner: M5. Prepared: 2026-10-21; updated: 2026-10-23 (Asia/Bangkok). This is a Windows demonstration draft, not a final release rehearsal. [Test plan](qa/WEEK3_INTEGRATION_TEST_PLAN.md), [QA results](qa/WEEK3_QA_SUMMARY.md), [evidence](qa/week3-evidence/README.md).
+Owner: M5. Prepared: 2026-10-21; updated: 2026-10-24 (Asia/Bangkok). This is a Windows demonstration draft, not a final release rehearsal. [Test plan](qa/WEEK3_INTEGRATION_TEST_PLAN.md), [QA results](qa/WEEK3_QA_SUMMARY.md), [evidence](qa/week3-evidence/README.md).
 
 ## Windows preparation
 
@@ -8,7 +8,7 @@ Use a fresh server JAR, frontend production build, local Chrome/Edge, isolated t
 
 The browser harnesses run headlessly and create screenshots. For a narrated walkthrough, use the recorded captures or an owner-provided isolated interactive environment. `test:live` and `test:browser:live` start separate databases and do not share their QA accounts/data. Run suites sequentially; each cleans up its processes and temporary runtime.
 
-Current evidence: [23/10 integrated capture](qa/week3-evidence/2026-10-23/post-pull-audit/README.md), revision `8c222a47142d7a80f75e56b8d77e5bf732797e16`. The extra packaged-JAR variant demonstrates Events UI/API from one origin without Vite, using HTTP/default runtime settings; it is separate from the checked-in suites and does not demonstrate production HTTPS. Use its [partial-username capture](qa/week3-evidence/2026-10-23/post-pull-audit/screenshots/events-username-substring.png) for the current Linux User behavior. [Handoff/gate status](qa/WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) remains OPEN pending owner inputs.
+Current evidence: [24/10 integrated capture](qa/week3-evidence/2026-10-24/integrated-regression/README.md), revision `a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1`. The extra packaged-JAR variant demonstrates Events UI/API from one origin without Vite, using HTTP/default runtime settings; it is separate from the checked-in suites and does not demonstrate production HTTPS. Use its [partial-username capture](qa/week3-evidence/2026-10-24/integrated-regression/screenshots/events-username-substring.png) for the current Linux User behavior. [Handoff/gate status](qa/WEEK3_M5_COMPLETION_20261024.md) remains OPEN with the M3 staging-verifier finding and pending owner/group decisions.
 
 ## Windows walkthrough, approximately 8–10 minutes
 

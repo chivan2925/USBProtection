@@ -1,6 +1,6 @@
 # Week 3 integration test plan — M5
 
-Prepared: 2026-10-21; updated: 2026-10-23 (Asia/Bangkok). Owner: M5. Scope: Event History hardening, Windows regression and preparation of deferred Ubuntu acceptance. [Inventory](WEEK3_TEST_INVENTORY.md), [QA summary](WEEK3_QA_SUMMARY.md), [evidence](week3-evidence/README.md), [demo draft](../DEMO_SCRIPT.md).
+Prepared: 2026-10-21; updated: 2026-10-24 (Asia/Bangkok). Owner: M5. Scope: Event History hardening, Windows regression and preparation of deferred Ubuntu acceptance. [Inventory](WEEK3_TEST_INVENTORY.md), [QA summary](WEEK3_QA_SUMMARY.md), [evidence](week3-evidence/README.md), [demo draft](../DEMO_SCRIPT.md).
 
 The supplied Week 3 M1–M5 ownership plan is the scope reference. Existing code that meets a requirement is verified rather than rewritten. This plan does not transfer ownership of backend, USBGuard core, Agent, packaging, shared auth or management UI to M5.
 
@@ -35,6 +35,7 @@ The supplied Week 3 M1–M5 ownership plan is the scope reference. Existing code
 | W3-A02 | M3; rerun by M5 / Maven mocks + build | Run enrollment persistence, heartbeat, event/outbox, policy sync/apply-failure/ACK-recovery tests and JAR build | Existing transport/recovery assertions pass; packaged JAR produced; unrepresented Week 3 fault cases remain owner follow-up |
 | W3-P01 | M3; review by M5 / static | Execute existing Windows package check with built JAR; inspect service/live config/helper loader and required class entries | Static source/JAR checks pass; installer/systemd runtime not inferred |
 | W3-P02 | M3; review by M5 / shell syntax | `bash -n` on installer, maintainer scripts and desktop launcher using Git Bash | Shell parses on Windows; no `.deb` binary, install or runtime claim |
+| W3-P03 | M3; QA by M5 / negative static-verifier check | Request -CheckStaging with absent staging, then missing required file and valid staging when available; do not run an installer | Requested absent/incomplete staging must fail or explicitly remain unverified; valid staging may PASS. Current absent-directory probe reproduces M5-W3-06. |
 | W3-D01 | M5 / documentation | Review plan, inventory, QA summary, evidence/provenance and demo draft | Actual statuses/evidence/owner blockers recorded; historical results retained |
 
 ## Deferred Ubuntu acceptance matrix
@@ -59,7 +60,7 @@ Run from repository root with a JDK 21+ in `JAVA_HOME`, Maven, compatible Node/n
 
 ```powershell
 mvn -o -B -f client-agent/pom.xml clean package
-powershell -NoProfile -ExecutionPolicy Bypass -File packaging/tests/verify-week2-windows.ps1 -CheckBuiltJar
+powershell -NoProfile -ExecutionPolicy Bypass -File packaging/tests/verify-week3-windows.ps1 -CheckBuiltJar
 bash -n packaging/scripts/build-deb.sh
 bash -n packaging/agent-deb/DEBIAN/postinst
 bash -n packaging/agent-deb/DEBIAN/prerm
@@ -79,7 +80,7 @@ node --test tests/m4_policy_live.test.mjs
 Pop-Location
 ```
 
-`clean package` runs tests and creates fresh JARs. Build frontend/dist before invoking the with-frontend profile. The three checked-in browser suites use Vite preview/proxy and do not themselves verify JAR-served React. The [23/10 packaged-JAR variant](week3-evidence/2026-10-23/post-pull-audit/packaged-browser-variant.json) separately retained all M5 assertions, set web = api and omitted Vite; it passed against the combined JAR on HTTP/default settings, not production HTTPS. Its temporary derived script is identified by hash, not required as a tracked test. [Execution logs](week3-evidence/2026-10-23/post-pull-audit/README.md) and [owner/gate checklist](WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) record current results and remaining inputs. Collect raw logs even for failed attempts, hash tested source/builds and copy only screenshots produced by the run.
+`clean package` runs tests and creates fresh JARs. Build frontend/dist before invoking the with-frontend profile. The three checked-in browser suites use Vite preview/proxy and do not themselves verify JAR-served React. The [24/10 packaged-JAR variant](week3-evidence/2026-10-24/integrated-regression/packaged-browser-variant.json) separately retained all M5 assertions, set web = api and omitted Vite; it passed against the combined JAR on HTTP/default settings, not production HTTPS. Its temporary derived script is identified by hash, not required as a tracked test. [Execution logs](week3-evidence/2026-10-24/integrated-regression/README.md) and [completion/owner findings](WEEK3_M5_COMPLETION_20261024.md) record current results and remaining inputs. Collect raw logs even for failed attempts, hash tested source/builds and copy only screenshots produced by the run.
 
 ## Handoff and completion
 

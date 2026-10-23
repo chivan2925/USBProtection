@@ -1,0 +1,22 @@
+{
+  "command": [
+    "npm.cmd",
+    "ci",
+    "--offline",
+    "--no-audit",
+    "--no-fund"
+  ],
+  "command_text": "npm.cmd ci --offline --no-audit --no-fund",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:21:50.633801+07:00",
+  "scope": "Integrated a0ad421 Windows locked dependency install; no product/test edits",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6"
+}
+
+
+added 27 packages in 23s
+
+{"finished_at": "2026-10-24T00:22:14.459474+07:00", "exit_code": 0}

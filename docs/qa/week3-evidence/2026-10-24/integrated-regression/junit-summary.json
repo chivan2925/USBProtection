@@ -1,0 +1,984 @@
+{
+  "captured_at": "2026-10-24T00:25:37.160182+07:00",
+  "revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "modules": {
+    "client-agent": {
+      "totals": {
+        "tests": 117,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "suites": [
+        {
+          "name": "com.group.usbshield.agent.ClientAgentTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.ClientAgentTest.xml",
+          "raw_report_sha256": "4fbbd168a2268cf50d01a4440da9b2ec7ca6223eac2afbbd2b6ba60600c6963d",
+          "test_cases": [
+            {
+              "name": "contextLoadsAndAllBeansAreConfigured",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.endpoint.EndpointManagerTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.endpoint.EndpointManagerTest.xml",
+          "raw_report_sha256": "6950ab64ce80b54fc71cb7d93253f655f45a539c36584d34552136cef3ea86c6",
+          "test_cases": [
+            {
+              "name": "policyVersionAndPendingAckCycle",
+              "status": "PASS"
+            },
+            {
+              "name": "loadExistingRegistration",
+              "status": "PASS"
+            },
+            {
+              "name": "corruptedStorageFileReEnrolls",
+              "status": "PASS"
+            },
+            {
+              "name": "ensureEnrolledSuccess",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.event.EventSenderServiceTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.event.EventSenderServiceTest.xml",
+          "raw_report_sha256": "8df2d281483e54eb64bb8af62d4c0e70fe26191e084e75ca78b855a9a1c5739d",
+          "test_cases": [
+            {
+              "name": "emitUsbEventSpoolWhenOffline",
+              "status": "PASS"
+            },
+            {
+              "name": "emitUsbEventDirectSend",
+              "status": "PASS"
+            },
+            {
+              "name": "emitUsbEventUnknownUser",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.event.UsbEventEnricherTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.event.UsbEventEnricherTest.xml",
+          "raw_report_sha256": "02f55f55b39728940598b1347d18c1b4e2a97655571ae4096d1ab0c95979d457",
+          "test_cases": [
+            {
+              "name": "unknownDoesNotDropEvent",
+              "status": "PASS"
+            },
+            {
+              "name": "capturesUserAndInstantAtEventTime",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.notification.BlockNotificationPolicyTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.notification.BlockNotificationPolicyTest.xml",
+          "raw_report_sha256": "38cc8c8aeaf602f7c9e79aa1ee64c8395a14067cc5447cbea241377de65b1b57",
+          "test_cases": [
+            {
+              "name": "emitsOnceForBlockedStorageAndDeduplicates",
+              "status": "PASS"
+            },
+            {
+              "name": "doesNotSendToTTY",
+              "status": "PASS"
+            },
+            {
+              "name": "ignoresNonStorageAllowedRemovalAndUnknownUser",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.notification.DesktopNotificationServiceTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.notification.DesktopNotificationServiceTest.xml",
+          "raw_report_sha256": "fadb3e50e48dd7beddbf8db4825cfe0ac99b718e2d12fefecfbd3bbef73dbf3d",
+          "test_cases": [
+            {
+              "name": "testNotifyWithUnknownUser",
+              "status": "PASS"
+            },
+            {
+              "name": "testNotificationDisabled",
+              "status": "PASS"
+            },
+            {
+              "name": "testNotifyBlockedUsbSuccess",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.notification.Week3NotificationPolicyTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.notification.Week3NotificationPolicyTest.xml",
+          "raw_report_sha256": "0854e6b2d2638dc4d670e3a83e92f4a4b319ba7825fc70f239899c71bfb87052",
+          "test_cases": [
+            {
+              "name": "rejectsNegativeCooldown",
+              "status": "PASS"
+            },
+            {
+              "name": "rapidDuplicatesAreSuppressedButRemovalAllowsNewInsertion",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownAndNonGraphicalSessionsCannotReceiveNotification",
+              "status": "PASS"
+            },
+            {
+              "name": "userSwitchDoesNotSuppressNewUsersPopup",
+              "status": "PASS"
+            },
+            {
+              "name": "graphicalSeatOtherThanSeat0StillUsesResolvedUid",
+              "status": "PASS"
+            },
+            {
+              "name": "removalDuringLogoutClearsPreviousCooldown",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.outbox.OutboxSpoolServiceTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.outbox.OutboxSpoolServiceTest.xml",
+          "raw_report_sha256": "8fcd6cc2979963b182c82f1f57e9497a05059b8ebf57b8d04aba7ebc591c4387",
+          "test_cases": [
+            {
+              "name": "drainOutboxDeliversAndDeletes",
+              "status": "PASS"
+            },
+            {
+              "name": "spoolPersistsFile",
+              "status": "PASS"
+            },
+            {
+              "name": "drainOutboxPausesOnNetworkError",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.session.ActiveUserInfoTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.session.ActiveUserInfoTest.xml",
+          "raw_report_sha256": "9721358dc8ac981016c1ded4e292c359fa860ca40b383403e1b6a289713e5666",
+          "test_cases": [
+            {
+              "name": "unknownUserCannotLeakPreviousSessionIdentity",
+              "status": "PASS"
+            },
+            {
+              "name": "resolvedRecordCarriesSessionAndTemporaryM3Getters",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.session.LinuxActiveUserResolverTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.session.LinuxActiveUserResolverTest.xml",
+          "raw_report_sha256": "cd610a722f82235a72ea00dafc88361fef2edc9a89a757a63d74f4efa7490f73",
+          "test_cases": [
+            {
+              "name": "testAmbiguityFailSafe",
+              "status": "PASS"
+            },
+            {
+              "name": "testGraphicalFilterPreference",
+              "status": "PASS"
+            },
+            {
+              "name": "testSingleActiveLocalCandidate",
+              "status": "PASS"
+            },
+            {
+              "name": "testNoCandidates",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.session.LoginctlActiveUserResolverTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.session.LoginctlActiveUserResolverTest.xml",
+          "raw_report_sha256": "553a094cf7ba23c636b2c211b104a18f19b34916919f346c4c9db8b0088ae980",
+          "test_cases": [
+            {
+              "name": "returnsUnknownOnUnexpectedRuntimeError",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsNoLocalSession",
+              "status": "PASS"
+            },
+            {
+              "name": "choosesUniqueLocalUser",
+              "status": "PASS"
+            },
+            {
+              "name": "choosesOnlyGraphicalSeat0",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsAmbiguousSessions",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.session.Week3ActiveSessionTransitionTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.session.Week3ActiveSessionTransitionTest.xml",
+          "raw_report_sha256": "b1a3051f1146542ec7384e504334de598cd1b80250961aa854e6af7e97558af5",
+          "test_cases": [
+            {
+              "name": "activeGraphicalSeat0WinsOverLocalTty",
+              "status": "PASS"
+            },
+            {
+              "name": "malformedAndOverflowUidCannotBeAttributed",
+              "status": "PASS"
+            },
+            {
+              "name": "nullSessionsAndInvalidNameAreUnknown",
+              "status": "PASS"
+            },
+            {
+              "name": "compatibilityCandidateSelectionUsesIdenticalRules",
+              "status": "PASS"
+            },
+            {
+              "name": "remoteOnlyIsNotAttributed",
+              "status": "PASS"
+            },
+            {
+              "name": "activeUserSwitchUsesCurrentSnapshot",
+              "status": "PASS"
+            },
+            {
+              "name": "duplicateSessionIdsFailClosed",
+              "status": "PASS"
+            },
+            {
+              "name": "logoutDropsPreviouslySelectedIdentity",
+              "status": "PASS"
+            },
+            {
+              "name": "twoActiveGraphicalSessionsAreAmbiguous",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.sync.AdminServerClientContractTest",
+          "tests": 10,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.sync.AdminServerClientContractTest.xml",
+          "raw_report_sha256": "315398ff69d3dd10ae529176b4b8d0d478b55556c90098b48e5e98d7a0da194a",
+          "test_cases": [
+            {
+              "name": "fetchPolicyServerError",
+              "status": "PASS"
+            },
+            {
+              "name": "sendHeartbeatWithAuthHeaders",
+              "status": "PASS"
+            },
+            {
+              "name": "sendEventSuccess",
+              "status": "PASS"
+            },
+            {
+              "name": "fetchPolicyWithAlias",
+              "status": "PASS"
+            },
+            {
+              "name": "enrollSuccess",
+              "status": "PASS"
+            },
+            {
+              "name": "enrollFailureReturnsEmpty",
+              "status": "PASS"
+            },
+            {
+              "name": "sendEventFailure",
+              "status": "PASS"
+            },
+            {
+              "name": "acknowledgePolicySuccess",
+              "status": "PASS"
+            },
+            {
+              "name": "acknowledgePolicyFailure",
+              "status": "PASS"
+            },
+            {
+              "name": "sendHeartbeatAuthFailure",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.sync.HeartbeatCoordinatorTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.sync.HeartbeatCoordinatorTest.xml",
+          "raw_report_sha256": "fe14f0a5754eed1b38c92c9a8ad9bb0b54648a6b2f3d9d5cd949359d98af071d",
+          "test_cases": [
+            {
+              "name": "retainPendingAckIfRetryFails",
+              "status": "PASS"
+            },
+            {
+              "name": "triggerSyncOnNewerServerVersion",
+              "status": "PASS"
+            },
+            {
+              "name": "skipIfEnrollmentPending",
+              "status": "PASS"
+            },
+            {
+              "name": "serverUnreachableHandledGracefully",
+              "status": "PASS"
+            },
+            {
+              "name": "noSyncWhenVersionIsEqualOrLower",
+              "status": "PASS"
+            },
+            {
+              "name": "retryPendingAckDuringHeartbeat",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.sync.PolicyAckRecoveryTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.sync.PolicyAckRecoveryTest.xml",
+          "raw_report_sha256": "09e3fe572cbd46bef18d967ec5c7676fcb9a3a38b9c66c2c7a7479ba52579d7f",
+          "test_cases": [
+            {
+              "name": "applyAndAckSuccess",
+              "status": "PASS"
+            },
+            {
+              "name": "applyFailureAbortsAck",
+              "status": "PASS"
+            },
+            {
+              "name": "applySuccessButAckFails",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.sync.PolicySyncServiceTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.sync.PolicySyncServiceTest.xml",
+          "raw_report_sha256": "d0ab52ddbd53b8bf6186361cbd4782d5493d571fb638d9e54752feb4268941b9",
+          "test_cases": [
+            {
+              "name": "testSyncPolicySuccess",
+              "status": "PASS"
+            },
+            {
+              "name": "testSyncPolicyFailureAbortsUpdateAndAck",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbDeviceInfoTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbDeviceInfoTest.xml",
+          "raw_report_sha256": "6ef992189c15fe47d747b996f6769655bf5ef1fb684c2036f888a89da10d3332",
+          "test_cases": [
+            {
+              "name": "recordSnapshotsInterfacesAndPreservesWeek1Contract",
+              "status": "PASS"
+            },
+            {
+              "name": "allowAndRejectAreMappedWithoutLosingRawTarget",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardEventListenerTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardEventListenerTest.xml",
+          "raw_report_sha256": "3dc697b0de31066477f30b8e156ebf9074bad1b60814b7f5287743147e8c06b5",
+          "test_cases": [
+            {
+              "name": "testDeduplicateFullWatchStream",
+              "status": "PASS"
+            },
+            {
+              "name": "testHandleDeviceRuleEvent",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardEventParserTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardEventParserTest.xml",
+          "raw_report_sha256": "c3210079a4b84e0d63d4c36c490b81251df81d8893146cbf63727778aa4345dc",
+          "test_cases": [
+            {
+              "name": "testParseHidMouseDevice",
+              "status": "PASS"
+            },
+            {
+              "name": "testParseBlockedDataTravelerFlashDisk",
+              "status": "PASS"
+            },
+            {
+              "name": "testParseDeviceRuleFromWatchStream",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardOutputParserTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardOutputParserTest.xml",
+          "raw_report_sha256": "18cf7c5a76d6c1defb47d123038bd91a49f5bdd9d9bc2182ee7573339c20ca50",
+          "test_cases": [
+            {
+              "name": "parsesMassStorageAndMouseFromPhysicalWeek1Fixture",
+              "status": "PASS"
+            },
+            {
+              "name": "parsesBaseRuleWithoutMistaking08PatternForDeviceInterface",
+              "status": "PASS"
+            },
+            {
+              "name": "ignoresUnrecognizedLines",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardPolicySynchronizerTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardPolicySynchronizerTest.xml",
+          "raw_report_sha256": "f541c46d90d83091485c5d2ee319dad427e640fc1bc5b3a84b4069e2098a19c9",
+          "test_cases": [
+            {
+              "name": "preservesForeignRules",
+              "status": "PASS"
+            },
+            {
+              "name": "allowsThenRevokesIdempotentlyAndPreservesBase",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsMissingBase",
+              "status": "PASS"
+            },
+            {
+              "name": "failsOnIpcDenied",
+              "status": "PASS"
+            },
+            {
+              "name": "disallowsUnsafeFingerprint",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardPresenceParserTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardPresenceParserTest.xml",
+          "raw_report_sha256": "b925f4341e644d187f0bb2c4d80b940d5bb00d5eeb168ab354331375a2972684",
+          "test_cases": [
+            {
+              "name": "emitsInsertOnce",
+              "status": "PASS"
+            },
+            {
+              "name": "skipsPolicyChangedAndApplied",
+              "status": "PASS"
+            },
+            {
+              "name": "parsesRemove",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3CloseoutAuditTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardWeek3CloseoutAuditTest.xml",
+          "raw_report_sha256": "f7f74a50d06e1ba5700a37fb2573cc7507b1e6632eee5bf81c795eb5460cd991",
+          "test_cases": [
+            {
+              "name": "broadForeignInterfaceRuleFailsWithoutMutatingPolicy",
+              "status": "PASS"
+            },
+            {
+              "name": "forgedBaseCannotPermitPolicyMutation",
+              "status": "PASS"
+            },
+            {
+              "name": "specificForeignRuleIsStillPreserved",
+              "status": "PASS"
+            },
+            {
+              "name": "unscopedForeignAllowFailsWithoutDeletingForeignRule",
+              "status": "PASS"
+            },
+            {
+              "name": "malformedFirstEventDoesNotKillSubsequentWatchDelivery",
+              "status": "PASS"
+            },
+            {
+              "name": "baseRuleRequiresCanonicalNonStorageExpression",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3ParsingAndIdentityTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardWeek3ParsingAndIdentityTest.xml",
+          "raw_report_sha256": "0368416d097023bfb0524a337dbf812093c00162fc19d892f452d5ab59b72f5d",
+          "test_cases": [
+            {
+              "name": "hashOnlyAndSeriallessHashRulesAreValid",
+              "status": "PASS"
+            },
+            {
+              "name": "presenceRejectsDuplicateFieldsAndInvalidTargets",
+              "status": "PASS"
+            },
+            {
+              "name": "ignoresInterfaceTextInsideDeviceNameAndNegativeBaseRules",
+              "status": "PASS"
+            },
+            {
+              "name": "seriallessMassStorageRemainsBlockedAndRetainsHash",
+              "status": "PASS"
+            },
+            {
+              "name": "parsesCompositeUsbWithMassStorageButNotNonStorageOnly",
+              "status": "PASS"
+            },
+            {
+              "name": "preservesSafeExplicitSerialAndAllowsAttributeReordering",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsAppendedOrDuplicateLegacyAttributes",
+              "status": "PASS"
+            },
+            {
+              "name": "malformedNumericDeviceIdsAreSkippedInsteadOfCrashing",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsIdentityBasedOnlyOnVidPidOrDeviceName",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3PolicyAndGatewayTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardWeek3PolicyAndGatewayTest.xml",
+          "raw_report_sha256": "34347e4f8f2c6a53cc1cb4f9f7431f5b49a44a1a7963f22a84a255aa2c941c8d",
+          "test_cases": [
+            {
+              "name": "rejectsMissingBaseAndForeignIdentityCollision",
+              "status": "PASS"
+            },
+            {
+              "name": "runnerRejectsInvalidArgumentsBeforeLaunchingUsbguard",
+              "status": "PASS"
+            },
+            {
+              "name": "removeFailurePreventsNewGrantsAndAcknowledgement",
+              "status": "PASS"
+            },
+            {
+              "name": "daemonRestartReappliesDesiredWithoutDuplicateRules",
+              "status": "PASS"
+            },
+            {
+              "name": "refusesAmbiguousImplicitPolicyWithoutAnyRuleChanges",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsUnparseableOrDuplicateManagedRulesWithoutMutation",
+              "status": "PASS"
+            },
+            {
+              "name": "readFailureDoesNotMutatePolicy",
+              "status": "PASS"
+            },
+            {
+              "name": "failedAppendCannotProduceSuccessfulGatewayApply",
+              "status": "PASS"
+            },
+            {
+              "name": "revokePrecedesGrantDuringPolicyReplacement",
+              "status": "PASS"
+            },
+            {
+              "name": "idempotentReconciliationPreservesBaseAndUnrelatedRules",
+              "status": "PASS"
+            },
+            {
+              "name": "ambiguousAppendReplyRollsBackNewManagedRule",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3WatchRecoveryTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "client-agent/target/surefire-reports/TEST-com.group.usbshield.agent.usbguard.UsbGuardWeek3WatchRecoveryTest.xml",
+          "raw_report_sha256": "2d51b9ed7a861f777761c91fde5de86e291c77f07fe59286c55dff285c8b3944",
+          "test_cases": [
+            {
+              "name": "partialSectionIsDiscardedAcrossReconnect",
+              "status": "PASS"
+            },
+            {
+              "name": "removeThenReinsertIsNotDroppedByDeduplication",
+              "status": "PASS"
+            },
+            {
+              "name": "oversizedWatchSectionIsDroppedWithoutEvent",
+              "status": "PASS"
+            },
+            {
+              "name": "notifierFailureCannotPreventEventTransport",
+              "status": "PASS"
+            },
+            {
+              "name": "policyChangedAndPolicyAppliedNeverEmitUsbInsertion",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownSessionPreservesEventWithoutPopup",
+              "status": "PASS"
+            },
+            {
+              "name": "duplicateWatchSectionsEmitOnlyOnce",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    },
+    "admin-server": {
+      "totals": {
+        "tests": 26,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "suites": [
+        {
+          "name": "com.group.usbshield.server.agentapi.AgentEventContractTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.agentapi.AgentEventContractTest.xml",
+          "raw_report_sha256": "9e41a181036644a8357261305f70442137be7b68524f64cd98118af868cd8d39",
+          "test_cases": [
+            {
+              "name": "testDeserializeMember2Week1Payload",
+              "status": "PASS"
+            },
+            {
+              "name": "testActiveUserAttributionFallback",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.agentapi.AgentHttpIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.agentapi.AgentHttpIntegrationTest.xml",
+          "raw_report_sha256": "b3db2d54aeecb1ce659626dfc23f0b52c7bc758804e9e72fcd5df29f118ad329",
+          "test_cases": [
+            {
+              "name": "heartbeatAndMember2EventReachHttpServerAndPersistInH2",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.EventSearchIntegrationTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.EventSearchIntegrationTest.xml",
+          "raw_report_sha256": "ac999035510d0cebfff285ff1c78336b94108a6bcd085181da9e47b0cd5a981a",
+          "test_cases": [
+            {
+              "name": "wildcardCharactersAreLiteralAndBlankQueriesDoNotFilter",
+              "status": "PASS"
+            },
+            {
+              "name": "nameFiltersCombineWithExactLinuxUsernameAndExistingFilters",
+              "status": "PASS"
+            },
+            {
+              "name": "numericSearchRetainsHistoricalRowsWithoutDeviceDetails",
+              "status": "PASS"
+            },
+            {
+              "name": "endpointSearchMatchesVisibleSnapshotNameAndLegacyFallback",
+              "status": "PASS"
+            },
+            {
+              "name": "usernameSearchTreatsWildcardCharactersLiterally",
+              "status": "PASS"
+            },
+            {
+              "name": "deviceNameSearchFiltersBeforePaginationAndRetainsExactIdQueries",
+              "status": "PASS"
+            },
+            {
+              "name": "usernameSubstringSearchIsCaseInsensitiveAndPaged",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.PolicyConsumerContractTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.PolicyConsumerContractTest.xml",
+          "raw_report_sha256": "88d49107a4ad88a77e155bed17fa9f159ac087b5efcf5da63d2dfe1892ed7652",
+          "test_cases": [
+            {
+              "name": "serverPolicyDeserializesWithActualUnmodifiedM3SourceDtos",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.UsbShieldServerApplicationTests",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.UsbShieldServerApplicationTests.xml",
+          "raw_report_sha256": "206271900fe7c131f26c6f10f0e8cb420fce739aaebd3c34d9884c448308c395",
+          "test_cases": [
+            {
+              "name": "contextLoads",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.Week2ExistingH2Test",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.Week2ExistingH2Test.xml",
+          "raw_report_sha256": "1be4412a88e8a20a414294be456deefa378aa45791353da162f8f991cf0b34be",
+          "test_cases": [
+            {
+              "name": "existingWeek1EndpointSurvivesAdditiveSchemaUpdateAndPersistsCredential",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.Week2ServerIntegrationTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.Week2ServerIntegrationTest.xml",
+          "raw_report_sha256": "8d242554888f5e7f5266d2a977a6635895a2cfa8efdd38e53e716a38f4d96882",
+          "test_cases": [
+            {
+              "name": "enrollmentRejectsInvalidAndDuplicateAndHashesCredential",
+              "status": "PASS"
+            },
+            {
+              "name": "agentRoutesRejectMissingInvalidAndCrossEndpointCredentials",
+              "status": "PASS"
+            },
+            {
+              "name": "adminSessionAndCsrfLifecycle",
+              "status": "PASS"
+            },
+            {
+              "name": "perEndpointAllowRevokeVersionAckAndCanonicalPolicy",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownUserAndOfflineStateRemainTruthful",
+              "status": "PASS"
+            },
+            {
+              "name": "concurrentWhitelistChangesDoNotLoseDesiredVersion",
+              "status": "PASS"
+            },
+            {
+              "name": "ingestedEventCanBeFilteredPagedAndQueriedWithoutCredentialsLeaking",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.Week3ProductionProfileTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.Week3ProductionProfileTest.xml",
+          "raw_report_sha256": "82b78bb716f1aac2567dd5be1cf9700d14977ad6fe21acd02df3c0b86b14b251",
+          "test_cases": [
+            {
+              "name": "deploymentDefaultsDoNotRelaxCookiesOrExposeConsole",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.group.usbshield.server.Week3SecurityAndStatusTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "raw_report": "admin-server/target/surefire-reports/TEST-com.group.usbshield.server.Week3SecurityAndStatusTest.xml",
+          "raw_report_sha256": "8d746a83f7d91c91cd2135057418ac3e3b1f7c647cb702c9e44b0a43cd5c9e25",
+          "test_cases": [
+            {
+              "name": "pendingPolicyAckCanCatchUpWithoutChangingDesiredOrAnotherEndpoint",
+              "status": "PASS"
+            },
+            {
+              "name": "adminSessionDoesNotBypassAgentCredentialsAndCorruptHashesFailClosed",
+              "status": "PASS"
+            },
+            {
+              "name": "noHeartbeatAndExpiredHeartbeatAreOffline",
+              "status": "PASS"
+            },
+            {
+              "name": "onlyNavigationRoutesRedirectToHashSpa",
+              "status": "PASS"
+            },
+            {
+              "name": "agentRoleCannotReadAdminDataOrMutateWithNoCsrf",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "note": "Extracted counts and testcase names/status only; raw XML environment properties and output are excluded. Maven command logs remain durable evidence."
+}

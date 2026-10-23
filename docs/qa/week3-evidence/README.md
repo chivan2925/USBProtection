@@ -1,18 +1,21 @@
 # Week 3 evidence index — M5
 
-## Current status — 2026-10-23
+## Current status — 2026-10-24
 
-Branch `huy`; tested revision `8c222a47142d7a80f75e56b8d77e5bf732797e16`. Windows 11 amd64; JDK 22.0.2; Maven 3.9.11; Node 22.20.0; npm 10.9.3; Chrome. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [completed work and pending handoffs](../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md).
+Branch `huy`; tested revision `a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1`. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [M5 completion / pending owners](../WEEK3_M5_COMPLETION_20261024.md).
 
-- [Post-pull execution index](2026-10-23/post-pull-audit/README.md): **16 commands, all exit 0**. Frontend **96/96**, server **26**, Agent **61**; install/lint/build, fixture/management/Events browser, separate policy HTTP **1/1**, combined-JAR browser and packaging static/four shell syntax checks.
-- [Environment](2026-10-23/post-pull-audit/environment.json), [source manifest](2026-10-23/post-pull-audit/sources/e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d.json), [execution/artifact validation](2026-10-23/post-pull-audit/validation.json): exact provenance. Source tree SHA-256 `e16a567bf1cd754d48d43c9e69c7c58a793695c91273e751d585fd30f631de4d`.
-- [Same-origin browser variant provenance](2026-10-23/post-pull-audit/packaged-browser-variant.json): temporary harness derived from unchanged M5 browser assertions, HTTP/default profile. [Desktop](2026-10-23/post-pull-audit/screenshots/events-real-http-desktop.png), [partial username](2026-10-23/post-pull-audit/screenshots/events-username-substring.png), [mobile](2026-10-23/post-pull-audit/screenshots/events-real-http-mobile.png), [management session expiry](2026-10-23/post-pull-audit/screenshots/m4-live-expired-session.png).
-- [Documentation-update validation](2026-10-23/qa-closeout/validation.json): local links, source hashes, current inventory/status consistency, document hashes and unchanged historical raw evidence. No application suite is rerun for this documentation update.
-- [Original post-pull review](../WEEK3_M5_POST_PULL_REVIEW_20261023.md) is preserved as a point-in-time audit; its primary-document gaps are addressed by the current inventory/summary and [handoff packet](../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md).
+- [Integrated regression commands](2026-10-24/integrated-regression/README.md): 21 attempts; 16 positive checks PASS, four resolved Git Bash launch failures, one reproduced negative staging FAIL (M5-W3-06). Frontend **96**, server **26**, Agent **117**, separate policy HTTP **1**, fixture/management/Events/packaged-JAR browser, install/lint/build, static and shell checks.
+- [Environment](2026-10-24/integrated-regression/environment.json), [source manifest](2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json), [JUnit summary](2026-10-24/integrated-regression/junit-summary.json), [validation/artifacts](2026-10-24/integrated-regression/validation.json). Source SHA-256 `117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6`.
+- [Staging negative probe](2026-10-24/integrated-regression/staging-probe.json): absent directory still produces exit 0/PASS. The assertion is FAIL; this is not package or staging success.
+- [Packaged browser provenance](2026-10-24/integrated-regression/packaged-browser-variant.json), [screenshot hashes/command attribution](2026-10-24/integrated-regression/screenshots.json), [desktop](2026-10-24/integrated-regression/screenshots/events-real-http-desktop.png), [partial username](2026-10-24/integrated-regression/screenshots/events-username-substring.png), [mobile](2026-10-24/integrated-regression/screenshots/events-real-http-mobile.png), [UNKNOWN/no-serial](2026-10-24/integrated-regression/screenshots/events-week3-unknown-no-serial.png), [session expiry](2026-10-24/integrated-regression/screenshots/m4-live-expired-session.png).
 
-Every executed command has a UTF-8 text log and adjacent JSON with argv/cwd, start/end +07:00, revision, source manifest and exit code. Exact times are in that metadata; older captures below keep their original scope. Runtime data was isolated for QA; the user's application database was not used or reset.
+Each command has a UTF-8 text log and adjacent JSON with argv/cwd/revision/start/end +07:00/scope/source manifest/exit. Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3, Vite 8.3.1, Chrome. Synthetic HTTP/ACK, unit/mock/static and default-profile packaged browser results do not prove Ubuntu/USB/GUI/production HTTPS behavior. QA H2/runtime are isolated; application DB is not used.
 
-**Tested Windows scopes PASS; group gate OPEN; Ubuntu U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No physical USB/USBGuard/native GUI/systemd/install/reboot PASS is implied. No `.deb` binary/build provenance is available in this audit.
+**M5 Windows QA work complete; group gate OPEN; M3 verifier issue OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
+
+## Previous captures retained
+
+[23/10 post-pull audit](2026-10-23/post-pull-audit/README.md), [23/10 documentation validation](2026-10-23/qa-closeout/validation.json), [23/10 handoff snapshot](../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) retain the earlier revision and Agent 61 result. All 21/10 raw logs, dated reports and Week 1/2 evidence remain unchanged.
 
 ---
 

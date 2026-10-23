@@ -1,0 +1,32 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "build"
+  ],
+  "command_text": "npm.cmd run build",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:22:49.863482+07:00",
+  "scope": "Fresh locked TypeScript/Vite production frontend bundle",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6"
+}
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 51 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:  0.41 kB
+dist/assets/index-Bsv2V3We.css   25.53 kB │ gzip:  6.65 kB
+dist/assets/index-DMSlTEoj.js   290.39 kB │ gzip: 88.22 kB
+
+✓ built in 282ms
+
+{"finished_at": "2026-10-24T00:22:56.823324+07:00", "exit_code": 0}
