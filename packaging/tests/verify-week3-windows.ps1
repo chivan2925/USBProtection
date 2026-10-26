@@ -4,7 +4,8 @@
 [CmdletBinding()]
 param(
     [switch]$CheckBuiltJar,
-    [switch]$CheckStaging
+    [switch]$CheckStaging,
+    [string]$CustomStagingPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -66,11 +67,13 @@ Assert-Contains $postinst 'mkdir -p /run/usbshield-notifier'
 Assert-Contains $postinst 'chmod 1777 /run/usbshield-notifier'
 Assert-Contains $postinst 'd /run/usbshield-notifier 1777 root root -'
 Assert-Contains $postinst 'rm -f /etc/sudoers.d/usbshield'
+Assert-Contains $postinst 'ImplicitPolicyTarget=block'
 Assert-Contains $postinst 'systemctl daemon-reload'
 Assert-Contains $postinst 'systemctl enable usbshield-agent.service'
 
 Assert-Contains $prerm 'systemctl stop usbshield-agent.service'
 Assert-Contains $prerm 'systemctl disable usbshield-agent.service'
+Assert-Contains $prerm 'ACTION="${1:-remove}"'
 
 # 3. Live Configuration Integrity
 Write-Host "`n[3/6] Verifying Live Configuration Files..." -ForegroundColor Yellow
@@ -136,30 +139,43 @@ if ($CheckBuiltJar) {
     Write-Host "  (Skipped JAR inspection. Pass -CheckBuiltJar to inspect target/usbshield-agent.jar)" -ForegroundColor Gray
 }
 
-# Optional Staging Directory Check
-if ($CheckStaging) {
-    $stagingPath = Join-Path $root 'packaging/staging'
-    if (Test-Path -LiteralPath $stagingPath) {
-        Write-Host "`nChecking staging structure..." -ForegroundColor Yellow
-        $stagingFiles = @(
-            'DEBIAN/control',
-            'DEBIAN/postinst',
-            'DEBIAN/prerm',
-            'opt/usbshield-agent/usbshield-agent.jar',
-            'opt/usbshield-agent/usbshield-notifier-launcher.sh',
-            'etc/usbshield-agent/application.yml',
-            'etc/xdg/autostart/usbshield-notifier.desktop',
-            'usr/lib/systemd/system/usbshield-agent.service'
-        )
-        foreach ($sf in $stagingFiles) {
-            $sfPath = Join-Path $stagingPath $sf
-            if (Test-Path -LiteralPath $sfPath) {
-                Write-Host "  [OK] Staging contains: $sf" -ForegroundColor Green
-            } else {
-                Write-Host "  [WARN] Staging missing: $sf" -ForegroundColor Yellow
-            }
+# Staging Directory Check
+if ($CheckStaging -or $CustomStagingPath) {
+    Write-Host "`n[CheckStaging] Verifying Debian Package Staging Structure..." -ForegroundColor Yellow
+    $actualStaging = if ($CustomStagingPath) {
+        if ([System.IO.Path]::IsPathRooted($CustomStagingPath)) { $CustomStagingPath } else { Join-Path $root $CustomStagingPath }
+    } else {
+        Join-Path $root 'packaging/staging'
+    }
+
+    if (-not (Test-Path -LiteralPath $actualStaging)) {
+        throw "Staging verification failed: Staging directory missing at '$actualStaging'. Run build or prepare staging before verifying."
+    }
+
+    $stagingFiles = @(
+        'DEBIAN/control',
+        'DEBIAN/postinst',
+        'DEBIAN/prerm',
+        'opt/usbshield-agent/usbshield-agent.jar',
+        'opt/usbshield-agent/usbshield-notifier-launcher.sh',
+        'etc/usbshield-agent/application.yml',
+        'etc/xdg/autostart/usbshield-notifier.desktop',
+        'usr/lib/systemd/system/usbshield-agent.service'
+    )
+    $missingFiles = @()
+    foreach ($sf in $stagingFiles) {
+        $sfPath = Join-Path $actualStaging $sf
+        if (Test-Path -LiteralPath $sfPath) {
+            Write-Host "  [OK] Staging contains: $sf" -ForegroundColor Green
+        } else {
+            Write-Host "  [FAIL] Staging missing required file: $sf" -ForegroundColor Red
+            $missingFiles += $sf
         }
     }
+    if ($missingFiles.Count -gt 0) {
+        throw "Staging verification failed: $($missingFiles.Count) required file(s) missing from staging ($actualStaging): $($missingFiles -join ', ')"
+    }
+    Write-Host "  [OK] Staging directory and all required files are present and valid." -ForegroundColor Green
 }
 
 Write-Host "`n================================================================" -ForegroundColor Cyan

@@ -32,9 +32,11 @@ build/
 ### VS Code ###
 .vscode/
 
-### Local Agent Data & Spool ###
-client-agent/data/
-**/data/spool/
+### Local Runtime Data, Databases & Spool ###
+data/
+**/data/
+*.mv.db
+*.trace.db
 *.deb
 packaging/staging/
 packaging/dist/

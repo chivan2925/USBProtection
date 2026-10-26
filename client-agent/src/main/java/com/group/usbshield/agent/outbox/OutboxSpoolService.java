@@ -50,11 +50,12 @@ public class OutboxSpoolService {
 
     /**
      * Lưu tạm sự kiện vào file đĩa khi gửi lên Admin Server thất bại
+     * @return true nếu ghi file thành công, false nếu thất bại
      */
-    public synchronized void spool(UsbEventPayload event) {
+    public synchronized boolean spool(UsbEventPayload event) {
         if (spoolPath == null) {
             log.error("Spool directory is not available. Event dropped: {}", event);
-            return;
+            return false;
         }
 
         String fileName = String.format("event_%d_%s.json", System.currentTimeMillis(), UUID.randomUUID().toString().substring(0, 8));
@@ -63,8 +64,10 @@ public class OutboxSpoolService {
         try {
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(targetFile, event);
             log.warn("[OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: {}", targetFile.getName());
+            return true;
         } catch (Exception e) {
             log.error("Failed to spool event to file {}: {}", targetFile.getName(), e.getMessage());
+            return false;
         }
     }
 
@@ -81,25 +84,43 @@ public class OutboxSpoolService {
             return;
         }
 
-        // Sắp xếp theo thứ tự thời gian xảy ra sự kiện
+        // Sắp xếp theo thứ tự thời gian xảy ra sự kiện (FIFO)
         Arrays.sort(files, Comparator.comparing(File::getName));
-        log.info("[OUTBOX-DRAIN] Found {} spooled event(s). Attempting to deliver...", files.length);
+        log.info("[OUTBOX-DRAIN] Found {} spooled event(s). Attempting to deliver in FIFO order...", files.length);
 
         for (File file : files) {
+            UsbEventPayload payload;
             try {
-                UsbEventPayload payload = objectMapper.readValue(file, UsbEventPayload.class);
-                boolean success = client.sendEvent(endpointId, agentToken, payload);
-                if (success) {
-                    if (file.delete()) {
-                        log.info("[OUTBOX-DRAIN] Successfully delivered and cleared spooled event: {}", file.getName());
-                    }
-                } else {
-                    log.warn("[OUTBOX-DRAIN] Server still unreachable. Pausing drain until next cycle.");
-                    break;
-                }
+                payload = objectMapper.readValue(file, UsbEventPayload.class);
             } catch (Exception e) {
-                log.error("Corrupted event file {}: {}. Removing.", file.getName(), e.getMessage());
-                file.delete();
+                // File hỏng cú pháp JSON thật sự, không thể parse -> xóa bỏ để tránh tắc nghẽn hàng đợi
+                log.error("Corrupted event file {}: {}. Removing unparseable file.", file.getName(), e.getMessage());
+                if (!file.delete()) {
+                    log.warn("Could not delete corrupted event file: {}", file.getName());
+                }
+                continue;
+            }
+
+            boolean success = false;
+            try {
+                success = client.sendEvent(endpointId, agentToken, payload);
+            } catch (Exception e) {
+                // Ngoại lệ mạng / HTTP server lỗi -> KHÔNG XÓA FILE, bảo lưu trên đĩa cho chu kỳ kế tiếp
+                log.warn("[OUTBOX-DRAIN] Exception while delivering spooled event {}: {}. Preserving event on disk for retry.",
+                        file.getName(), e.getMessage());
+                break;
+            }
+
+            if (success) {
+                if (file.delete()) {
+                    log.info("[OUTBOX-DRAIN] Successfully delivered and cleared spooled event: {}", file.getName());
+                } else {
+                    log.warn("[OUTBOX-DRAIN] Successfully delivered but failed to delete file: {}", file.getName());
+                }
+            } else {
+                // Server từ chối hoặc unreachable -> dừng drain để bảo đảm thứ tự FIFO
+                log.warn("[OUTBOX-DRAIN] Server rejected or unreachable for event {}. Pausing drain until next cycle.", file.getName());
+                break;
             }
         }
     }

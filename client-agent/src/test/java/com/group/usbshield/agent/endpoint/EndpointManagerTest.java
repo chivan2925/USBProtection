@@ -133,4 +133,29 @@ class EndpointManagerTest {
         assertTrue(reloaded.ensureEnrolled(), "Should enroll afresh when storage file is corrupted");
         assertEquals("EP-RECOVERED", reloaded.getEndpointId());
     }
+
+    @Test
+    @DisplayName("ensureEnrolled returns false and aborts when credential cannot be persisted to disk")
+    void ensureEnrolledFailsSafelyOnDiskWriteError() throws Exception {
+        Path blockerFile = tempDir.resolve("blocker");
+        Files.writeString(blockerFile, "I am a file, not a directory");
+
+        AgentProperties brokenProps = new AgentProperties();
+        brokenProps.setDataDir(blockerFile.resolve("subpath").toString());
+        brokenProps.setEnrollmentToken("test-secret");
+
+        EndpointManager failManager = new EndpointManager(brokenProps, systemInfoProvider, adminServerClient, objectMapper);
+        failManager.init();
+
+        EnrollmentResponse response = EnrollmentResponse.builder()
+                .endpointId("EP-UNSAVED")
+                .agentToken("tok-unsaved")
+                .currentPolicyVersion(0L)
+                .build();
+        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+
+        boolean enrolled = failManager.ensureEnrolled();
+        assertFalse(enrolled, "Enrollment must be marked failed if credentials cannot be written to disk");
+        assertNull(failManager.getCurrentRegistration(), "Registration must not be retained in memory when disk save fails");
+    }
 }

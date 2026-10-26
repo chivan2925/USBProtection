@@ -26,7 +26,7 @@ Gói `.deb` tự động thiết lập mô hình chạy non-root cho tiến trì
 | Đường dẫn | Sở hữu | Quyền | Mục đích |
 |---|---|---|---|
 | `/opt/usbshield-agent/` | `root:usbshield` | `755` | Chứa file thực thi `usbshield-agent.jar` và `usbshield-notifier-launcher.sh` |
-| `/etc/usbshield-agent/` | `root:usbshield` | `750` | Chứa cấu hình bảo mật `application.yml` và base rules `rules-v0.1.conf` |
+| `/etc/usbshield-agent/` | `root:usbshield` | `750` | Thư mục cấu hình (chứa `application.yml` quyền `640` và `rules-v0.1.conf` quyền `644`) |
 | `/var/lib/usbshield-agent/` | `usbshield:usbshield` | `700` | Lưu thông tin đăng ký `endpoint.json` và thư mục hàng đợi offline `spool/` |
 | `/run/usbshield-notifier/` | `root:root` | `1777` (Sticky) | Thư mục socket IPC giữa Agent và Desktop Notifier (khởi tạo qua `tmpfiles.d`) |
 | `/etc/xdg/autostart/` | `root:root` | `644` | File `usbshield-notifier.desktop` tự khởi động helper khi người dùng đăng nhập GUI |

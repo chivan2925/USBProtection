@@ -29,7 +29,7 @@ Hệ thống tuân thủ chặt chẽ nguyên tắc đặc quyền tối thiểu
 │   ├── usbshield-agent.jar              (root:usbshield, 755 - Binary ứng dụng Agent)
 │   └── usbshield-notifier-launcher.sh   (root:usbshield, 755 - Script launcher cho user GUI)
 ├── etc/usbshield-agent/
-│   ├── application.yml                  (root:usbshield, 750 - Cấu hình bảo mật live)
+│   ├── application.yml                  (root:usbshield, 640 - Cấu hình bảo mật live)
 │   └── rules-v0.1.conf                  (root:usbshield, 644 - Quy tắc USBGuard cơ sở)
 ├── var/lib/usbshield-agent/             (usbshield:usbshield, 700 - Thư mục dữ liệu độc quyền)
 │   ├── endpoint.json                    (Dữ liệu đăng ký, Agent Token, Policy Version)
@@ -66,10 +66,11 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
 
 ## 3. Khả năng Chịu lỗi & Vòng đời Đồng bộ (Resilience & Retry Lifecycle)
 
-### 3.1. Lưu trữ định danh & Tự phục hồi (`EndpointManager.java`)
+### 3.1. Lưu trữ định danh & Tự phục hồi Fail-Safe (`EndpointManager.java`)
 * Thông tin đăng ký được ghi an toàn vào `/var/lib/usbshield-agent/endpoint.json`.
 * Khi khởi động lại hoặc service reload, `loadLocalRegistration()` tự động nạp lại thông tin mà không thực hiện re-enroll vô cớ.
 * **Cơ chế phục hồi khi file hỏng:** Đã bổ sung kiểm thử xác minh khi file `endpoint.json` bị corrupt do sự cố mất điện đĩa cứng, Agent tự động bắt lỗi an toàn và kích hoạt lại quy trình `ensureEnrolled()` với Admin Server qua bootstrap token.
+* **Bảo đảm Fail-Safe Credential Persistence:** Hàm `ensureEnrolled()` chỉ trả về `true` khi và chỉ khi thông tin đăng ký đã được ghi bền vững thành công xuống đĩa (`saveRegistration()` thành công). Nếu gặp lỗi đĩa (full disk, permission denied), tiến trình enroll lập tức trả về `false` và hủy bỏ nạp registration trong bộ nhớ để bảo toàn trạng thái fail-safe.
 
 ### 3.2. Cơ chế Xác nhận Chính sách (Pending Policy ACK Retry)
 * **Nguyên tắc No False-ACK:** Agent tuyệt đối chỉ gửi ACK lên Admin Server sau khi `UsbGuardGateway` thực sự áp dụng thành công bộ rule vào hạt nhân. Nếu USBGuard apply thất bại, Agent lập tức hủy gửi ACK.
@@ -79,11 +80,12 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
 ### 3.3. Hàng đợi Ngoại tuyến Bền vững (Durable Outbox Spooling)
 * Khi phát sinh sự kiện cắm/rút USB trong lúc Admin Server offline:
   * Sự kiện được đóng gói và ghi thành các file riêng biệt `event_<timestamp>_<uuid>.json` trong thư mục `/var/lib/usbshield-agent/spool/`.
-  * Cơ chế FIFO (First-In, First-Out) đảm bảo thứ tự thời gian của sự kiện.
-* Khi kết nối mạng phục hồi:
-  * `drainOutbox()` tuần tự đọc file, gửi lên server qua `adminServerClient.sendEvent()`.
-  * Chỉ khi server phản hồi thành công (`HTTP 200`), file sự kiện trên đĩa mới bị xóa bỏ.
-  * Nếu gặp sự cố mạng gián đoạn giữa chừng, tiến trình gửi dừng lại ngay lập tức và bảo lưu các file còn lại cho chu kỳ retry tiếp theo.
+  * Cơ chế FIFO (First-In, First-Out) đảm bảo thứ tự thời gian của sự kiện dựa trên timestamp file.
+* Khi kết nối mạng phục hồi (`drainOutbox`):
+  * **Tách biệt lỗi parse và lỗi gửi mạng:** Phân biệt rõ giữa file hỏng cấu trúc JSON (được dọn dẹp an toàn để tránh nghẽn hàng đợi) và lỗi truyền thông (network/server exception hoặc 5xx).
+  * **Bảo toàn sự kiện tuyệt đối:** Khi `sendEvent()` ném ngoại lệ hoặc trả về `false`, file sự kiện trên đĩa **TUYỆT ĐỐI KHÔNG BỊ XÓA**, tiến trình dừng ngay lập tức để bảo toàn thứ tự FIFO và bảo lưu cho chu kỳ kế tiếp.
+  * Chỉ khi server phản hồi thành công (`HTTP 200`), file sự kiện trên đĩa mới được xóa bỏ.
+  * Kiểm thử tự động chứng minh sự kiện lưu trên đĩa sống sót an toàn qua chu kỳ restart Agent.
 
 ---
 
@@ -96,7 +98,7 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
 ```text
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 117, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 122, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
@@ -104,29 +106,35 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
 ```
 
 **Các nhóm test case quan trọng của Member 3:**
-1. `AdminServerClientContractTest`:
+1. `AdminServerClientContractTest` (10 tests):
    * `enrollSuccess`: Đăng ký thành công, gắn header đúng định dạng.
    * `enrollFailureReturnsEmpty`: Xử lý 401 Unauthorized / 400 Bad Request không gây crash.
    * `sendHeartbeatWithAuthHeaders` & `sendHeartbeatAuthFailure`: Kiểm tra header `X-Endpoint-Id`, `X-Agent-Token` và bắt lỗi 401/403.
    * `fetchPolicyWithAlias` & `fetchPolicyServerError`: Deserialize chính sách và bắt lỗi 500 an toàn.
    * `acknowledgePolicySuccess` & `acknowledgePolicyFailure`: Xác nhận ACK thành công hoặc rớt mạng.
    * `sendEventSuccess` & `sendEventFailure`: Gửi sự kiện USB và xử lý lỗi mạng.
-2. `PolicyAckRecoveryTest`:
+2. `PolicyAckRecoveryTest` (3 tests):
    * `applySuccessButAckFails`: USBGuard apply thành công nhưng ACK rớt mạng -> lưu `pendingAckVersion`.
    * `applyFailureAbortsAck`: USBGuard apply thất bại -> không gửi ACK, không cập nhật phiên bản local.
    * `applyAndAckSuccess`: Luồng thành công hoàn chỉnh -> xóa pending ACK.
-3. `HeartbeatCoordinatorTest`:
+3. `HeartbeatCoordinatorTest` (6 tests):
    * `retryPendingAckDuringHeartbeat`: Gửi lại ACK còn nợ trong nhịp heartbeat kế tiếp.
    * `retainPendingAckIfRetryFails`: Nếu gửi lại ACK vẫn bị lỗi mạng -> tiếp tục giữ pending ACK.
    * `serverUnreachableHandledGracefully`: Mất kết nối server hoàn toàn -> bỏ qua chu kỳ sync và outbox an toàn, không ném exception.
-4. `OutboxSpoolServiceTest`:
+4. `OutboxSpoolServiceTest` (7 tests - Hardened & Extended):
    * `spoolPersistsFile`: Ghi file sự kiện ra đĩa.
-   * `drainOutboxDeliversAndDeletes`: Đẩy sự kiện lên server thành công và dọn dẹp file.
+   * `drainOutboxDeliversAndDeletes`: Đẩy sự kiện lên server theo thứ tự FIFO nghiêm ngặt và dọn dẹp file.
    * `drainOutboxPausesOnNetworkError`: Tạm dừng khi mạng đứt và giữ nguyên các file chưa gửi.
-5. `EndpointManagerTest`:
+   * `drainOutboxPreservesFileOnClientException`: Bảo toàn file sự kiện khi `sendEvent` ném runtime/network exception (chống mất event).
+   * `drainOutboxHandlesCorruptedJsonFile`: Dọn dẹp an toàn file JSON hỏng và tiếp tục xử lý các event hợp lệ còn lại.
+   * `drainOutboxSurvivesRestart`: Quét và gửi bù chính xác các file sự kiện tồn tại từ phiên trước khi khởi động lại.
+   * `spoolHandlesDiskWriteFailure`: Xử lý an toàn và trả `false` khi gặp sự cố ghi đĩa.
+5. `EndpointManagerTest` (5 tests - Hardened & Extended):
    * `ensureEnrolledSuccess`: Lưu thông tin đăng ký vào file `endpoint.json`.
    * `loadExistingRegistration`: Nạp lại thông tin sau khi khởi động lại mà không gọi API enroll.
    * `corruptedStorageFileReEnrolls`: Tự phục hồi khi file JSON trên đĩa bị hỏng.
+   * `policyVersionAndPendingAckCycle`: Cập nhật phiên bản chính sách và chu kỳ xóa pending ACK.
+   * `ensureEnrolledFailsSafelyOnDiskWriteError`: Từ chối đăng ký và hủy bỏ lưu memory nếu việc ghi file đĩa thất bại.
 
 ---
 
