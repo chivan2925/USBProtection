@@ -48,20 +48,36 @@ if [ -f /opt/usbshield-agent/usbshield-notifier-launcher.sh ]; then
     chmod 755 /opt/usbshield-agent/usbshield-notifier-launcher.sh
 fi
 
-# 4. Initialize default USBGuard rules if not present or empty
+# 5. Verify or configure USBGuard fail-closed state
+USBGUARD_CONF="/etc/usbguard/usbguard-daemon.conf"
+if [ -f "$USBGUARD_CONF" ]; then
+    if grep -q "^ImplicitPolicyTarget=allow" "$USBGUARD_CONF"; then
+        echo "WARNING: USBGuard daemon configured with ImplicitPolicyTarget=allow (fail-open). Overriding to fail-closed (block)..."
+        sed -i 's/^ImplicitPolicyTarget=allow/ImplicitPolicyTarget=block/' "$USBGUARD_CONF"
+    elif ! grep -q "^ImplicitPolicyTarget=" "$USBGUARD_CONF"; then
+        echo "ImplicitPolicyTarget=block" >> "$USBGUARD_CONF"
+    fi
+fi
+
+# Initialize default USBGuard rules if not present or empty
 if [ ! -s /etc/usbguard/rules.conf ] && [ -f /etc/usbshield-agent/rules-v0.1.conf ]; then
     mkdir -p /etc/usbguard
     cp /etc/usbshield-agent/rules-v0.1.conf /etc/usbguard/rules.conf
     chmod 600 /etc/usbguard/rules.conf
-    echo "Initialized default USBGuard rules at /etc/usbguard/rules.conf"
+    echo "Initialized default fail-closed USBGuard rules at /etc/usbguard/rules.conf"
 fi
 
-# 5. Reload systemd daemon and enable service
+# 6. Reload systemd daemon and manage service lifecycle
 systemctl daemon-reload
-systemctl enable usbguard.service || true
-systemctl start usbguard.service || true
-systemctl enable usbshield-agent.service
-systemctl restart usbshield-agent.service || true
+if systemctl is-enabled usbguard.service >/dev/null 2>&1 || systemctl enable usbguard.service; then
+    systemctl start usbguard.service || echo "WARNING: Could not start usbguard.service immediately."
+fi
 
-echo "USBShield Agent installed and started successfully."
+systemctl enable usbshield-agent.service
+if systemctl restart usbshield-agent.service; then
+    echo "USBShield Agent installed and started successfully."
+else
+    echo "WARNING: usbshield-agent.service was enabled but failed to restart immediately. Check systemctl status."
+fi
+
 exit 0

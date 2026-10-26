@@ -1,0 +1,53 @@
+Kết quả review Week 3 — USBProtection
+Repository: chivan2925/USBProtection
+Nhánh: main
+Commit mới nhất đã kiểm tra: 78db532 — 26/10/2026.
+
+Kết luận sơ bộ: Chưa thể chốt Week 3 PASS cho cả nhóm, ngay cả khi tạm loại trừ kiểm thử Ubuntu.
+
+Điểm quan trọng: repository đã có đầy đủ code và hồ sơ Week 3 của cả năm thành viên. Các lần kiểm thử tích hợp trên Windows ghi nhận 26 backend tests, 117 Client Agent tests và 96 frontend tests PASS. Tuy nhiên, báo cáo QA vẫn ghi nhận một lỗi ở bộ kiểm tra đóng gói M3 và các vấn đề cần nghiệm thu bổ sung. Đây không phải trường hợp cả nhóm chưa triển khai Week 3.
+
+Tôi giữ đúng phạm vi bạn đã chốt: USB vật lý, USBGuard thực tế, systemd, GUI notification, reboot và cài .deb trên Ubuntu được hoãn đến sau Week 4, không tính là lỗi chưa hoàn thành Windows Scope.
+1. Đánh giá từng thành viên
+Thành viên	Trạng thái Windows Week 3	Nhận xét
+M1 — Admin Server	Đạt kỹ thuật, chờ xác nhận	Auth, endpoint ONLINE/OFFLINE, policy ACK, profile production và JAR tích hợp React đã có test PASS
+M2 — USBGuard Core	Đạt kỹ thuật	Đã merge cả ba phần và closeout fix; các bộ test parser, policy, session, listener và notification đều PASS
+M3 — Client Agent/Packaging	Chưa đạt closeout	Có lỗi staging verifier đã tái hiện, cùng vấn đề durability và installer lifecycle cần sửa
+M4 — Admin Frontend	Đạt kỹ thuật, chờ xác nhận	UI/UX, session, Allow/Revoke, desired/applied, browser tests và responsive có bằng chứng PASS
+M5 — Events/QA	Hoàn thành phần việc QA	Event History, regression, test matrix và Demo Script draft đầy đủ; đã ghi nhận chính xác blocker của M3
+
+Phát hiện bảo mật cần ưu tiên
+Tôi phát hiện repository main đang theo dõi trực tiếp:
+- data/endpoint.json: chứa trường agentToken có giá trị, không phải chỉ là schema.
+- admin-server/data/usbshield.mv.db: cơ sở dữ liệu H2 dạng file.
+- client-agent/data/spool/event_*.json: dữ liệu sự kiện chứa endpoint và thông tin phiên người dùng.
+Đây là vấn đề quản lý dữ liệu runtime trong Git, không thuộc riêng một thành viên. Ưu tiên P0 đối với endpoint token nếu còn hiệu lực: cần thu hồi/đổi credential, bỏ theo dõi các file runtime và bổ sung quy tắc .gitignore phù hợp. Chỉ thêm .gitignore không xóa dữ liệu khỏi các commit cũ. Với H2 và spool, cần kiểm tra dữ liệu thật trước khi quyết định có phải xử lý lịch sử Git hay không.
+2. Những vấn đề cần sửa trước khi chốt Week 3
+Ưu tiên	Owner	Vấn đề và hành động cần thực hiện
+P0	M3	Staging verifier báo PASS sai. verify-week3-windows.ps1 -CheckStaging vẫn exit 0 khi thiếu packaging/staging, và chỉ WARN khi thiếu file. Phải trả lỗi cho staging không hợp lệ và bổ sung negative tests.
+P0	M3	Nguy cơ mất event trong durable outbox. OutboxSpoolService có thể xóa file khi sendEvent() ném exception; spool() cũng chỉ ghi log khi lưu thất bại. Cần bảo toàn event, chỉ xóa sau khi gửi thành công và kiểm thử disk/network failures.
+P0	M3	Credential persistence chưa fail-safe. EndpointManager.saveRegistration() nuốt exception ghi file; enrollment vẫn có thể trả thành công khi credential chưa lưu bền vững. Cần báo thất bại rõ ràng và kiểm thử lỗi ghi đĩa.
+P0	M3	Installer chưa xác nhận cấu hình USBGuard fail-closed. postinst chỉ copy base rules nếu rules.conf trống, chưa bảo đảm ImplicitPolicyTarget=block và policy hiện có an toàn. Cần xác minh cấu hình hoặc từ chối trạng thái không an toàn, không tự ghi đè foreign policy.
+P1	M3	postinst bỏ qua lỗi khởi động service nhưng vẫn in thành công; prerm chưa phân biệt upgrade và remove. Cần sửa hoặc có quyết định kỹ thuật giải thích rõ.
+P1	M3	Bổ sung assertions cho FIFO thực tế, spool sau restart, disk-write failure, nhiều chu kỳ mất/phục hồi mạng. Đồng bộ tài liệu quyền file application.yml: thực tế 640, không phải 750.
+P0 bảo mật	M1/M3, integration owner	Xử lý runtime credentials và dữ liệu đang được theo dõi trong Git như đã nêu ở trên.
+
+Các điểm được xác nhận trực tiếp từ source và hồ sơ QA:
+- Week 3 staging verifier
+- OutboxSpoolService.java
+- EndpointManager.java
+- Debian postinst
+- Báo cáo QA M5, các lỗi còn mở
+Lưu ý: Tôi đã xác nhận repository đang ở chế độ public. Vì vậy, hãy ưu tiên kiểm tra và thu hồi agentToken trong data/endpoint.json nếu credential đó còn sử dụng được. Đây là vấn đề cần xử lý trước khi triển khai thực tế.
+3. Những việc chỉ còn chờ xác nhận
+Theo QA, H01 (M1) và H02 (M4) đã đạt technical regression nhưng chưa có owner acknowledgment chính thức. H03 của M2 đã DONE; H04 của M3 vẫn OPEN. H05 — quyết định nghiệm thu tích hợp toàn nhóm — cũng chưa được đóng.
+
+Kết quả kiểm thử 24/10 vẫn có giá trị đối với code hiện tại vì hai commit tiếp theo lên main chỉ thay đổi tài liệu và evidence, không thay implementation. Tuy vậy, khi sửa các lỗi trên vẫn phải chạy lại các test liên quan trên revision cuối cùng.
+4. Kết luận
+M1, M2, M4 và M5: Có thể xem là hoàn thành phần triển khai kỹ thuật Week 3 trong phạm vi Windows dựa trên code và bằng chứng hiện có. M1/M4 cần xác nhận bàn giao chính thức.
+
+M3: Chưa nên chốt. Cần ưu tiên sửa staging verifier, durable outbox, credential persistence và cấu hình fail-closed trước khi nghiệm thu.
+
+Toàn nhóm: Chưa đạt WEEK 3 — PASS (WINDOWS SCOPE) cho đến khi các P0 được xử lý, kiểm thử lại PASS và M1 ghi nhận quyết định tích hợp trên commit cuối cùng.
+
+Không cần thực hiện các bài test Ubuntu ngay lúc này; chúng vẫn được hoãn đến sau Week 4 theo kế hoạch.

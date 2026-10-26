@@ -46,7 +46,12 @@ public class EndpointManager {
     }
 
     private void resolveStoragePath() {
-        // Ưu tiên đường dẫn cấu hình chuẩn (vd /var/lib/usbshield-agent)
+        if (properties.getDataDir() == null || properties.getDataDir().isBlank()) {
+            this.storageFilePath = null;
+            log.error("Data directory is not configured");
+            return;
+        }
+
         Path configuredPath = Path.of(properties.getDataDir());
         try {
             if (!Files.exists(configuredPath)) {
@@ -55,14 +60,20 @@ public class EndpointManager {
             this.storageFilePath = configuredPath.resolve("endpoint.json");
             log.info("Endpoint credential storage configured at: {}", storageFilePath);
         } catch (Exception e) {
-            // Fallback sang thư mục local ./data/ nếu chạy trên Windows hoặc không có quyền root
-            Path fallbackPath = Path.of("./data");
-            try {
-                Files.createDirectories(fallbackPath);
-                this.storageFilePath = fallbackPath.resolve("endpoint.json");
-                log.info("Fallback credential storage configured at: {}", storageFilePath);
-            } catch (Exception ex) {
-                log.error("Could not initialize local data storage directory: {}", ex.getMessage());
+            // Chỉ fallback sang ./data nếu dataDir là default Linux path (/var/lib/usbshield-agent)
+            if ("/var/lib/usbshield-agent".equals(properties.getDataDir())) {
+                Path fallbackPath = Path.of("./data");
+                try {
+                    Files.createDirectories(fallbackPath);
+                    this.storageFilePath = fallbackPath.resolve("endpoint.json");
+                    log.info("Fallback credential storage configured at: {}", storageFilePath);
+                } catch (Exception ex) {
+                    this.storageFilePath = null;
+                    log.error("Could not initialize local data storage directory: {}", ex.getMessage());
+                }
+            } else {
+                this.storageFilePath = configuredPath.resolve("endpoint.json");
+                log.warn("Could not pre-create configured dataDir {}, will attempt creation during save: {}", configuredPath, e.getMessage());
             }
         }
     }
@@ -98,14 +109,21 @@ public class EndpointManager {
         Optional<EnrollmentResponse> responseOpt = adminServerClient.enroll(request);
         if (responseOpt.isPresent()) {
             EnrollmentResponse response = responseOpt.get();
-            this.currentRegistration = EndpointRegistration.builder()
+            EndpointRegistration newRegistration = EndpointRegistration.builder()
                     .endpointId(response.getEndpointId())
                     .agentToken(response.getAgentToken())
                     .currentPolicyVersion(response.getCurrentPolicyVersion() != null ? response.getCurrentPolicyVersion() : 0L)
                     .build();
-            saveRegistration();
-            log.info("Endpoint successfully enrolled! Assigned ID: {}", currentRegistration.getEndpointId());
-            return true;
+
+            boolean persisted = saveRegistration(newRegistration);
+            if (persisted) {
+                this.currentRegistration = newRegistration;
+                log.info("Endpoint successfully enrolled! Assigned ID: {}", currentRegistration.getEndpointId());
+                return true;
+            } else {
+                log.error("Failed to persist endpoint registration to disk at {}. Enrollment marked as failed to prevent non-durable state.", storageFilePath);
+                return false;
+            }
         } else {
             log.warn("Enrollment could not be completed at this time (Admin Server unreachable).");
             return false;
@@ -119,31 +137,56 @@ public class EndpointManager {
         return "POC-UNENROLLED-" + systemInfoProvider.getHostname();
     }
 
-    public synchronized void updateAppliedPolicyVersion(long newVersion) {
+    public synchronized boolean updateAppliedPolicyVersion(long newVersion) {
         if (currentRegistration != null) {
             currentRegistration.setCurrentPolicyVersion(newVersion);
             currentRegistration.setPendingAckVersion(newVersion);
-            saveRegistration();
-            log.info("Updated local applied policy version to {} (marked as pending ACK)", newVersion);
+            boolean saved = saveRegistration();
+            if (saved) {
+                log.info("Updated local applied policy version to {} (marked as pending ACK)", newVersion);
+                return true;
+            } else {
+                log.error("Failed to persist updated policy version {} to disk", newVersion);
+                return false;
+            }
         }
+        return false;
     }
 
-    public synchronized void clearPendingAck() {
+    public synchronized boolean clearPendingAck() {
         if (currentRegistration != null && currentRegistration.getPendingAckVersion() != null) {
             currentRegistration.setPendingAckVersion(null);
-            saveRegistration();
-            log.info("Cleared pending policy ACK");
+            boolean saved = saveRegistration();
+            if (saved) {
+                log.info("Cleared pending policy ACK");
+                return true;
+            } else {
+                log.error("Failed to persist cleared pending ACK to disk");
+                return false;
+            }
         }
+        return false;
     }
 
-    private void saveRegistration() {
-        if (storageFilePath == null || currentRegistration == null) {
-            return;
+    public synchronized boolean saveRegistration() {
+        return saveRegistration(this.currentRegistration);
+    }
+
+    public synchronized boolean saveRegistration(EndpointRegistration registration) {
+        if (storageFilePath == null || registration == null) {
+            log.error("Cannot persist endpoint registration: storageFilePath or registration is null");
+            return false;
         }
         try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(storageFilePath.toFile(), currentRegistration);
+            if (storageFilePath.getParent() != null && !Files.exists(storageFilePath.getParent())) {
+                Files.createDirectories(storageFilePath.getParent());
+            }
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(storageFilePath.toFile(), registration);
+            log.debug("Successfully persisted endpoint registration to {}", storageFilePath);
+            return true;
         } catch (Exception e) {
             log.error("Failed to persist endpoint registration to {}: {}", storageFilePath, e.getMessage());
+            return false;
         }
     }
 }
