@@ -92,3 +92,26 @@ M4/M5 browser regression and full React live API integration are separate eviden
 serving the React bundle does not substitute for those tests.
 Historical Week 1/2 evidence, frozen M2 sample, frontend/client/packaging source and
 M5 QA files are left unchanged.
+
+## M1 handoff and runtime data hygiene (2026-10-27)
+
+M1 acknowledges H01 as technically complete for the Windows Week 3 scope described
+above. This acknowledgment covers Admin Server implementation and its recorded
+verification only; it does not close the group integration decision (H05) or the
+open M3 closeout items (H04).
+
+The repository review identified runtime material tracked by Git. The current
+checkout no longer contains `data/endpoint.json`, but Git history includes it; the
+current checkout does track `admin-server/data/usbshield.mv.db` and one client event
+spool file. The root `.gitignore` now excludes the server runtime directory and
+enrollment credential path. Those tracked runtime files are removed from the Git
+index while preserved on disk, so a clean checkout will not include local H2 or
+spool contents. This does not erase their prior public Git history.
+
+Treat any enrollment token ever stored in the historical endpoint file as
+compromised: rotate the corresponding deployment bootstrap secret and re-enroll
+affected agents before deployment. The repository does not contain the live
+deployment environment, so this change cannot confirm or perform that deployment
+rotation. History rewriting is also not included because it would change published
+Git history and invalidate existing clones; repository maintainers should coordinate
+that cleanup if they require historical removal.
