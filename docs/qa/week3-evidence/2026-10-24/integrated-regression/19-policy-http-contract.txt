@@ -1,0 +1,34 @@
+{
+  "command": [
+    "node",
+    "--test",
+    "tests/m4_policy_live.test.mjs"
+  ],
+  "command_text": "node --test tests/m4_policy_live.test.mjs",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:25:38.378032+07:00",
+  "scope": "Standalone real backend policy HTTP test: duplicate Revoke, future ACK rejection and B isolation; synthetic HTTP input",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6"
+}
+
+TAP version 13
+# Subtest: real backend keeps duplicate Revoke idempotent and rejects future ACK without changing B
+ok 1 - real backend keeps duplicate Revoke idempotent and rejects future ACK without changing B
+  ---
+  duration_ms: 13829.4734
+  type: 'test'
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 13961.2644
+
+{"finished_at": "2026-10-24T00:25:52.425166+07:00", "exit_code": 0}

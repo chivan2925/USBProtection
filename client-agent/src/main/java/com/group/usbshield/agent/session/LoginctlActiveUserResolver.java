@@ -1,26 +1,32 @@
 package com.group.usbshield.agent.session;
 
 import java.util.List;
+import java.util.Objects;
 
-/** Member 2 — Week 2: fail-safe unique active-local user resolution. */
 public class LoginctlActiveUserResolver implements ActiveUserResolver {
     private final LoginctlGateway loginctl;
-    public LoginctlActiveUserResolver(LoginctlGateway loginctl) {this.loginctl=loginctl;}
-    @Override public ActiveUserInfo resolveCurrentActiveUser() {
+
+    public LoginctlActiveUserResolver(LoginctlGateway loginctl) {
+        this.loginctl = Objects.requireNonNull(loginctl, "loginctl");
+    }
+
+    @Override
+    public ActiveUserInfo resolveCurrentActiveUser() {
         try {
-            List<SessionProperties> active=loginctl.listSessionIds().stream().map(loginctl::showSession)
-                    .filter(SessionProperties::activeLocal).toList();
-            if (active.isEmpty()) return ActiveUserInfo.unknown("no-active-local-session");
-            SessionProperties selected;
-            if(active.size()==1) selected=active.getFirst();
-            else {
-                List<SessionProperties> graphical=active.stream().filter(SessionProperties::graphicalSeat0).toList();
-                if (graphical.size()!=1) return ActiveUserInfo.unknown("ambiguous-active-local-sessions");
-                selected=graphical.getFirst();
+            List<String> sessionIds = loginctl.listSessionIds();
+            if (sessionIds == null || sessionIds.stream().anyMatch(Objects::isNull)) {
+                return ActiveUserInfo.unknown("loginctl-error");
             }
-            if(selected.name()==null || selected.name().isBlank() || selected.user()==null || !selected.user().matches("[0-9]+"))
-                return ActiveUserInfo.unknown("invalid-session-identity");
-            return ActiveUserInfo.resolved(selected.name(), Long.valueOf(selected.user()),selected.sessionId(),selected.type(),selected.seat());
-        } catch (RuntimeException e) { return ActiveUserInfo.unknown("loginctl-error"); }
+            if (sessionIds.size() != sessionIds.stream().distinct().count()) {
+                return ActiveUserInfo.unknown("ambiguous-active-local-sessions");
+            }
+            List<SessionProperties> snapshot = sessionIds.stream().map(loginctl::showSession).toList();
+            if (snapshot.stream().anyMatch(Objects::isNull)) {
+                return ActiveUserInfo.unknown("loginctl-error");
+            }
+            return ActiveSessionSelector.select(snapshot);
+        } catch (RuntimeException error) {
+            return ActiveUserInfo.unknown("loginctl-error");
+        }
     }
 }

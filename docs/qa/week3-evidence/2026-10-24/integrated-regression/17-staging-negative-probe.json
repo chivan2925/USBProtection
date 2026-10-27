@@ -1,0 +1,21 @@
+{
+  "command": [
+    "powershell.exe",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "packaging/tests/verify-week3-windows.ps1",
+    "-CheckStaging"
+  ],
+  "command_text": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File packaging/tests/verify-week3-windows.ps1 -CheckStaging",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:23:57.610616+07:00",
+  "scope": "Negative QA probe: request staging validation when directory is absent; exit0/PASS is a verifier gap, not a staging PASS",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6",
+  "exit_code": 0,
+  "finished_at": "2026-10-24T00:23:58.408385+07:00"
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "node",
+    ".artifacts/audit-packaged-events-20261024.mjs"
+  ],
+  "command_text": "node .artifacts/audit-packaged-events-20261024.mjs",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:27:06.278934+07:00",
+  "scope": "Same M5 Events assertions with UI/API served by combined JAR; HTTP/default profile, no Vite or production HTTPS claim",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6",
+  "exit_code": 0,
+  "finished_at": "2026-10-24T00:27:29.552252+07:00"
+}

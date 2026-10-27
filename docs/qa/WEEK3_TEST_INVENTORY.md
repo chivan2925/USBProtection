@@ -1,5 +1,63 @@
 # Week 3 test inventory — M5
 
+## Current status — 2026-10-27
+
+Updated: 2026-10-27 (Asia/Bangkok). Branch `huy`; tested revision `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`. [Plan](WEEK3_INTEGRATION_TEST_PLAN.md), [QA summary](WEEK3_QA_SUMMARY.md), [M3 follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md).
+
+**M5 Event History and application regressions: PASS; W3-P03 staging verifier: PASS after M3 fix; M5-W3-07 policy-persistence/ACK source review: OPEN. Group gate: OPEN. Ubuntu E2E: NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** Implementation owner is distinct from the collector of these results; no new human owner acceptance is implied.
+
+Windows 11 amd64; JDK 22.0.2; Maven 3.9.11; Node 22.20.0; npm 10.9.3; Chrome. [M3 follow-up evidence](week3-evidence/2026-10-27/m3-followup/README.md) records the fresh Agent/package/static/shell results on this revision. The [24/10 integrated regression](week3-evidence/2026-10-24/integrated-regression/README.md) remains valid for unchanged frontend/server/Event History source, but does not cover M3's new code. The previous [23/10 handoff snapshot](WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) and all earlier raw logs are preserved; no old result is relabeled.
+
+### WINDOWS_EXECUTABLE — current integrated revision
+
+| ID | Implementation owner | Level / suite | Actual result | Status | Evidence / limit |
+|---|---|---|---|---|---|
+| W3-F01 | M5 | Unit/component | Required columns, source time, escaping/encoded endpoint links and UNKNOWN semantics verified in 96-test suite | PASS | [Frontend](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt); synthetic component input |
+| W3-F02 | M5/M1 | Mapper + real HTTP/browser | Empty/null/missing serial, persisted hash/device identity and no-serial display verified | PASS | [Unit](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt); physical USB is U09 |
+| W3-F03 | M5/M1 | Mapper + real HTTP/browser | Historical UNKNOWN, A/new user and B/other user remain separate; combined endpoint/user filters preserve attribution | PASS | [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt); synthetic snapshots, not Linux session switching |
+| W3-F04 | M5/M1 | Unit/API/browser | Endpoint/USB names or IDs and partial username search before server pagination; type/decision/reset/global totals pass on 28 seeded records | PASS | [Frontend](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt), [server](week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt) |
+| W3-F05 | M5 | Unit + browser | Local day boundaries/final microsecond; DST/one-sided/invalid date unit cases pass | PASS | [Unit](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt) |
+| W3-F06 | M5 | Mapper/component/browser | Baseline 20+5 paging, final-page UI and rejection of malformed metadata/enums/excess final-page rows pass | PASS | [Unit](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt) |
+| W3-F07 | M5/M4 | Unit + browser fault injection | Loading/empty, HTML/malformed rejection, cancellation, 403/500/network errors and recovery without mock fallback pass | PASS | [Unit](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt), [fixture](week3-evidence/2026-10-24/integrated-regression/16-browser-fixture.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt) |
+| W3-F08 | M4/M1/M5 | Real HTTP/browser | Login/session reload/CSRF, genuine backend restart/session expiry, logout and no JS credential persistence pass | PASS | [Management](week3-evidence/2026-10-24/integrated-regression/18-browser-management.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt); server restart is not client reboot |
+| W3-F09 | M4/M5 | Fixture + real browser | Readonly/identified demo and desktop/mobile layout checks pass; live Events fits 375px | PASS | [Fixture](week3-evidence/2026-10-24/integrated-regression/16-browser-fixture.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt), [packaged mobile](week3-evidence/2026-10-24/integrated-regression/screenshots/events-real-http-mobile.png) |
+| W3-F10 | M4/M1 | Real HTTP/browser + standalone policy contract | A Allow/duplicate/Revoke, B isolation, desired/applied, controlled ACK and restart persistence pass; standalone test verifies duplicate Revoke and future ACK rejection | PASS | [Management](week3-evidence/2026-10-24/integrated-regression/18-browser-management.txt), [policy 1/1](week3-evidence/2026-10-24/integrated-regression/19-policy-http-contract.txt); controlled ACK is not actual USBGuard apply |
+| W3-F11 | M5/M1 | Component/API + real HTTP/browser | Endpoint/USB partial names or IDs, name/ID table alignment and full-history filtering verified; exact-ID API retained | PASS | [Server](week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt), [Events](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt); owner review H01 |
+| W3-F12 | M5/M1 | Unit/API + real HTTP/browser | Case-insensitive literal substring Linux username, UNKNOWN and combined filters pass; exact `linuxUsername` API retained | PASS | [Frontend](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt), [server](week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt), [packaged screenshot](week3-evidence/2026-10-24/integrated-regression/screenshots/events-username-substring.png) |
+| W3-S01 | M1 | Maven unit/HTTP integration | 26 server tests, 0 failures/errors/skips, including auth/status/ACK regression | PASS | [Server build/test](week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt) |
+| W3-S02 | M1 | Maven/config/build + same-origin browser | Production-default tests and combined React/JAR build pass; packaged assets match frontend build; browser UI/API served by same JAR | PASS | [Build](week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt), [browser](week3-evidence/2026-10-24/integrated-regression/21-browser-packaged-jar.txt), [asset validation](week3-evidence/2026-10-24/integrated-regression/validation.json); browser is HTTP/default profile, not production HTTPS |
+| W3-A01 | M2 | Maven unit/mocks | Six M2 suites contribute 48 assertions/tests covering no-serial identity, fail-closed/recovery, session transitions and notification; the current combined Agent suite passes **122** | PASS | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md), [original M2 run](week3-evidence/2026-10-24/integrated-regression/02-agent-tests-package.txt); H03 review/execution DONE, no actual daemon/GUI |
+| W3-A02 | M3 | Maven unit/mocks + JAR | Enrollment disk-write failure, outbox FIFO/false/exception/corrupt/restart/disk-write cases and existing retry/ACK tests pass; **122** overall; JAR built | PASS | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md); H04 remains open only for M5-W3-07 and package provenance |
+| W3-A03 | M3 | Policy persistence/ACK source review | `updateAppliedPolicyVersion`/`clearPendingAck` expose persistence failure but current callers ignore the return before ACK/clear flow | NOT EXECUTED | [Finding M5-W3-07](WEEK3_M5_M3_FOLLOWUP_20261027.md); focused failure-path test and correction required before PASS |
+| W3-P01 | M3 | Source/archive static | Week 3 verifier -CheckBuiltJar passes service/control/maintainer/live/helper and freshly built JAR checks | PASS | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md); source/archive assertions only; separate staging behavior is P03, no .deb/runtime claim |
+| W3-P02 | M3 | Shell syntax / Git Bash | Four scripts individually parse; none is executed as installer | PASS | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md); syntax-only result, not an install/runtime claim |
+| W3-P03 | M3; QA by M5 | Staging verifier negative/positive suite | Absent staging rejects, incomplete staging rejects, and complete synthetic staging passes | PASS | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md); M5-W3-06 resolved; no actual package staging or `.deb` claim |
+| W3-D01 | M5 | Documentation/provenance review | M3 follow-up result, resolved staging finding, new source-review finding and unchanged Ubuntu scope aligned across QA documents | PASS | [Follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md); group gate OPEN |
+
+Also exit 0: [locked install](week3-evidence/2026-10-24/integrated-regression/01-npm-ci.txt), [lint](week3-evidence/2026-10-24/integrated-regression/12-frontend-lint.txt), [TypeScript/Vite build](week3-evidence/2026-10-24/integrated-regression/13-frontend-build.txt). The standalone policy HTTP test is separate from the 96 frontend unit tests. M5 made no application or test-source changes during this QA follow-up. The 24/10 historical regression has four initial Git Bash launches that failed at the sandbox boundary (logs 03–06); permitted retries 07–10 passed. It contains 16 successful positive command runs, four resolved launch failures and one negative probe that exposed the now-resolved verifier defect.
+
+### DEFERRED_UBUNTU — after Week 4
+
+| ID | Owner | Required execution | Actual result | Status |
+|---|---|---|---|---|
+| W3-U01 | M3/M1 | Clean `.deb` install/enrollment/ONLINE | Not run; binary/build provenance unavailable in this audit | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U02 | M2/M3/M1/M5 | Physical unknown USB BLOCK and source/Web correlation | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U03 | M1/M2/M3/M4/M5 | Actual A/B Allow/Revoke/apply/ACK/enforcement | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U04 | M2/M3/M5 | Actual switch/logout/ambiguous/remote/no-GUI sessions | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U05 | M2/M3/M1/M5 | Actual fail-closed/server-down/durable spool/reconnect | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U06 | M2/M3/M5 | Client reboot, service and credential/policy/spool persistence | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U07 | M2/M3/M5 | Correct-UID native popup/socket/helper/exclusions | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U08 | M3/M2/M5 | Install/upgrade/uninstall/reinstall and retention/permissions | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+| W3-U09 | M2/M3/M1/M5 | Physical no-serial hash identity/reconnect/enforcement | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
+
+[Current M3 finding and closure criteria](WEEK3_M5_M3_FOLLOWUP_20261027.md) track M5-W3-07 separately from executed PASS cases. H01/H02/H05 group reviews and Ubuntu cases are still open. No claim is made that all Week 3 P0 requirements are accepted. Full scenario steps remain in the plan.
+
+---
+
+## Historical snapshot — 2026-10-21
+
+The following snapshot retains its original revision, counts and scope. Use the current section above for the integrated 2026-10-23 status.
+
 Updated: 2026-10-21 (Asia/Bangkok). [Plan and expected results](WEEK3_INTEGRATION_TEST_PLAN.md), [QA summary](WEEK3_QA_SUMMARY.md), [raw evidence index](week3-evidence/README.md).
 
 Execution environment: Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3 and local Chrome. Branch `huy`; base revision `dee3cf7753521c653a79e24cc848df384bf7b639` plus the working-tree M5 changes. Exact tested source is identified by per-command [source manifests](week3-evidence/2026-10-21/sources/) and [environment](week3-evidence/2026-10-21/environment.json). This is not a claim that these changes are already committed or merged to `main`.
@@ -8,7 +66,7 @@ Later on the same date, [Event filter/table alignment](WEEK3_EVENT_NAME_SEARCH_F
 
 All Windows rows below were freshly run on 2026-10-21; command logs and adjacent JSON files record exact start/end times in +07:00, cwd, full base revision, source manifest and exit status. Owner means implementation owner; these reruns were collected by M5/Codex, not a human owner's acceptance.
 
-## WINDOWS_EXECUTABLE
+### WINDOWS_EXECUTABLE
 
 | ID | Implementation owner | Level / environment | Command or suite | Actual result | Status | Evidence / limit |
 |---|---|---|---|---|---|---|
@@ -34,7 +92,7 @@ All Windows rows below were freshly run on 2026-10-21; command logs and adjacent
 
 Dependency install (`npm ci --offline --no-audit --no-fund`), final lint and production build also exited 0: [install](week3-evidence/2026-10-21/02-npm-ci.txt), [lint](week3-evidence/2026-10-21/11-frontend-lint.txt), [build](week3-evidence/2026-10-21/07-frontend-build.txt). Build precedes the final test-only CRLF change; application/build inputs are unchanged and recorded in both manifests.
 
-## DEFERRED_UBUNTU — after Week 4
+### DEFERRED_UBUNTU — after Week 4
 
 | ID | Owner | Level / required environment | Actual result | Status | Evidence / follow-up |
 |---|---|---|---|---|---|

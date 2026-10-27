@@ -1,0 +1,17 @@
+{
+  "command": [
+    "bash",
+    "-n",
+    "packaging/scripts/build-deb.sh"
+  ],
+  "command_text": "bash -n packaging/scripts/build-deb.sh",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:22:00.236841+07:00",
+  "scope": "Parse builder only; do not execute package assembly",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6",
+  "exit_code": 3221225794,
+  "finished_at": "2026-10-24T00:22:00.492624+07:00"
+}

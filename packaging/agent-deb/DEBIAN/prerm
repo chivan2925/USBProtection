@@ -1,13 +1,20 @@
 #!/bin/bash
 set -e
 
-# Stop and disable systemd service before package removal
-if systemctl is-active --quiet usbshield-agent.service; then
+ACTION="${1:-remove}"
+
+# Stop active service during both remove and upgrade
+if systemctl is-active --quiet usbshield-agent.service 2>/dev/null; then
     systemctl stop usbshield-agent.service || true
 fi
 
-systemctl disable usbshield-agent.service || true
-rm -f /etc/sudoers.d/usbshield
+# Only disable service on complete removal, NOT on upgrade
+if [ "$ACTION" = "remove" ]; then
+    systemctl disable usbshield-agent.service || true
+    rm -f /etc/sudoers.d/usbshield
+    echo "USBShield Agent service stopped and disabled for removal."
+else
+    echo "USBShield Agent service stopped for package upgrade (service remains enabled)."
+fi
 
-echo "USBShield Agent service stopped."
 exit 0

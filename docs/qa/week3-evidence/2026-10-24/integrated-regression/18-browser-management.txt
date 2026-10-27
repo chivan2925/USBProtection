@@ -1,0 +1,30 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:live"
+  ],
+  "command_text": "npm.cmd run test:live",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:24:44.649383+07:00",
+  "scope": "Fresh real Spring Security/H2 management/browser, controlled HTTP ACK, A/B, real JVM restart/session persistence; no Agent USB apply",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6"
+}
+
+
+> frontend@0.0.0 pretest:live
+> node tests/apply-browser-readiness-fix.mjs
+
+frontend/tests/browser.mjs: HTTP readiness fix already applied.
+
+> frontend@0.0.0 test:live
+> node tests/browser.mjs --live
+
+PASS: real Spring Boot/Spring Security + file-backed H2; browser invalid/valid login, empty data, session reload, endpoint/event mapping, A Allow/idempotency/Revoke, B isolation, CSRF rejection, policy fetch, controlled HTTP ACK display, persistence after restart, expired session, logout, mobile.
+{"endpointA":"EP-5f884c30-80dd-4065-92fd-cdb87d504cc4","endpointB":"EP-8ecdb968-e750-41a5-8af5-56fa950c3dce","beforeA":{"endpointId":"EP-5f884c30-80dd-4065-92fd-cdb87d504cc4","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-23T17:25:02.344455Z","policyVersion":1,"appliedPolicyVersion":0},"allowedA":{"endpointId":"EP-5f884c30-80dd-4065-92fd-cdb87d504cc4","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-23T17:25:02.344455Z","policyVersion":2,"appliedPolicyVersion":0},"revokedA":{"endpointId":"EP-5f884c30-80dd-4065-92fd-cdb87d504cc4","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-23T17:25:02.344455Z","policyVersion":3,"appliedPolicyVersion":2},"persistedDesired":3,"persistedApplied":2,"eventCount":1}
+NOT EXECUTED: actual M3 Agent apply/ACK, Ubuntu USBGuard enforcement, physical USB, native notification. Events and HTTP ACK above are synthetic inputs to real backend.
+
+{"finished_at": "2026-10-24T00:25:22.208637+07:00", "exit_code": 0}

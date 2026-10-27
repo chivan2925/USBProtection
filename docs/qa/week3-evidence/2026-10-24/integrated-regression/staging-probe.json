@@ -1,0 +1,14 @@
+{
+  "captured_at": "2026-10-24T00:23:56.530203+07:00",
+  "path": "packaging/staging",
+  "exists_before_probe": false,
+  "expected_result": "When -CheckStaging is requested and staging is absent, failure or explicit unverified result is required; a PASS is not proof of staging.",
+  "exists_after_probe": false,
+  "command_metadata": "17-staging-negative-probe.json",
+  "observed_exit_code": 0,
+  "observed_output": "DECISION: PASS (WINDOWS SCOPE)",
+  "assertion_result": "FAIL",
+  "issue_id": "M5-W3-06",
+  "implementation_owner": "M3",
+  "interpretation": "Reproduced verifier false positive when explicitly checking absent staging; not a product runtime failure or a staging/package PASS."
+}

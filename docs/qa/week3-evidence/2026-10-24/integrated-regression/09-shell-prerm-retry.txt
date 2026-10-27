@@ -1,0 +1,18 @@
+{
+  "command": [
+    "bash",
+    "-n",
+    "packaging/agent-deb/DEBIAN/prerm"
+  ],
+  "command_text": "bash -n packaging/agent-deb/DEBIAN/prerm",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1",
+  "started_at": "2026-10-24T00:22:49.492183+07:00",
+  "scope": "Permitted parser retry after Windows sandbox launch failure; no removal execution",
+  "source_manifest": "sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json",
+  "source_tree_sha256": "117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6"
+}
+
+
+{"finished_at": "2026-10-24T00:22:49.563341+07:00", "exit_code": 0}

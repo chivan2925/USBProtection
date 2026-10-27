@@ -168,4 +168,86 @@ class AdminServerClientContractTest {
         assertTrue(ok);
         mockServer.verify();
     }
+
+    @Test
+    @DisplayName("enroll() should return empty when server returns 401 Unauthorized or 400 Bad Request")
+    void enrollFailureReturnsEmpty() {
+        mockServer.expect(requestTo("http://localhost:8080/api/agent/enroll"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withUnauthorizedRequest());
+
+        EnrollmentRequest request = EnrollmentRequest.builder()
+                .hostname("ubuntu-test")
+                .machineId("machine-bad-token")
+                .enrollmentToken("wrong-token")
+                .build();
+
+        Optional<EnrollmentResponse> result = client.enroll(request);
+        assertTrue(result.isEmpty());
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("sendHeartbeat() should return empty when token is rejected with 401 or 403")
+    void sendHeartbeatAuthFailure() {
+        mockServer.expect(requestTo("http://localhost:8080/api/agent/heartbeat"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withUnauthorizedRequest());
+
+        HeartbeatRequest request = HeartbeatRequest.builder()
+                .endpointId("EP-TEST-001")
+                .currentPolicyVersion(1L)
+                .build();
+
+        Optional<HeartbeatResponse> result = client.sendHeartbeat(request, "invalid-token");
+        assertTrue(result.isEmpty());
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("fetchPolicy() should return empty on 500 Server Error or 403 Forbidden")
+    void fetchPolicyServerError() {
+        mockServer.expect(requestTo("http://localhost:8080/api/agent/policy"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withServerError());
+
+        Optional<PolicyResponse> result = client.fetchPolicy("EP-TEST-001", "token-secret-123");
+        assertTrue(result.isEmpty());
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("acknowledgePolicy() should return false when server returns error or is unreachable")
+    void acknowledgePolicyFailure() {
+        mockServer.expect(requestTo("http://localhost:8080/api/agent/policy/ack"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withServerError());
+
+        PolicyAckRequest ack = PolicyAckRequest.builder()
+                .appliedPolicyVersion(2L)
+                .ruleCount(1)
+                .build();
+
+        boolean ok = client.acknowledgePolicy("EP-TEST-001", "token-secret-123", ack);
+        assertFalse(ok);
+        mockServer.verify();
+    }
+
+    @Test
+    @DisplayName("sendEvent() should return false when server returns error or network flaps")
+    void sendEventFailure() {
+        mockServer.expect(requestTo("http://localhost:8080/api/agent/events"))
+                .andExpect(method(HttpMethod.POST))
+                .andRespond(withServerError());
+
+        UsbEventPayload payload = UsbEventPayload.builder()
+                .endpointId("EP-TEST-001")
+                .eventType("CONNECTED")
+                .decision("BLOCKED")
+                .build();
+
+        boolean ok = client.sendEvent("EP-TEST-001", "token-secret-123", payload);
+        assertFalse(ok);
+        mockServer.verify();
+    }
 }

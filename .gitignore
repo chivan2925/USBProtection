@@ -32,12 +32,11 @@ build/
 ### VS Code ###
 .vscode/
 
-### Local Agent Data & Spool ###
-client-agent/data/
-**/data/spool/
-# Runtime server state and enrollment credentials must never be committed.
-/admin-server/data/
-/data/endpoint.json
+### Local Runtime Data, Databases & Spool ###
+data/
+**/data/
+*.mv.db
+*.trace.db
 *.deb
 packaging/staging/
 packaging/dist/

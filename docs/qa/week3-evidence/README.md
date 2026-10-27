@@ -1,5 +1,29 @@
 # Week 3 evidence index — M5
 
+## Current status — 2026-10-27
+
+Branch `huy`; tested revision `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [M3 follow-up](../WEEK3_M5_M3_FOLLOWUP_20261027.md).
+
+- [M3 follow-up evidence](2026-10-27/m3-followup/README.md): Agent **122/122**, staging verifier **3/3**, static verifier with JAR and four shell parsers PASS. M5-W3-06 is resolved; M5-W3-07 is an open source-review finding.
+- [Integrated regression commands](2026-10-24/integrated-regression/README.md): previous frontend/server/browser baseline, still applicable because those sources did not change in the M3 pull. Frontend **96**, server **26**, Agent then **117**, separate policy HTTP **1**.
+- [Environment](2026-10-24/integrated-regression/environment.json), [source manifest](2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json), [JUnit summary](2026-10-24/integrated-regression/junit-summary.json), [validation/artifacts](2026-10-24/integrated-regression/validation.json). Source SHA-256 `117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6`.
+- [Historical staging negative probe](2026-10-24/integrated-regression/staging-probe.json): recorded the defect that M3 resolved and M5 retested on 27/10.
+- [Packaged browser provenance](2026-10-24/integrated-regression/packaged-browser-variant.json), [screenshot hashes/command attribution](2026-10-24/integrated-regression/screenshots.json), [desktop](2026-10-24/integrated-regression/screenshots/events-real-http-desktop.png), [partial username](2026-10-24/integrated-regression/screenshots/events-username-substring.png), [mobile](2026-10-24/integrated-regression/screenshots/events-real-http-mobile.png), [UNKNOWN/no-serial](2026-10-24/integrated-regression/screenshots/events-week3-unknown-no-serial.png), [session expiry](2026-10-24/integrated-regression/screenshots/m4-live-expired-session.png).
+
+The 24/10 command captures each have a UTF-8 text log and adjacent JSON with argv/cwd/revision/start/end +07:00/scope/source manifest/exit; the 27/10 M3 follow-up has its scoped command/result index and validation record. Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3, Vite 8.3.1, Chrome. Synthetic HTTP/ACK, unit/mock/static and default-profile packaged browser results do not prove Ubuntu/USB/GUI/production HTTPS behavior. QA H2/runtime are isolated; application DB is not used.
+
+**M5 Windows QA work complete; M5-W3-06 resolved; M5-W3-07 OPEN; group gate OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
+
+## Previous captures retained
+
+[23/10 post-pull audit](2026-10-23/post-pull-audit/README.md), [23/10 documentation validation](2026-10-23/qa-closeout/validation.json), [23/10 handoff snapshot](../WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) retain the earlier revision and Agent 61 result. All 21/10 raw logs, dated reports and Week 1/2 evidence remain unchanged.
+
+---
+
+## Historical snapshot — 2026-10-21
+
+The following snapshot retains its original revision, counts and scope. Use the current section above for the integrated 2026-10-23 status.
+
 Captured: 2026-10-21 (Asia/Bangkok). [Plan](../WEEK3_INTEGRATION_TEST_PLAN.md), [inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [demo draft](../../DEMO_SCRIPT.md).
 
 Later same-day follow-up: [Event filter/table name-search capture](2026-10-21/event-name-search/README.md), with 88 frontend tests, 18 server tests and new browser/build evidence. The initial capture below remains unchanged and identifies its earlier source snapshot.
@@ -10,7 +34,7 @@ Each command has a UTF-8 `.txt` log and same-stem `.json` metadata with argv/cwd
 
 Latest same-day correction: [partial Linux User search](2026-10-21/username-substring/README.md). This has a separate source manifest and execution logs; previous captures remain historical.
 
-## Executions
+### Executions
 
 All dates below are 2026-10-21. Exact times are in the raw metadata. npm commands run from `frontend/`; Maven/package/shell commands run from repository root.
 
@@ -39,7 +63,7 @@ All dates below are 2026-10-21. Exact times are in the raw metadata. npm command
 | [20](2026-10-21/20-packaging-static.txt) | Existing Windows verifier with `-CheckBuiltJar` | 0; source/JAR static checks PASS |
 | [21](2026-10-21/21-browser-events.txt) | `npm run test:browser:live` | 0; 25 baseline + 3 Week 3 synthetic HTTP events, no-serial/UNKNOWN/source time/A–B isolation/errors/recovery PASS |
 
-## Screenshots from this run
+### Screenshots from this run
 
 Only captures whose timestamps fall in their successful browser run are copied into the new Week 3 directory. Historical `.artifacts` captures were not reused.
 

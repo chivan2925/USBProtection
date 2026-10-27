@@ -1,0 +1,42 @@
+{
+  "screenshots/m4-live-expired-session.png": {
+    "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6",
+    "captured_at": "2026-10-24T00:25:20.764760+07:00",
+    "command": "18-browser-management.json"
+  },
+  "screenshots/events-real-http-desktop.png": {
+    "sha256": "aec4aeb0819ea7b155b678e9da3ba5dc450f4ab42f954c3ed642059591a05541",
+    "captured_at": "2026-10-24T00:27:22.443248+07:00",
+    "command": "21-browser-packaged-jar.json"
+  },
+  "screenshots/events-real-http-mobile.png": {
+    "sha256": "d53c27684552697e2b1e1ce3e0247b520e93dd5408fdea548940ea3ccf92f3a9",
+    "captured_at": "2026-10-24T00:27:25.265620+07:00",
+    "command": "21-browser-packaged-jar.json"
+  },
+  "screenshots/events-real-http-date-filter.png": {
+    "sha256": "305261a575873420c68cc33c55bbd56d6a602e0705ea0c8b6e3cb459d0fd54fa",
+    "captured_at": "2026-10-24T00:27:24.623082+07:00",
+    "command": "21-browser-packaged-jar.json"
+  },
+  "screenshots/events-username-substring.png": {
+    "sha256": "fa51eff0d967ee26a9fbae398210bb5cb8c4cc08d22bac9cfaf198e3ae55c422",
+    "captured_at": "2026-10-24T00:27:26.500820+07:00",
+    "command": "21-browser-packaged-jar.json"
+  },
+  "screenshots/events-week3-unknown-no-serial.png": {
+    "sha256": "973d6759c8ec55b86df2480efa973014b6fd3f1df7b95a0aa32e3102736f68e2",
+    "captured_at": "2026-10-24T00:27:26.697217+07:00",
+    "command": "21-browser-packaged-jar.json"
+  },
+  "screenshots/events-week3-endpoint-a.png": {
+    "sha256": "39d4a338ee8cf9a30fccdaa3aa2bc27a9d1cffee018a6f685ecd5a348531847c",
+    "captured_at": "2026-10-24T00:27:27.711799+07:00",
+    "command": "21-browser-packaged-jar.json"
+  },
+  "screenshots/events-week3-endpoint-b.png": {
+    "sha256": "81a2b6d5e9a4b7e6bb8ca222b736128d220a5ff24d74c80a51c4d6da600e6ba2",
+    "captured_at": "2026-10-24T00:27:27.168747+07:00",
+    "command": "21-browser-packaged-jar.json"
+  }
+}

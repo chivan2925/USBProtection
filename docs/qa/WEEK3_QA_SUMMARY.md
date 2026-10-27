@@ -1,5 +1,56 @@
 # Week 3 QA summary — M5
 
+## Current status — 2026-10-27
+
+Branch `huy`; tested revision `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`. [Inventory](WEEK3_TEST_INVENTORY.md), [M3 follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md), [execution index](week3-evidence/2026-10-27/m3-followup/README.md), [demo draft](../DEMO_SCRIPT.md).
+
+**M5 Windows testing and QA documentation complete. M3 resolves staging verifier M5-W3-06; Agent suite now passes 122 tests. M5-W3-07 policy-persistence/ACK source review remains OPEN. Group Week 3 gate OPEN. Ubuntu U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No new human owner acceptance or final release decision is recorded.
+
+### Fresh results on the integrated revision
+
+| Scope | Actual result | Evidence |
+|---|---|---|
+| Locked install, lint, TypeScript/Vite build | PASS; Vite 8.3.1 | [01 install](week3-evidence/2026-10-24/integrated-regression/01-npm-ci.txt), [12 lint](week3-evidence/2026-10-24/integrated-regression/12-frontend-lint.txt), [13 build](week3-evidence/2026-10-24/integrated-regression/13-frontend-build.txt) |
+| Frontend M4/M5 | **96/96 PASS**, no failures/skips/cancellations | [11](week3-evidence/2026-10-24/integrated-regression/11-frontend-tests.txt) |
+| Agent M2/M3 and executable JAR | **122 PASS**, 0 failures/errors/skips; new M3 outbox/enrollment cases | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md) |
+| Server + bundled React JAR | **26 PASS**, 0 failures/errors/skips | [14](week3-evidence/2026-10-24/integrated-regression/14-server-with-frontend.txt) |
+| Fixture / management / Events browser | All PASS; real Spring Boot/H2, 28 HTTP-seeded Events, A/B, auth/error/recovery/mobile, real JVM restart | [16](week3-evidence/2026-10-24/integrated-regression/16-browser-fixture.txt), [18](week3-evidence/2026-10-24/integrated-regression/18-browser-management.txt), [20](week3-evidence/2026-10-24/integrated-regression/20-browser-events.txt) |
+| Standalone policy HTTP | **1/1 PASS**, separate from the 96 unit tests | [19](week3-evidence/2026-10-24/integrated-regression/19-policy-http-contract.txt) |
+| Browser using packaged JAR origin | PASS; unchanged M5 assertions, no Vite; HTTP/default runtime, not production HTTPS | [21](week3-evidence/2026-10-24/integrated-regression/21-browser-packaged-jar.txt), [variant](week3-evidence/2026-10-24/integrated-regression/packaged-browser-variant.json) |
+| Week 3 static verifier / four shell syntax checks | PASS for current source/archive assertions and four individually parsed scripts | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md) |
+| Staging verifier (W3-P03) | **PASS — M5-W3-06 resolved**; negative absent/incomplete and positive complete staging cases pass | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md) |
+
+The 24/10 historical regression captured 21 command attempts: 16 successful positive runs, four Git Bash launch failures at the Windows sandbox boundary resolved by permitted retries, and one negative probe revealing the verifier defect. Failed launch logs 03–06 are retained; retries 07–10 are the actual shell-parse PASS evidence. Exit 0 of historical probe 17 did not establish valid staging.
+
+Windows 11 amd64; JDK 22.0.2; Maven 3.9.11; Node 22.20.0; npm 10.9.3; Chrome. [M3 follow-up evidence](week3-evidence/2026-10-27/m3-followup/README.md) records the fresh Windows Agent/static/shell checks; [24/10 evidence](week3-evidence/2026-10-24/integrated-regression/README.md) remains the current frontend/server/browser capture. Runtime/H2 were isolated; the operator application DB was not read/reset/used. Actual USBGuard, physical USB, Linux sessions, native GUI, systemd and install/reboot were not executed.
+
+### M5 completion and remaining owner work
+
+M5 Events source/tests and server/frontend remain unchanged by the latest pull; M2 core/session/notification changes and M3 tests/report/verifier were integrated. This QA follow-up verifies the M3 changes on `2885cf9` without M5 editing application/test/packaging source. Current QA docs, evidence index, demo draft and owner report are updated. [23/10 snapshot](WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) retains its original revision and 61-test Agent result; new results do not overwrite it.
+
+| Item | Current status | Next owner action |
+|---|---|---|
+| M5 Event UI/contracts/regression/evidence/docs/demo draft | **DONE for feasible Windows scope** | Retest affected areas when an owner changes source; Week 4 final guides/rehearsal remain scheduled separately. |
+| H01 M1 / H02 M4 | Technical tests/review PASS; owner acknowledgment not newly recorded | Owners confirm integrated contract/shared UI and handoff. |
+| H03 M2 core/session | **DONE for M5 review/execution**; report available and six new suites/48 tests PASS in real Maven | No longer waiting for source/report; hardware acceptance stays deferred. |
+| H04 M3 retry/packaging | M5-W3-06 and prior outbox/lifecycle review items retested PASS; **OPEN** M5-W3-07 and package provenance | Fix persistence/ACK failure path, then supply `.deb`/staging provenance when available. |
+| H05 M1 + group | **OPEN** | Record integrated revision, disposition of Windows P0/issues and group decision. |
+| U01–U09 | **NOT EXECUTED / DEFERRED_UBUNTU** | Actual execution after Week 4. |
+
+### Open finding and review questions
+
+**M5-W3-06 — RESOLVED, M3.** The new staging-verifier suite passes 3/3: absent staging and incomplete staging reject, valid synthetic staging passes. The fresh static verifier also passes with the built Agent JAR. This validates verifier behavior, not an actual `.deb` staging build.
+
+**M5-W3-07 — OPEN, M3.** `EndpointManager` now returns persistence success/failure, but `PolicySyncService` and `HeartbeatCoordinator` ignore it before sending ACK or clearing pending ACK. A save failure can therefore leave non-durable state while the server is acknowledged. This is source-review evidence; it needs a failure-path regression and code correction. The former FIFO, exception, corrupt-file, restart, disk-write, enrollment-write, postinst-reporting and prerm-upgrade questions are covered or source-updated in the new M3 revision. `.deb`/real staging provenance remains **NOT BUILT / NOT VERIFIED**. Details are in the [M3 follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md).
+
+A packaging script/report PASS label does not constitute group acceptance. The allowed eventual group label remains `WEEK 3 — PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED`, after owner decisions; FULL PASS is not claimed.
+
+---
+
+## Historical snapshot — 2026-10-21
+
+The following snapshot retains its original revision, counts and scope. Use the current section above for the integrated 2026-10-23 status.
+
 Updated: 2026-10-21 (Asia/Bangkok). Branch `huy`, working tree based on `dee3cf7753521c653a79e24cc848df384bf7b639`. [Plan](WEEK3_INTEGRATION_TEST_PLAN.md), [inventory](WEEK3_TEST_INVENTORY.md), [evidence/provenance](week3-evidence/README.md), [demo draft](../DEMO_SCRIPT.md).
 
 **M5 independent Week 3 work: implementation ready and Windows regression PASS. Group Week 3 acceptance: OPEN, pending owners/integrated revision. Ubuntu E2E: NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** This report is a fresh Windows run, not a reuse of Week 2 results or a final release declaration.
@@ -8,7 +59,7 @@ Updated: 2026-10-21 (Asia/Bangkok). Branch `huy`, working tree based on `dee3cf7
 
 The subsequent [Linux User substring correction](week3-evidence/2026-10-21/username-substring/README.md) changes live user search to case-insensitive partial matching via `username`; legacy exact `linuxUsername` is preserved. Its separate evidence records the new source, 20 server tests and 88 frontend tests. Earlier 18/13 server results retain their historical scopes.
 
-## Changes and reviewed behavior
+### Changes and reviewed behavior
 
 - Reviewed existing Event History UI, source/type mapping, filters, shared resource/auth integration and loading/empty/error behavior. Existing behavior was retained where tests already demonstrated the requirement.
 - Fixed M5 `mapEventPage`: an excess final-page row now rejects the entire response. Before the fix, page 1 / size 2 / total 3 could accept two rows despite only one record remaining. Valid partial/out-of-range empty pages retain server metadata/order.
@@ -17,7 +68,7 @@ The subsequent [Linux User substring correction](week3-evidence/2026-10-21/usern
 - Extended M5 real browser Events regression with three synthetic no-serial HTTP events: A/UNKNOWN, A/new user and B/other user. On top of 25 baseline records, 28 persisted records verify exact user/device/endpoint filters and A/B isolation. This is not a real Linux user switch or USBGuard run.
 - Created Week 3 plan, inventory, QA report, evidence index and demo draft; appended the Week 3 scope to `TEST_PLAN.md`. Week 1/2 reports/logs remain unchanged.
 
-## Fresh Windows results
+### Fresh Windows results
 
 | Command / scope | Result | Evidence |
 |---|---|---|
@@ -35,7 +86,7 @@ The subsequent [Linux User substring correction](week3-evidence/2026-10-21/usern
 
 Server and Agent Java source were not edited in the initial execution above; the later name-search follow-up narrowly extends the server Event API as documented separately. These suites were freshly executed by M5/Codex on Windows, without attributing new results to another human owner. Browser suites ran sequentially on isolated runtime data. The original application H2 database SHA-256 was unchanged during the initial capture; the later capture does not read or hash the user's actively locked database. Source/build/screenshot provenance is in the evidence index. The initial frontend build happened before the final test-only readiness correction; application/build source remained identical, so rebuilding that unchanged bundle was unnecessary. The subsequent UI/name-query change has its own fresh build.
 
-## Failed attempts and resolved issues
+### Failed attempts and resolved issues
 
 | ID | State | Finding / disposition |
 |---|---|---|
@@ -47,7 +98,7 @@ Server and Agent Java source were not edited in the initial execution above; the
 
 No unresolved functional failure remains in the independently executed M5 Windows scope. This statement does not imply that all owners' Week 3 requirements are implemented or accepted.
 
-## Owner handoff and remaining group work
+### Owner handoff and remaining group work
 
 | Owner | Outstanding review/input | Why group acceptance remains open |
 |---|---|---|
