@@ -17,11 +17,14 @@ public class AdminServerClient {
     private final RestClient restClient;
     private final AgentProperties properties;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public AdminServerClient(AgentProperties properties) {
+        this(properties, RestClient.builder().baseUrl(properties.getServerUrl()).build());
+    }
+
+    public AdminServerClient(AgentProperties properties, RestClient restClient) {
         this.properties = properties;
-        this.restClient = RestClient.builder()
-                .baseUrl(properties.getServerUrl())
-                .build();
+        this.restClient = restClient;
     }
 
     /**

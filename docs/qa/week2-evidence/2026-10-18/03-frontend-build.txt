@@ -1,0 +1,27 @@
+M5 Week 2 non-Ubuntu completion verification
+Started: 2026-10-18T14:40:37.989369+07:00
+Timezone: Asia/Bangkok
+Base revision: e7b05fe972f07aa2d304dcd8e6cf21c664f4d085
+Branch: huy
+Source: working tree; current file hashes are in source-manifest.json.
+Command: npm run build
+Working directory: D:\USBProtection\frontend
+Scope: Windows; isolated H2 and synthetic HTTP inputs. Ubuntu/physical USB/GUI not executed.
+
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 51 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.65 kB │ gzip:  0.42 kB
+dist/assets/index-BeALIVYP.css   25.37 kB │ gzip:  6.62 kB
+dist/assets/index-Dj3Hlp7B.js   288.90 kB │ gzip: 87.81 kB
+
+✓ built in 257ms
+
+Finished: 2026-10-18T14:40:43.174531+07:00
+Exit code: 0

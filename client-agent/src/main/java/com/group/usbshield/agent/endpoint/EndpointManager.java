@@ -122,8 +122,17 @@ public class EndpointManager {
     public synchronized void updateAppliedPolicyVersion(long newVersion) {
         if (currentRegistration != null) {
             currentRegistration.setCurrentPolicyVersion(newVersion);
+            currentRegistration.setPendingAckVersion(newVersion);
             saveRegistration();
-            log.info("Updated local applied policy version to {}", newVersion);
+            log.info("Updated local applied policy version to {} (marked as pending ACK)", newVersion);
+        }
+    }
+
+    public synchronized void clearPendingAck() {
+        if (currentRegistration != null && currentRegistration.getPendingAckVersion() != null) {
+            currentRegistration.setPendingAckVersion(null);
+            saveRegistration();
+            log.info("Cleared pending policy ACK");
         }
     }
 

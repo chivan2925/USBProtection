@@ -30,6 +30,24 @@ if getent group usbguard >/dev/null; then
     usermod -aG usbguard usbshield
 fi
 
+# 4. Setup runtime notifier socket directory and tmpfiles.d (Week 2 Unix Socket IPC)
+mkdir -p /run/usbshield-notifier
+chmod 1777 /run/usbshield-notifier
+
+if [ -d /etc/tmpfiles.d ]; then
+    echo "d /run/usbshield-notifier 1777 root root -" > /etc/tmpfiles.d/usbshield-notifier.conf
+fi
+
+# Clean up deprecated sudoers rule from Week 1 prototype if present
+if [ -f /etc/sudoers.d/usbshield ]; then
+    rm -f /etc/sudoers.d/usbshield
+fi
+
+# Ensure launcher script executable if installed
+if [ -f /opt/usbshield-agent/usbshield-notifier-launcher.sh ]; then
+    chmod 755 /opt/usbshield-agent/usbshield-notifier-launcher.sh
+fi
+
 # 4. Initialize default USBGuard rules if not present or empty
 if [ ! -s /etc/usbguard/rules.conf ] && [ -f /etc/usbshield-agent/rules-v0.1.conf ]; then
     mkdir -p /etc/usbguard

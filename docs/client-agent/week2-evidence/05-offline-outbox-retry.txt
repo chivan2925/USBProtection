@@ -1,0 +1,22 @@
+=== USBShield Client Agent - Offline Spool & Outbox Drain Evidence ===
+Scenario: USB plugged in while Admin Server / network link is disconnected
+Fail-Closed Guarantee: USBGuard still enforces BLOCK autonomously; EventSender spools to disk.
+
+--- 1. Server Disconnected / Event Spooling ---
+[WARN] Failed to send USB event to server: I/O error on POST request for "http://localhost:8080/api/agent/events": Connect timed out
+[WARN] [OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: /var/lib/usbshield-agent/spool/event_1792249519382_b6db4a9e.json
+
+$ ls -la /var/lib/usbshield-agent/spool/
+-rw------- 1 usbshield usbshield 524 Oct 17 22:15 event_1792249519382_b6db4a9e.json
+
+--- 2. Server Restored / Reconnection Cycle ---
+Heartbeat succeeds:
+[INFO] Heartbeat response received: status=ONLINE, serverPolicyVersion=0
+
+HeartbeatCoordinator triggers outbox drain:
+[INFO] [OUTBOX-DRAIN] Found 1 spooled event(s). Attempting to deliver...
+[INFO] Successfully sent USB event CONNECTED for device {vendorId=0951, productId=1666} to Admin Server
+[INFO] [OUTBOX-DRAIN] Successfully delivered and cleared spooled event: event_1792249519382_b6db4a9e.json
+
+$ ls -la /var/lib/usbshield-agent/spool/
+total 0 (empty directory - no event dropped)

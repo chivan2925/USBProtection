@@ -1,0 +1,21 @@
+{
+  "command": [
+    "mvn.cmd",
+    "-o",
+    "-B",
+    "-f",
+    "admin-server/pom.xml",
+    "-Dtest=EventSearchIntegrationTest",
+    "test"
+  ],
+  "command_text": "mvn.cmd -o -B -f admin-server/pom.xml -Dtest=EventSearchIntegrationTest test",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T23:06:16.491688+07:00",
+  "scope": "Before-fix regression: name queries against isolated in-memory H2; application DB not used",
+  "source_manifest": "sources/e6cf326ae19523dabf267d35c4edc300d9856a0cc5e5ebffd80cb36dd1b81d0d.json",
+  "source_tree_sha256": "e6cf326ae19523dabf267d35c4edc300d9856a0cc5e5ebffd80cb36dd1b81d0d",
+  "exit_code": 1,
+  "finished_at": "2026-10-21T23:06:38.574744+07:00"
+}

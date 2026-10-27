@@ -1,0 +1,30 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:live"
+  ],
+  "command_text": "npm.cmd run test:live",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:40:12.904982+07:00",
+  "scope": "Windows Chromium plus fresh Spring Boot/H2; synthetic enrollment/event and controlled HTTP ACK",
+  "source_manifest": "sources/85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe.json",
+  "source_tree_sha256": "85d505a3b6a358c2e0960976a5f16f9edb95c037e67895399f4c2cc22dd8cdfe"
+}
+
+
+> frontend@0.0.0 pretest:live
+> node tests/apply-browser-readiness-fix.mjs
+
+frontend/tests/browser.mjs: HTTP readiness fix already applied.
+
+> frontend@0.0.0 test:live
+> node tests/browser.mjs --live
+
+PASS: real Spring Boot/Spring Security + file-backed H2; browser invalid/valid login, empty data, session reload, endpoint/event mapping, A Allow/idempotency/Revoke, B isolation, CSRF rejection, policy fetch, controlled HTTP ACK display, persistence after restart, expired session, logout, mobile.
+{"endpointA":"EP-fe3c204a-f242-4b29-af67-0a99e59a416a","endpointB":"EP-135523c3-66ee-4b06-9e25-8e16a2a79529","beforeA":{"endpointId":"EP-fe3c204a-f242-4b29-af67-0a99e59a416a","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-21T15:40:25.836672Z","policyVersion":1,"appliedPolicyVersion":0},"allowedA":{"endpointId":"EP-fe3c204a-f242-4b29-af67-0a99e59a416a","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-21T15:40:25.836672Z","policyVersion":2,"appliedPolicyVersion":0},"revokedA":{"endpointId":"EP-fe3c204a-f242-4b29-af67-0a99e59a416a","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-21T15:40:25.836672Z","policyVersion":3,"appliedPolicyVersion":2},"persistedDesired":3,"persistedApplied":2,"eventCount":1}
+NOT EXECUTED: actual M3 Agent apply/ACK, Ubuntu USBGuard enforcement, physical USB, native notification. Events and HTTP ACK above are synthetic inputs to real backend.
+
+{"finished_at": "2026-10-21T22:40:43.113322+07:00", "exit_code": 0}

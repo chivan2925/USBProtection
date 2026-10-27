@@ -28,11 +28,12 @@ class LinuxActiveUserResolverTest {
         ActiveUserInfo user = resolver.evaluateCandidates(List.of(candidate));
 
         assertNotNull(user);
-        assertEquals("usbdev", user.getUsername());
-        assertEquals(1000L, user.getUid());
-        assertEquals("21", user.getSessionId());
-        assertEquals("wayland", user.getSessionType());
-        assertEquals("seat0", user.getSeat());
+        assertEquals("usbdev", user.username());
+        assertEquals(1000L, user.uid());
+        assertEquals("21", user.sessionId());
+        assertEquals("wayland", user.sessionType());
+        assertEquals("seat0", user.seat());
+        assertEquals("RESOLVED", user.status());
     }
 
     @Test
@@ -41,9 +42,11 @@ class LinuxActiveUserResolverTest {
         ActiveUserInfo user = resolver.evaluateCandidates(Collections.emptyList());
 
         assertNotNull(user);
-        assertEquals("UNKNOWN", user.getUsername());
-        assertNull(user.getUid());
-        assertNull(user.getSessionId());
+        assertEquals("UNKNOWN", user.username());
+        assertNull(user.uid());
+        assertNull(user.sessionId());
+        assertEquals("UNKNOWN", user.status());
+        assertEquals("no-active-local-session", user.reason());
     }
 
     @Test
@@ -59,9 +62,9 @@ class LinuxActiveUserResolverTest {
         ActiveUserInfo user = resolver.evaluateCandidates(List.of(graphical, tty));
 
         assertNotNull(user);
-        assertEquals("student01", user.getUsername());
-        assertEquals(1001L, user.getUid());
-        assertEquals("wayland", user.getSessionType());
+        assertEquals("student01", user.username());
+        assertEquals(1001L, user.uid());
+        assertEquals("wayland", user.sessionType());
     }
 
     @Test
@@ -77,7 +80,9 @@ class LinuxActiveUserResolverTest {
         ActiveUserInfo user = resolver.evaluateCandidates(List.of(user1, user2));
 
         assertNotNull(user);
-        assertEquals("UNKNOWN", user.getUsername(), "Khi có tranh chấp 2 session đồ họa, bắt buộc trả về UNKNOWN");
-        assertNull(user.getUid());
+        assertEquals("UNKNOWN", user.username(), "Khi có tranh chấp 2 session đồ họa, bắt buộc trả về UNKNOWN");
+        assertNull(user.uid());
+        assertEquals("UNKNOWN", user.status());
+        assertEquals("ambiguous-active-local-sessions", user.reason());
     }
 }

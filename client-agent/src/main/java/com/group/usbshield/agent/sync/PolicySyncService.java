@@ -64,18 +64,28 @@ public class PolicySyncService {
         }
 
         // Nạp vào USBGuard Engine (qua Adapter của Member 2)
-        usbGuardGateway.applyWhitelist(fingerprints);
+        boolean applied = usbGuardGateway.applyWhitelist(fingerprints);
+        if (!applied) {
+            log.error("Failed to apply policy to USBGuard. Aborting version update and acknowledgment.");
+            return false;
+        }
 
-        // Cập nhật version local
+        // Cập nhật version local và đánh dấu cần ACK
         endpointManager.updateAppliedPolicyVersion(newVersion);
 
         // Gửi ACK lên Server
         PolicyAckRequest ackRequest = PolicyAckRequest.builder()
                 .appliedPolicyVersion(newVersion)
+                .ruleCount(fingerprints.size())
                 .build();
-        adminServerClient.acknowledgePolicy(endpointId, agentToken, ackRequest);
+        boolean ackSuccess = adminServerClient.acknowledgePolicy(endpointId, agentToken, ackRequest);
+        if (ackSuccess) {
+            endpointManager.clearPendingAck();
+            log.info("Policy synchronization to version {} completed and ACK confirmed by server.", newVersion);
+        } else {
+            log.warn("Policy version {} applied locally, but server ACK failed. Will retry on next heartbeat cycle.", newVersion);
+        }
 
-        log.info("Policy synchronization to version {} completed successfully.", newVersion);
         return true;
     }
 }

@@ -1,0 +1,275 @@
+{
+  "command": [
+    "node",
+    "--experimental-strip-types",
+    "--test",
+    "tests/m5_event_api.test.mjs",
+    "tests/m5_live_api.test.mjs",
+    "tests/m5_events.test.mjs"
+  ],
+  "command_text": "node --experimental-strip-types --test tests/m5_event_api.test.mjs tests/m5_live_api.test.mjs tests/m5_events.test.mjs",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:33:32.031728+07:00",
+  "scope": "M5 regression before mapper correction; mocked Admin EventPage",
+  "source_manifest": "sources/671e1b581ad25a092d7e791ec5d5461a87edf718359833d763eccbf7c1a2396a.json",
+  "source_tree_sha256": "671e1b581ad25a092d7e791ec5d5461a87edf718359833d763eccbf7c1a2396a"
+}
+
+TAP version 13
+# Subtest: Admin read DTO preserves M2 mouse attribution, device ID and canonical interfaceClass
+ok 1 - Admin read DTO preserves M2 mouse attribution, device ID and canonical interfaceClass
+  ---
+  duration_ms: 6.1047
+  type: 'test'
+  ...
+# Subtest: BLOCKED decision and UNKNOWN Linux user remain independent
+ok 2 - BLOCKED decision and UNKNOWN Linux user remain independent
+  ---
+  duration_ms: 0.5967
+  type: 'test'
+  ...
+# Subtest: nullable legacy device/hostname and defensive UNKNOWN decision do not invent attribution
+ok 3 - nullable legacy device/hostname and defensive UNKNOWN decision do not invent attribution
+  ---
+  duration_ms: 1.0583
+  type: 'test'
+  ...
+# Subtest: array helper preserves empty results and rejects a page envelope or invalid item
+ok 4 - array helper preserves empty results and rejects a page envelope or invalid item
+  ---
+  duration_ms: 2.1953
+  type: 'test'
+  ...
+# Subtest: bad identity, enums, sessions and canonical device fields fail the read
+ok 5 - bad identity, enums, sessions and canonical device fields fail the read
+  ---
+  duration_ms: 1.3122
+  type: 'test'
+  ...
+# Subtest: large string IDs retain precision for event links and device selection
+ok 6 - large string IDs retain precision for event links and device selection
+  ---
+  duration_ms: 0.3248
+  type: 'test'
+  ...
+# Subtest: occurredAt and receivedAt require offset-bearing instants and preserve source precision
+ok 7 - occurredAt and receivedAt require offset-bearing instants and preserve source precision
+  ---
+  duration_ms: 2.0386
+  type: 'test'
+  ...
+# Subtest: Admin page mapping retains server totals, order and input without local pagination
+ok 8 - Admin page mapping retains server totals, order and input without local pagination
+  ---
+  duration_ms: 1.14
+  type: 'test'
+  ...
+# Subtest: last partial page keeps its zero-based page and global totals
+ok 9 - last partial page keeps its zero-based page and global totals
+  ---
+  duration_ms: 1.2185
+  type: 'test'
+  ...
+# Subtest: empty results and out-of-range empty pages retain actual server metadata
+ok 10 - empty results and out-of-range empty pages retain actual server metadata
+  ---
+  duration_ms: 1.0489
+  type: 'test'
+  ...
+# Subtest: malformed or contradictory page metadata cannot look like complete empty history
+ok 11 - malformed or contradictory page metadata cannot look like complete empty history
+  ---
+  duration_ms: 1.5753
+  type: 'test'
+  ...
+# Subtest: one invalid event rejects the entire page without silently dropping audit rows
+ok 12 - one invalid event rejects the entire page without silently dropping audit rows
+  ---
+  duration_ms: 0.368
+  type: 'test'
+  ...
+# Subtest: last page cannot contain more audit rows than its remaining global total
+not ok 13 - last page cannot contain more audit rows than its remaining global total
+  ---
+  duration_ms: 1.3264
+  type: 'test'
+  location: 'D:\\USBProtection\\frontend\\tests\\m5_event_api.test.mjs:129:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///D:/USBProtection/frontend/tests/m5_event_api.test.mjs:130:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: no-serial storage keeps its hash and database identity without inventing a serial
+ok 14 - no-serial storage keeps its hash and database identity without inventing a serial
+  ---
+  duration_ms: 1.0237
+  type: 'test'
+  ...
+# Subtest: historical attribution remains independent across user switches and endpoints sharing a hostname
+ok 15 - historical attribution remains independent across user switches and endpoints sharing a hostname
+  ---
+  duration_ms: 1.5362
+  type: 'test'
+  ...
+# Subtest: Events loading, unavailable and error states never display fixture rows
+ok 16 - Events loading, unavailable and error states never display fixture rows
+  ---
+  duration_ms: 772.0539
+  type: 'test'
+  ...
+# Subtest: Events ready empty data stays empty, and UNKNOWN is never displayed as BLOCK
+ok 17 - Events ready empty data stays empty, and UNKNOWN is never displayed as BLOCK
+  ---
+  duration_ms: 16.1977
+  type: 'test'
+  ...
+# Subtest: EventTable renders required columns: Endpoint, Linux User, USB, Event, Decision
+ok 18 - EventTable renders required columns: Endpoint, Linux User, USB, Event, Decision
+  ---
+  duration_ms: 2.8125
+  type: 'test'
+  ...
+# Subtest: EventTable renders username for each event
+ok 19 - EventTable renders username for each event
+  ---
+  duration_ms: 2.6582
+  type: 'test'
+  ...
+# Subtest: EventTable renders device names
+ok 20 - EventTable renders device names
+  ---
+  duration_ms: 2.7107
+  type: 'test'
+  ...
+# Subtest: EventTable renders BLOCK and ALLOW decisions visibly
+ok 21 - EventTable renders BLOCK and ALLOW decisions visibly
+  ---
+  duration_ms: 3.544
+  type: 'test'
+  ...
+# Subtest: EventTable shows empty state when no events match
+ok 22 - EventTable shows empty state when no events match
+  ---
+  duration_ms: 2.0781
+  type: 'test'
+  ...
+# Subtest: EventTable shows loading state when loading=true
+ok 23 - EventTable shows loading state when loading=true
+  ---
+  duration_ms: 2.1125
+  type: 'test'
+  ...
+# Subtest: EventTable links endpoint to /endpoints/:id detail page
+ok 24 - EventTable links endpoint to /endpoints/:id detail page
+  ---
+  duration_ms: 3.2492
+  type: 'test'
+  ...
+# Subtest: Events page uses the tested table for ready data and preserves frontend fields
+ok 25 - Events page uses the tested table for ready data and preserves frontend fields
+  ---
+  duration_ms: 5.7439
+  type: 'test'
+  ...
+# Subtest: EventTable preserves source time, escaped attribution and encoded endpoint identity
+ok 26 - EventTable preserves source time, escaped attribution and encoded endpoint identity
+  ---
+  duration_ms: 2.2472
+  type: 'test'
+  ...
+# Subtest: EventTable last server page retains all rows, their order and global pagination
+ok 27 - EventTable last server page retains all rows, their order and global pagination
+  ---
+  duration_ms: 5.3062
+  type: 'test'
+  ...
+# Subtest: live event adapter uses exact canonical query, session cookie and server page totals
+ok 28 - live event adapter uses exact canonical query, session cookie and server page totals
+  ---
+  duration_ms: 45.4249
+  type: 'test'
+  ...
+# Subtest: empty HTTP result stays empty; auth/server/network/HTML failures never become fixtures
+ok 29 - empty HTTP result stays empty; auth/server/network/HTML failures never become fixtures
+  ---
+  duration_ms: 6.7783
+  type: 'test'
+  ...
+# Subtest: cancelled live read makes no HTTP request
+ok 30 - cancelled live read makes no HTTP request
+  ---
+  duration_ms: 0.6987
+  type: 'test'
+  ...
+# Subtest: login verifies me and rotates CSRF; restored session supplies the logout token
+ok 31 - login verifies me and rotates CSRF; restored session supplies the logout token
+  ---
+  duration_ms: 4.7733
+  type: 'test'
+  ...
+# Subtest: invalid CSRF response prevents credentials from being submitted
+ok 32 - invalid CSRF response prevents credentials from being submitted
+  ---
+  duration_ms: 0.7271
+  type: 'test'
+  ...
+# Subtest: live filters use exact device/user identity and include the last nanosecond of local dates
+ok 33 - live filters use exact device/user identity and include the last nanosecond of local dates
+  ---
+  duration_ms: 3.3971
+  type: 'test'
+  ...
+# Subtest: invalid live filters are rejected instead of silently changing matching semantics
+ok 34 - invalid live filters are rejected instead of silently changing matching semantics
+  ---
+  duration_ms: 0.8034
+  type: 'test'
+  ...
+# Subtest: live pagination accepts boundary sizes and rejects invalid pages before fetching
+ok 35 - live pagination accepts boundary sizes and rejects invalid pages before fetching
+  ---
+  duration_ms: 0.6859
+  type: 'test'
+  ...
+# Subtest: live adapter rejects excess final-page rows rather than rendering a contradictory history
+not ok 36 - live adapter rejects excess final-page rows rather than rendering a contradictory history
+  ---
+  duration_ms: 2.223
+  type: 'test'
+  location: 'D:\\USBProtection\\frontend\\tests\\m5_live_api.test.mjs:114:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'rejects'
+  stack: |-
+    async file:///D:/USBProtection/frontend/tests/m5_live_api.test.mjs:116:5
+    async withFetch (file:///D:/USBProtection/frontend/tests/m5_live_api.test.mjs:14:9)
+    async TestContext.<anonymous> (file:///D:/USBProtection/frontend/tests/m5_live_api.test.mjs:115:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..36
+# tests 36
+# suites 0
+# pass 34
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3219.1709
+
+{"finished_at": "2026-10-21T22:33:35.362443+07:00", "exit_code": 1}

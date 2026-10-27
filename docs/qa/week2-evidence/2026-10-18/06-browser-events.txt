@@ -1,0 +1,21 @@
+M5 Week 2 non-Ubuntu completion verification
+Started: 2026-10-18T14:41:08.738520+07:00
+Timezone: Asia/Bangkok
+Base revision: e7b05fe972f07aa2d304dcd8e6cf21c664f4d085
+Branch: huy
+Source: working tree; current file hashes are in source-manifest.json.
+Command: npm run test:browser:live
+Working directory: D:\USBProtection\frontend
+Scope: Windows; isolated H2 and synthetic HTTP inputs. Ubuntu/physical USB/GUI not executed.
+
+
+> frontend@0.0.0 test:browser:live
+> node tests/browser-live.mjs
+
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.
+PASS: browser-injected 403/500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png
+LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.
+
+Finished: 2026-10-18T14:41:29.036350+07:00
+Exit code: 0

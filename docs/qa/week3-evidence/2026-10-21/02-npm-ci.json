@@ -1,0 +1,19 @@
+{
+  "command": [
+    "npm.cmd",
+    "ci",
+    "--offline",
+    "--no-audit",
+    "--no-fund"
+  ],
+  "command_text": "npm.cmd ci --offline --no-audit --no-fund",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:34:31.185248+07:00",
+  "scope": "Windows dependency installation from package-lock and local npm cache",
+  "source_manifest": "sources/7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34.json",
+  "source_tree_sha256": "7865381580fa73a037a2ce095b92db611b78c311b96c5ecd7b623c09d2a0ff34",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T22:34:51.645822+07:00"
+}

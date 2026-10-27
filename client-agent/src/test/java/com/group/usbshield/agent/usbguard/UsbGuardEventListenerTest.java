@@ -12,6 +12,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.group.usbshield.agent.notification.DesktopNotificationService;
+import com.group.usbshield.agent.session.ActiveUserInfo;
+import com.group.usbshield.agent.session.ActiveUserResolver;
+import com.group.usbshield.agent.system.SystemInfoProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -22,6 +32,7 @@ class UsbGuardEventListenerTest {
     private EndpointManager endpointManager;
     private SystemInfoProvider systemInfoProvider;
     private EventSenderService eventSenderService;
+    private DesktopNotificationService desktopNotificationService;
 
     private UsbGuardEventListener listener;
 
@@ -32,18 +43,13 @@ class UsbGuardEventListenerTest {
         endpointManager = mock(EndpointManager.class);
         systemInfoProvider = mock(SystemInfoProvider.class);
         eventSenderService = mock(EventSenderService.class);
+        desktopNotificationService = mock(DesktopNotificationService.class);
 
         when(endpointManager.getEndpointId()).thenReturn("EP-TEST-001");
         when(systemInfoProvider.getHostname()).thenReturn("ubuntu-test-lab");
 
         when(activeUserResolver.resolveCurrentActiveUser()).thenReturn(
-                ActiveUserInfo.builder()
-                        .username("student01")
-                        .uid(1001L)
-                        .sessionId("3")
-                        .sessionType("wayland")
-                        .seat("seat0")
-                        .build()
+                ActiveUserInfo.resolved("student01", 1001L, "3", "wayland", "seat0")
         );
 
         listener = new UsbGuardEventListener(
@@ -51,7 +57,8 @@ class UsbGuardEventListenerTest {
                 activeUserResolver,
                 endpointManager,
                 systemInfoProvider,
-                eventSenderService
+                eventSenderService,
+                desktopNotificationService
         );
     }
 
@@ -84,5 +91,36 @@ class UsbGuardEventListenerTest {
         assertEquals("1665", captured.getDevice().get("productId"));
         assertEquals("DataTraveler 2.0", captured.getDevice().get("name"));
         assertEquals("08:06:50", captured.getDevice().get("interface"));
+
+        // Xác nhận popup thông báo đã được kích hoạt
+        verify(desktopNotificationService, times(1)).notifyBlockedUsb(any(), any());
+    }
+
+    @Test
+    @DisplayName("Kiểm tra khử trùng lặp: Cắm 1 USB phát sinh 3 khối PresenceChanged, PolicyChanged, PolicyApplied -> Chỉ gửi DUY NHẤT 1 event")
+    void testDeduplicateFullWatchStream() {
+        String[] fullWatchStreamLines = {
+                "[device] PresenceChanged: id=11",
+                "event=Insert",
+                "target=block",
+                "device_rule=block id 0951:1665 serial \"C81F660E8BE8FFA14601FEF6\" name \"DataTraveler 2.0\" hash \"xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=\" parent-hash \"Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=\" via-port \"3-2\" with-interface 08:06:50 with-connect-type \"unknown\"",
+                "[device] PolicyChanged: id=11",
+                "target_old=block",
+                "target_new=block",
+                "device_rule=block id 0951:1665 serial \"C81F660E8BE8FFA14601FEF6\" name \"DataTraveler 2.0\" hash \"xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=\" parent-hash \"Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=\" via-port \"3-2\" with-interface 08:06:50 with-connect-type \"unknown\"",
+                "rule_id=4294967294",
+                "[device] PolicyApplied: id=11",
+                "target_new=block",
+                "device_rule=block id 0951:1665 serial \"C81F660E8BE8FFA14601FEF6\" name \"DataTraveler 2.0\" hash \"xfCC0uOLcks7yZarco6Jd3mAdADNaNbVBilp2NDHNyY=\" parent-hash \"Lw/Cdah32MiEGYi1D+rX5Vcs8544WKd6bqSOuVKqKn4=\" via-port \"3-2\" with-interface 08:06:50 with-connect-type \"unknown\"",
+                "rule_id=4294967294"
+        };
+
+        for (String line : fullWatchStreamLines) {
+            listener.processWatchLine(line);
+        }
+
+        // BẮT BUỘC chỉ được gọi đúng 1 lần duy nhất cho toàn bộ chuỗi cắm USB
+        verify(eventSenderService, times(1)).sendPayload(any());
+        verify(desktopNotificationService, times(1)).notifyBlockedUsb(any(), any());
     }
 }

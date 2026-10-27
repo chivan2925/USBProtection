@@ -1,0 +1,20 @@
+{
+  "command": [
+    "node",
+    "--experimental-strip-types",
+    "--test",
+    "tests/m5_event_api.test.mjs",
+    "tests/m5_live_api.test.mjs",
+    "tests/m5_events.test.mjs"
+  ],
+  "command_text": "node --experimental-strip-types --test tests/m5_event_api.test.mjs tests/m5_live_api.test.mjs tests/m5_events.test.mjs",
+  "cwd": "D:\\USBProtection\\frontend",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T22:33:32.031728+07:00",
+  "scope": "M5 regression before mapper correction; mocked Admin EventPage",
+  "source_manifest": "sources/671e1b581ad25a092d7e791ec5d5461a87edf718359833d763eccbf7c1a2396a.json",
+  "source_tree_sha256": "671e1b581ad25a092d7e791ec5d5461a87edf718359833d763eccbf7c1a2396a",
+  "exit_code": 1,
+  "finished_at": "2026-10-21T22:33:35.362443+07:00"
+}

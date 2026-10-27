@@ -1,0 +1,24 @@
+M5 Week 2 post-merge Windows environment
+Captured: 2026-10-16T16:42:40.9811884+07:00
+Timezone: Asia/Bangkok
+Revision: a9b1799e2920cba8b6d02fc1d7186fbc0bc59825
+Branch: huy
+OS: Microsoft Windows NT 10.0.26200.0
+PowerShell: 5.1.26100.9444
+Node: v22.20.0
+npm: 10.9.3
+Java executable for browser integration: C:\Program Files\Java\jdk-22\bin\java.exe
+Java version:
+java 22.0.2 2024-07-16
+Java(TM) SE Runtime Environment (build 22.0.2+9-70)
+Java HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)
+Browser executable: C:\Program Files\Google\Chrome\Application\chrome.exe
+Browser file version: 155.0.8059.80
+Backend JAR SHA256: 20E70663C2C88726F7916525886C6D1BDAD6850F86AFCEB98D32EF2D75C3A09B
+Backend artifact: existing admin-server/target/usbshield-admin-server.jar; not rebuilt in this documentation/evidence run.
+Maven: owner evidence reviewed; no new Maven execution in this capture.
+Application DB: locally modified and locked by an existing process; not opened, copied, reset or used by the test harnesses.
+Test DBs: separate temporary file-backed H2 databases under frontend/.artifacts/.
+Coverage: build/lint/72 tests; fixture browser; real management and Events browser integration.
+Data source: synthetic fixtures or authenticated HTTP QA inputs. Actual M3 runtime/Ubuntu/physical USB/native notification NOT EXECUTED.
+Human M4 approval: not recorded; technical handoff prepared separately.

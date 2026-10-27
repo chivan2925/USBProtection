@@ -1,0 +1,12 @@
+{
+  "command": [
+    "npm.cmd",
+    "run",
+    "test:browser"
+  ],
+  "started": "2026-10-18T14:40:59.789570+07:00",
+  "finished": "2026-10-18T14:41:08.594781+07:00",
+  "exit_code": 0,
+  "base_revision": "e7b05fe972f07aa2d304dcd8e6cf21c664f4d085",
+  "branch": "huy"
+}

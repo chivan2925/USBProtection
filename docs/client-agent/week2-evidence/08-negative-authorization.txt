@@ -1,0 +1,47 @@
+=== USBShield Client Agent - Negative & Security Authorization Evidence ===
+Module: Member 3 Transport & Security Handling
+Target: Admin Server Protection Boundaries
+
+--- 1. Missing or Invalid Agent Token ---
+Scenario: Rogue client calls protected endpoint /api/agent/policy without valid X-Agent-Token
+Request:
+  GET /api/agent/policy
+  X-Endpoint-Id: EP-6A72C3D9
+  X-Agent-Token: invalid-fake-token
+
+Response Status: 401 Unauthorized
+Client Log:
+[WARN] Failed to fetch policy: 401 Unauthorized: [Unauthorized agent token]
+
+--- 2. Spoofed Endpoint ID ---
+Scenario: Token for Endpoint A used to request policy for Endpoint B
+Request:
+  GET /api/agent/policy
+  X-Endpoint-Id: EP-DIFFERENT-B
+  X-Agent-Token: agt_for_endpoint_A
+
+Response Status: 403 Forbidden
+Client Log:
+[WARN] Failed to fetch policy: 403 Forbidden: [Endpoint credential mismatch]
+
+--- 3. Policy Apply Failure (Fail-Safe Defense) ---
+Scenario: USBGuard daemon returns error when applying corrupt rule fragment
+Trace:
+[INFO] Applying new policy version 2 with 1 whitelisted devices
+[ERROR] Failed to apply policy to USBGuard. Aborting version update and acknowledgment.
+Verification:
+- local applied policy version remains at previous version (e.g. 1)
+- NO false ACK request sent to Server
+- Server maintains appliedPolicyVersion=1 (no false positive compliance)
+
+--- 4. Temporary Network Drop During ACK Delivery ---
+Scenario: USBGuard applies rule successfully, but network connection drops right before POST /api/agent/policy/ack
+Trace:
+[INFO] Applying new policy version 2 with 1 whitelisted devices
+[INFO] Updated local applied policy version to 2 (marked as pending ACK)
+[WARN] Policy version 2 applied locally, but server ACK failed. Will retry on next heartbeat cycle.
+Recovery:
+Next heartbeat detects pending ACK for version 2:
+[INFO] Retrying pending policy ACK for version 2...
+[INFO] Pending policy ACK for version 2 successfully confirmed by server.
+[INFO] Cleared pending policy ACK

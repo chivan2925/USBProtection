@@ -13,4 +13,5 @@ public class EndpointRegistration {
     private String endpointId;
     private String agentToken;
     private Long currentPolicyVersion;
+    private Long pendingAckVersion;
 }

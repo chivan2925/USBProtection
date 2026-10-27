@@ -1,0 +1,20 @@
+{
+  "command": [
+    "mvn.cmd",
+    "-o",
+    "-B",
+    "-f",
+    "admin-server/pom.xml",
+    "package"
+  ],
+  "command_text": "mvn.cmd -o -B -f admin-server/pom.xml package",
+  "cwd": "D:\\USBProtection",
+  "branch": "huy",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "started_at": "2026-10-21T23:22:14.447559+07:00",
+  "scope": "Linux username substring regression: case/whitespace/literal wildcards, global pagination, UNKNOWN and legacy exact filter; isolated H2 and fresh JAR",
+  "source_manifest": "sources/91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934.json",
+  "source_tree_sha256": "91459287cb91aedb9e5b68aec8365e72c77890a35f47f74bfe291b02d2f5e934",
+  "exit_code": 0,
+  "finished_at": "2026-10-21T23:23:01.343163+07:00"
+}

@@ -89,6 +89,21 @@ excludes it from policy. Unknown/cross-endpoint entry returns 404.
 
 Event filters (exact match): `endpointId,linuxUsername,deviceId,decision,eventType`;
 `from,to` are inclusive ISO-8601 instants with timezone. Range applies to occurredAt.
+Week 3 name-search extension (2026-10-21): optional `endpoint` matches a
+case-insensitive literal substring of endpoint ID or the hostname displayed in
+EventResponse. Captured event hostname takes precedence; only legacy rows with
+a null hostname fall back to the registered endpoint name. Optional `device`
+matches a case-insensitive literal substring of `device.name`, or the exact
+positive numeric `usbDeviceId` (including historical rows missing device details).
+Leading/trailing whitespace is ignored; blank search fields add no predicate.
+`%`, `_` and backslash are literal characters, not user-provided SQL wildcards.
+Name searches combine with all other filters using AND and execute before
+counting/pagination. Existing exact `endpointId`/`deviceId` semantics are unchanged.
+The live Linux User filter sends optional `username`: a case-insensitive literal
+substring of the stored Linux username, with trimmed whitespace and escaped
+wildcard characters. It is filtered/counted before pagination and combines with
+other criteria using AND. Existing `linuxUsername` remains an exact-match
+parameter for callers that need it; neither parameter searches numeric Linux UID.
 `page` zero-based default 0; `size` default 20, range 1..100. Stable sort:
 occurredAt DESC, id DESC. Invalid range/enum/size → 400. Empty page remains real empty data.
 
@@ -101,45 +116,54 @@ model at the adapter boundary; no backend contract change or mock fallback.
 
 ## Errors
 
-JSON body: `{status:400,message:"Invalid request fields",timestamp:"...Z"}`.
-400 invalid JSON/validation/query; 401 missing/invalid credential; 403 forbidden
-identity/role or missing CSRF; 404 missing resource; 409 duplicate/conflicting data
-or policy version/identity; 503 enrollment disabled. Network failure has no HTTP
-response; retry is owned by Agent. Ingestion success means persisted, not USB allowed.
+### 6.1. Gửi Heartbeat thử nghiệm:
+```bash
+curl -X POST http://localhost:8080/api/agent/heartbeat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "endpointId": "POC-UNENROLLED-LAB-PC-01",
+    "hostname": "usbshield-lab",
+    "agentVersion": "1.0.0-SNAPSHOT",
+    "currentPolicyVersion": 1
+  }'
+```
 
-## Evidence and handoff
+### 6.2. Gửi sự kiện USB kèm Active User:
+```bash
+curl -X POST http://localhost:8080/api/agent/events \
+  -H "Content-Type: application/json" \
+  -d '{
+    "endpointId": "POC-UNENROLLED-LAB-PC-01",
+    "hostname": "usbshield-lab",
+    "linuxUsername": "usbdev",
+    "linuxUid": 1000,
+    "sessionId": "21",
+    "sessionType": "wayland",
+    "seat": "seat0",
+    "device": {
+      "vendorId": "093a",
+      "productId": "2510",
+      "serial": "",
+      "name": "USB Optical Mouse",
+      "hash": "L46bZEAKg59EA+puzjHMh8D4jLliJqK4sYxKSd/DRz8=",
+      "interface": "03:01:02"
+    },
+    "eventType": "CONNECTED",
+    "decision": "ALLOWED",
+    "occurredAt": "2026-09-28T14:10:16+07:00"
+  }'
+```
 
-[Week 2 server report](member1/WEEK2_SERVER_INTEGRATION.md).
-M3 must review policy field and ACK semantics; M4/M5 consume explicit DTO/paging and
-CSRF lifecycle. Cross-member sign-off and physical Ubuntu E2E must be recorded by
-those members; this document is not their approval.
+Ví dụ event trên phải khớp `docs/agent-contract/sample-usb-event.json` của M2: USB Optical Mouse (class `03:01:02`) được `ALLOWED`, session `21`. Đây là sample peripheral, không phải evidence chặn Flash Disk. Để gửi nguyên sample từ repo root, dùng:
 
+```bash
+curl -X POST http://localhost:8080/api/agent/events \
+  -H "Content-Type: application/json" \
+  --data-binary @docs/agent-contract/sample-usb-event.json
+```
 
-## Week 3 deployment/status addendum (2026-10-23)
-
-Wire routes and DTOs **unchanged from v0.2**. New endpoints start OFFLINE with
-`lastSeen=null` until an authenticated heartbeat. No synthetic enrollment timestamp.
-Existing rows retain their lastSeen and age out by the configured timeout.
-Malformed stored Agent hash, unsupported BCrypt cost, missing/oversized credentials
-fail with 401. Admin session and Agent credential boundaries remain separate.
-
-Build with `admin-server/build-release.ps1` (JDK 21/22, Maven, Node/npm with installed
-frontend dependencies), or run `npm run build` in frontend then
-`mvn -B -f admin-server/pom.xml -Pwith-frontend clean package` from root.
-The Maven profile copies dist into target/classes/static, not source-controlled static.
-The resulting JAR serves React and API at the same origin. The current frontend uses
-hash routes (`/#/events`); known plain navigation paths redirect to those routes.
-API paths and missing asset paths never fall back to index.html.
-
-Use `--spring.profiles.active=prod` with `USBSHIELD_DB_URL` (H2 file JDBC URL),
-`USBSHIELD_DB_PASSWORD`, `USBSHIELD_ENROLLMENT_TOKEN`, and first-account
-`USBSHIELD_ADMIN_PASSWORD` configured outside source. Optional username defaults admin.
-Bind defaults 127.0.0.1, PORT defaults 8080; change USBSHIELD_BIND_ADDRESS explicitly
-for LAN. Secure cookie defaults true; use HTTPS directly or via trusted local reverse
-proxy. Forwarded headers are not trusted by default. Only isolated HTTP tests should
-use `--server.servlet.session.cookie.secure=false`. No default production password
-is created. Existing account passwords are not overwritten by bootstrap.
-
-See [Week 3 M1 report](member1/WEEK3_SERVER_HARDENING.md) for Windows evidence and
-Ubuntu tests deferred until after Week 4. Bundling current frontend does not claim
-its live API adapter/auth UI integration is completed by M4/M5.
+### 6.3. Kéo chính sách Whitelist của Endpoint:
+```bash
+curl -X GET http://localhost:8080/api/agent/policy \
+  -H "X-Endpoint-Id: POC-UNENROLLED-LAB-PC-01"
+```

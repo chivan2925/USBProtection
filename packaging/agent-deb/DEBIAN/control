@@ -4,7 +4,7 @@ Section: admin
 Priority: optional
 Architecture: amd64
 Maintainer: USBShield Engineering Team
-Depends: openjdk-21-jre-headless, usbguard
+Depends: openjdk-21-jre-headless, usbguard, libnotify-bin
 Description: USBShield Client Protection Agent for Ubuntu
  USBShield Agent runs as a persistent system service to enforce per-endpoint
  USB whitelist policies, capture active user attribution, and forward events to

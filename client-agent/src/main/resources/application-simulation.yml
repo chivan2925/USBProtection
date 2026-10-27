@@ -1,0 +1,21 @@
+# Configuration for Local Development / Simulation Testing
+spring:
+  config:
+    activate:
+      on-profile: simulation
+
+usbshield:
+  agent:
+    server-url: ${USBSHIELD_SERVER_URL:http://localhost:8080}
+    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:default-enrollment-secret}
+    data-dir: ${USBSHIELD_DATA_DIR:./data}
+    config-dir: ${USBSHIELD_CONFIG_DIR:./config}
+    heartbeat-interval-ms: 5000
+    notification-enabled: true
+    # Simulation enabled for end-to-end synthetic testing
+    simulation-enabled: true
+
+logging:
+  level:
+    com.group.usbshield.agent: DEBUG
+    root: INFO

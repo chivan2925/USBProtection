@@ -54,8 +54,8 @@ graph TB
 ## 2. Các nguyên tắc kiến trúc cốt lõi (Core Architectural Principles)
 
 ### 2.1. Fail-Closed Principle (Nguyên tắc mặc định chặn)
-- Chính sách cơ bản của USBGuard trên máy Client là **Reject/Block theo mặc định** đối với toàn bộ thiết bị USB Mass Storage (Class `08`).
-- Chuột, bàn phím và các ngoại vi không phải lưu trữ được cấu hình trong Base Policy cho phép (`allow with-interface equals { 03:*:* }`).
+- Base policy thực tế trong `packaging/usbguard/rules-v0.1.conf` dùng `allow with-interface none-of { 08:*:* }`: cho phép thiết bị không có Mass Storage interface, bao gồm chuột/bàn phím class `03` và các ngoại vi không lưu trữ khác.
+- Thiết bị có Mass Storage interface (class `08`), kể cả composite Storage + HID, không khớp rule trên. Nếu không có rule allow cụ thể cho thiết bị đó, `ImplicitPolicyTarget=block` sẽ **BLOCK**. Các rule whitelist phải được tạo và duy trì riêng cho đúng endpoint.
 - **Khả năng tự trị khi mất mạng (Offline Resilience):** Khi Agent mất kết nối tới Admin Server, daemon USBGuard trên máy trạm vẫn thực thi chính sách đã lưu cục bộ (`/etc/usbguard/rules.conf`). Agent sẽ spool các sự kiện vào outbox cục bộ và đồng bộ lại khi kết nối phục hồi.
 
 ### 2.2. Per-Endpoint Whitelist (Chính sách Whitelist theo máy trạm)
@@ -161,7 +161,7 @@ erDiagram
 ### 5.1. Luồng phát hiện & chặn USB (Detection & Ingestion Flow)
 1. Người dùng cắm USB vào máy trạm Ubuntu.
 2. Kernel nhận diện và USBGuard daemon kích hoạt quy tắc kiểm tra.
-3. Nếu USB không nằm trong rules cho phép, USBGuard lập tức **BLOCK** thiết bị ở tầng nhân.
+3. Thiết bị không có class `08` khớp base allow rule. Mass Storage chưa có rule allow cụ thể sẽ rơi vào implicit **BLOCK** ở tầng nhân.
 4. `UsbGuardEventListener` trong Client Agent bắt được tín hiệu từ `usbguard watch`.
 5. `ActiveUserResolver` truy vấn `systemd-logind` để lấy session local đang active (user, uid, session type).
 6. Client Agent đóng gói `AgentEventRequest` và gửi `POST /api/agent/events` tới Admin Server.

@@ -1,0 +1,66 @@
+{
+  "captured_at": "2026-10-21T23:15:40.659457+07:00",
+  "base_revision": "dee3cf7753521c653a79e24cc848df384bf7b639",
+  "final_source_manifest": "sources/7b2d5816a95e6833d4a03958428dce092a549b0cd61a95f94d767df657d21e70.json",
+  "final_source_tree_sha256": "7b2d5816a95e6833d4a03958428dce092a549b0cd61a95f94d767df657d21e70",
+  "tested_sources_unchanged": true,
+  "frontend_test_lint_build_inputs_match_final_source": true,
+  "server_test_build_and_browser_sources_match": true,
+  "verified_local_links": 174,
+  "git_diff_check_exit_code": 0,
+  "artifacts": {
+    "admin-server/target/usbshield-admin-server.jar": {
+      "sha256": "d770548e549fb723ad9d078d9b090663d569185fcfee5164284560851520d270",
+      "bytes": 57214299
+    },
+    "frontend/dist/favicon.svg": {
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea",
+      "bytes": 354
+    },
+    "frontend/dist/icons.svg": {
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a",
+      "bytes": 5031
+    },
+    "frontend/dist/index.html": {
+      "sha256": "b40e5bfb1d4cb690365206e67acae792a9542b510d6e3281cf46f825048ca68d",
+      "bytes": 656
+    },
+    "frontend/dist/assets/index-C4xPVMoN.js": {
+      "sha256": "915f321738d6929c26b9c170daa4d2c4b2cd83a3138aef9fe21a6e97bdcfa6c0",
+      "bytes": 289011
+    },
+    "frontend/dist/assets/index-CWwGY5jO.css": {
+      "sha256": "8472db2bdae49837d905e0ff87f0945b6b4835625a3217d89a5addffe8aa1e55",
+      "bytes": 25437
+    }
+  },
+  "screenshots": {
+    "screenshots/events-name-search.png": {
+      "sha256": "1f9779bc321cc35dc26e63d501521dd71b0bd95e014f3c70559a9d9f7ea95b85",
+      "captured_at": "2026-10-21T23:11:50.984617+07:00",
+      "command": "08-browser-events.json"
+    },
+    "screenshots/events-week3-endpoint-b.png": {
+      "sha256": "ffe6426dc855d2758931b4aae11abf8e47e9e46e7fa61bf8388c9a0496af114f",
+      "captured_at": "2026-10-21T23:11:53.749704+07:00",
+      "command": "08-browser-events.json"
+    },
+    "screenshots/events-real-http-mobile.png": {
+      "sha256": "65bfdd84414828965fc3095aadbe41e48c5a827c1114960cbc30272f68998d02",
+      "captured_at": "2026-10-21T23:11:52.154624+07:00",
+      "command": "08-browser-events.json"
+    }
+  },
+  "documents_sha256": {
+    "docs/API.md": "f89fcb9041adbc48230dee798a31ab4d0257f16529fbdf40637d4f1dc36a67cb",
+    "docs/TEST_PLAN.md": "a9919ca1068121e175f5f58aa355df1cae172456e5af849c24eaad3744d572bb",
+    "docs/qa/EVENT_VIEW_MODEL_MAPPING.md": "eec1fed2d80fae475afa030decfbd32bb4cd0775e5bd58bd524647a9be79bd38",
+    "docs/qa/WEEK3_EVENT_NAME_SEARCH_FIX.md": "12079b2ac2714b2ac5ed365c913dba2b2a7f823bf8c0eef59f11ab72dff1ff0c",
+    "docs/qa/WEEK3_INTEGRATION_TEST_PLAN.md": "fe2b2e8466175262fecdf2e3b8a13e3cea072f7be795fe1e7f916ab67c134d4f",
+    "docs/qa/WEEK3_TEST_INVENTORY.md": "a780dc970a4b5261321ce8f2ec9349bac8e143b962da9e0ce401afcd256a079e",
+    "docs/qa/WEEK3_QA_SUMMARY.md": "6fba87237d70b46fa28d52ada1d21d8df32af9f8441ee3c9696b03190d833b36",
+    "docs/qa/week3-evidence/README.md": "9e974619013917f00ee0b819cfea72548d8dcfaa80c7ffa130a305dfdbd1f004",
+    "docs/qa/week3-evidence/2026-10-21/event-name-search/README.md": "1ca4d6faaa6181250d9f4101e9935d208904008a705345c8553e3725fa557866"
+  },
+  "application_database": "Already locked by user runtime; not opened, reset, stopped or hashed by this follow-up. Tests used isolated DBs."
+}

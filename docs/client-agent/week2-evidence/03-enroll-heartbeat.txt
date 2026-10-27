@@ -1,0 +1,48 @@
+=== USBShield Client Agent - Enrollment & Heartbeat Protocol Evidence ===
+Protocol: HTTP/1.1 REST (Spring RestClient)
+Target Server: http://192.168.1.10:8080 (or localhost:8080)
+Date: 2026-10-17
+
+--- 1. POST /api/agent/enroll ---
+Request Headers:
+  Content-Type: application/json
+Request Body:
+{
+  "hostname": "lab-pc-01",
+  "machineId": "3b7b848c464c4c47a5a87b7a12345678",
+  "ipAddress": "192.168.1.105",
+  "enrollmentToken": "default-enrollment-secret"
+}
+
+Response Status: 200 OK
+Response Body:
+{
+  "endpointId": "EP-6A72C3D9",
+  "agentToken": "agt_8f2a10b4712e48bb94553b1b6d09",
+  "currentPolicyVersion": 0
+}
+
+EndpointManager Log:
+[INFO] Endpoint successfully enrolled! Assigned ID: EP-6A72C3D9
+[INFO] Persisted credentials to /var/lib/usbshield-agent/endpoint.json
+
+--- 2. POST /api/agent/heartbeat (Normal Cycle) ---
+Request Headers:
+  X-Endpoint-Id: EP-6A72C3D9
+  X-Agent-Token: agt_8f2a10b4712e48bb94553b1b6d09
+  Content-Type: application/json
+Request Body:
+{
+  "endpointId": "EP-6A72C3D9",
+  "currentPolicyVersion": 0
+}
+
+Response Status: 200 OK
+Response Body:
+{
+  "status": "ONLINE",
+  "serverPolicyVersion": 0
+}
+
+HeartbeatCoordinator Log:
+[DEBUG] Heartbeat ACK from server: status=ONLINE, serverPolicyVersion=0

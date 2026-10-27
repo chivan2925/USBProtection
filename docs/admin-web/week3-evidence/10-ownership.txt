@@ -1,0 +1,36 @@
+PASS: all tracked changes and new deliverables belong to M4.
+UNCHANGED: admin-server/**, client-agent/**, packaging/**, M5 Event History and QA.
+UNCHANGED shared files: api.ts, browser.mjs, liveServer.mjs, package.json, package-lock.json, vite.config.ts.
+
+Changed/new paths:
+frontend/src/App.css
+frontend/src/App.tsx
+frontend/src/components/ConfirmDialog.tsx
+frontend/src/components/endpoint/EndpointWhitelistPanel.tsx
+frontend/src/hooks/AuthProvider.tsx
+frontend/src/hooks/useAuth.ts
+frontend/src/pages/Endpoints.tsx
+frontend/src/pages/Login.tsx
+frontend/src/services/mappers/endpointMapper.ts
+frontend/src/services/mappers/policyMapper.ts
+frontend/tests/m4_admin_api.test.mjs
+frontend/tests/m4_auth.test.mjs
+frontend/tests/m4_endpoints.test.mjs
+docs/ADMIN_GUIDE.md
+docs/admin-web/WEEK3_UI_UX_HARDENING.md
+docs/admin-web/week3-evidence/00-environment.json
+docs/admin-web/week3-evidence/01-lint.txt
+docs/admin-web/week3-evidence/02-tests.txt
+docs/admin-web/week3-evidence/03-build.txt
+docs/admin-web/week3-evidence/04-browser-fixture.txt
+docs/admin-web/week3-evidence/05-browser-real-backend.txt
+docs/admin-web/week3-evidence/06-browser-events-regression.txt
+docs/admin-web/week3-evidence/07-policy-real-backend.txt
+docs/admin-web/week3-evidence/08-clean-install.txt
+docs/admin-web/week3-evidence/09-source-sha256.txt
+docs/admin-web/week3-evidence/m4-current-ui.png
+docs/admin-web/week3-evidence/m4-live-allow-a.png
+docs/admin-web/week3-evidence/m4-live-expired-session.png
+docs/admin-web/week3-evidence/m4-mobile.png
+docs/admin-web/week3-evidence/m4-network.png
+frontend/tests/m4_policy_live.test.mjs
