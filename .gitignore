@@ -35,6 +35,9 @@ build/
 ### Local Agent Data & Spool ###
 client-agent/data/
 **/data/spool/
+# Runtime server state and enrollment credentials must never be committed.
+/admin-server/data/
+/data/endpoint.json
 *.deb
 packaging/staging/
 packaging/dist/
