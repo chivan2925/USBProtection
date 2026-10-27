@@ -2,9 +2,10 @@
 
 ## Current status — 2026-10-27
 
-Branch `huy`; tested revision `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [M3 follow-up](../WEEK3_M5_M3_FOLLOWUP_20261027.md).
+Branch `huy`; code tested at `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`; QA reviewed current head `fa19b3458fd063cdf9d59883885853759bd25fd2`, whose application-source tree is unchanged from the tested revision. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [M1 handoff](../../member1/WEEK3_SERVER_HARDENING.md), [M3 follow-up](../WEEK3_M5_M3_FOLLOWUP_20261027.md).
 
 - [M3 follow-up evidence](2026-10-27/m3-followup/README.md): Agent **122/122**, staging verifier **3/3**, static verifier with JAR and four shell parsers PASS. M5-W3-06 is resolved; M5-W3-07 is an open source-review finding.
+- [M1 handoff](../../member1/WEEK3_SERVER_HARDENING.md): H01 is acknowledged for Windows scope. It adds no executable source delta from the tested revision, so no test rerun is required; deployment secret rotation/re-enrollment remains external and **NOT VERIFIED**.
 - [Integrated regression commands](2026-10-24/integrated-regression/README.md): previous frontend/server/browser baseline, still applicable because those sources did not change in the M3 pull. Frontend **96**, server **26**, Agent then **117**, separate policy HTTP **1**.
 - [Environment](2026-10-24/integrated-regression/environment.json), [source manifest](2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json), [JUnit summary](2026-10-24/integrated-regression/junit-summary.json), [validation/artifacts](2026-10-24/integrated-regression/validation.json). Source SHA-256 `117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6`.
 - [Historical staging negative probe](2026-10-24/integrated-regression/staging-probe.json): recorded the defect that M3 resolved and M5 retested on 27/10.
@@ -12,7 +13,7 @@ Branch `huy`; tested revision `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`. [Inven
 
 The 24/10 command captures each have a UTF-8 text log and adjacent JSON with argv/cwd/revision/start/end +07:00/scope/source manifest/exit; the 27/10 M3 follow-up has its scoped command/result index and validation record. Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3, Vite 8.3.1, Chrome. Synthetic HTTP/ACK, unit/mock/static and default-profile packaged browser results do not prove Ubuntu/USB/GUI/production HTTPS behavior. QA H2/runtime are isolated; application DB is not used.
 
-**M5 Windows QA work complete; M5-W3-06 resolved; M5-W3-07 OPEN; group gate OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
+**M5 Windows QA work complete; H01 M1 acknowledged for Windows scope; M5-W3-06 resolved; M5-W3-07, H02 M4, and group gate OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
 
 ## Previous captures retained
 
