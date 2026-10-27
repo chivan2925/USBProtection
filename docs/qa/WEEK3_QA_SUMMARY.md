@@ -2,9 +2,9 @@
 
 ## Current status — 2026-10-27
 
-Branch `huy`; tested revision `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`. [Inventory](WEEK3_TEST_INVENTORY.md), [M3 follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md), [execution index](week3-evidence/2026-10-27/m3-followup/README.md), [demo draft](../DEMO_SCRIPT.md).
+Branch `huy`; code tested at `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba`; QA also reviewed current head `fa19b3458fd063cdf9d59883885853759bd25fd2`, whose application-source tree is unchanged from the tested revision. [Inventory](WEEK3_TEST_INVENTORY.md), [M1 handoff](../member1/WEEK3_SERVER_HARDENING.md), [M3 follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md), [execution index](week3-evidence/2026-10-27/m3-followup/README.md), [demo draft](../DEMO_SCRIPT.md).
 
-**M5 Windows testing and QA documentation complete. M3 resolves staging verifier M5-W3-06; Agent suite now passes 122 tests. M5-W3-07 policy-persistence/ACK source review remains OPEN. Group Week 3 gate OPEN. Ubuntu U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No new human owner acceptance or final release decision is recorded.
+**M5 Windows testing and QA documentation complete. M1 has recorded H01 acknowledgment for Windows scope; M3 resolves staging verifier M5-W3-06 and the Agent suite passes 122 tests. M5-W3-07, H02 M4, and the H05 group gate remain OPEN. Ubuntu U01–U09 are NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No final release decision is recorded.
 
 ### Fresh results on the integrated revision
 
@@ -26,12 +26,13 @@ Windows 11 amd64; JDK 22.0.2; Maven 3.9.11; Node 22.20.0; npm 10.9.3; Chrome. [M
 
 ### M5 completion and remaining owner work
 
-M5 Events source/tests and server/frontend remain unchanged by the latest pull; M2 core/session/notification changes and M3 tests/report/verifier were integrated. This QA follow-up verifies the M3 changes on `2885cf9` without M5 editing application/test/packaging source. Current QA docs, evidence index, demo draft and owner report are updated. [23/10 snapshot](WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) retains its original revision and 61-test Agent result; new results do not overwrite it.
+M5 Events source/tests and server/frontend remain unchanged by the latest pull; M2 core/session/notification changes and M3 tests/report/verifier were integrated. This QA follow-up verifies the M3 changes on `2885cf9` without M5 editing application/test/packaging source. The current pull adds the M1 acknowledgment document only, so it does not require a test rerun. Current QA docs, evidence index, demo draft and owner report are updated. [23/10 snapshot](WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) retains its original revision and 61-test Agent result; new results do not overwrite it.
 
 | Item | Current status | Next owner action |
 |---|---|---|
 | M5 Event UI/contracts/regression/evidence/docs/demo draft | **DONE for feasible Windows scope** | Retest affected areas when an owner changes source; Week 4 final guides/rehearsal remain scheduled separately. |
-| H01 M1 / H02 M4 | Technical tests/review PASS; owner acknowledgment not newly recorded | Owners confirm integrated contract/shared UI and handoff. |
+| H01 M1 server | **DONE for Windows scope; owner acknowledgment recorded** | [M1 handoff](../member1/WEEK3_SERVER_HARDENING.md) does not close H05 or Ubuntu acceptance. |
+| H02 M4 shared UI | Technical tests/review PASS; owner acknowledgment not newly recorded | M4 confirms integrated shared-UI handoff. |
 | H03 M2 core/session | **DONE for M5 review/execution**; report available and six new suites/48 tests PASS in real Maven | No longer waiting for source/report; hardware acceptance stays deferred. |
 | H04 M3 retry/packaging | M5-W3-06 and prior outbox/lifecycle review items retested PASS; **OPEN** M5-W3-07 and package provenance | Fix persistence/ACK failure path, then supply `.deb`/staging provenance when available. |
 | H05 M1 + group | **OPEN** | Record integrated revision, disposition of Windows P0/issues and group decision. |
@@ -42,6 +43,8 @@ M5 Events source/tests and server/frontend remain unchanged by the latest pull; 
 **M5-W3-06 — RESOLVED, M3.** The new staging-verifier suite passes 3/3: absent staging and incomplete staging reject, valid synthetic staging passes. The fresh static verifier also passes with the built Agent JAR. This validates verifier behavior, not an actual `.deb` staging build.
 
 **M5-W3-07 — OPEN, M3.** `EndpointManager` now returns persistence success/failure, but `PolicySyncService` and `HeartbeatCoordinator` ignore it before sending ACK or clearing pending ACK. A save failure can therefore leave non-durable state while the server is acknowledged. This is source-review evidence; it needs a failure-path regression and code correction. The former FIFO, exception, corrupt-file, restart, disk-write, enrollment-write, postinst-reporting and prerm-upgrade questions are covered or source-updated in the new M3 revision. `.deb`/real staging provenance remains **NOT BUILT / NOT VERIFIED**. Details are in the [M3 follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md).
+
+**Runtime-data hygiene — deployment follow-up, NOT VERIFIED.** The M1 handoff records that historical enrollment/runtime material must be treated as compromised. Rotation of the deployment bootstrap secret and re-enrollment of affected agents happen outside this repository; no QA evidence claims that either action occurred.
 
 A packaging script/report PASS label does not constitute group acceptance. The allowed eventual group label remains `WEEK 3 — PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED`, after owner decisions; FULL PASS is not claimed.
 
