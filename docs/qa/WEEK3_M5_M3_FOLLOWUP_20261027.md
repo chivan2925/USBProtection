@@ -2,7 +2,7 @@
 
 Reviewed revision: `2885cf9cfc30b841fb0e3d44d3fd281ea16350ba` on branch `huy`. M3 implementation commit under review: `8beb954edbdcdfb9071c52a91d4fb82e1e8522a7`. [Inventory](WEEK3_TEST_INVENTORY.md), [QA summary](WEEK3_QA_SUMMARY.md), [execution evidence](week3-evidence/2026-10-27/m3-followup/README.md).
 
-M3 fixed the staging-verifier defect recorded as M5-W3-06 and added Windows mock coverage for the outbox/enrollment gaps. M5 reran the Agent package and packaging checks. Group acceptance remains OPEN; Ubuntu cases remain `NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4`.
+M3 fixed the staging-verifier defect recorded as M5-W3-06 and added Windows mock coverage for the outbox/enrollment gaps. M5 reran the Agent package and packaging checks. This 27/10 record preserves the then-open M5-W3-07 finding; the [28/10 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md) records its resolution. Group acceptance remains OPEN; Ubuntu cases remain `NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4`.
 
 ## Verified M3 changes
 
@@ -15,7 +15,7 @@ M3 fixed the staging-verifier defect recorded as M5-W3-06 and added Windows mock
 | Packaging checks | Static verifier with the freshly built Agent JAR and four shell parsers pass. No `.deb`, staging tree, install, service, or reboot was executed. |
 | Diff hygiene | `git diff --check f80a936..HEAD` reports trailing whitespace only at `packaging/tests/test-staging-verifier.ps1:40`. This is a non-functional cleanup item and does not affect the executed verifier result. |
 
-## Open QA finding
+## Historical open QA finding — status on 2026-10-27
 
 **M5-W3-07 — OPEN, M3.** `EndpointManager.updateAppliedPolicyVersion()` and `clearPendingAck()` now return whether persistence succeeded, but `PolicySyncService` and `HeartbeatCoordinator` ignore those results. In particular, after USBGuard applies a policy, `PolicySyncService` calls `updateAppliedPolicyVersion(newVersion)` and can still send the server ACK when the save returned `false`. The pending-ACK durability claim therefore is not established on this failure path.
 
@@ -30,6 +30,6 @@ This is a source-review finding, not a newly reproduced runtime failure. Closure
 | Enrollment disk-write failure | **Covered by new unit test and rerun PASS** |
 | `postinst` restart reporting and `prerm` upgrade branch | **Source/static PASS; Ubuntu runtime remains deferred** |
 | `.deb` and real staging provenance | **NOT BUILT / NOT VERIFIED** in this workspace |
-| M5-W3-07 durable policy/ACK failure path | **OPEN** |
+| M5-W3-07 durable policy/ACK failure path | **OPEN on 2026-10-27; resolved on 2026-10-28** |
 
-The allowed group decision remains `WEEK 3 — PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED` only after M5-W3-07, owner reviews, and the group decision are resolved. This follow-up does not claim `FULL PASS`.
+This follow-up did not claim `FULL PASS`. The later [M3 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md) resolves M5-W3-07; H02, M3 package provenance, H05, and deferred Ubuntu acceptance remain open.
