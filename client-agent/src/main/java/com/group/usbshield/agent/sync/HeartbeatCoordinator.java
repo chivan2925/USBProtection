@@ -81,8 +81,12 @@ public class HeartbeatCoordinator {
                     .appliedPolicyVersion(pendingAck)
                     .build();
             if (adminServerClient.acknowledgePolicy(endpointId, agentToken, retryAck)) {
-                endpointManager.clearPendingAck();
-                log.info("Pending policy ACK for version {} successfully confirmed by server.", pendingAck);
+                boolean cleared = endpointManager.clearPendingAck();
+                if (cleared) {
+                    log.info("Pending policy ACK for version {} successfully confirmed by server and cleared from disk.", pendingAck);
+                } else {
+                    log.warn("Server confirmed policy ACK for version {}, but clearing pending ACK from disk failed. Retained for next cycle.", pendingAck);
+                }
             } else {
                 log.warn("Retry of pending policy ACK for version {} failed. Will retry on next heartbeat cycle.", pendingAck);
             }

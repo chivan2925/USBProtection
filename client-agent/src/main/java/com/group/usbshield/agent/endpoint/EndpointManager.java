@@ -139,6 +139,9 @@ public class EndpointManager {
 
     public synchronized boolean updateAppliedPolicyVersion(long newVersion) {
         if (currentRegistration != null) {
+            long prevVersion = currentRegistration.getCurrentPolicyVersion();
+            Long prevPending = currentRegistration.getPendingAckVersion();
+
             currentRegistration.setCurrentPolicyVersion(newVersion);
             currentRegistration.setPendingAckVersion(newVersion);
             boolean saved = saveRegistration();
@@ -146,7 +149,10 @@ public class EndpointManager {
                 log.info("Updated local applied policy version to {} (marked as pending ACK)", newVersion);
                 return true;
             } else {
-                log.error("Failed to persist updated policy version {} to disk", newVersion);
+                // Rollback in-memory state so memory does not diverge from disk state
+                currentRegistration.setCurrentPolicyVersion(prevVersion);
+                currentRegistration.setPendingAckVersion(prevPending);
+                log.error("Failed to persist updated policy version {} to disk. Rolled back in-memory state to version {}.", newVersion, prevVersion);
                 return false;
             }
         }
@@ -155,13 +161,16 @@ public class EndpointManager {
 
     public synchronized boolean clearPendingAck() {
         if (currentRegistration != null && currentRegistration.getPendingAckVersion() != null) {
+            Long prevPending = currentRegistration.getPendingAckVersion();
             currentRegistration.setPendingAckVersion(null);
             boolean saved = saveRegistration();
             if (saved) {
                 log.info("Cleared pending policy ACK");
                 return true;
             } else {
-                log.error("Failed to persist cleared pending ACK to disk");
+                // Rollback in-memory state so memory retains pending ACK for retry
+                currentRegistration.setPendingAckVersion(prevPending);
+                log.error("Failed to persist cleared pending ACK to disk. Retained pending ACK version {} for retry.", prevPending);
                 return false;
             }
         }
