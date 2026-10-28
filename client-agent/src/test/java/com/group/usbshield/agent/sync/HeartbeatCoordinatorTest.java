@@ -123,12 +123,43 @@ class HeartbeatCoordinatorTest {
                 .thenReturn(Optional.of(hbResp));
         when(adminServerClient.acknowledgePolicy(eq("EP-01"), eq("tok-01"), any(PolicyAckRequest.class)))
                 .thenReturn(true);
+        when(endpointManager.clearPendingAck()).thenReturn(true);
 
         coordinator.performHeartbeatCycle();
 
         ArgumentCaptor<PolicyAckRequest> captor = ArgumentCaptor.forClass(PolicyAckRequest.class);
         verify(adminServerClient).acknowledgePolicy(eq("EP-01"), eq("tok-01"), captor.capture());
         assertEquals(4L, captor.getValue().getAppliedPolicyVersion());
+        verify(endpointManager).clearPendingAck();
+    }
+
+    @Test
+    @DisplayName("performHeartbeatCycle handles clearPendingAck failure gracefully when server ACK succeeded")
+    void retryPendingAckHandlesClearFailureGracefully() {
+        EndpointRegistration reg = EndpointRegistration.builder()
+                .endpointId("EP-01")
+                .agentToken("tok-01")
+                .currentPolicyVersion(4L)
+                .pendingAckVersion(4L)
+                .build();
+
+        when(endpointManager.ensureEnrolled()).thenReturn(true);
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+
+        HeartbeatResponse hbResp = HeartbeatResponse.builder()
+                .status("ONLINE")
+                .serverPolicyVersion(4L)
+                .build();
+        when(adminServerClient.sendHeartbeat(any(), eq("tok-01")))
+                .thenReturn(Optional.of(hbResp));
+        when(adminServerClient.acknowledgePolicy(eq("EP-01"), eq("tok-01"), any(PolicyAckRequest.class)))
+                .thenReturn(true);
+        // Clear pending ACK fails on disk
+        when(endpointManager.clearPendingAck()).thenReturn(false);
+
+        assertDoesNotThrow(() -> coordinator.performHeartbeatCycle());
+
+        verify(adminServerClient).acknowledgePolicy(eq("EP-01"), eq("tok-01"), any(PolicyAckRequest.class));
         verify(endpointManager).clearPendingAck();
     }
 

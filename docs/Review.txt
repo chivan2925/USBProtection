@@ -1,0 +1,52 @@
+2. Các vấn đề chưa hoàn thành
+P0 — M3: Policy persistence và ACK chưa fail-safe
+Finding: M5-W3-07 — OPEN.
+
+Hai file liên quan:
+- PolicySyncService.java
+- HeartbeatCoordinator.java
+Trong PolicySyncService, sau khi USBGuard áp dụng policy:
+endpointManager.updateAppliedPolicyVersion(newVersion);
+
+
+Hàm này đã được M3 sửa để trả về boolean, nhưng caller không kiểm tra kết quả. Vì vậy, nếu lưu phiên bản policy xuống đĩa thất bại, Agent vẫn có thể gửi ACK cho Admin Server.
+
+Tương tự, HeartbeatCoordinator không kiểm tra kết quả clearPendingAck(). Trạng thái trong bộ nhớ có thể không khớp trạng thái được lưu bền vững.
+
+M3 cần: kiểm tra kết quả persistence trước khi ACK; ngăn mất pending ACK khi ghi đĩa thất bại; bảo đảm trạng thái trong bộ nhớ không bị đánh dấu thành công sai; bổ sung JUnit regression cho các tình huống này.
+
+Đây là lỗi xác định từ source, không cần Ubuntu để phát hiện.
+P1 — M4: Chưa xác nhận H02
+Các regression của M4 đã PASS nhưng báo cáo QA chưa ghi nhận xác nhận chính thức về shared UI, authentication, browser integration và contract với M1/M5.
+
+M4 cần: review phiên bản tích hợp hiện tại và ghi nhận handoff/acknowledgment cho H02. Không cần viết lại frontend nếu source không có lỗi mới.
+
+---
+
+3. Kết quả xử lý từ Member 3 (HuyBao - hbao)
+Finding: M5-W3-07 — RESOLVED (Đã khắc phục & bổ sung regression tests)
+
+Xác nhận đánh giá: Đánh giá của Leader là HOÀN TOÀN CHÍNH XÁC.
+Caller trước đây không kiểm tra boolean return từ persistence, dẫn đến nguy cơ gửi false-ACK và phân kỳ trạng thái giữa RAM và đĩa cứng.
+
+Các thay đổi đã thực hiện:
+1. `EndpointManager.java`:
+   - Bổ sung cơ chế rollback in-memory state (`currentPolicyVersion` và `pendingAckVersion`) về trạng thái cũ nếu `saveRegistration()` thất bại khi gọi `updateAppliedPolicyVersion()`.
+   - Trong `clearPendingAck()`, nếu ghi đĩa thất bại, giữ nguyên `pendingAckVersion` trong bộ nhớ để bảo toàn quyền thử lại ở nhịp kế tiếp.
+2. `PolicySyncService.java`:
+   - Kiểm tra kết quả trả về của `endpointManager.updateAppliedPolicyVersion(newVersion)`. Nếu lưu đĩa thất bại, ghi log error, lập tức hủy gửi ACK lên server và return `false`.
+   - Kiểm tra kết quả `endpointManager.clearPendingAck()` sau khi ACK thành công.
+3. `HeartbeatCoordinator.java`:
+   - Kiểm tra kết quả trả về của `clearPendingAck()` khi retry ACK trong nhịp heartbeat.
+4. Bổ sung 5 JUnit regression tests:
+   - `EndpointManagerTest.updateAppliedPolicyVersionRollsBackOnDiskWriteFailure`: Kiểm tra rollback bộ nhớ khi ghi đĩa thất bại.
+   - `EndpointManagerTest.clearPendingAckRollsBackOnDiskWriteFailure`: Kiểm tra không làm mất pending ACK trên RAM khi ghi đĩa thất bại.
+   - `PolicySyncServiceTest.testSyncPolicyPersistenceFailureAbortsAck`: Kiểm tra hủy gửi ACK khi persistence thất bại.
+   - `PolicyAckRecoveryTest.applySuccessButPersistenceFailureAbortsAck`: Kiểm tra toàn chu trình áp dụng rule thành công nhưng persistence thất bại thì hủy ACK.
+   - `HeartbeatCoordinatorTest.retryPendingAckHandlesClearFailureGracefully`: Kiểm tra xử lý an toàn khi clear pending ACK gặp lỗi đĩa.
+5. Kết quả kiểm thử Windows Scope:
+   - `mvn test -f client-agent/pom.xml`: 127/127 tests PASS (tăng từ 122 lên 127 tests).
+   - `mvn test -f admin-server/pom.xml`: 26/26 tests PASS.
+   - `npm test` (frontend): 96/96 tests PASS.
+   - `packaging/tests/verify-week3-windows.ps1`: PASS.
+   - `packaging/tests/test-staging-verifier.ps1`: 3/3 PASS.

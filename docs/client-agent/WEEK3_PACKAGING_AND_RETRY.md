@@ -72,20 +72,14 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
 * **Cơ chế phục hồi khi file hỏng:** Đã bổ sung kiểm thử xác minh khi file `endpoint.json` bị corrupt do sự cố mất điện đĩa cứng, Agent tự động bắt lỗi an toàn và kích hoạt lại quy trình `ensureEnrolled()` với Admin Server qua bootstrap token.
 * **Bảo đảm Fail-Safe Credential Persistence:** Hàm `ensureEnrolled()` chỉ trả về `true` khi và chỉ khi thông tin đăng ký đã được ghi bền vững thành công xuống đĩa (`saveRegistration()` thành công). Nếu gặp lỗi đĩa (full disk, permission denied), tiến trình enroll lập tức trả về `false` và hủy bỏ nạp registration trong bộ nhớ để bảo toàn trạng thái fail-safe.
 
-### 3.2. Cơ chế Xác nhận Chính sách (Pending Policy ACK Retry)
-* **Nguyên tắc No False-ACK:** Agent tuyệt đối chỉ gửi ACK lên Admin Server sau khi `UsbGuardGateway` thực sự áp dụng thành công bộ rule vào hạt nhân. Nếu USBGuard apply thất bại, Agent lập tức hủy gửi ACK.
-* **Duy trì Pending ACK khi mất kết nối:** Nếu USBGuard đã apply thành công nhưng request gửi ACK gặp sự cố rớt mạng (HTTP timeout / 500), `pendingAckVersion` sẽ được giữ nguyên trong bộ nhớ và ghi bền xuống đĩa.
-* **Tự động gửi lại trong chu kỳ Heartbeat kế tiếp:** Trong mỗi lần gửi heartbeat định kỳ (5 giây), `HeartbeatCoordinator` phát hiện có `pendingAckVersion` sẽ tự động thực hiện gửi lại request ACK. Khi Admin Server phản hồi 200 OK, `clearPendingAck()` mới được gọi.
-
-### 3.3. Hàng đợi Ngoại tuyến Bền vững (Durable Outbox Spooling)
-* Khi phát sinh sự kiện cắm/rút USB trong lúc Admin Server offline:
-  * Sự kiện được đóng gói và ghi thành các file riêng biệt `event_<timestamp>_<uuid>.json` trong thư mục `/var/lib/usbshield-agent/spool/`.
-  * Cơ chế FIFO (First-In, First-Out) đảm bảo thứ tự thời gian của sự kiện dựa trên timestamp file.
-* Khi kết nối mạng phục hồi (`drainOutbox`):
-  * **Tách biệt lỗi parse và lỗi gửi mạng:** Phân biệt rõ giữa file hỏng cấu trúc JSON (được dọn dẹp an toàn để tránh nghẽn hàng đợi) và lỗi truyền thông (network/server exception hoặc 5xx).
-  * **Bảo toàn sự kiện tuyệt đối:** Khi `sendEvent()` ném ngoại lệ hoặc trả về `false`, file sự kiện trên đĩa **TUYỆT ĐỐI KHÔNG BỊ XÓA**, tiến trình dừng ngay lập tức để bảo toàn thứ tự FIFO và bảo lưu cho chu kỳ kế tiếp.
-  * Chỉ khi server phản hồi thành công (`HTTP 200`), file sự kiện trên đĩa mới được xóa bỏ.
-  * Kiểm thử tự động chứng minh sự kiện lưu trên đĩa sống sót an toàn qua chu kỳ restart Agent.
+### 3.2. Cơ chế Xác nhận Chính sách Fail-Safe (Pending Policy ACK Retry & Persistence Verification)
+* **Nguyên tắc No False-ACK:** Agent tuyệt đối chỉ gửi ACK lên Admin Server sau khi `UsbGuardGateway` thực sự áp dụng thành công bộ rule vào hạt nhân VÀ phiên bản policy mới đã được ghi bền vững thành công vào đĩa (`endpointManager.updateAppliedPolicyVersion()` trả về `true`).
+* **Bảo toàn tính nhất quán Bộ nhớ - Đĩa (Fail-Safe Rollback):**
+  * Trong `EndpointManager`, nếu tiến trình ghi đĩa `saveRegistration()` thất bại, bộ nhớ lập tức được khôi phục (rollback) về phiên bản trước đó, ngăn chặn hoàn toàn hiện tượng phân kỳ trạng thái bộ nhớ và đĩa cứng.
+  * Trong `PolicySyncService`, nếu việc lưu bền vững thất bại, Agent lập tức hủy bỏ gửi ACK, bảo toàn `pendingAckVersion` và trả về `false`.
+  * Trong `HeartbeatCoordinator`, việc dọn dẹp pending ACK (`clearPendingAck()`) được kiểm tra chặt chẽ; nếu ghi đĩa thất bại, pending ACK vẫn được duy trì trong bộ nhớ để tiếp tục thử lại ở chu kỳ kế tiếp.
+* **Duy trì Pending ACK khi mất kết nối:** Nếu USBGuard đã apply thành công và đĩa đã lưu bền vững nhưng request gửi ACK gặp sự cố rớt mạng (HTTP timeout / 500), `pendingAckVersion` sẽ được giữ nguyên trong bộ nhớ và ghi bền xuống đĩa.
+* **Tự động gửi lại trong chu kỳ Heartbeat kế tiếp:** Trong mỗi lần gửi heartbeat định kỳ (5 giây), `HeartbeatCoordinator` phát hiện có `pendingAckVersion` sẽ tự động thực hiện gửi lại request ACK. Khi Admin Server phản hồi 200 OK và đĩa ghi thành công, `clearPendingAck()` mới hoàn tất.
 
 ---
 
@@ -98,7 +92,7 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
 ```text
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 122, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 127, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
@@ -113,15 +107,21 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
    * `fetchPolicyWithAlias` & `fetchPolicyServerError`: Deserialize chính sách và bắt lỗi 500 an toàn.
    * `acknowledgePolicySuccess` & `acknowledgePolicyFailure`: Xác nhận ACK thành công hoặc rớt mạng.
    * `sendEventSuccess` & `sendEventFailure`: Gửi sự kiện USB và xử lý lỗi mạng.
-2. `PolicyAckRecoveryTest` (3 tests):
+2. `PolicyAckRecoveryTest` (4 tests):
    * `applySuccessButAckFails`: USBGuard apply thành công nhưng ACK rớt mạng -> lưu `pendingAckVersion`.
    * `applyFailureAbortsAck`: USBGuard apply thất bại -> không gửi ACK, không cập nhật phiên bản local.
    * `applyAndAckSuccess`: Luồng thành công hoàn chỉnh -> xóa pending ACK.
-3. `HeartbeatCoordinatorTest` (6 tests):
+   * `applySuccessButPersistenceFailureAbortsAck`: USBGuard apply thành công nhưng ghi đĩa thất bại -> hủy gửi ACK, rollback state.
+3. `PolicySyncServiceTest` (3 tests):
+   * `testSyncPolicySuccess`: Quy trình đồng bộ và ACK thành công.
+   * `testSyncPolicyApplyFailure`: Áp dụng policy thất bại hủy bỏ ACK.
+   * `testSyncPolicyPersistenceFailureAbortsAck`: Áp dụng policy thành công nhưng lưu đĩa thất bại -> lập tức hủy ACK.
+4. `HeartbeatCoordinatorTest` (7 tests):
    * `retryPendingAckDuringHeartbeat`: Gửi lại ACK còn nợ trong nhịp heartbeat kế tiếp.
    * `retainPendingAckIfRetryFails`: Nếu gửi lại ACK vẫn bị lỗi mạng -> tiếp tục giữ pending ACK.
    * `serverUnreachableHandledGracefully`: Mất kết nối server hoàn toàn -> bỏ qua chu kỳ sync và outbox an toàn, không ném exception.
-4. `OutboxSpoolServiceTest` (7 tests - Hardened & Extended):
+   * `retryPendingAckHandlesClearFailureGracefully`: Xử lý an toàn khi clear pending ACK gặp sự cố đĩa.
+5. `OutboxSpoolServiceTest` (7 tests - Hardened & Extended):
    * `spoolPersistsFile`: Ghi file sự kiện ra đĩa.
    * `drainOutboxDeliversAndDeletes`: Đẩy sự kiện lên server theo thứ tự FIFO nghiêm ngặt và dọn dẹp file.
    * `drainOutboxPausesOnNetworkError`: Tạm dừng khi mạng đứt và giữ nguyên các file chưa gửi.
@@ -129,12 +129,14 @@ Dịch vụ được thiết kế với các tiêu chí an toàn cao:
    * `drainOutboxHandlesCorruptedJsonFile`: Dọn dẹp an toàn file JSON hỏng và tiếp tục xử lý các event hợp lệ còn lại.
    * `drainOutboxSurvivesRestart`: Quét và gửi bù chính xác các file sự kiện tồn tại từ phiên trước khi khởi động lại.
    * `spoolHandlesDiskWriteFailure`: Xử lý an toàn và trả `false` khi gặp sự cố ghi đĩa.
-5. `EndpointManagerTest` (5 tests - Hardened & Extended):
+6. `EndpointManagerTest` (7 tests - Hardened & Extended):
    * `ensureEnrolledSuccess`: Lưu thông tin đăng ký vào file `endpoint.json`.
    * `loadExistingRegistration`: Nạp lại thông tin sau khi khởi động lại mà không gọi API enroll.
    * `corruptedStorageFileReEnrolls`: Tự phục hồi khi file JSON trên đĩa bị hỏng.
    * `policyVersionAndPendingAckCycle`: Cập nhật phiên bản chính sách và chu kỳ xóa pending ACK.
    * `ensureEnrolledFailsSafelyOnDiskWriteError`: Từ chối đăng ký và hủy bỏ lưu memory nếu việc ghi file đĩa thất bại.
+   * `updateAppliedPolicyVersionRollsBackOnDiskWriteFailure`: Rollback bộ nhớ khi cập nhật policy version gặp lỗi ghi đĩa.
+   * `clearPendingAckRollsBackOnDiskWriteFailure`: Giữ nguyên pending ACK trong bộ nhớ nếu xóa trên đĩa thất bại.
 
 ---
 
@@ -237,4 +239,4 @@ Theo sự thống nhất trong kế hoạch kiểm thử Week 3 của cả nhóm
 3. **Bàn giao cho M5 (QA Lead):**
    * Script kiểm tra tĩnh: `packaging/tests/verify-week3-windows.ps1`
    * Báo cáo và hướng dẫn cài đặt: `docs/CLIENT_INSTALLATION.md`
-   * Suite kiểm thử Client: 117 tests tại `client-agent/src/test/java/`
+   * Suite kiểm thử Client: 127 tests tại `client-agent/src/test/java/`

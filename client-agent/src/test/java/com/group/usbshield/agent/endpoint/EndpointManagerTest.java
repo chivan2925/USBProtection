@@ -158,4 +158,56 @@ class EndpointManagerTest {
         assertFalse(enrolled, "Enrollment must be marked failed if credentials cannot be written to disk");
         assertNull(failManager.getCurrentRegistration(), "Registration must not be retained in memory when disk save fails");
     }
+
+    @Test
+    @DisplayName("updateAppliedPolicyVersion rolls back in-memory version on disk persistence failure")
+    void updateAppliedPolicyVersionRollsBackOnDiskWriteFailure() throws Exception {
+        EnrollmentResponse response = EnrollmentResponse.builder()
+                .endpointId("EP-01")
+                .agentToken("tok-01")
+                .currentPolicyVersion(1L)
+                .build();
+        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+        endpointManager.ensureEnrolled();
+
+        // Simulate disk write failure by replacing endpoint.json file with a directory
+        Path storageFile = tempDir.resolve("endpoint.json");
+        Files.deleteIfExists(storageFile);
+        Files.createDirectory(storageFile);
+
+        boolean updated = endpointManager.updateAppliedPolicyVersion(2L);
+        assertFalse(updated, "Must report failure when persistence to disk fails");
+        // Verify in-memory state was rolled back to previous valid values
+        assertEquals(1L, endpointManager.getCurrentRegistration().getCurrentPolicyVersion(),
+                "In-memory policy version must rollback to previous version on disk failure");
+        assertNull(endpointManager.getCurrentRegistration().getPendingAckVersion(),
+                "In-memory pending ACK must rollback to previous state on disk failure");
+    }
+
+    @Test
+    @DisplayName("clearPendingAck rolls back and retains pending ACK in memory when disk persistence fails")
+    void clearPendingAckRollsBackOnDiskWriteFailure() throws Exception {
+        EnrollmentResponse response = EnrollmentResponse.builder()
+                .endpointId("EP-01")
+                .agentToken("tok-01")
+                .currentPolicyVersion(1L)
+                .build();
+        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+        endpointManager.ensureEnrolled();
+
+        // Successfully update version to 2 (pendingAck = 2)
+        assertTrue(endpointManager.updateAppliedPolicyVersion(2L));
+        assertEquals(2L, endpointManager.getCurrentRegistration().getPendingAckVersion());
+
+        // Now simulate disk write failure by replacing endpoint.json with a directory
+        Path storageFile = tempDir.resolve("endpoint.json");
+        Files.deleteIfExists(storageFile);
+        Files.createDirectory(storageFile);
+
+        boolean cleared = endpointManager.clearPendingAck();
+        assertFalse(cleared, "clearPendingAck must return false when disk persistence fails");
+        // In-memory pendingAckVersion must NOT be lost, must retain 2L for retry
+        assertEquals(2L, endpointManager.getCurrentRegistration().getPendingAckVersion(),
+                "Pending ACK version must be retained in memory when disk write fails");
+    }
 }

@@ -70,8 +70,12 @@ public class PolicySyncService {
             return false;
         }
 
-        // Cập nhật version local và đánh dấu cần ACK
-        endpointManager.updateAppliedPolicyVersion(newVersion);
+        // Cập nhật version local và đánh dấu cần ACK (fail-safe persistence)
+        boolean persisted = endpointManager.updateAppliedPolicyVersion(newVersion);
+        if (!persisted) {
+            log.error("Failed to persist applied policy version {} to disk. Aborting acknowledgment to maintain fail-safe state.", newVersion);
+            return false;
+        }
 
         // Gửi ACK lên Server
         PolicyAckRequest ackRequest = PolicyAckRequest.builder()
@@ -80,8 +84,12 @@ public class PolicySyncService {
                 .build();
         boolean ackSuccess = adminServerClient.acknowledgePolicy(endpointId, agentToken, ackRequest);
         if (ackSuccess) {
-            endpointManager.clearPendingAck();
-            log.info("Policy synchronization to version {} completed and ACK confirmed by server.", newVersion);
+            boolean cleared = endpointManager.clearPendingAck();
+            if (cleared) {
+                log.info("Policy synchronization to version {} completed and ACK confirmed by server.", newVersion);
+            } else {
+                log.warn("Server confirmed ACK for version {}, but failed to clear pending ACK from disk. Will retry clearing on next cycle.", newVersion);
+            }
         } else {
             log.warn("Policy version {} applied locally, but server ACK failed. Will retry on next heartbeat cycle.", newVersion);
         }
