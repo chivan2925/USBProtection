@@ -240,3 +240,8 @@ Theo sự thống nhất trong kế hoạch kiểm thử Week 3 của cả nhóm
    * Script kiểm tra tĩnh: `packaging/tests/verify-week3-windows.ps1`
    * Báo cáo và hướng dẫn cài đặt: `docs/CLIENT_INSTALLATION.md`
    * Suite kiểm thử Client: 127 tests tại `client-agent/src/test/java/`
+
+
+## Week 3 final closeout overlay — 2026-10-28
+
+The root-extractable direct-file patch updates `packaging/agent-deb/DEBIAN/postinst` to validate exactly one active `ImplicitPolicyTarget=block`, reject conflicting/unsafe directives without overwriting foreign policy, and fail if USBGuard cannot start/restart. This is **NOT EXECUTED on Ubuntu**. M2/M3 must review before an Ubuntu installer run after Week 4; validate the updated shell syntax on Windows with `bash -n` or Git Bash. Historical PASS logs above predate this installer edit and are not fresh evidence for it. H05 remains pending final Windows execution evidence and group sign-off.
