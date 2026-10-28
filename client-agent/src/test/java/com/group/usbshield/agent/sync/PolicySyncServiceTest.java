@@ -55,12 +55,16 @@ class PolicySyncServiceTest {
 
         when(adminServerClient.fetchPolicy("EP-001", "token-123")).thenReturn(Optional.of(response));
         when(usbGuardGateway.applyWhitelist(anyList())).thenReturn(true);
+        when(endpointManager.updateAppliedPolicyVersion(2L)).thenReturn(true);
+        when(adminServerClient.acknowledgePolicy(eq("EP-001"), eq("token-123"), any())).thenReturn(true);
+        when(endpointManager.clearPendingAck()).thenReturn(true);
 
         boolean result = policySyncService.syncPolicy(registration);
 
         assertTrue(result);
         verify(endpointManager, times(1)).updateAppliedPolicyVersion(2L);
         verify(adminServerClient, times(1)).acknowledgePolicy(eq("EP-001"), eq("token-123"), any());
+        verify(endpointManager, times(1)).clearPendingAck();
     }
 
     @Test
@@ -92,5 +96,39 @@ class PolicySyncServiceTest {
         assertFalse(result, "Khi áp policy thất bại thì syncPolicy phải trả về false");
         verify(endpointManager, never()).updateAppliedPolicyVersion(anyLong());
         verify(adminServerClient, never()).acknowledgePolicy(anyString(), anyString(), any());
+    }
+
+    @Test
+    @DisplayName("Khi USBGuard áp dụng thành công nhưng LƯU ĐĨA THẤT BẠI -> HỦY GỬI ACK để tránh false-ACK")
+    void testSyncPolicyPersistenceFailureAbortsAck() {
+        EndpointRegistration registration = EndpointRegistration.builder()
+                .endpointId("EP-001")
+                .agentToken("token-123")
+                .currentPolicyVersion(1L)
+                .build();
+
+        PolicyResponse response = PolicyResponse.builder()
+                .policyVersion(2L)
+                .whitelistedDevices(List.of(
+                        WhitelistedDeviceDto.builder()
+                                .vendorId("0951")
+                                .productId("1665")
+                                .fingerprintValue("id 0951:1665")
+                                .build()
+                ))
+                .build();
+
+        when(adminServerClient.fetchPolicy("EP-001", "token-123")).thenReturn(Optional.of(response));
+        when(usbGuardGateway.applyWhitelist(anyList())).thenReturn(true);
+        // Giả lập lưu đĩa thất bại (disk full, permission denied, filesystem error)
+        when(endpointManager.updateAppliedPolicyVersion(2L)).thenReturn(false);
+
+        boolean result = policySyncService.syncPolicy(registration);
+
+        assertFalse(result, "Khi lưu version policy xuống đĩa thất bại thì syncPolicy phải trả về false để đảm bảo fail-safe");
+        verify(endpointManager, times(1)).updateAppliedPolicyVersion(2L);
+        // Bắt buộc TUYỆT ĐỐI KHÔNG được gửi ACK lên Server khi chưa lưu bền vững
+        verify(adminServerClient, never()).acknowledgePolicy(anyString(), anyString(), any());
+        verify(endpointManager, never()).clearPendingAck();
     }
 }
