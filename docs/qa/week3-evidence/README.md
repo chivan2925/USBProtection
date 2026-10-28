@@ -14,7 +14,7 @@ Branch `huy`; tested revision `39561907ef92f97234f449140bc394ddfe4f30e8`. [Inven
 
 The 24/10 command captures each have a UTF-8 text log and adjacent JSON with argv/cwd/revision/start/end +07:00/scope/source manifest/exit; the 27/10 M3 follow-up has its scoped command/result index and validation record. Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3, Vite 8.3.1, Chrome. Synthetic HTTP/ACK, unit/mock/static and default-profile packaged browser results do not prove Ubuntu/USB/GUI/production HTTPS behavior. QA H2/runtime are isolated; application DB is not used.
 
-**M5 Windows QA work complete; H01 M1 acknowledged for Windows scope; M5-W3-06 and M5-W3-07 resolved; H02 M4, M3 package provenance, and group gate OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
+**M5 Windows QA work complete; H01 M1 acknowledged for Windows scope; M5-W3-06 and M5-W3-07 resolved; H02 M4 DONE (owner acknowledged 2026-10-28); M3 package provenance and H05 group gate OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
 
 ## Previous captures retained
 

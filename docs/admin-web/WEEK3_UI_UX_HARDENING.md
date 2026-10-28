@@ -112,5 +112,5 @@ Dựa trên evidence tích hợp 24/10/2026 ([`week3-evidence/2026-10-24/integra
 ### Giới hạn — mục không nằm trong phạm vi H02
 
 - H05 (quyết định group `WEEK 3 — PASS (WINDOWS SCOPE)`) vẫn **OPEN** — M4 không tự đóng.
-- M5-W3-07 (M3 `PolicySyncService` / `HeartbeatCoordinator` ACK persistence fail-safe) — **OPEN, thuộc M3**.
+- M5-W3-07 (M3 `PolicySyncService` / `HeartbeatCoordinator` ACK persistence fail-safe) — **RESOLVED 2026-10-28, thuộc M3**; see `docs/qa/WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md`.
 - Ubuntu E2E, USB vật lý, systemd, reboot, native GUI: **DEFERRED UNTIL AFTER WEEK 4** — đúng theo kế hoạch nhóm.

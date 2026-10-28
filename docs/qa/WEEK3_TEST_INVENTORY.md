@@ -1,10 +1,14 @@
 # Week 3 test inventory — M5
 
+## Owner execution follow-up — 2026-10-28
+
+Owner-submitted Windows command output confirms staging verifier 3/3, static/JAR, frontend lint/build, 96/96 unit tests and three browser commands PASS. The owner additionally reports three Maven `BUILD SUCCESS` results; full Maven logs and exact tested local SHA are not attached. `npm ci` flagged **two high-severity security advisories** (triage outstanding); Vite emitted one cache `EPERM` during the 96/96 passing tests. Classification, provenance and next actions: [owner validation](WEEK3_OWNER_WINDOWS_VALIDATION_20261028.md). This supplements, but does not overwrite, the separately sourced 24/10 and 28/10 M5 execution evidence; H05 remains pending.
+
 ## Current status — 2026-10-28
 
 Updated: 2026-10-28 (Asia/Bangkok). Branch `huy`; tested revision `39561907ef92f97234f449140bc394ddfe4f30e8`. [Plan](WEEK3_INTEGRATION_TEST_PLAN.md), [QA summary](WEEK3_QA_SUMMARY.md), [M1 handoff](../member1/WEEK3_SERVER_HARDENING.md), [M3 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md), [previous M3 follow-up](WEEK3_M5_M3_FOLLOWUP_20261027.md).
 
-**M5 Event History and application regressions: PASS; H01 M1 Windows-scope acknowledgment: DONE; W3-P03 staging verifier and M5-W3-07 policy-persistence/ACK closure: PASS; H02 M4 and group gate: OPEN. Ubuntu E2E: NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** Implementation owner is distinct from the collector of these results; no final group acceptance is implied.
+**M5 Event History and application regressions: PASS; H01 M1 Windows-scope acknowledgment: DONE; W3-P03 staging verifier and M5-W3-07 policy-persistence/ACK closure: PASS; H02 M4: DONE (owner acknowledged 2026-10-28); H05 group gate: OPEN. Ubuntu E2E: NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** Implementation owner is distinct from the collector of these results; no final group acceptance is implied.
 
 Windows 11 amd64; JDK 22.0.2; Maven 3.9.11; Node 22.20.0; npm 10.9.3; Chrome. [M3 persistence-closure evidence](week3-evidence/2026-10-28/m3-persistence-closure/README.md) records the fresh Agent package and static-JAR checks on this revision. The [24/10 integrated regression](week3-evidence/2026-10-24/integrated-regression/README.md) remains valid for unchanged frontend/server/Event History source, but does not cover M3's new code. The previous [23/10 handoff snapshot](WEEK3_M5_HANDOFF_AND_STATUS_20261023.md) and all earlier raw logs are preserved; no old result is relabeled.
 
@@ -32,7 +36,7 @@ Windows 11 amd64; JDK 22.0.2; Maven 3.9.11; Node 22.20.0; npm 10.9.3; Chrome. [M
 | W3-P01 | M3 | Source/archive static | Week 3 verifier -CheckBuiltJar passes service/control/maintainer/live/helper and freshly built JAR checks | PASS | [M3 closure](week3-evidence/2026-10-28/m3-persistence-closure/README.md); source/archive assertions only; separate staging behavior is P03, no .deb/runtime claim |
 | W3-P02 | M3 | Shell syntax / Git Bash | Four scripts individually parse; none is executed as installer | PASS | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md); syntax-only result, not an install/runtime claim |
 | W3-P03 | M3; QA by M5 | Staging verifier negative/positive suite | Absent staging rejects, incomplete staging rejects, and complete synthetic staging passes | PASS | [M3 follow-up](week3-evidence/2026-10-27/m3-followup/README.md); M5-W3-06 resolved; no actual package staging or `.deb` claim |
-| W3-D01 | M5 | Documentation/provenance review | M1 H01 acknowledgment, M3 persistence closure, resolved staging finding and unchanged Ubuntu scope aligned across QA documents | PASS | [M1 handoff](../member1/WEEK3_SERVER_HARDENING.md), [M3 closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md); H02/H04/H05 remain open |
+| W3-D01 | M5 | Documentation/provenance review | M1 H01 acknowledgment, M3 persistence closure, resolved staging finding and unchanged Ubuntu scope aligned across QA documents | PASS | [M1 handoff](../member1/WEEK3_SERVER_HARDENING.md), [M3 closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md); H02 DONE; H04 `.deb` provenance and H05 remain open |
 
 Also exit 0: [locked install](week3-evidence/2026-10-24/integrated-regression/01-npm-ci.txt), [lint](week3-evidence/2026-10-24/integrated-regression/12-frontend-lint.txt), [TypeScript/Vite build](week3-evidence/2026-10-24/integrated-regression/13-frontend-build.txt). The standalone policy HTTP test is separate from the 96 frontend unit tests. M5 made no application or test-source changes during this QA follow-up. The M1 runtime-data hygiene handoff requires deployment bootstrap-secret rotation and affected-agent re-enrollment; those external actions are **NOT VERIFIED**. The 24/10 historical regression has four initial Git Bash launches that failed at the sandbox boundary (logs 03–06); permitted retries 07–10 passed. It contains 16 successful positive command runs, four resolved launch failures and one negative probe that exposed the now-resolved verifier defect.
 
@@ -50,7 +54,7 @@ Also exit 0: [locked install](week3-evidence/2026-10-24/integrated-regression/01
 | W3-U08 | M3/M2/M5 | Install/upgrade/uninstall/reinstall and retention/permissions | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
 | W3-U09 | M2/M3/M1/M5 | Physical no-serial hash identity/reconnect/enforcement | Not run | NOT EXECUTED / DEFERRED_UBUNTU |
 
-[M3 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md) records M5-W3-07 as resolved separately from the historical 27/10 finding. H01 is acknowledged for Windows scope; H02/H05 group reviews and Ubuntu cases are still open. No claim is made that all Week 3 P0 requirements are accepted. Full scenario steps remain in the plan.
+[M3 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md) records M5-W3-07 as resolved separately from the historical 27/10 finding. H01 and H02 owner handoffs are acknowledged for Windows scope; H05 group acceptance and Ubuntu cases remain open. No claim is made that all Week 3 P0 requirements are accepted. Full scenario steps remain in the plan.
 
 ---
 

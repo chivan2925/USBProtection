@@ -1,3 +1,7 @@
+SUPERSEDED HISTORICAL REVIEW — NOT THE CURRENT WEEK 3 GATE.
+See docs/qa/WEEK3_FINAL_OWNER_CLOSEOUT_PENDING.md and docs/qa/WEEK3_QA_SUMMARY.md for current status: H02 DONE, M5-W3-07 RESOLVED, H05 PENDING.
+The text below is preserved as historical review content.
+
 Kết quả review Week 3 — USBProtection
 Repository: chivan2925/USBProtection
 Nhánh: main
