@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# 1. Create dedicated system user/group if not exists
 if ! getent group usbshield >/dev/null; then
     groupadd --system usbshield
 fi
@@ -11,7 +10,6 @@ if ! getent passwd usbshield >/dev/null; then
             --shell /usr/sbin/nologin usbshield
 fi
 
-# 2. Setup directories and permissions
 mkdir -p /opt/usbshield-agent
 mkdir -p /etc/usbshield-agent
 mkdir -p /var/lib/usbshield-agent/spool
@@ -25,12 +23,10 @@ chmod 750 /etc/usbshield-agent
 chown -R usbshield:usbshield /var/lib/usbshield-agent
 chmod 700 /var/lib/usbshield-agent
 
-# 3. Add usbshield user to usbguard group for IPC access if applicable
 if getent group usbguard >/dev/null; then
     usermod -aG usbguard usbshield
 fi
 
-# 4. Setup runtime notifier socket directory and tmpfiles.d (Week 2 Unix Socket IPC)
 mkdir -p /run/usbshield-notifier
 chmod 1777 /run/usbshield-notifier
 
@@ -38,28 +34,41 @@ if [ -d /etc/tmpfiles.d ]; then
     echo "d /run/usbshield-notifier 1777 root root -" > /etc/tmpfiles.d/usbshield-notifier.conf
 fi
 
-# Clean up deprecated sudoers rule from Week 1 prototype if present
 if [ -f /etc/sudoers.d/usbshield ]; then
     rm -f /etc/sudoers.d/usbshield
 fi
 
-# Ensure launcher script executable if installed
 if [ -f /opt/usbshield-agent/usbshield-notifier-launcher.sh ]; then
     chmod 755 /opt/usbshield-agent/usbshield-notifier-launcher.sh
 fi
 
-# 5. Verify or configure USBGuard fail-closed state
 USBGUARD_CONF="/etc/usbguard/usbguard-daemon.conf"
-if [ -f "$USBGUARD_CONF" ]; then
-    if grep -q "^ImplicitPolicyTarget=allow" "$USBGUARD_CONF"; then
-        echo "WARNING: USBGuard daemon configured with ImplicitPolicyTarget=allow (fail-open). Overriding to fail-closed (block)..."
-        sed -i 's/^ImplicitPolicyTarget=allow/ImplicitPolicyTarget=block/' "$USBGUARD_CONF"
-    elif ! grep -q "^ImplicitPolicyTarget=" "$USBGUARD_CONF"; then
-        echo "ImplicitPolicyTarget=block" >> "$USBGUARD_CONF"
-    fi
+if [ ! -f "$USBGUARD_CONF" ]; then
+    echo "ERROR: Missing USBGuard daemon configuration at $USBGUARD_CONF; refusing to start USBShield without fail-closed policy." >&2
+    exit 1
 fi
 
-# Initialize default USBGuard rules if not present or empty
+active_targets="$(awk '
+    /^[[:space:]]*#/ { next }
+    /^[[:space:]]*ImplicitPolicyTarget[[:space:]]*=/ {
+        sub(/#.*/, "")
+        sub(/^[^=]*=/, "")
+        gsub(/[[:space:]]/, "")
+        if (length($0) > 0) print $0
+    }
+' "$USBGUARD_CONF")"
+
+usbguard_conf_updated=0
+if [ -z "$active_targets" ]; then
+    printf '\nImplicitPolicyTarget=block\n' >> "$USBGUARD_CONF"
+    usbguard_conf_updated=1
+    echo "Configured explicit USBGuard ImplicitPolicyTarget=block."
+elif [ "$active_targets" != "block" ]; then
+    echo "ERROR: Unsafe or ambiguous USBGuard ImplicitPolicyTarget setting: '$active_targets'." >&2
+    echo "Configure exactly one active 'ImplicitPolicyTarget=block' in $USBGUARD_CONF and retry installation." >&2
+    exit 1
+fi
+
 if [ ! -s /etc/usbguard/rules.conf ] && [ -f /etc/usbshield-agent/rules-v0.1.conf ]; then
     mkdir -p /etc/usbguard
     cp /etc/usbshield-agent/rules-v0.1.conf /etc/usbguard/rules.conf
@@ -67,10 +76,22 @@ if [ ! -s /etc/usbguard/rules.conf ] && [ -f /etc/usbshield-agent/rules-v0.1.con
     echo "Initialized default fail-closed USBGuard rules at /etc/usbguard/rules.conf"
 fi
 
-# 6. Reload systemd daemon and manage service lifecycle
 systemctl daemon-reload
 if systemctl is-enabled usbguard.service >/dev/null 2>&1 || systemctl enable usbguard.service; then
-    systemctl start usbguard.service || echo "WARNING: Could not start usbguard.service immediately."
+    if [ "$usbguard_conf_updated" -eq 1 ]; then
+        if ! systemctl restart usbguard.service; then
+            echo "ERROR: USBGuard could not restart after fail-closed configuration change." >&2
+            exit 1
+        fi
+    else
+        if ! systemctl start usbguard.service; then
+            echo "ERROR: USBGuard could not start; refusing to report a successful installation." >&2
+            exit 1
+        fi
+    fi
+else
+    echo "ERROR: Unable to enable USBGuard service." >&2
+    exit 1
 fi
 
 systemctl enable usbshield-agent.service

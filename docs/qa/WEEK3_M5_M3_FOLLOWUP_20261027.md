@@ -32,4 +32,4 @@ This is a source-review finding, not a newly reproduced runtime failure. Closure
 | `.deb` and real staging provenance | **NOT BUILT / NOT VERIFIED** in this workspace |
 | M5-W3-07 durable policy/ACK failure path | **OPEN on 2026-10-27; resolved on 2026-10-28** |
 
-This follow-up did not claim `FULL PASS`. The later [M3 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md) resolves M5-W3-07; H02, M3 package provenance, H05, and deferred Ubuntu acceptance remain open.
+This follow-up did not claim `FULL PASS`. The later [M3 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md) resolves M5-W3-07; H02 is now DONE (28/10 M4 owner acknowledgment); M3 package provenance, H05, and deferred Ubuntu acceptance remain open.

@@ -1,10 +1,16 @@
 # Week 3 QA summary — M5
 
+## Owner Windows verification received — 2026-10-28 (pending exact checkout SHA)
+
+The owner provided additional Windows output after the direct-file closeout package. **Reported `BUILD SUCCESS` for all three Maven commands**; the supplied PowerShell text directly shows packaging staging negative/positive 3/3 PASS, static/JAR inspection PASS, frontend `npm ci`, lint and build PASS, `npm test` **96/96 PASS**, and all three browser commands PASS. An incidental Vite cache `EPERM` appeared during the passing unit test run. `npm ci` reported **two high-severity advisories**, not yet triaged. See [owner validation](WEEK3_OWNER_WINDOWS_VALIDATION_20261028.md) for the exact evidence classification and limitations.
+
+These are **owner-reported runs**, not a new M5 independent test run. The user-local tested commit SHA and `git status` were not included, and Maven test counts cannot be inferred from the owner's brief build-success statement. H02 and M5-W3-07 remain resolved; H05 still requires exact revision, security triage and explicit group acceptance. Ubuntu E2E remains deferred until after Week 4.
+
 ## Current status — 2026-10-28
 
 Branch `huy`; tested revision `39561907ef92f97234f449140bc394ddfe4f30e8`. [Inventory](WEEK3_TEST_INVENTORY.md), [M1 handoff](../member1/WEEK3_SERVER_HARDENING.md), [M3 persistence closure](WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md), [execution index](week3-evidence/2026-10-28/m3-persistence-closure/README.md), [demo draft](../DEMO_SCRIPT.md).
 
-**M5 Windows testing and QA documentation complete. M1 has recorded H01 acknowledgment for Windows scope; M3 resolves M5-W3-06 and M5-W3-07, and the Agent suite passes 127 tests. H02 M4, M3 package provenance, and the H05 group gate remain OPEN. Ubuntu U01–U09 are NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No final release decision is recorded.
+**M5 Windows testing and QA documentation complete. M1 has recorded H01 acknowledgment for Windows scope; M3 resolves M5-W3-06 and M5-W3-07, and the Agent suite passes 127 tests. M3 package provenance and the H05 group gate remain OPEN. H02 M4 is DONE (owner acknowledgment 2026-10-28). Ubuntu U01–U09 are NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No final release decision is recorded.
 
 ### Fresh results on the integrated revision
 
@@ -32,7 +38,7 @@ M5 Events source/tests and server/frontend remain unchanged by the latest pull; 
 |---|---|---|
 | M5 Event UI/contracts/regression/evidence/docs/demo draft | **DONE for feasible Windows scope** | Retest affected areas when an owner changes source; Week 4 final guides/rehearsal remain scheduled separately. |
 | H01 M1 server | **DONE for Windows scope; owner acknowledgment recorded** | [M1 handoff](../member1/WEEK3_SERVER_HARDENING.md) does not close H05 or Ubuntu acceptance. |
-| H02 M4 shared UI | Technical tests/review PASS; owner acknowledgment not newly recorded | M4 confirms integrated shared-UI handoff. |
+| H02 M4 shared UI | **DONE** — M4 owner acknowledgment recorded 2026-10-28 | [M4 integrated shared-UI handoff](../admin-web/WEEK3_UI_UX_HARDENING.md); no additional M4 code changes required. |
 | H03 M2 core/session | **DONE for M5 review/execution**; report available and six new suites/48 tests PASS in real Maven | No longer waiting for source/report; hardware acceptance stays deferred. |
 | H04 M3 retry/packaging | M5-W3-06 and M5-W3-07 are retested PASS; **OPEN** package provenance only | Supply `.deb`/staging provenance when available. |
 | H05 M1 + group | **OPEN** | Record integrated revision, disposition of Windows P0/issues and group decision. |
