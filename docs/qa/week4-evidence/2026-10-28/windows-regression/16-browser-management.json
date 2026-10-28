@@ -1,0 +1,91 @@
+{
+  "id": "16-browser-management",
+  "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "revisionAfter": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceTreeSHA256After": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\npm.cmd",
+  "args": [
+    "run",
+    "test:live"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-Command",
+      "& 'C:\\Program Files\\nodejs\\npm.cmd' 'run' 'test:live'; exit $LASTEXITCODE"
+    ]
+  },
+  "startedAt": "2026-10-28T12:50:24.587Z",
+  "endedAt": "2026-10-28T12:51:17.838Z",
+  "startedAtBangkok": "2026-10-28 19:50:24 +07:00",
+  "endedAtBangkok": "2026-10-28 19:51:17 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "f4fef2c9bb24fbfd3874d6101cc45e3225dbd4b7c93b7dada7558962c4a23c45",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "bde4c43c61bc0a09db1cb48b8a0bbc4a946b549389ee2b8aa8df29b0852e7831",
+  "screenshots": [
+    {
+      "path": "screenshots/16-browser-management/m4-live-allow-a.png",
+      "sha256": "07c7a561b6326cb95c5e75467b1b97fb181ce34e54544fdde48320069483d82f",
+      "bytes": 119318,
+      "modifiedAt": "2026-10-28T12:50:53.067Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-dashboard.png",
+      "sha256": "de50cd2c3e60b99cc789221e7c3ae0e23b3a716fbc7a7a4308ff39c9f03126dc",
+      "bytes": 171521,
+      "modifiedAt": "2026-10-28T12:50:51.066Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-empty.png",
+      "sha256": "be1fa48b914201486341949a1f7f7e95ec1716b445d29ec9f1b55193a1a0743c",
+      "bytes": 177811,
+      "modifiedAt": "2026-10-28T12:50:49.976Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-events.png",
+      "sha256": "fd1134c6580942156ec376dcc2faf7bb5d49400a8946bc5cf2dc107ddff300e9",
+      "bytes": 73615,
+      "modifiedAt": "2026-10-28T12:50:55.480Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-expired-session.png",
+      "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6",
+      "bytes": 41529,
+      "modifiedAt": "2026-10-28T12:51:16.096Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-http-ack.png",
+      "sha256": "52fa16daa40b194638ea96feca522d2a287cb536ee94cb429af2c46cc6c26194",
+      "bytes": 117723,
+      "modifiedAt": "2026-10-28T12:50:54.235Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-login.png",
+      "sha256": "5410d8c3ff94c90ac48b2b4633610796b51f5f350a48d5a35a0ec4f30564936d",
+      "bytes": 291140,
+      "modifiedAt": "2026-10-28T12:50:48.805Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-mobile.png",
+      "sha256": "9a881094869a3b876ae24befd429262e92064e508d37d5e416cfb8127693eee4",
+      "bytes": 44687,
+      "modifiedAt": "2026-10-28T12:50:55.623Z"
+    },
+    {
+      "path": "screenshots/16-browser-management/m4-live-revoke-a.png",
+      "sha256": "6a9fa1e5fb05c6d763d7423c9895769831c6c4d927c9203cae468ac84e480f8b",
+      "bytes": 116532,
+      "modifiedAt": "2026-10-28T12:50:55.202Z"
+    }
+  ],
+  "junit": []
+}

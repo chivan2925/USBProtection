@@ -1,0 +1,12 @@
+
+> frontend@0.0.0 pretest:live
+> node tests/apply-browser-readiness-fix.mjs
+
+frontend/tests/browser.mjs: HTTP readiness fix already applied.
+
+> frontend@0.0.0 test:live
+> node tests/browser.mjs --live
+
+PASS: real Spring Boot/Spring Security + file-backed H2; browser invalid/valid login, empty data, session reload, endpoint/event mapping, A Allow/idempotency/Revoke, B isolation, CSRF rejection, policy fetch, controlled HTTP ACK display, persistence after restart, expired session, logout, mobile.
+{"endpointA":"EP-15f261ef-798b-4c45-9d28-c329f2ea26f2","endpointB":"EP-14d269d1-65ca-456c-8e9e-74662834da29","beforeA":{"endpointId":"EP-15f261ef-798b-4c45-9d28-c329f2ea26f2","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-28T12:50:50.164407Z","policyVersion":1,"appliedPolicyVersion":0},"allowedA":{"endpointId":"EP-15f261ef-798b-4c45-9d28-c329f2ea26f2","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-28T12:50:50.164407Z","policyVersion":2,"appliedPolicyVersion":0},"revokedA":{"endpointId":"EP-15f261ef-798b-4c45-9d28-c329f2ea26f2","hostname":"m4-live-ubuntu-a","ipAddress":null,"status":"ONLINE","lastSeen":"2026-10-28T12:50:50.164407Z","policyVersion":3,"appliedPolicyVersion":2},"persistedDesired":3,"persistedApplied":2,"eventCount":1}
+NOT EXECUTED: actual M3 Agent apply/ACK, Ubuntu USBGuard enforcement, physical USB, native notification. Events and HTTP ACK above are synthetic inputs to real backend.

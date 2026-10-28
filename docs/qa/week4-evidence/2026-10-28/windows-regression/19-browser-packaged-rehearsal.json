@@ -1,0 +1,82 @@
+{
+  "id": "19-browser-packaged-rehearsal",
+  "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "revisionAfter": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceTreeSHA256After": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "docs/qa/scripts/rehearse-week4.mjs"
+  ],
+  "launch": {
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "docs/qa/scripts/rehearse-week4.mjs"
+    ]
+  },
+  "startedAt": "2026-10-28T13:00:42.812Z",
+  "endedAt": "2026-10-28T13:01:23.747Z",
+  "startedAtBangkok": "2026-10-28 20:00:42 +07:00",
+  "endedAtBangkok": "2026-10-28 20:01:23 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "f4fef2c9bb24fbfd3874d6101cc45e3225dbd4b7c93b7dada7558962c4a23c45",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "bee96e7fbc123c4075f97de65736a7edbc3960d32cb34fb15eacffd6cc2cd457",
+  "screenshots": [
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-name-search.png",
+      "sha256": "b8e6232cfe30341151f64dc331b47feccaa1d87dc71a40c657ecaf01fb2c2fc2",
+      "bytes": 203781,
+      "modifiedAt": "2026-10-28T13:01:13.725Z"
+    },
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-real-http-date-filter.png",
+      "sha256": "607ce09892135c04dd901cb0bf15498a36397e9cedb4a7dacdf41ad2c5fd81de",
+      "bytes": 203545,
+      "modifiedAt": "2026-10-28T13:01:14.846Z"
+    },
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-real-http-desktop.png",
+      "sha256": "a9455437c51e6f8ae67815a203ede6a90c1701295ad3f8865c3af7c9a0ac9ac6",
+      "bytes": 203535,
+      "modifiedAt": "2026-10-28T13:01:10.445Z"
+    },
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-real-http-mobile.png",
+      "sha256": "a6eaef6e725771cd2d19ab71f999a1e524159b1330f6afdf5256564195e4ccd4",
+      "bytes": 117635,
+      "modifiedAt": "2026-10-28T13:01:15.905Z"
+    },
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-username-substring.png",
+      "sha256": "974cb7b6c538f58a2561867f6cb860e3f530323284c03abacc7aa3802151d042",
+      "bytes": 76708,
+      "modifiedAt": "2026-10-28T13:01:18.143Z"
+    },
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-week3-endpoint-a.png",
+      "sha256": "28bd53c313929a9b2fb3b0197a3918f045478fb88671199ce2a345a8b17667a7",
+      "bytes": 75753,
+      "modifiedAt": "2026-10-28T13:01:20.750Z"
+    },
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-week3-endpoint-b.png",
+      "sha256": "4cc41d009af7aa6cdf8c4d719d6cd833e77f1b2126df918f44d01b55c660b874",
+      "bytes": 69787,
+      "modifiedAt": "2026-10-28T13:01:19.460Z"
+    },
+    {
+      "path": "screenshots/19-browser-packaged-rehearsal/events-week3-unknown-no-serial.png",
+      "sha256": "5f60668e7f0b6a22641ebbcfa0868fce71725127ba64a6d0555c586ced8f30eb",
+      "bytes": 68951,
+      "modifiedAt": "2026-10-28T13:01:18.517Z"
+    }
+  ],
+  "junit": []
+}

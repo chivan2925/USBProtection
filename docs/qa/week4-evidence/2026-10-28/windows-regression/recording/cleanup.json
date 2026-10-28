@@ -1,0 +1,23 @@
+{
+  "terminationConfirmed": true,
+  "runtimeRetained": false,
+  "children": [
+    {
+      "pid": 30440,
+      "killError": {
+        "code": 128,
+        "message": "Command failed: taskkill /PID 30440 /T /F\nERROR: The process with PID 35260 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\nERROR: The process with PID 1792 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\nERROR: The process with PID 28588 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\nERROR: The process with PID 22200 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\nERROR: The process with PID 28468 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\nERROR: The process with PID 35616 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\nERROR: The process with PID 34164 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\nERROR: The process with PID 34768 (child process of PID 30440) could not be terminated.\r\nReason: There is no running instance of the task.\r\r\n"
+      },
+      "exitCode": 1,
+      "signalCode": null,
+      "confirmed": true
+    },
+    {
+      "pid": 12240,
+      "killError": null,
+      "exitCode": 1,
+      "signalCode": null,
+      "confirmed": true
+    }
+  ]
+}

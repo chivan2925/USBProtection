@@ -1,0 +1,43 @@
+{
+  "id": "08-packaging-static",
+  "scope": "Static service/config/helper and current executable Agent JAR; no install",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "revisionAfter": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceTreeSHA256After": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "powershell.exe",
+  "args": [
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "packaging/tests/verify-week3-windows.ps1",
+    "-CheckBuiltJar"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "packaging/tests/verify-week3-windows.ps1",
+      "-CheckBuiltJar"
+    ]
+  },
+  "startedAt": "2026-10-28T12:44:27.719Z",
+  "endedAt": "2026-10-28T12:44:30.586Z",
+  "startedAtBangkok": "2026-10-28 19:44:27 +07:00",
+  "endedAtBangkok": "2026-10-28 19:44:30 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "9e0a3f57ad171fce7010cbf2f5b00a06a3fa886fdc1cf69833ddba4bba9fe408",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "aa5e1fa00fd05c76b9e8712972425b5dc0b9452d0230323fa7d807c2754fa9c5",
+  "screenshots": [],
+  "junit": []
+}

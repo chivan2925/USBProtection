@@ -1,0 +1,38 @@
+{
+  "id": "01-npm-ci",
+  "scope": "Locked dependency installation; offline cache only",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "revisionAfter": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceTreeSHA256After": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\npm.cmd",
+  "args": [
+    "ci",
+    "--offline",
+    "--no-audit",
+    "--no-fund"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-Command",
+      "& 'C:\\Program Files\\nodejs\\npm.cmd' 'ci' '--offline' '--no-audit' '--no-fund'; exit $LASTEXITCODE"
+    ]
+  },
+  "startedAt": "2026-10-28T12:42:33.795Z",
+  "endedAt": "2026-10-28T12:43:25.457Z",
+  "startedAtBangkok": "2026-10-28 19:42:33 +07:00",
+  "endedAtBangkok": "2026-10-28 19:43:25 +07:00",
+  "exitCode": 1,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "FAIL",
+  "runnerSHA256": "9e0a3f57ad171fce7010cbf2f5b00a06a3fa886fdc1cf69833ddba4bba9fe408",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "6024a0cee40b3cc0b764172a154e8ab8938baaa28ae2b976b1af16be2f348370",
+  "screenshots": [],
+  "junit": []
+}
