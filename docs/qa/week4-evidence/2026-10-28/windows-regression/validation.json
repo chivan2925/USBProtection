@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "validatedAtBangkok": "2026-10-28T20:07:36.839435+07:00",
+  "command": {
+    "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/validate-week4.py"
+    ],
+    "cwd": "D:\\USBProtection"
+  },
+  "sourceRevision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "validatorSHA256": "5649b389d243bd37ffc31c160e88e7f58bb8af127b99a8b142ec3c0b1988ce56",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "successfulChecks": 18,
+  "resolvedEnvironmentFailures": [
+    {
+      "capture": "01-npm-ci",
+      "reason": "ENOTCACHED",
+      "resolvedBy": "07-npm-ci-registry"
+    }
+  ],
+  "tests": {
+    "client-agent": {
+      "tests": 127,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "admin-server": {
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "frontend": {
+      "tests": 96,
+      "passed": 96,
+      "failed": 0
+    },
+    "policy-http": {
+      "tests": 1,
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "screenshots": 39,
+  "recordings": [
+    {
+      "path": "recording",
+      "status": "CAPTURED",
+      "frames": 207,
+      "bytes": 6764775,
+      "durationMs": 10585.438,
+      "capped": false,
+      "scope": "Actual browser recording, Windows, isolated H2, synthetic HTTP QA events; no audio; no encoded video file; no physical USB or Ubuntu claim."
+    }
+  ],
+  "recordingAttempts": [
+    {
+      "path": "recording",
+      "status": "PASS",
+      "exitCode": 0
+    }
+  ],
+  "packagedFrontendAssetMatches": 5,
+  "historicalEvidenceUnchanged": true,
+  "trackedApplicationUnchanged": true,
+  "brokenDocumentationLinks": [],
+  "credentialPatternScan": "PASS for captured text; synthetic screenshot/replay data separately reviewed",
+  "limits": "Windows technical checks only. Candidate/owner handoffs pending; Ubuntu E2E NOT EXECUTED/DEFERRED. No narrated or encoded video."
+}

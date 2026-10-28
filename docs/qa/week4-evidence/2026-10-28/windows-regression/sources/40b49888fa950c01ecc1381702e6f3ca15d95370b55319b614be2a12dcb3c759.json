@@ -1,0 +1,921 @@
+{
+  "treeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "files": [
+    {
+      "path": "admin-server/.mvn/wrapper/maven-wrapper.properties",
+      "sha256": "1f3cf0a7111d2b54736d1f89d7e93f1f143f8b3d5a58a5bb46e3b60b3eebd931"
+    },
+    {
+      "path": "admin-server/build-release.ps1",
+      "sha256": "1aefee5996c0e5ddce0c2d1447399b628da1dc53e59eafe9eca6ddf89ad2ac0a"
+    },
+    {
+      "path": "admin-server/mvnw",
+      "sha256": "b1ef6ce14df54e6f8552734080184b18f78b0a0c61ed80c08d7d78b254e44941"
+    },
+    {
+      "path": "admin-server/mvnw.cmd",
+      "sha256": "46eedb8419bd14fe70d5bb2916d7b6f51806e51b39d5b76a42610384ca929c1c"
+    },
+    {
+      "path": "admin-server/pom.xml",
+      "sha256": "bf8bc51b74c4309a6d466fe3e4f2771a46ec65787dd7a53e50bbf9d5310fe4c4"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/UsbShieldServerApplication.java",
+      "sha256": "ff7ccba63dbae8954fe94c3551eb1c6f387ef2771b83ccc6e1512036b7ec84ad"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentAuthenticationFilter.java",
+      "sha256": "1b0eeb9bc40351d36d704ee9050810a3ec4ddbc4489728ff442d7a5baff861c4"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentCredentialService.java",
+      "sha256": "25d7292c50968255f1ace523501ae1bfea67094c65d617a0667b03b7aa9ef545"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEnrollmentController.java",
+      "sha256": "86900ee43d12a17c3ef1bbf033463f07c1b1e3214418205d8969f7a764ec23c2"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEventController.java",
+      "sha256": "7c0579d18d14c1f5bc1d9c130c118fdd07efe70b213ea6c67dbe6cb3302ec69e"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentHeartbeatController.java",
+      "sha256": "31c0d124a62680f0118c83fda411e5f0d091e9d70b98d70d689f9d22df19e75e"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEnrollmentRequest.java",
+      "sha256": "048d1f744fe31fde0261eebefefe53a638d40efb48a1b6e1f9ebe4d6f501bcc2"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEnrollmentResponse.java",
+      "sha256": "65a947f49e5f80cb67e8d8a7ede42627028b568f646c8b6d8ba74162b6b70cda"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEventRequest.java",
+      "sha256": "e877317023cd2b1e4083fa303a21d9210d445a4ae4419fc472014f755abfb475"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentHeartbeatRequest.java",
+      "sha256": "f02c4d896f1720a73537c7f94ab54db698be156d529c7a6923411e25a3ae652c"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentHeartbeatResponse.java",
+      "sha256": "464ffb2e90e836831c06cc50feb8f2a93461e21aaffb4fd3b68e6502dfddfca0"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentUsbDeviceDto.java",
+      "sha256": "4ea2401a3d5be4ff2cdee2f2f44a59ce984c4d832b4071d3f328497ee8877373"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/auth/AdminAuthController.java",
+      "sha256": "b6707957422c9da1c36e222f46efd024fc969cdb45a346be67b5402e4b6ada45"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/auth/AdminBootstrap.java",
+      "sha256": "65c2bd1dfe2af359a7ea12507f1b57809dbd129a90ca5b856f5a66499c63f61c"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/auth/AdminUser.java",
+      "sha256": "5fd1ded00f6c23002ccc4ca7eacca26e573113f27b5e14c7a9b4b37cfcda4b80"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/auth/AdminUserRepository.java",
+      "sha256": "3bd98619390f93572d1fc49e30a36769483f7f9b70507dd13ed0cb038e21acf1"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/common/ApiExceptionHandler.java",
+      "sha256": "435819c02877bf946f7c13aed1db48b1155141d709ee6d56cfdf5c27abd140a0"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/config/OpenApiConfig.java",
+      "sha256": "f451cf8209da30219c6c51b303d5a001d9eb621221ad340107d7d471ff6fc6a8"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/config/SecurityConfig.java",
+      "sha256": "2d01f65e5607441eb2f21add8f8d5c9e7a0ce7bf21b153687c6491e7b8eeecab"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/config/SpaController.java",
+      "sha256": "c5ec9ba0f4a34f7f3d91b4d61f997a4cc2ee3e256e18f8e3ea494f0383037f18"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/device/UsbDevice.java",
+      "sha256": "8ba3fcef7e88962bf25dbb40439c77bfb763fd6e52b2af8728f734bc3696655e"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/device/UsbDeviceRepository.java",
+      "sha256": "afb414931004288a997275175e064bd11cee7c2ccc2445dc8aeeee0e0f457006"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/endpoint/AdminEndpointController.java",
+      "sha256": "6a5c88d02d2317b3742385987f2e72421e13088ebdb5b82ed8efe38823e79287"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/endpoint/Endpoint.java",
+      "sha256": "f827bd116684cb5574d16b4dc519417570d08d2a6d3b55e977c24bb7c5d5d2d5"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/endpoint/EndpointRepository.java",
+      "sha256": "599d9ea2d285e189b8a9d3eb0dbc51df38dc257bc7db94730c64686c98bce2d7"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/event/AdminEventController.java",
+      "sha256": "0daa092253d51a9071440dbbfbaaa763af3b28c19252eb6a7f1a4b01c19b3e75"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/event/UsbEvent.java",
+      "sha256": "c524cb7ea5182e809beb04485fa2e2226150b5967ae94ad8f0469bb9d173333f"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/event/UsbEventRepository.java",
+      "sha256": "8c0593357482f0b7482d8b351cc0ed1ebe04f99413ce1bc09498d79e258f531d"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/policy/AdminEndpointWhitelistController.java",
+      "sha256": "e8c2e29f20269ce693f3323d6ef458ded64c2149faa41d55a81c02664f8492db"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/policy/AgentPolicyController.java",
+      "sha256": "e4bdb7ff99548e7526ff54409ab100aa2429441aa78d0604b47b05954d773a89"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/policy/EndpointPolicyService.java",
+      "sha256": "bfd33f761e64b623e17fddfdb6f381930cb9ba29b18b3b583ae585e0f7f06728"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/policy/EndpointWhitelistEntry.java",
+      "sha256": "02b276c8395f1c7d2b0bb187aaeb3356ebca0e1c9bfe517abebe3826fa8c4124"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/policy/EndpointWhitelistEntryRepository.java",
+      "sha256": "de1ac20f38c9b86fd2cdb72e0093fc46397cd408ab56ae1cdc82a4541963c379"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/policy/dto/AgentPolicyResponse.java",
+      "sha256": "1813d2a254861b9ba4c94a56bf277ca088afd5a238db629ff667bcebd5a91390"
+    },
+    {
+      "path": "admin-server/src/main/java/com/group/usbshield/server/policy/dto/WhitelistedDeviceDto.java",
+      "sha256": "87eef35d0721727f2000e342dddcb19c36f8a0db9cc1b28570975e994e89ce44"
+    },
+    {
+      "path": "admin-server/src/main/resources/application-prod.yml",
+      "sha256": "7d380bcc1ec8adae4468f3fdfe10adf9e1f21b01656b73d252d96ac7046effdd"
+    },
+    {
+      "path": "admin-server/src/main/resources/application.yml",
+      "sha256": "bfd71f25c44e9d15efd19ab60c941dddceed2acdcc3d374b78c3a339bab244e0"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/EventSearchIntegrationTest.java",
+      "sha256": "47935b0261cc67e4bd1ed138ec7df36465785330e9f574d746412268edb7bc88"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/PolicyConsumerContractTest.java",
+      "sha256": "9ad23056df79a3274c1e72a29c1f74b299fc7ef723b49cbfbf2fbfe4b398fc29"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/UsbShieldServerApplicationTests.java",
+      "sha256": "5b8db630d44dee7af17245d819faced9721e5bc598ec2b2700c9d649bdacbb36"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/Week2ExistingH2Test.java",
+      "sha256": "b9462840249654b98217313a5a865bbb63cec5c2b808ce2b742a9add1019e4db"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/Week2ServerIntegrationTest.java",
+      "sha256": "03ea52c3f6e53b095f30b021e37c35bd81567cf675f345f0ede4097636bb0c08"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/Week3ProductionProfileTest.java",
+      "sha256": "51be07aecebf11e3aa37c344b300cb8ea5673fd2a8d34dc96ea723d99ed814bb"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/Week3SecurityAndStatusTest.java",
+      "sha256": "d25d6f307a80813170bcbac428e556c4518772272eebefeaf51226a8dbf636d4"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentEventContractTest.java",
+      "sha256": "a892c30b15115c5dd2e73c92bebb5020b5efbcdbe6d78cfd539749fbe2b5e98d"
+    },
+    {
+      "path": "admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentHttpIntegrationTest.java",
+      "sha256": "d99477c1947e4651077fc6473d639ba6e15077d89dec630813f33487c04ee64a"
+    },
+    {
+      "path": "admin-server/verify-week1.ps1",
+      "sha256": "4be703a9c791f1133b5b1d7908ae8199fb9d996dee5150d2a5f81ba8b5f4b8c7"
+    },
+    {
+      "path": "admin-server/verify-week2.ps1",
+      "sha256": "7054dce57885940276bc645883400189a3b927c1363edf1e98e8baac9a62bed2"
+    },
+    {
+      "path": "admin-server/verify-week3.ps1",
+      "sha256": "6933c11f5a905fbc8f9cad3274d102ced1b2083a499757af7698f7f22edfa753"
+    },
+    {
+      "path": "client-agent/pom.xml",
+      "sha256": "14fff6a5dcb2a8f3c925c66cbbf0c2609e45e333597ea6687ce7bacb584e4238"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/ClientAgentApplication.java",
+      "sha256": "7d8ac45481ac5360d77a2043b5aa4930a4a68f4768e2679b84eba0daabe03f92"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/config/AgentProperties.java",
+      "sha256": "217bccb2881727f59615985d442da1392027e364553ff6994e68009a4854f527"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/endpoint/EndpointManager.java",
+      "sha256": "ed9859d3dd160cafb2cdbd0f3159d65cb21217c8490dda9b8ea10ffa4bb0b012"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/endpoint/EndpointRegistration.java",
+      "sha256": "ed3d44d8c3ab6e0b14bc55176140c375363a0245b0c740a87d50c644b80afb51"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/event/ClientUsbEvent.java",
+      "sha256": "f1ac5ab91b58074ea2953eb05743217f59eeae5690b910ad7f619fa5546bc816"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/event/EventSenderService.java",
+      "sha256": "2a253577de91073e42e3ff7e33d3e6a4f40865d0f6ca2545e3239e55c4558d72"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/event/EventSimulationRunner.java",
+      "sha256": "86ad7891c07e3fa22e8074ffc5a911ab86c4e4d984ebb903c218074d132ccc96"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/event/UsbEventEnricher.java",
+      "sha256": "7306d63b8578289017d3b7977f0d170e20b415eb71b0ae9ffb0c62c82998494d"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/event/UsbEventPayload.java",
+      "sha256": "b92ecae8e328ff73f50e8993496eabd3527360b30cdb3a35ac1b84b5efb31666"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/BlockNotificationPolicy.java",
+      "sha256": "732aaa410bf65b39559091af26dd637c9390f3399a8ad53353fbd5ad82b68454"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/ClientNotificationPublisher.java",
+      "sha256": "56d5b375bf348e18443a689a6afe486143b1464a0aa9defef7a672d1f375316a"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/DesktopNotificationClient.java",
+      "sha256": "7ddb56793c259a7c7f987422292db434877eaee07ad3ac655c79aac268aaf422"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/DesktopNotificationClientMain.java",
+      "sha256": "efafd8d7af7bfbb5b3030cc9129fef43a30d303d6eb0d7099cd19366ae3d0c94"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/DesktopNotificationService.java",
+      "sha256": "522da3881beef734c89cd12e7e381fb351f89dc4d78b0a0ae57dbc176e1058ab"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/NotifySendDesktopCommand.java",
+      "sha256": "122c116983b0a4d0cd2017784b459bbd94cfcc95c61f10ec6715bb79f6ddcee0"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/UnixSocketNotificationPublisher.java",
+      "sha256": "f37bc8cbb7d2767d6c8b40e78c1e921af23a6628fda0cf03899a772492671ba0"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/UsbBlockNotification.java",
+      "sha256": "a5899903cc405518d979e5d3ccf1a56ef6904d4752d7596bc4a1aa5fe0ff1e04"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/outbox/OutboxSpoolService.java",
+      "sha256": "a079019e875b0e013fc2e9be947b02ae4a2fbd8e0ac53590d0b5289a64859918"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/ActiveSessionSelector.java",
+      "sha256": "c32a2424a36158ec0f7b14190564124fd3b994e13d7799e42e3e59d28f32d394"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/ActiveUserInfo.java",
+      "sha256": "4ca6e2cd665e287bb3d973ee4dbf767a59179f798f99ed6eeede3bf753790e77"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/ActiveUserResolver.java",
+      "sha256": "f3f2532dbe4d6644c5c054c6d4a8881feb82fcb910bbd12ee47f2817f98e334d"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/AdaptiveActiveUserResolver.java",
+      "sha256": "5cb2bd8a41da17a5b6684d354b27a54491849ff78df58a8534f0fdd03759a6f3"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/LinuxActiveUserResolver.java",
+      "sha256": "d25eaa2bb1fe2a9868a9cf35ba5adf3bf1b0531e2e983b0b9b0456333ef77ba7"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/LoginctlActiveUserResolver.java",
+      "sha256": "60aea3156367f9e0adddf016f26af42ee906c71fa22db3ac747de8c6efdf6bae"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/LoginctlGateway.java",
+      "sha256": "ef50ccf6cf61fef895cc067455ce849954eec6bc08c9f0498123c8369e566159"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/MockActiveUserResolver.java",
+      "sha256": "97919861f819b48f59fd59c156d40c3c6bcb22b3dc5f0c0861d59fd5f36f5278"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/ProcessLoginctlGateway.java",
+      "sha256": "5a4bc885462f4a282cd5c6adb6da67025d4bb2c2997e88fdb184c579ad1ddeac"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/session/SessionProperties.java",
+      "sha256": "00e4bc1682ae4da462627bd73b0f22f3b7e0ce6d7a0a0109e217f452da4728e9"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/AdminServerClient.java",
+      "sha256": "fb5f01683a67a89197b9718c511f0aa78829c21afefa3ff86c2f20c62f41aac7"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/HeartbeatCoordinator.java",
+      "sha256": "50f77f0fb38d68b50560d6b56a9c7fec6944a00b610b788ef3ebab817ef92b18"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/PolicySyncService.java",
+      "sha256": "9bff31d5808c16b673f2abb2fa75ebf416de514298c70a5accec077592ffb212"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/dto/EnrollmentRequest.java",
+      "sha256": "482cbd56d7fef4c2564ac0a0eb433d7fc60e91ae59ffe35946d85dd17242842c"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/dto/EnrollmentResponse.java",
+      "sha256": "e9c56882c398be0e3e46b3ada0d5572548ef001f5b6066a66ceb2e9233762630"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/dto/HeartbeatRequest.java",
+      "sha256": "9ece7a19d1e12e9f8d1665fb14f02f5a19f56b5efbe5e719271812cb06252879"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/dto/HeartbeatResponse.java",
+      "sha256": "d1f5cbf921bf4962f0066f2c2a7b5479072645f6a18ffcb3c4844319e11c1d99"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/dto/PolicyAckRequest.java",
+      "sha256": "6ca0509b1d146f3251d2b7dfac1aa568b75c084d55e900934f97b7ada07e7942"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/dto/PolicyResponse.java",
+      "sha256": "1dbfaadb93d31a0fb31fef42077bb66339e395a9bff31454bf76cf159dc48939"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/sync/dto/WhitelistedDeviceDto.java",
+      "sha256": "51eaf1570dd38d829acbcfd67d90f4e913e48212fb79a92548b5a6d9ce9779c7"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/system/SystemInfoProvider.java",
+      "sha256": "52fc0a1f7b37c51bcfc228cd0ebf4c1d829e0acb45ec46c2c77b90c8a4757404"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/AdaptiveUsbGuardGateway.java",
+      "sha256": "cc53103a40e6369a2a21d5aaaf6638b779d5ba7e443073b7917ba9434377ac8a"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/CommandResult.java",
+      "sha256": "fe5c9439c9aebeaf92b9b4b2973f2b20b3b30393095ec23f92d91ea6efad482b"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/DeviceFingerprint.java",
+      "sha256": "1d780e62dfb2c823708b77b21820f596d133903f6b23581e3c082e8dea8e260a"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/MockUsbGuardGateway.java",
+      "sha256": "83d9cded37e155e8e40f62a563bcee9ac44f1ec2c75a4b51d096c8d503232c46"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbDeviceInfo.java",
+      "sha256": "74a738cba238a55ac91cc7c379c988d4ca18bca26036d28cbad31cc89109aff8"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardCliGateway.java",
+      "sha256": "38e64eebb76ccb44b27f06f57cec609796efcdbef10f43e3b2bcd73c094d4dc5"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardCommandRunner.java",
+      "sha256": "df65203c444989af8a96a683c702a140eaada9dfc5b60e9c4ab3efe4a904c3d3"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardDeviceMapper.java",
+      "sha256": "2b0c346e8d0db8bdbdba8008558554c8d6954cec37a150125d8b89785a0b1ea3"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardEventListener.java",
+      "sha256": "c57cc6fc3e37f9dc5ab02847c7b9e921127a00d500333f3dea3cb1186afa55e1"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardEventParser.java",
+      "sha256": "bdc6b8edc0cd9979904371d55cdb46e9f3c88abdf7937737994c74d766aa88c4"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardGateway.java",
+      "sha256": "db304d8a54b9999f6115643fcdad94c309fdad3cb13c28f0f6bfde997df0a3a2"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardHealth.java",
+      "sha256": "1e2d27805944cddbfc09e53c6bb23c11074f08a22b68cc672842adb75f437230"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardOutputParser.java",
+      "sha256": "d9384160046163288abf42d14d409701fe21adab7a3d6cf63daef2c523e0cead"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardPolicySynchronizer.java",
+      "sha256": "fa4d0db4e5e11ea17bda58b7cfd9f2c953c6a525a7074a60f93fe3ed3bda6723"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardPresenceEvent.java",
+      "sha256": "e3e199da1fa42f532bf5d23316c724bd17a09d55a99653e9af9d39d07b39bafe"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardPresenceParser.java",
+      "sha256": "a70192e4cdc8517314291752bba6c98023b4fdafe3772c7ba0902c74840c778c"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardRuleBuilder.java",
+      "sha256": "6c33017674f5a1767932d9b8e28f5e7ec990db47e22554ab00f1a06e960c4561"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardRuleInfo.java",
+      "sha256": "9e78358c777637e43f9f6c43f2ca03b7e23f3f2029c78c8d2efb97a6ea2a0123"
+    },
+    {
+      "path": "client-agent/src/main/resources/application-live.yml",
+      "sha256": "3be41e0358753789e8926a2d91df0f586caa69f14ef3d753e28c14a972d74530"
+    },
+    {
+      "path": "client-agent/src/main/resources/application-simulation.yml",
+      "sha256": "c2a04691108b7b3b1b8a3a4f3fb095a590552d192fafb7b744c365be27696046"
+    },
+    {
+      "path": "client-agent/src/main/resources/application.yml",
+      "sha256": "bcb7771dc958be6b70a420b31d2281e1b1595abd14bc284039e19084d6d00e19"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/ClientAgentTest.java",
+      "sha256": "de21f3acf348dc80a32c20a9fdd3b7fefe2d9a2418414398dbd5d894c32d2dc6"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/endpoint/EndpointManagerTest.java",
+      "sha256": "edfb7ffc7b7f3cf7294ae19ddef75fc90212c2aeb1944476f229a6a2e6af6092"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/event/EventSenderServiceTest.java",
+      "sha256": "e52c210c943c370c108dd957750e8845ff205ab5ed793ce9c78b1f3941780d61"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/event/UsbEventEnricherTest.java",
+      "sha256": "a497f8f56147b46b356a4a04f971f8b2f15c8ea84bb6769097fff9278ed141d7"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/notification/BlockNotificationPolicyTest.java",
+      "sha256": "69898d96fc05ad31befcd1f6d8a5dd8f38f10f8117be55a1940f4c0cfd531aa3"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/notification/DesktopNotificationServiceTest.java",
+      "sha256": "c7e427351ef176069547715268b8da2426dba73f075e6dfe32a7ae8082b296b0"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/notification/Week3NotificationPolicyTest.java",
+      "sha256": "bc317276df8980f14921aa6ace18d586f6fe9abe9d7235807282ef428aaa994e"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/outbox/OutboxSpoolServiceTest.java",
+      "sha256": "73a83edf8e53b0f5bf8ef0a147374929f19efe415d1f50a8837b04ea540ef246"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/session/ActiveUserInfoTest.java",
+      "sha256": "62b136a0c88c9b9a90032e96eaed2303a75e73859bebeed859c3ba9cd9274947"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/session/LinuxActiveUserResolverTest.java",
+      "sha256": "73b80a63c374038c10a3a5eac188326b25004b10899f62db2d308e1700223770"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/session/LoginctlActiveUserResolverTest.java",
+      "sha256": "1998f9118b8e1a98df34a7291e4a81e33b593d6d16e4e4baa618359e6a4635bd"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/session/Week3ActiveSessionTransitionTest.java",
+      "sha256": "6d65db37508acd10fcc43507ae0c80fbd07ed9fa9b248efdabc5982c3e93b0fb"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/sync/AdminServerClientContractTest.java",
+      "sha256": "b0e28e0a0655fdb734a2cef46b3f3e16033e97042dbb5861c71add78e609fbe7"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/sync/HeartbeatCoordinatorTest.java",
+      "sha256": "00c9833dab93ff0cb9948e30b590d4c213d23d5427a2aa95689365655f579260"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/sync/PolicyAckRecoveryTest.java",
+      "sha256": "ab08df18ad96718b9e1409581b7931937319e77fdb0a9ec19036eeb608e768f1"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/sync/PolicySyncServiceTest.java",
+      "sha256": "e5c5456bb1f1dac0cd7dd53f4e5c5f720cfd6fb7ee440718e559b04847f8b049"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbDeviceInfoTest.java",
+      "sha256": "2897e8f4346d932cfd8a53b7b34b936a3a4bf2a16e0c69b25f1ddec93bf22351"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardEventListenerTest.java",
+      "sha256": "212144f980629b24f111a1c36107661e7c50d0fa2b555080436ca46a2a640611"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardEventParserTest.java",
+      "sha256": "48e1c7b458c7aaa5910929c45e4a33a142d467060a7d6885288f9a5e2e66bf67"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardOutputParserTest.java",
+      "sha256": "c6d76d7b0f410e0ec5dad8b10839862dd13b49b2e85d80cc73cc15124c5d3cb2"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardPolicySynchronizerTest.java",
+      "sha256": "46d5174450d5d2a2c7ac5aa165b923616b503f43224f7b69161ac8626465a346"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardPresenceParserTest.java",
+      "sha256": "0c03af962f22bc93c058232a5f1b88460e971bcbbbf10e8735219b2246a46f76"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek3CloseoutAuditTest.java",
+      "sha256": "051c4ddff5daea89df943d06cab74d515e3240d827d885747bbf8a5af2d984ef"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek3ParsingAndIdentityTest.java",
+      "sha256": "a4e544752820b47766183b9c7652f76de3d189f39c0d9990eeb11a2142e7cd4b"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek3PolicyAndGatewayTest.java",
+      "sha256": "38769aaef024ea5fd6b299db863d15671830a5d417465dfa44041f33915eff08"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek3WatchRecoveryTest.java",
+      "sha256": "3f813f8f480ea6ba67abc9008472a9fb188d9540a707a75f0a9fb3e91bb237db"
+    },
+    {
+      "path": "frontend/.env.example",
+      "sha256": "8a0c105e189a928d6998681ad06d02ff7234c7ab8a9b4170e1b33e64d9891bb8"
+    },
+    {
+      "path": "frontend/.gitignore",
+      "sha256": "b4a064c1bb283aaf12a103e9d936abf1c45a6e0779819abd3dd6ffc2d1699067"
+    },
+    {
+      "path": "frontend/.oxlintrc.json",
+      "sha256": "b4d344818a1e1bf43997e4744a9153c8eef770c98b58229cd86363dabb85ded4"
+    },
+    {
+      "path": "frontend/README.md",
+      "sha256": "cc7bb8fdfa83e7b165f48a83830c44a3c5c3c75cdf7f48832689c8b0ea6099c2"
+    },
+    {
+      "path": "frontend/index.html",
+      "sha256": "aa6233472344313e2e7935f48badfdd96d07e29dc96165eb72e8f6c196c28942"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "sha256": "341efaa22b03bf87b54d78cf70f6114da0ef735139d1011bd7e830941be816b2"
+    },
+    {
+      "path": "frontend/package.json",
+      "sha256": "7700d438989dbe4c725750bb33c7f75d180dc5c7c6bb3f791e1ad1390d91e8d2"
+    },
+    {
+      "path": "frontend/public/favicon.svg",
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea"
+    },
+    {
+      "path": "frontend/public/icons.svg",
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a"
+    },
+    {
+      "path": "frontend/src/App.css",
+      "sha256": "8483c51b9d141dc64f65a96dd8901d3bbd3206ffb4b386f63c20244bbda00b40"
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "sha256": "dfb703da0ae73e4a7762c7bd919d4ef9f94bd9f9754b5a54277971ec8b75a889"
+    },
+    {
+      "path": "frontend/src/assets/hero.png",
+      "sha256": "881ffbcaafc212e49addad08846a5b82761355fa20624253af3477ba33262c5c"
+    },
+    {
+      "path": "frontend/src/assets/react.svg",
+      "sha256": "35ef61ed53b323ae94a16a8ec659b3d0af3880698791133f23b084085ab1c2e5"
+    },
+    {
+      "path": "frontend/src/assets/vite.svg",
+      "sha256": "5be21acd42eb7b896e517f4e0f0f11eb5c5d9e54fbbcebe9453f033008fcca6f"
+    },
+    {
+      "path": "frontend/src/components/Common.tsx",
+      "sha256": "0c112514ed221965e66c101212ed776e9d31f5316f3c2a535467523294cff5f4"
+    },
+    {
+      "path": "frontend/src/components/ConfirmDialog.tsx",
+      "sha256": "0f20d9d79c48e24492abfd5b633cac4d51827aed4cf931a154002a916a0cf177"
+    },
+    {
+      "path": "frontend/src/components/DataTable.tsx",
+      "sha256": "65a57ce442bd01ed4a4898d7a0e85982e83977d18f5b97d0df67de798b29d4f9"
+    },
+    {
+      "path": "frontend/src/components/Filters.tsx",
+      "sha256": "251bb5a99ffeecf51a3292c49e21d25d400c83533fff42e729e25f19538a0114"
+    },
+    {
+      "path": "frontend/src/components/Icon.tsx",
+      "sha256": "2b4454e33fcb30931f4e3a68f33456e94dc403b4f7f06491de293d39e7bf20f6"
+    },
+    {
+      "path": "frontend/src/components/Toast.tsx",
+      "sha256": "742deee182ede614724b941b566ee89b851c63af646b28b7a4b62ae0f2896ec0"
+    },
+    {
+      "path": "frontend/src/components/endpoint/EndpointStatusBadge.tsx",
+      "sha256": "50ea5c1a873f1042c38c669b153e8cf12378d55127123751b361b0a6b330f78b"
+    },
+    {
+      "path": "frontend/src/components/endpoint/EndpointWhitelistPanel.tsx",
+      "sha256": "efe44204c23e4a4f3e29447b744e0f7b815c586d1fd521203e02b0269a9dad0e"
+    },
+    {
+      "path": "frontend/src/components/event/EventFilters.tsx",
+      "sha256": "2d97c4cbbcb89ca364a84204437f976031a4ba736c4507952e2f519f359eaf0e"
+    },
+    {
+      "path": "frontend/src/components/event/EventTable.tsx",
+      "sha256": "83f04fe0fc03e275bdbe12d5a767e9736ad6d09832c096f46764718c0695cc9e"
+    },
+    {
+      "path": "frontend/src/components/event/events.css",
+      "sha256": "3beefec8a355bc4a60cc53b32e1d265258a9d7855db5e9eb38caeaea00ce291a"
+    },
+    {
+      "path": "frontend/src/hooks/AuthProvider.tsx",
+      "sha256": "0aacfb4d6406b6fdcfb2d37b563c8e8d2f707f77011a621993d027d1e677e197"
+    },
+    {
+      "path": "frontend/src/hooks/useAuth.ts",
+      "sha256": "7691ac6e8ec7f1e4fdbdc7e9916eb0de14a183231fc9e26b9992c4af4b01aae0"
+    },
+    {
+      "path": "frontend/src/hooks/useResource.ts",
+      "sha256": "2c1354d0e371346b827b6ed09fcf6a704c3fa96cd73957a8a16c885deeb0ee3a"
+    },
+    {
+      "path": "frontend/src/hooks/useRoute.ts",
+      "sha256": "de81b416e28e9461a782ff3aa5c47407aef6d60d10cb447f54de98620ffcce51"
+    },
+    {
+      "path": "frontend/src/hooks/useToast.ts",
+      "sha256": "0343571842b9d56d2933cd74af90bb6a804c2c59372a7e1395cd562f3492e854"
+    },
+    {
+      "path": "frontend/src/index.css",
+      "sha256": "eda91fc7a2babaf9d00e64989ced709f6327786777984d7f5864d688f7b8602b"
+    },
+    {
+      "path": "frontend/src/layouts/AdminLayout.tsx",
+      "sha256": "0ee81d54d4c3e824ad7e97ae805ae260b934d43324a240d8e765741d2cd2ca00"
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "sha256": "6e9e5807fcbd48b75a96db5cbef36c996262196be42e6d4760dc86babbe61ad2"
+    },
+    {
+      "path": "frontend/src/mocks/dashboard.ts",
+      "sha256": "c38fe3955dd00432d4745653807ba79fe006a0c7ef61d16f98db8a3eeace7bc6"
+    },
+    {
+      "path": "frontend/src/mocks/endpoints.ts",
+      "sha256": "4ad29bd0e0db7588feb708fbc062b65eb389764bca74d4b969cac78ffccfdfa8"
+    },
+    {
+      "path": "frontend/src/mocks/events.ts",
+      "sha256": "834d3112556e593792aac22f78bdfa79250153cdc1c615d067e3336ba9802e1d"
+    },
+    {
+      "path": "frontend/src/pages/Dashboard.tsx",
+      "sha256": "8577f40797024f00da1942f89b1cec854db210ac592c97b779d07d7ece046865"
+    },
+    {
+      "path": "frontend/src/pages/Devices.tsx",
+      "sha256": "e29497ed6182aabcbe653173bfb89b6b99c0e28a64bb46db11436003a3269f25"
+    },
+    {
+      "path": "frontend/src/pages/Endpoints.tsx",
+      "sha256": "ad6d4e9b2a0bcc848f1abe5122acca2750423119b0e31267455c08da7bf10a2e"
+    },
+    {
+      "path": "frontend/src/pages/Events.tsx",
+      "sha256": "00466f4f571d71b3037bd2159d770bf2475ffc2d8c8a2469daba79da4aa3dc11"
+    },
+    {
+      "path": "frontend/src/pages/Login.tsx",
+      "sha256": "4dac03d265a5fa97d43d0f3e6c26a54057798a5dd9a2ced3002159eb411ca392"
+    },
+    {
+      "path": "frontend/src/pages/Settings.tsx",
+      "sha256": "5b361752aa3167640b495645e8ee4ca6218f66ce88e4640c4c0c1cc7bf14d3e7"
+    },
+    {
+      "path": "frontend/src/pages/types.ts",
+      "sha256": "015acfa952823fdcf42f1c67729899b5b1ce293c84ef76bc044987e6dc817d4a"
+    },
+    {
+      "path": "frontend/src/services/api.ts",
+      "sha256": "ecfaeb1336282101d80764e00bacbb64bd84d9ec3e63ca4474111fbd2b30dedf"
+    },
+    {
+      "path": "frontend/src/services/demo.ts",
+      "sha256": "131ae311dc5c376a64651bc7d6804f0b742ef3bbf9772acfa5a2dcde1df6af13"
+    },
+    {
+      "path": "frontend/src/services/http.ts",
+      "sha256": "d36e707f9bcc0aa796aa30ef210b1b9e66903a9a69209e68bb35c5407578432e"
+    },
+    {
+      "path": "frontend/src/services/mappers/endpointMapper.ts",
+      "sha256": "0ed7a216142f2b027583860d8d76cc7d78b1ae1b1264f7ac337e530f8eb68d1c"
+    },
+    {
+      "path": "frontend/src/services/mappers/eventMapper.ts",
+      "sha256": "f2b9dffd44303ff575305ff768a83a2e1646fa065c0a0c1fee32e5eab921b745"
+    },
+    {
+      "path": "frontend/src/services/mappers/policyMapper.ts",
+      "sha256": "10f63172a6496f7aa50cbdc21c1c4bce1c43ba71fafdad24aaa5a34c1e57bc5a"
+    },
+    {
+      "path": "frontend/src/services/models.ts",
+      "sha256": "ddbece2083bb163b3cb31626424a36e4351eb14994889af50a264005b7906798"
+    },
+    {
+      "path": "frontend/src/types/endpoint.ts",
+      "sha256": "64d7ae6f540bd53a88a3825fe3e90b5a6d12876a9153bd4f4990a43056aa9448"
+    },
+    {
+      "path": "frontend/src/types/event.ts",
+      "sha256": "69a26770d1f8f130011f053a0a81b46fa12486eb3b438bea65cf3a6fc640091e"
+    },
+    {
+      "path": "frontend/src/types/policy.ts",
+      "sha256": "aa0ec96181f51d3f9000e68b4a3b96e4b2311b9468cc9df054a2bb39293c2b69"
+    },
+    {
+      "path": "frontend/src/utils/eventFilters.ts",
+      "sha256": "cb3c6dd37d92385639acd47d6c7d81d0d0abe0233deed24b6442e47d0858af14"
+    },
+    {
+      "path": "frontend/src/utils/format.ts",
+      "sha256": "7269a443f100261ef2263524656651ad356708b0fe4c05621b9d504f724941a4"
+    },
+    {
+      "path": "frontend/tests/apply-browser-readiness-fix.mjs",
+      "sha256": "62f24686dd98a158d11b3bac90d573d852df500f71353630d0c6e9e6107ff10c"
+    },
+    {
+      "path": "frontend/tests/browser-live.mjs",
+      "sha256": "d7679a7cc6b5f8bab971d9d2fae2a67588e681f04e3dafccb8d604a8df4e083b"
+    },
+    {
+      "path": "frontend/tests/browser-readiness.test.mjs",
+      "sha256": "3d7fc5a3320e6d02fcdd98ba281a6b830653685da3bc77633540ce15b562017d"
+    },
+    {
+      "path": "frontend/tests/browser.mjs",
+      "sha256": "47cbf8d6673d99c898d9aa158278f1e983b4aef8dbe45a6bf356676fac4392bf"
+    },
+    {
+      "path": "frontend/tests/components.test.mjs",
+      "sha256": "46ec154384af331c6409acc5a8cc0b60363143dea7727192564ad6a6cd34ec74"
+    },
+    {
+      "path": "frontend/tests/core.test.mjs",
+      "sha256": "970183102e3910267158b727ba36b592446511e6f52b3b4a55acb283321502b9"
+    },
+    {
+      "path": "frontend/tests/eventFilters.test.mjs",
+      "sha256": "a69abadc6d885593cbc9ef6823936b563bbc78aa845ad258ecf598db19e457fb"
+    },
+    {
+      "path": "frontend/tests/fixtures/admin-events-page.json",
+      "sha256": "3630691c4972a279875067453cdc0615c3468a52f4255a92b0c3109ea023641b"
+    },
+    {
+      "path": "frontend/tests/fixtures/adminServer.mjs",
+      "sha256": "e8e4839835cda7ebf9a38513c2773e2304c8fbc7de868170a7dcbe6d8c12c989"
+    },
+    {
+      "path": "frontend/tests/liveServer.mjs",
+      "sha256": "310465fc67338fb64dff61b8f05e4c51da14b216042bfb9109bf57247af2171f"
+    },
+    {
+      "path": "frontend/tests/m4_admin_api.test.mjs",
+      "sha256": "d54b65030b0680c5dfb24305bc58182c393962ea659ec21b71b0c48745e889bf"
+    },
+    {
+      "path": "frontend/tests/m4_auth.test.mjs",
+      "sha256": "fef4183d38b4d58cf9494d5584371b28a53341e15f6cac1a853432df18f6eace"
+    },
+    {
+      "path": "frontend/tests/m4_endpoints.test.mjs",
+      "sha256": "dea10649efce133f03e84395b3764d9337a2488fac3e724f2646398487fba7d1"
+    },
+    {
+      "path": "frontend/tests/m4_policy_live.test.mjs",
+      "sha256": "90de4644852a4e23bde32bd13cc156a94424dec912c9bb3783abf7d51183f91a"
+    },
+    {
+      "path": "frontend/tests/m5_event_api.test.mjs",
+      "sha256": "678d8c219dba54a6b77a1e87ef9a0576b0a1103c76df0482ac66701075dbe79d"
+    },
+    {
+      "path": "frontend/tests/m5_events.test.mjs",
+      "sha256": "289f5d309d5ad859dd382e5db34aa344c317bf3e34b20415af484822e5637fc9"
+    },
+    {
+      "path": "frontend/tests/m5_live_api.test.mjs",
+      "sha256": "3f076370f26e65656292518074ccb343a2a069ce24f0934889dc85703738aa78"
+    },
+    {
+      "path": "frontend/tsconfig.app.json",
+      "sha256": "8e5d12ba330e7d86409edec74b95451e0db22ee09b9426c94b5bf817571eddb0"
+    },
+    {
+      "path": "frontend/tsconfig.json",
+      "sha256": "770b4140bbb581e2dfd9ea9946ffc9c75a1d86ba7d2db5f77c83e37cbdf9d808"
+    },
+    {
+      "path": "frontend/tsconfig.node.json",
+      "sha256": "d366cc0827139db39c61815f22491bbfda56c654354a42ad7795143d314e45e8"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "sha256": "8d8ae4c4e719915c84efd8c8562966baf961dbb4ce68efdd1db93c96dad8f57d"
+    },
+    {
+      "path": "packaging/agent-deb/DEBIAN/control",
+      "sha256": "027e56de601420dde55ded3ff459697b964f63440a9a962cb55b91069ebb9320"
+    },
+    {
+      "path": "packaging/agent-deb/DEBIAN/postinst",
+      "sha256": "4e55c031adaf4ac9904c5d3a441eac472025c6c2ccc90d6dfd012a69d0ef2f41"
+    },
+    {
+      "path": "packaging/agent-deb/DEBIAN/prerm",
+      "sha256": "59bda2b53a89d68a08f614a2542968d8fd17411521b0c30dc722eb45523b0d5d"
+    },
+    {
+      "path": "packaging/agent-deb/etc/usbshield-agent/application.yml",
+      "sha256": "4f04a3312239c531924efd3b6a5a651af13dcecba6f7dac42d202202f4f6b5e9"
+    },
+    {
+      "path": "packaging/desktop/usbshield-notifier-launcher.sh",
+      "sha256": "283e587b025edb14ec89d70ce24cbe7c9d4e3239393fb564f1ac24814f99dcb9"
+    },
+    {
+      "path": "packaging/desktop/usbshield-notifier.desktop",
+      "sha256": "4d39ea3c20de8489cbe73bb67ea844a76eba3639155c68aa5443c01852b551f5"
+    },
+    {
+      "path": "packaging/scripts/build-deb.sh",
+      "sha256": "7d2908573572222e18561c8ecd7612e5c8456ba00c2a01c6bd1d1c47ce8ca892"
+    },
+    {
+      "path": "packaging/systemd/usbshield-agent.service",
+      "sha256": "fc5e10fc26891d1a9792aa606386511e81fc9a81dbd2ac66ded5d4a0e820086e"
+    },
+    {
+      "path": "packaging/tests/test-staging-verifier.ps1",
+      "sha256": "b6624f8f85a56adb082ce4637837f4fa23cb28c57c8c207ad90ee39fbec0340f"
+    },
+    {
+      "path": "packaging/tests/verify-week2-windows.ps1",
+      "sha256": "5ad709d9fd528eda46bb10887cb33e8f8ac71aaabeaf9e00d8960fd81b816328"
+    },
+    {
+      "path": "packaging/tests/verify-week3-windows.ps1",
+      "sha256": "d900ba8ac052819cdd3c46e052add0303e7e5c8515910809295ea57986704b80"
+    },
+    {
+      "path": "packaging/usbguard/rules-v0.1.conf",
+      "sha256": "ee1aea40ab2d9b17710056fc2737bc6d02a1df9211f4100b4d164352e69364f5"
+    }
+  ]
+}

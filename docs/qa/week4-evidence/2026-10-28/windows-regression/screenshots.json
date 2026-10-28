@@ -1,0 +1,314 @@
+[
+  {
+    "path": "screenshots/15-browser-fixture/demo-dashboard-desktop.png",
+    "sha256": "78044b7b938745a038e9d0ae5c4d5cc06f0aa4323a103fe58eb1dca86987a0fc",
+    "bytes": 193735,
+    "modifiedAt": "2026-10-28T12:46:41.433Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/demo-endpoint-desktop.png",
+    "sha256": "4be4bda89160520558661c7b4d9122ff417e53a550daf2209f2fecde51e8c59d",
+    "bytes": 121163,
+    "modifiedAt": "2026-10-28T12:46:41.977Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/demo-endpoint-mobile.png",
+    "sha256": "e55c6a6d2240ae2126ea66165d015b39793238671778f61a9563f36b1490a37f",
+    "bytes": 86681,
+    "modifiedAt": "2026-10-28T12:46:42.806Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/demo-endpoints-list-desktop.png",
+    "sha256": "91a74204ff7d09062a440b868dedddb2ffda1ffb38aaff3113ad4000aa46e9b4",
+    "bytes": 79456,
+    "modifiedAt": "2026-10-28T12:46:41.650Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/demo-events-desktop.png",
+    "sha256": "b668b9178ba8025d44560ab58884a9d4a7c4e0c6f91d4888aa518f43bfd2317e",
+    "bytes": 90713,
+    "modifiedAt": "2026-10-28T12:46:42.327Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/demo-events-mobile.png",
+    "sha256": "27e2de0d77e10f015c3f00d82e94c119af437b1d9300db46f05bd101b063183a",
+    "bytes": 54140,
+    "modifiedAt": "2026-10-28T12:46:42.668Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-allow-a.png",
+    "sha256": "fb542a24619609c6752f513765135ae60b988f679b8302b4ac6c272b9336ecbc",
+    "bytes": 117063,
+    "modifiedAt": "2026-10-28T12:46:35.660Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-dashboard.png",
+    "sha256": "d37724a6da6742f8f9e6230cf005a91faf7bdb7b5d4df62a8c74a02f0a3cbc87",
+    "bytes": 177796,
+    "modifiedAt": "2026-10-28T12:46:34.436Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-empty.png",
+    "sha256": "8800f4d265732af95b7a87011f746c036cfc48e012aedd37686ae31f6d467d58",
+    "bytes": 74995,
+    "modifiedAt": "2026-10-28T12:46:37.827Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-events.png",
+    "sha256": "452bd07654e54f5b24864f85624d74b68625997d53a4a0f0e295396c6a21db70",
+    "bytes": 76222,
+    "modifiedAt": "2026-10-28T12:46:37.160Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-login.png",
+    "sha256": "8143501d141f0271e706cf8da92338ad7851e206ee28e52650ad3a95049b8edd",
+    "bytes": 291115,
+    "modifiedAt": "2026-10-28T12:46:33.385Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-mobile.png",
+    "sha256": "ef55070fc64d62ff76c40aacd1bf517efc01e353ce5959ef2ec1a23ade4cf6a3",
+    "bytes": 53423,
+    "modifiedAt": "2026-10-28T12:46:40.277Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-mutation-error.png",
+    "sha256": "09815c0e0f607b340f8607082756cbbc723525a2554ae086be97f59a805fb25f",
+    "bytes": 193522,
+    "modifiedAt": "2026-10-28T12:46:36.415Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/15-browser-fixture/m4-network.png",
+    "sha256": "bd5553536a9fbf055e10fcba3e59e077ed6e419fd9931c627746ad49f647168c",
+    "bytes": 135584,
+    "modifiedAt": "2026-10-28T12:46:43.400Z",
+    "ownerCapture": "15-browser-fixture",
+    "scope": "Headless fixture browser regression; labelled demo/read-only/error/mobile states"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-allow-a.png",
+    "sha256": "07c7a561b6326cb95c5e75467b1b97fb181ce34e54544fdde48320069483d82f",
+    "bytes": 119318,
+    "modifiedAt": "2026-10-28T12:50:53.067Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-dashboard.png",
+    "sha256": "de50cd2c3e60b99cc789221e7c3ae0e23b3a716fbc7a7a4308ff39c9f03126dc",
+    "bytes": 171521,
+    "modifiedAt": "2026-10-28T12:50:51.066Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-empty.png",
+    "sha256": "be1fa48b914201486341949a1f7f7e95ec1716b445d29ec9f1b55193a1a0743c",
+    "bytes": 177811,
+    "modifiedAt": "2026-10-28T12:50:49.976Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-events.png",
+    "sha256": "fd1134c6580942156ec376dcc2faf7bb5d49400a8946bc5cf2dc107ddff300e9",
+    "bytes": 73615,
+    "modifiedAt": "2026-10-28T12:50:55.480Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-expired-session.png",
+    "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6",
+    "bytes": 41529,
+    "modifiedAt": "2026-10-28T12:51:16.096Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-http-ack.png",
+    "sha256": "52fa16daa40b194638ea96feca522d2a287cb536ee94cb429af2c46cc6c26194",
+    "bytes": 117723,
+    "modifiedAt": "2026-10-28T12:50:54.235Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-login.png",
+    "sha256": "5410d8c3ff94c90ac48b2b4633610796b51f5f350a48d5a35a0ec4f30564936d",
+    "bytes": 291140,
+    "modifiedAt": "2026-10-28T12:50:48.805Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-mobile.png",
+    "sha256": "9a881094869a3b876ae24befd429262e92064e508d37d5e416cfb8127693eee4",
+    "bytes": 44687,
+    "modifiedAt": "2026-10-28T12:50:55.623Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/16-browser-management/m4-live-revoke-a.png",
+    "sha256": "6a9fa1e5fb05c6d763d7423c9895769831c6c4d927c9203cae468ac84e480f8b",
+    "bytes": 116532,
+    "modifiedAt": "2026-10-28T12:50:55.202Z",
+    "ownerCapture": "16-browser-management",
+    "scope": "Real Spring Boot/H2 browser; synthetic enrollment/event/controlled ACK, A/B isolation and real JVM restart"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-name-search.png",
+    "sha256": "f761aa35d1813cc66697fc9a5115553b3444e278bb1a7b6626eda7ed48ff0fe4",
+    "bytes": 208982,
+    "modifiedAt": "2026-10-28T12:54:19.955Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-real-http-date-filter.png",
+    "sha256": "5a1cb94ae859535ed54b40079d3ed75b17704a42c80e60185e4b477ccce0475a",
+    "bytes": 208727,
+    "modifiedAt": "2026-10-28T12:54:21.454Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-real-http-desktop.png",
+    "sha256": "c66bfa5a3eba2103411ce6f48e561dce97ecac1a2157c253925b0825c512d6cf",
+    "bytes": 208810,
+    "modifiedAt": "2026-10-28T12:54:17.744Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-real-http-mobile.png",
+    "sha256": "311392e3979b0e0edd80cad3cb4c0f1f77e3ce60fadb650a6229ebe2d7709163",
+    "bytes": 119513,
+    "modifiedAt": "2026-10-28T12:54:22.180Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-username-substring.png",
+    "sha256": "70bae51b539de698ea6de329ebe4acd807df7c3a5caca415171a3d840fd6988a",
+    "bytes": 76347,
+    "modifiedAt": "2026-10-28T12:54:23.632Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-week3-endpoint-a.png",
+    "sha256": "0add7b4653099184c0e5c8ed4d2b0975ebe5d0ca5cf8d25bca140669a5294cf0",
+    "bytes": 76025,
+    "modifiedAt": "2026-10-28T12:54:24.976Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-week3-endpoint-b.png",
+    "sha256": "652c5c52779f96b293fc8476c31a3a32732386f4eb9b5341729d8f93a083eb1b",
+    "bytes": 69746,
+    "modifiedAt": "2026-10-28T12:54:24.359Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/18-browser-events/events-week3-unknown-no-serial.png",
+    "sha256": "a9ab6999fc6b34d8b691818bfc9a3a36e6d9e24f15800ed1cc90dd73304eb60b",
+    "bytes": 68879,
+    "modifiedAt": "2026-10-28T12:54:23.876Z",
+    "ownerCapture": "18-browser-events",
+    "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-name-search.png",
+    "sha256": "b8e6232cfe30341151f64dc331b47feccaa1d87dc71a40c657ecaf01fb2c2fc2",
+    "bytes": 203781,
+    "modifiedAt": "2026-10-28T13:01:13.725Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-real-http-date-filter.png",
+    "sha256": "607ce09892135c04dd901cb0bf15498a36397e9cedb4a7dacdf41ad2c5fd81de",
+    "bytes": 203545,
+    "modifiedAt": "2026-10-28T13:01:14.846Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-real-http-desktop.png",
+    "sha256": "a9455437c51e6f8ae67815a203ede6a90c1701295ad3f8865c3af7c9a0ac9ac6",
+    "bytes": 203535,
+    "modifiedAt": "2026-10-28T13:01:10.445Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-real-http-mobile.png",
+    "sha256": "a6eaef6e725771cd2d19ab71f999a1e524159b1330f6afdf5256564195e4ccd4",
+    "bytes": 117635,
+    "modifiedAt": "2026-10-28T13:01:15.905Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-username-substring.png",
+    "sha256": "974cb7b6c538f58a2561867f6cb860e3f530323284c03abacc7aa3802151d042",
+    "bytes": 76708,
+    "modifiedAt": "2026-10-28T13:01:18.143Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-week3-endpoint-a.png",
+    "sha256": "28bd53c313929a9b2fb3b0197a3918f045478fb88671199ce2a345a8b17667a7",
+    "bytes": 75753,
+    "modifiedAt": "2026-10-28T13:01:20.750Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-week3-endpoint-b.png",
+    "sha256": "4cc41d009af7aa6cdf8c4d719d6cd833e77f1b2126df918f44d01b55c660b874",
+    "bytes": 69787,
+    "modifiedAt": "2026-10-28T13:01:19.460Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  },
+  {
+    "path": "screenshots/19-browser-packaged-rehearsal/events-week3-unknown-no-serial.png",
+    "sha256": "5f60668e7f0b6a22641ebbcfa0868fce71725127ba64a6d0555c586ced8f30eb",
+    "bytes": 68951,
+    "modifiedAt": "2026-10-28T13:01:18.517Z",
+    "ownerCapture": "19-browser-packaged-rehearsal",
+    "scope": "Packaged JAR same-origin Events assertions plus actual authenticated CDP screencast; synthetic HTTP/H2; no audio or Ubuntu"
+  }
+]

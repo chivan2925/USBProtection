@@ -1,0 +1,1565 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/01-npm-ci.json",
+      "bytes": 1304,
+      "sha256": "244aa4e5202937694471bf0a43ee805fa38590159c61ff67aed18895e395da65"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/01-npm-ci.txt",
+      "bytes": 308,
+      "sha256": "6024a0cee40b3cc0b764172a154e8ab8938baaa28ae2b976b1af16be2f348370"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/02-agent-package.json",
+      "bytes": 8788,
+      "sha256": "37643ced551ee22d83e3c04fada84a09562ec22bc2b8d2bdc2990758e123b062"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/02-agent-package.txt",
+      "bytes": 96656,
+      "sha256": "4e362b1bdfcf322cc41313a64ac2cff14ed358836e463aa87dc862c6db94a035"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/03-shell-builder.json",
+      "bytes": 1203,
+      "sha256": "06e2656cb2286c8f05b85c515f6092979862afc6c72416dc4a88c8c6b3742f87"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/03-shell-builder.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/04-shell-postinst.json",
+      "bytes": 1221,
+      "sha256": "d9b9f473ccc151ddadb858f3ab3754675167c9765467e04685f316a69ac72288"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/04-shell-postinst.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/05-shell-prerm.json",
+      "bytes": 1210,
+      "sha256": "9b0214e2932147504ac0f65bc5116588169a6092e65f6e02d9e763ca9a80e80a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/05-shell-prerm.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/06-shell-notifier.json",
+      "bytes": 1257,
+      "sha256": "169a4bc3635f109bd5ab68aafd10fa20a228760177f7477c92c39bfba2b657f3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/06-shell-notifier.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/07-npm-ci-registry.json",
+      "bytes": 1330,
+      "sha256": "274f3c4bf85fb7e000163525e3438bf625ebd725886b0337500a3cc834dadf19"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/07-npm-ci-registry.txt",
+      "bytes": 25,
+      "sha256": "19a558255bbde33000d51276e0db5eb955e7541dce9c6b00266928de44eab61e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/08-packaging-static.json",
+      "bytes": 1390,
+      "sha256": "2640c08e86e35a0e84122ffdd69dd09fa64c583c48d878fafa0154f7be1cfff6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/08-packaging-static.txt",
+      "bytes": 6166,
+      "sha256": "aa5e1fa00fd05c76b9e8712972425b5dc0b9452d0230323fa7d807c2754fa9c5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/09-staging-probes.json",
+      "bytes": 1368,
+      "sha256": "ad725bb1b117b5af6a8557e1429df5929227a283fa66b9af3034f12796823f7a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/09-staging-probes.txt",
+      "bytes": 20104,
+      "sha256": "e9736175154ce49c237c16d2bea3a631ea02f845a8b9de78b173d8714ae59a1a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/10-frontend-tests.json",
+      "bytes": 1245,
+      "sha256": "1817fc40284e53a3ff4090e76792026fa30b0d7af6d4fc459a41c6ab607bbee3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/10-frontend-tests.txt",
+      "bytes": 8864,
+      "sha256": "b1cc4558222c27761834092a54994e9cdee2e6c7f6fb94ad62a856adfd244d34"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/11-frontend-lint.json",
+      "bytes": 1218,
+      "sha256": "e668085d49af84dc19cf48144e7d1237bc73f79d34b381397b7351219f851e4e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/11-frontend-lint.txt",
+      "bytes": 58,
+      "sha256": "624cb87f76da7fd33fa615ce5b7917ce08c64e00c2703ecaa9e04973490fad8e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/12-npm-audit.json",
+      "bytes": 1316,
+      "sha256": "691aba01876d6152bfa7eb54498560e49ab68f76ee7cb1ba7c14451ba84907d8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/12-npm-audit.txt",
+      "bytes": 361,
+      "sha256": "7b7dd56b09876e6c7893e3ca8a52d095441796e837ecbf4bbe566673f4faf766"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/13-frontend-build.json",
+      "bytes": 1244,
+      "sha256": "ee2c0d99fa3c2bf229187b26e0679b4fb414c0b7bd996a7ad421747dc058d743"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/13-frontend-build.txt",
+      "bytes": 396,
+      "sha256": "4d37a5284029972ad0148dd68fbbb69917d481db65ece5849756b132ed546a23"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/14-server-with-frontend.json",
+      "bytes": 7286,
+      "sha256": "b4870540efe109cfdab8882446d7dd2de50cb429a269c9393f04979c4476ef13"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/14-server-with-frontend.txt",
+      "bytes": 808930,
+      "sha256": "149c4a15d94333c0620a0a2c27f2daf150028bf77d6cbc0d5c66d7aaa3c20d94"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/15-browser-fixture.json",
+      "bytes": 4576,
+      "sha256": "bab0796790af2c904ae9fc779e84f4ea416a094548dd0f634637587f0914ca53"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/15-browser-fixture.txt",
+      "bytes": 650,
+      "sha256": "fbc4ed90a90d8538707c48ae31cf941335a69d6f23883c330d691d5fec59f312"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/16-browser-management.json",
+      "bytes": 3461,
+      "sha256": "6fef8416f94e2a6d97c734bc56403bb50becc5039d5a5a2d0b0e65933e2cf906"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/16-browser-management.txt",
+      "bytes": 1486,
+      "sha256": "bde4c43c61bc0a09db1cb48b8a0bbc4a946b549389ee2b8aa8df29b0852e7831"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/17-policy-http.json",
+      "bytes": 1270,
+      "sha256": "ca7d377e746c10b9519e5cf671d4d0d0428563f0b687914eafa487db4876df54"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/17-policy-http.txt",
+      "bytes": 223,
+      "sha256": "ff300bbbf31053f5594ca6e29fea36f499c8edfd0da94be69cf6d7ca7c409ae6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/18-browser-events.json",
+      "bytes": 3282,
+      "sha256": "867142df81f3b1cf55b67bdc04cb1a376c5ca65d4629f9fb7c6f6d9b5e26dcb6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/18-browser-events.txt",
+      "bytes": 864,
+      "sha256": "ef2822ed1d43891516f86b3899ede0ad3ac9a7ff1de262e178e12075350de086"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/19-browser-packaged-rehearsal.json",
+      "bytes": 3327,
+      "sha256": "fd0e05eb559443135d56510be3c1bc762fc239c2cb2f952b0f24594031561895"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/19-browser-packaged-rehearsal.txt",
+      "bytes": 1247,
+      "sha256": "bee96e7fbc123c4075f97de65736a7edbc3960d32cb34fb15eacffd6cc2cd457"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/build-manifest.json",
+      "bytes": 3821,
+      "sha256": "0077558bb5494d7d8723eca3860d8c528b363b6e27b6395000a35d2d68aaf2b7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/environment.json",
+      "bytes": 1143,
+      "sha256": "a3aff75c3206484ad969ecb54e896cd612a14ead1f6073a4adfee15dd79e88fb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/junit-summary.json",
+      "bytes": 11546,
+      "sha256": "29ede659249ddd85cffc96ba790a41aa91c445270d0fcafe0e0a125f74b75652"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/qa-documents.json",
+      "bytes": 2105,
+      "sha256": "0d07d21867610c584274fdf7bdeeccadee5fc7301e1fb6bac6634b645e9feb5a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/README.md",
+      "bytes": 6616,
+      "sha256": "c28309b9720843c0c331a89beb35efb8c2b13338b61cc8333c8a91fd5719c042"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/cleanup.json",
+      "bytes": 1599,
+      "sha256": "e750e50e7b7942212bdb3200171a2c34486c4bdbf7e841b3d338368c64252a20"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00001.jpg",
+      "bytes": 26419,
+      "sha256": "ad6a6caf0a1f4830a1bb307da64c008047224a6c05e569bc936775ef8354f679"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00002.jpg",
+      "bytes": 32514,
+      "sha256": "2d38d2c5d0d18c9bc82039f1bd8b5538587ee1bd9b06c420a43f17286e240952"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00003.jpg",
+      "bytes": 42682,
+      "sha256": "ff5ef0651f93f62c02e4f78d1bfeccc50be5e00b79a8c7599cf116d2daeed834"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00004.jpg",
+      "bytes": 32498,
+      "sha256": "c3b30bd1a1e6ee9bb7cacff4d7b8671d8f442e6c2100af39da1a072613edfad3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00005.jpg",
+      "bytes": 32469,
+      "sha256": "5ee3215e567fc014b2e0d4d2b7259aa21cf30358c575eb2ccba2f743ef239f08"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00006.jpg",
+      "bytes": 32488,
+      "sha256": "8af2c6693d6f2c34568b5d21862c1b0b5e6a6f037ea759cf7157c6158fcadf05"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00007.jpg",
+      "bytes": 32536,
+      "sha256": "81e8e2096aaa67f898c918b4331cc34728cb9a14572b851218e6631cb1073614"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00008.jpg",
+      "bytes": 32564,
+      "sha256": "a93bda43fa632eaa56092439707d60a3fbdfbd120fa43b844279b3cf3d7b85cf"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00009.jpg",
+      "bytes": 32590,
+      "sha256": "815e71361ac67187dde68832ba9970696aadd4f5bb47d3acf168878d176273f7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00010.jpg",
+      "bytes": 32016,
+      "sha256": "5c9b982402fe2c1cd1d3b3984700414cd83031519d21082bdbec572b8f442c03"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00011.jpg",
+      "bytes": 32524,
+      "sha256": "242d4ea9192742dc5f1e01532b2e43a29ad539918a48e924b7ad23a7b5d305eb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00012.jpg",
+      "bytes": 32526,
+      "sha256": "a96da51475d6c6ea7f2dd59b60174b4171f36a374df552fed1c1b1760e8ff0d3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00013.jpg",
+      "bytes": 32534,
+      "sha256": "7ee5b90378d08d2a892fcc86749e824387f3c63b089784b6cc98d2fe0a428adc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00014.jpg",
+      "bytes": 32565,
+      "sha256": "758c480f4df376d811e68ed71ded2924b6602ae0dc7e8b3ad1ff02cdf24c2f3f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00015.jpg",
+      "bytes": 32628,
+      "sha256": "9d351b9d77182c2408aee2689b868ac3548f999825f4f7ca456473d27e122a55"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00016.jpg",
+      "bytes": 32644,
+      "sha256": "76f4b871677e191be7755d99e232afc277817bbe0067cdf03d8c466b2fbf970f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00017.jpg",
+      "bytes": 32635,
+      "sha256": "e619cc422857bd9d47cfe36c86fbf12a03d04b1b404d3272e4fdbe05af5b3348"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00018.jpg",
+      "bytes": 49061,
+      "sha256": "122aeebcaa69d25e197868bd9cba575bb5cb6f3de40f2fe4a4da658aa551a54e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00019.jpg",
+      "bytes": 32577,
+      "sha256": "82bbf961ad5e696de0a93e75204df99086f8c7d71533381fe996a7a393db787c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00020.jpg",
+      "bytes": 32559,
+      "sha256": "e0f7ed5b58a388c9178f140b0976dbd33d781bed26579e8951b66a3fc7b18640"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00021.jpg",
+      "bytes": 32587,
+      "sha256": "27b6540ada91cf598421d640326ca0c9feced221f79547151ad7868d1c5471f2"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00022.jpg",
+      "bytes": 32618,
+      "sha256": "1efe1bd7b09e8cb044eeb035aca5c6f65cea9563ff5e28f7b6a4995438c58722"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00023.jpg",
+      "bytes": 32667,
+      "sha256": "6cc2780289480e9525d16ed0da669c4e50e0d979d5a917771d87a188636fead6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00024.jpg",
+      "bytes": 32086,
+      "sha256": "41e361a7dc4e93b90faae8773c6138d4784dace1325cb0a2bc939540764898b8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00025.jpg",
+      "bytes": 32627,
+      "sha256": "df1c2b3a9c0b7c5e9c410f7008297508a4774f14a32798b2f32d3d7f719e76ae"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00026.jpg",
+      "bytes": 32617,
+      "sha256": "d8fcca2ba3984162823fa0ff86aaa1ee97c459459d895a6550f8ca2908d8a300"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00027.jpg",
+      "bytes": 32632,
+      "sha256": "62b7ccec8756ed47085dc28f417535991ec82e76552cb5fab92860c22cfe0ddc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00028.jpg",
+      "bytes": 32685,
+      "sha256": "42337f2f3cbc3fb08c5de46324650d583ad8fb5be040ac22eec04600c472c0ba"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00029.jpg",
+      "bytes": 32704,
+      "sha256": "2c396919b01cf97484f7adae655c699dbd332cfc3539a7dc75e424677636fe0d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00030.jpg",
+      "bytes": 32760,
+      "sha256": "8e1fc69d1f8df713f18dbb02e7af34d06e98da7bf80e8917ad7e0a05edc27e7f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00031.jpg",
+      "bytes": 32787,
+      "sha256": "43fa375625bd4d03152ad900d9eb9534a347a6bc74efbe6e345004dbcbeacdb8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00032.jpg",
+      "bytes": 32816,
+      "sha256": "dc3226dfb72512fb656d9a39f60161d5aa7ef258395d115c4b46124c1d36e948"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00033.jpg",
+      "bytes": 32822,
+      "sha256": "4042cc69ae04a2150e6a71e5f8b9149ba06c6f1968daa0b86f34297d26a34890"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00034.jpg",
+      "bytes": 32846,
+      "sha256": "ae77851075c9d915d5c6d24b90f3b08ecf83b19d3cb9af84d646a16f94f4ec89"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00035.jpg",
+      "bytes": 32813,
+      "sha256": "1b6f571f05a431a20f05e981d0b58729b1b4ae432106fadec14f47ebe3628f9b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00036.jpg",
+      "bytes": 32770,
+      "sha256": "2eb0c6a337f7bdad85aec376502131b3a6cb3deb11a125c821098552fd97e6dd"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00037.jpg",
+      "bytes": 32738,
+      "sha256": "22b88c05b6762f1267a53457f7c65f4258da322f342174bd8efa82b9291173f7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00038.jpg",
+      "bytes": 32669,
+      "sha256": "7f92ae10252ef30b8bc420b5ae3442dba31d87c9bb4cf9b46e2b5b4dd887c4ad"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00039.jpg",
+      "bytes": 32558,
+      "sha256": "2d982e9d41c7e500e556592d743bc77b478f9c735d2f277723b5641ebeb9f55d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00040.jpg",
+      "bytes": 32516,
+      "sha256": "c0cab7b6aa3962a8437db9317a7e4b54b6f45f760a889f19d42356de500ca7bf"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00041.jpg",
+      "bytes": 32489,
+      "sha256": "0dabe5b6eeebd1ba8f5e17c33f84075f779ca052983a7953413e49b97c0f1c90"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00042.jpg",
+      "bytes": 32478,
+      "sha256": "611e553424c77672cbae91a918ecbc8f3d6caf3eb4e72e9a064831348d1429da"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00043.jpg",
+      "bytes": 32448,
+      "sha256": "54ca6242c2fbede9e8783296dbf0e39d360196011f019803e1039897a437607c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00044.jpg",
+      "bytes": 32454,
+      "sha256": "690bbaf1ea9a03084ff5abe0101ce3e5af1644fc7cd40f1e55f20f62512b9b7f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00045.jpg",
+      "bytes": 32631,
+      "sha256": "297ac853e510681cb09d78b485d4a68bc8e018d32a5bbd843194f81ec72e8265"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00046.jpg",
+      "bytes": 32613,
+      "sha256": "770d29bea79b889c2934b19b1ae206f44ca6d905bc7adfcb934cd4b6e4e9a4b5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00047.jpg",
+      "bytes": 32664,
+      "sha256": "5d0b2e8478bf73bee7da60bbe5b7dabb3e669ca3e273c4380d05d66961eadca1"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00048.jpg",
+      "bytes": 32192,
+      "sha256": "647c39c660ebc8ba09c667c86dbc84e00805467737a048c5e142ad88578da84b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00049.jpg",
+      "bytes": 32569,
+      "sha256": "0e11c921bd413ff55755db4db5f8b90a7e060da28211302b6da42f01e7062a13"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00050.jpg",
+      "bytes": 32544,
+      "sha256": "9f9ac13e3ec32297a7eb70eefb9fc72c12bfb0a715c8025d78411be3512d6053"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00051.jpg",
+      "bytes": 32588,
+      "sha256": "7dc48af2121304b967eec7b3537fb290beeb3ea0a61d0f8d0b0f570d57cc5ca2"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00052.jpg",
+      "bytes": 32640,
+      "sha256": "5f27aaa65899a268a4daeca066183bf7d61fc25b84c07b73a0037ea4bcb21dd7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00053.jpg",
+      "bytes": 32662,
+      "sha256": "7b7ce51b7f3626f142cad4ca209aebec6bbf4de8ccf52225c99e7a579a36ff8f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00054.jpg",
+      "bytes": 32690,
+      "sha256": "6b17c8936c86383a1608d9de7481154b7a6309b33f25142a6627a5f1becd856a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00055.jpg",
+      "bytes": 32761,
+      "sha256": "238037331a9f0f21365213b23b4a70a3440680b366e1656120a181bd7e4926bc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00056.jpg",
+      "bytes": 32772,
+      "sha256": "3c53163a1f253907dfe8dcb48eb97f58c4916fcf6bf43e02ee09d61115b3b433"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00057.jpg",
+      "bytes": 32731,
+      "sha256": "c887651a36785465bf77063a902fb709e168e91eb103b9a5f443868b845c3747"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00058.jpg",
+      "bytes": 49131,
+      "sha256": "17566b29ab1955f088b71ffdbcd22898f3f4162769b07281d93a5128bc89a309"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00059.jpg",
+      "bytes": 32524,
+      "sha256": "242d4ea9192742dc5f1e01532b2e43a29ad539918a48e924b7ad23a7b5d305eb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00060.jpg",
+      "bytes": 32513,
+      "sha256": "2fc7e24f1f70f2f6f4da383aa793e4c82af2e6e2ed5a8bf90919f545b61e95eb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00061.jpg",
+      "bytes": 32532,
+      "sha256": "b136ecd31bed0ee52943b046d700ebe59a9935df627fa29506a84b298c8b6a36"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00062.jpg",
+      "bytes": 32575,
+      "sha256": "36f25256bbc2061d7f075011c9cdc580e3ac6c54957136fd671e49c2379bc3b2"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00063.jpg",
+      "bytes": 32610,
+      "sha256": "f17cea13c2a3f8f1095dee683f9b858ac95d8200d6407a164499068f524911db"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00064.jpg",
+      "bytes": 48980,
+      "sha256": "d479610b4be706070f11c1facd8606edf095543b14736d8a28ce88920caf7367"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00065.jpg",
+      "bytes": 32418,
+      "sha256": "a65cec0925d9bce75c1b49e1024aaebbdb04398a2d510cbeca61a17672ba05ec"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00066.jpg",
+      "bytes": 32417,
+      "sha256": "094bf4f7599abfd38fd6aa5292b3b3e4e96c9ed3c733293e40b6d1ba470ccf89"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00067.jpg",
+      "bytes": 31931,
+      "sha256": "0f873d7c7ce2862eefe4194056b195400574ee4fa0cd94142461845079eeecdc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00068.jpg",
+      "bytes": 32203,
+      "sha256": "6736d2030d8236495a905d1b10a6c0637073b211982b82d5f5d4c66887dcc644"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00069.jpg",
+      "bytes": 32191,
+      "sha256": "41541163b01b70f1fd4d72068d0354b54654b9db776b17b8f025bec6c8d366b7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00070.jpg",
+      "bytes": 32214,
+      "sha256": "3674c9163b31d3591933d9d4f5494ba674305c57320e30b6258f3928077705d6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00071.jpg",
+      "bytes": 32265,
+      "sha256": "4dec95084d2a93b0cdb64a9857fe6d685a321c593c5c7c3fe0a6c6c1a0894bde"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00072.jpg",
+      "bytes": 32307,
+      "sha256": "ed04a7c3f553ab6a1adc675a1bffe7122da022e982c0d4180f0d4b3efe372846"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00073.jpg",
+      "bytes": 32312,
+      "sha256": "131584e37062b5ea6fd58fccb9cd023d05e70375ab4e20be81c4cf6ebb8b63dd"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00074.jpg",
+      "bytes": 32375,
+      "sha256": "a4206aa1beaa54c6e5b2dc4850521385efd7997eb8105c927fa1610a2114c187"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00075.jpg",
+      "bytes": 32389,
+      "sha256": "b227d576883c543182fe46b3d35e88adf293e73855fc65cd611f0aff5dbf3154"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00076.jpg",
+      "bytes": 32381,
+      "sha256": "3c078e4929e522cbe9e41853989567739db0357c7334c95d2f370df757d539a1"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00077.jpg",
+      "bytes": 32398,
+      "sha256": "9a26abd17a5e450da466f103e7935b5451987bf1953f88860c15c26f663814c3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00078.jpg",
+      "bytes": 32397,
+      "sha256": "cef8f7df1d9547b9a48675edeaae4e39a8ce01cd96dc5d2a7e48d03f438e3006"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00079.jpg",
+      "bytes": 48782,
+      "sha256": "5688f0e6df4c8596ea19bd28893788c6712d3432a1a75b6fca716a1e51fb4e21"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00080.jpg",
+      "bytes": 32669,
+      "sha256": "697d6185af7e1a7f43e5520173a6ba2713bf30b9319dd541e80832202c6a991c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00081.jpg",
+      "bytes": 32651,
+      "sha256": "8af632fa2539c7f364e4b0d3230e7f33dfed90ee474342513d787da825d5af50"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00082.jpg",
+      "bytes": 32696,
+      "sha256": "96463570785030ddbd0948d8a23d4cde61ce46a06c870f30af630eab7f3886d6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00083.jpg",
+      "bytes": 32733,
+      "sha256": "e01fa35385ef408894ccb55a1d004a827f5335745c9915ec7096c7a3c50d91e7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00084.jpg",
+      "bytes": 32158,
+      "sha256": "7e17acd9b5bc76989b9bc8e25324458313e01dd588f3e3ec19aff9e79005f9b3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00085.jpg",
+      "bytes": 32591,
+      "sha256": "ddee5c65cf733e0a695a41dd2e25f55ac32875e53b613f1739aed0a7a3c22b9e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00086.jpg",
+      "bytes": 32564,
+      "sha256": "4cb79962338b2737f51d46ba8fac89db53c95217775f76c0df8da8f05d196e61"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00087.jpg",
+      "bytes": 32580,
+      "sha256": "d42b9e4b6f6c05000a906c14bcd5ac950a4968bf8903d11529f1f3a501f377a5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00088.jpg",
+      "bytes": 32630,
+      "sha256": "18d5fe5fc64576cf9ea91515b60d982cc9146b9595b377aa35bf9e856cb67fbc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00089.jpg",
+      "bytes": 32669,
+      "sha256": "59c19ab53b78584e1bc2a514df45a03c6d34853e4f3278da459802164e21a3e9"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00090.jpg",
+      "bytes": 32684,
+      "sha256": "a3427275dd7c245c0187b35aacb3ab2650205610f13023648c21df546f548610"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00091.jpg",
+      "bytes": 32700,
+      "sha256": "16af450abe0a1f02337ee80913a042cf3d1f9251d09bd42c48a89ff59730ca95"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00092.jpg",
+      "bytes": 32756,
+      "sha256": "5520aae8d928417d3889269128250240a4cefd714f1accd91c5f5b3b19e71ade"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00093.jpg",
+      "bytes": 32750,
+      "sha256": "d4a1886c3fd5cc68ffaddce50f24b7b0725435852762a3475c9dd628c3dfa160"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00094.jpg",
+      "bytes": 26461,
+      "sha256": "e17a4b8cea2daa082e5e52fdb57157673a56389b8ca98e8e6d182759863b334d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00095.jpg",
+      "bytes": 32625,
+      "sha256": "ca8f73c2a59940450c755bfec0bca470e015258e5d70d8984b445c8482ed8461"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00096.jpg",
+      "bytes": 32626,
+      "sha256": "c5bef0cfc361bd5d14e6a71c460a39fc1bf2d478063c39ddf03ac490d19e9ade"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00097.jpg",
+      "bytes": 32179,
+      "sha256": "367daa6cb4154ae29b79fd8b50af2577a820254ee47f5ee7c0193ba7fa34722e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00098.jpg",
+      "bytes": 32521,
+      "sha256": "9f6207678ed03f6430e5123787e4000c5e6e802085622e0d3bd2c170c9ab8035"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00099.jpg",
+      "bytes": 32530,
+      "sha256": "681905d2b34d15cc89db29d37dc9243ba8588cd5da80409947a3efec7d4bee4a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00100.jpg",
+      "bytes": 32552,
+      "sha256": "3b876cc50040d7de41a745863ce7d82de523f7e1468d9bdc53fab7bcba25ef21"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00101.jpg",
+      "bytes": 32575,
+      "sha256": "d3273293322b03aca1869bdc7e6a7eea8fd1ca544a210ea93300f8d58569b923"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00102.jpg",
+      "bytes": 32590,
+      "sha256": "9cebd7855fc79e51168f8a702909b068dafce093882052c3cf8e17ffdc4a8bb3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00103.jpg",
+      "bytes": 49065,
+      "sha256": "317bdff649d52c2a8d8c1b56e406223718c29977eff79f31c7b9d3017670dda9"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00104.jpg",
+      "bytes": 32520,
+      "sha256": "8772e04306489a1ca9d44cc3d7e5b16c02f1abf20f76d585e41a30ba7cefb736"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00105.jpg",
+      "bytes": 32520,
+      "sha256": "558d84d53460779568327cde0ddf4fe7c9cb41639f933b0263845be7a52c6700"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00106.jpg",
+      "bytes": 32579,
+      "sha256": "d520b4cd8b9f3a0be55af31c367b85172c94be276499b5ac7f9034915e89c9a5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00107.jpg",
+      "bytes": 32600,
+      "sha256": "63ad14e5e8faae87f9993a5279194bcf5d35367f58926afa9b0a88a7bc847016"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00108.jpg",
+      "bytes": 49203,
+      "sha256": "e37ffd64d1095ec1d294b02ff8311eb40c988a533254d65b72b6da3aa4dd7341"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00109.jpg",
+      "bytes": 32534,
+      "sha256": "be3192e2041d2061476e0c04388e7134358e74663f5067b58c102c6638d5ea75"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00110.jpg",
+      "bytes": 32540,
+      "sha256": "7139efa0afef0c3fd1f2af5d88b40ba9ff83b4c3d859f632bebac87e5c8bbe94"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00111.jpg",
+      "bytes": 32571,
+      "sha256": "399805168733b022866869dfc54ba72778d7a490f57ed3f1f79316b74c2e7136"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00112.jpg",
+      "bytes": 32583,
+      "sha256": "300a45ef60812eef525575bdc016a28da4076009b7469e53a779ced5a78c5a1e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00113.jpg",
+      "bytes": 49012,
+      "sha256": "a5cce3d644336d478ec112d70db07a51d9c0dd4fe1797d3b4e49003c8697ff75"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00114.jpg",
+      "bytes": 32476,
+      "sha256": "5a8b655a38a3150f5fad72fe19bdf773a5d7f01745f1628414720a80b1736a9e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00115.jpg",
+      "bytes": 32462,
+      "sha256": "6bc9b7dc1e82dc814c48ad926db15cea3eeb16f0f9b987dc71215b074ec7a17b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00116.jpg",
+      "bytes": 32562,
+      "sha256": "d85d1253592af2ee01b63030eb08ef236039d848dbede2355feb27a8e8b0c1b6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00117.jpg",
+      "bytes": 32579,
+      "sha256": "342033c2741615b8b1b587155b099cbde26c026116b9556751520b1dae1c8026"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00118.jpg",
+      "bytes": 32593,
+      "sha256": "50a50cb42d2d66c010d4dd609c44e5693e58f8ae66ad576d30d8a43d54d16077"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00119.jpg",
+      "bytes": 32607,
+      "sha256": "af65ef95ee1ec47237f8667599b7db5eaba73ca82de75068b049e01c064b3869"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00120.jpg",
+      "bytes": 32619,
+      "sha256": "37a7240df9da0a96d8e6f2f7712a06d31d3252ca8c14d22131097e9db82f3e9f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00121.jpg",
+      "bytes": 26389,
+      "sha256": "3bb81814727ae16ddf245706e86b237114c42d0b3acad1bb759667f2f8afaa47"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00122.jpg",
+      "bytes": 32532,
+      "sha256": "f9aa0299c7531325fceb69f4f8bac50d253eea73b42887d876b1c7002392799c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00123.jpg",
+      "bytes": 32535,
+      "sha256": "38543f2b472ce85317d3c458369f41de2e6da9806823d8066f294b7c4cf59946"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00124.jpg",
+      "bytes": 32561,
+      "sha256": "3844c129ee06d8d88909708650d452c358db8ff985b4d7179e60d4017e7a5075"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00125.jpg",
+      "bytes": 32701,
+      "sha256": "af26e37189f2d2760d9c8bf33c74ae87cf399f27bc22258ae6250982ab35f499"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00126.jpg",
+      "bytes": 32714,
+      "sha256": "a2be5261b120f37ea8fe344ce8f41d6a397adea6a698197274fd0ab86b9c827b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00127.jpg",
+      "bytes": 32715,
+      "sha256": "435b4e7202d4be1b5cdab722a924d3272cc5d04ae4aabdb6f681e704432e3638"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00128.jpg",
+      "bytes": 32708,
+      "sha256": "1aa1e60105bd276b5c7c7562560523ca7b393bd7d425670c5fab2522425547ce"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00129.jpg",
+      "bytes": 32743,
+      "sha256": "106f917ba59545521bac4dd903d96b56b9af76d18988040b1081d65a95c4d954"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00130.jpg",
+      "bytes": 32724,
+      "sha256": "bc1f6f4493caff5c24efb628edd17bbbb58933eaaf3399a607d0c58746e52d16"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00131.jpg",
+      "bytes": 48560,
+      "sha256": "10e0efa2d631bf0dd05335eb1cca398cb54f9418734ebdf4b84b0bea81307e3b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00132.jpg",
+      "bytes": 8124,
+      "sha256": "e5af68281267eb984a8b88866a3392175292ed388f0d50d4b3b58ace5f81acb0"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00133.jpg",
+      "bytes": 8124,
+      "sha256": "98f77bb0c7501b0dfcfe8d4e38f83354838730fddb047c78836b76383eee509e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00134.jpg",
+      "bytes": 8132,
+      "sha256": "4d32ecc7045066d94a5919e2c77e18e335f634f5cbc33995f9cc1927c0e71858"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00135.jpg",
+      "bytes": 31902,
+      "sha256": "ed465e8233f5d7d93b4ffe2e8230a321d3dd87f3be9cc3dfd0bb8de3664a1e5e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00136.jpg",
+      "bytes": 31948,
+      "sha256": "fca5ae0e8f110a4e5d709a788cd6580915e612c453625fbda959126f4c795c47"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00137.jpg",
+      "bytes": 31960,
+      "sha256": "15b56ce14fd5bc26845558a9707e29b9d9dd01b919b06fe8cbc5ef56cbce751a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00138.jpg",
+      "bytes": 31974,
+      "sha256": "013e2746764cfc3c0f7f1925e35747c5fd0b8c94b10cc244968e06e45cbd45ad"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00139.jpg",
+      "bytes": 8625,
+      "sha256": "375911e76f9c6e7818a8cca31a0cddc1951a9a169e49bc3ec8d92be598fac3f1"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00140.jpg",
+      "bytes": 48560,
+      "sha256": "c1c2258491436c332a5c7a84c1cba0a7b364bfb5ab39dcd020000ce80ab7a984"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00141.jpg",
+      "bytes": 31870,
+      "sha256": "283e70f539d4c26982070663e3db635b25dafacfc425dd92ec46ecfc7ab39662"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00142.jpg",
+      "bytes": 31881,
+      "sha256": "5696b9b43f01de68fe1e0c79f1e20bad75a54ad5d986cb70bfc32ee9f869c16c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00143.jpg",
+      "bytes": 35035,
+      "sha256": "0bb80db966ac85060ef29cada92ee3ae8619d0cb55cab987174ff67583fd080a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00144.jpg",
+      "bytes": 31876,
+      "sha256": "11c4b5c6dc88702e6bf31be81965f35055703cca4c8608a9b95297138c384695"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00145.jpg",
+      "bytes": 31881,
+      "sha256": "5696b9b43f01de68fe1e0c79f1e20bad75a54ad5d986cb70bfc32ee9f869c16c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00146.jpg",
+      "bytes": 31879,
+      "sha256": "9795b8e22c0313a27d3e055159ab21faea8fe0179da1eaebf80a0e0929947a2e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00147.jpg",
+      "bytes": 31887,
+      "sha256": "48654b72a3f5e2688dadcc48e862916f95a7f1df009ff29e0f2b89f3bcf9d789"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00148.jpg",
+      "bytes": 31891,
+      "sha256": "b4d206217438e474d7faa39769443a62d9f6e7805ef1a541e978ea37242f8e11"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00149.jpg",
+      "bytes": 31881,
+      "sha256": "5696b9b43f01de68fe1e0c79f1e20bad75a54ad5d986cb70bfc32ee9f869c16c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00150.jpg",
+      "bytes": 31879,
+      "sha256": "9795b8e22c0313a27d3e055159ab21faea8fe0179da1eaebf80a0e0929947a2e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00151.jpg",
+      "bytes": 31890,
+      "sha256": "18bf8a59f33a52de1246263fc366a0c742e30c6f1822254773dbd254c96c225f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00152.jpg",
+      "bytes": 31983,
+      "sha256": "b65e80963cb9911f8648202c3fdd3d29587b142009f95d153e518b5bd2b7adb5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00153.jpg",
+      "bytes": 31987,
+      "sha256": "29f11cdf958a9d717f42bc2a3b5902c7e2ad5da424c494a86ab5c34397025f8a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00154.jpg",
+      "bytes": 32020,
+      "sha256": "66d3822b3a9729a3a9081d02eb436e4b19ba2dbf42ba5f82705ec77a12bab212"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00155.jpg",
+      "bytes": 48756,
+      "sha256": "f3ed23a22852cec885d94a4a7b0d870fcabf58df51800ca1f2cd56a752c73b0d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00156.jpg",
+      "bytes": 31824,
+      "sha256": "9c912efac6d64412853ffc62c2a5de6087c92bf24576fadcc166fa155257697a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00157.jpg",
+      "bytes": 31820,
+      "sha256": "299eeae384c365e2642529fd9e4f0af98bda819c74eb463d5a60cb29b462b087"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00158.jpg",
+      "bytes": 31846,
+      "sha256": "7f7e12579659deb4f27bf1654e7faf34fadc5a2f63489505aaf2a77d934dd85e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00159.jpg",
+      "bytes": 31863,
+      "sha256": "6d85c2b1cd8efe1966566ab4d01d6025c77a275e2a23372d89304b887a15c077"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00160.jpg",
+      "bytes": 35219,
+      "sha256": "a50d42b7dfb08b1cb17909a0ed5780bd0546d7e1808eafe5fe7654c164c3ea49"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00161.jpg",
+      "bytes": 35028,
+      "sha256": "04a72d9eadaa4fa1a28d3443c9f08e57c5414eba301b32499576fbcd3fd917f8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00162.jpg",
+      "bytes": 31612,
+      "sha256": "fba67ff23b80d47b1d453f8a62e0632fdf948678f76a07b7ab29973a53e55559"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00163.jpg",
+      "bytes": 31626,
+      "sha256": "911659444a2bf752543f4db3b2004b9ac0cb31b8c9d65e4097b070fe6fbede75"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00164.jpg",
+      "bytes": 31684,
+      "sha256": "81b77dd738217fc8b2b2e1af7c6da5cbb1a379e6c970f33de7c9a9e908bb557f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00165.jpg",
+      "bytes": 31699,
+      "sha256": "3d2ea9e1cdc247376e399d2871f12a4b15a469043bd11fc1b4b5a635a65b3880"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00166.jpg",
+      "bytes": 32026,
+      "sha256": "b197fbb5c045ea2351956d40716c3fcaaf7e195923a7b80d5aaa839cee5ced3c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00167.jpg",
+      "bytes": 32026,
+      "sha256": "b197fbb5c045ea2351956d40716c3fcaaf7e195923a7b80d5aaa839cee5ced3c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00168.jpg",
+      "bytes": 32371,
+      "sha256": "d1282ea76515506706f1900c3c4ec02ce32d7c7da5407e601e19306987cb4077"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00169.jpg",
+      "bytes": 31926,
+      "sha256": "a2031b3c18f867c5d12a19a7b0290e8f9ef8131d383853b7804b26d43e373b92"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00170.jpg",
+      "bytes": 31959,
+      "sha256": "1a302a12df9dc3d4b5a46143854367eb0f9021c9238517de013c16facca5b8bb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00171.jpg",
+      "bytes": 31998,
+      "sha256": "57b3779ef3fe5706c737dbc7926fc238c88518008af1978fa83f237e929ef910"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00172.jpg",
+      "bytes": 32379,
+      "sha256": "1b6eb9714f6b1a31652189a8549b407a732eb8cfef29c90983b620375cd59632"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00173.jpg",
+      "bytes": 31863,
+      "sha256": "5b35bb24a4f154d76187b06e9a67ecfce6bb4f60d9041aa0bd0655258feb3e2d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00174.jpg",
+      "bytes": 31908,
+      "sha256": "3fe01aba9523d06763922113720385ed1c7901c08ae5043010a9197e4dda534c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00175.jpg",
+      "bytes": 31981,
+      "sha256": "07b64666920f9aac19e2aef4e85997c67f7dcac578134f5e993664f86d0832f8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00176.jpg",
+      "bytes": 32050,
+      "sha256": "dc11193ddfa903e0d6aae9b35cf63f8a7a5dbcff0d66791470633a6740154225"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00177.jpg",
+      "bytes": 32070,
+      "sha256": "a194b5b4cd0124b5379c83639f14adfb4d01efe1feca9ec6c24c1633b20f4e9c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00178.jpg",
+      "bytes": 32080,
+      "sha256": "fd760f9b9aec2baf7aac35a482926b5ec32234ebe450461bd5e2328cfa42e4fd"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00179.jpg",
+      "bytes": 31719,
+      "sha256": "56d0c962921d51e052301748e9ff8705d19377992dfde805ee2a1684ad4edebe"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00180.jpg",
+      "bytes": 31719,
+      "sha256": "9bb5523f269160139d756c5cda34d1acd6ff711d4a13dc3224925a20eb4538b2"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00181.jpg",
+      "bytes": 31738,
+      "sha256": "9cbbf448563d37f83eb3a03369736ff16cd0555b3359a07d73bf3e4abbc7deca"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00182.jpg",
+      "bytes": 31791,
+      "sha256": "8fe40d139ea3674e7f34b1a4681f31cf2d58eb8d3bbf3b69f8dd359ed40443be"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00183.jpg",
+      "bytes": 31809,
+      "sha256": "9350f2bb63323b28eb8b7db08bb4000c6f0145ce59da444560e01a2ea6d5da6a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00184.jpg",
+      "bytes": 32265,
+      "sha256": "b560956ca3071adf7df237d438b720d501b579ffbc382884332cb12236735068"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00185.jpg",
+      "bytes": 32265,
+      "sha256": "b560956ca3071adf7df237d438b720d501b579ffbc382884332cb12236735068"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00186.jpg",
+      "bytes": 31794,
+      "sha256": "e2ef6ed088e886ddf05ad03d424bbe24abdba883beb62f48e2ca3959a313154e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00187.jpg",
+      "bytes": 31805,
+      "sha256": "70d5747d3fcf986971c8196a6a456d18ad4493dd2817743dcee14a7736af5551"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00188.jpg",
+      "bytes": 31804,
+      "sha256": "79bee55acee742304ad834e61a10660bebdbaf72f63c73f1c96fdddf6b474dd1"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00189.jpg",
+      "bytes": 31901,
+      "sha256": "08812699d01beaacc510b7eab6c68fd84716eb9bab6100806b1db00e57d70c32"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00190.jpg",
+      "bytes": 31912,
+      "sha256": "3ae50afd231911b8179638565a012d3ec06c2e239680b83aebc68d0abe4bfd06"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00191.jpg",
+      "bytes": 31916,
+      "sha256": "b02caf3f9baeb27371984e0d8b7768a3eeabfeb641bbd6546496c591627791b4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00192.jpg",
+      "bytes": 31608,
+      "sha256": "789baa7b7e8e789a4730ceb86d8c66bb9c6485933174d76618898c39bfe3444d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00193.jpg",
+      "bytes": 31871,
+      "sha256": "7e123fa83b313435cd006c252efe67465b1658ea5751fd5305cd918c8398118f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00194.jpg",
+      "bytes": 31858,
+      "sha256": "e7aa91d1f3490201c53b93de38199bc2a2e032de8d3b1e50d8015e4370bdf201"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00195.jpg",
+      "bytes": 31980,
+      "sha256": "5435ab6e140acc1e34c04254c99e036e0b877daac75183eb2a24776267b423e4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00196.jpg",
+      "bytes": 32021,
+      "sha256": "b2246a15d8cdd09610184d85c4c0ae653c81f231e85ee6c6203fb0484ddca3f5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00197.jpg",
+      "bytes": 32032,
+      "sha256": "8c481f64161fa1214ae90538813f11af7d6c26749f5c5654f6052ea4dddb16ac"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00198.jpg",
+      "bytes": 31565,
+      "sha256": "ed45304bf549ae30a44c5c2eb335b2b435184e3c4f0477f5f5675d86483304d9"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00199.jpg",
+      "bytes": 31557,
+      "sha256": "502bb6977c7b52c674c2356905949aa492beb05a15937c4ea288d5d56666ca6e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00200.jpg",
+      "bytes": 31567,
+      "sha256": "9c259b4aa06e757ccd123f8cc8322a4b85bbe0ce1bb1f9baaba674cf33649458"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00201.jpg",
+      "bytes": 31624,
+      "sha256": "bfff94627c4ef1edfb3f73a168b6bc196453ccf8500286bd96fa5c3f3474f918"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00202.jpg",
+      "bytes": 31661,
+      "sha256": "2dc36a968b1a83c3c3fdc9b1a443a7d557d51bf1b2b2f9c87e29f49bb7c4622f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00203.jpg",
+      "bytes": 37053,
+      "sha256": "6ee0f431903a7e28db69aea2716bf9cf8ebb489f6429f86beb23aab92f2a0a9d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00204.jpg",
+      "bytes": 31659,
+      "sha256": "8f2051507cffbd3a8d6d0db91f57d0884ff651121cd58eb01ff3fb414b8172e8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00205.jpg",
+      "bytes": 31704,
+      "sha256": "26ec06fa6e1d498e5e705b8079adb1147daff8967ea6312fa0bbf1bee3e8517c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00206.jpg",
+      "bytes": 31812,
+      "sha256": "9fdf10f7e9c2abe6e27a0a629ceedb6495629d57f993e539d2bc384bab973761"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames/00207.jpg",
+      "bytes": 31847,
+      "sha256": "fe57cad474d58e1242ddf953845ab4ef11137ff54d5322235ec5e5d1cbf7e6fe"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/frames.json",
+      "bytes": 73555,
+      "sha256": "2b9be3a075c4ccfbaf356c41867b84e3135b6781e5c357d7ba22b6dca156772f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/provenance.json",
+      "bytes": 13795,
+      "sha256": "611eea5cea4955893ea3f950a3f61859d040db939d89fcd4ac0bd00864847cee"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/README.md",
+      "bytes": 1222,
+      "sha256": "0aedafc6e800f7ed601ee03c5b54f952b3f2617d872ed5177426ac336243a6aa"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/recording/replay.html",
+      "bytes": 9032087,
+      "sha256": "f06fd11f6b8275d03b6373055785463891dd74ab0d467475a16e4cd35727d829"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/demo-dashboard-desktop.png",
+      "bytes": 193735,
+      "sha256": "78044b7b938745a038e9d0ae5c4d5cc06f0aa4323a103fe58eb1dca86987a0fc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/demo-endpoint-desktop.png",
+      "bytes": 121163,
+      "sha256": "4be4bda89160520558661c7b4d9122ff417e53a550daf2209f2fecde51e8c59d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/demo-endpoint-mobile.png",
+      "bytes": 86681,
+      "sha256": "e55c6a6d2240ae2126ea66165d015b39793238671778f61a9563f36b1490a37f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/demo-endpoints-list-desktop.png",
+      "bytes": 79456,
+      "sha256": "91a74204ff7d09062a440b868dedddb2ffda1ffb38aaff3113ad4000aa46e9b4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/demo-events-desktop.png",
+      "bytes": 90713,
+      "sha256": "b668b9178ba8025d44560ab58884a9d4a7c4e0c6f91d4888aa518f43bfd2317e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/demo-events-mobile.png",
+      "bytes": 54140,
+      "sha256": "27e2de0d77e10f015c3f00d82e94c119af437b1d9300db46f05bd101b063183a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-allow-a.png",
+      "bytes": 117063,
+      "sha256": "fb542a24619609c6752f513765135ae60b988f679b8302b4ac6c272b9336ecbc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-dashboard.png",
+      "bytes": 177796,
+      "sha256": "d37724a6da6742f8f9e6230cf005a91faf7bdb7b5d4df62a8c74a02f0a3cbc87"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-empty.png",
+      "bytes": 74995,
+      "sha256": "8800f4d265732af95b7a87011f746c036cfc48e012aedd37686ae31f6d467d58"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-events.png",
+      "bytes": 76222,
+      "sha256": "452bd07654e54f5b24864f85624d74b68625997d53a4a0f0e295396c6a21db70"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-login.png",
+      "bytes": 291115,
+      "sha256": "8143501d141f0271e706cf8da92338ad7851e206ee28e52650ad3a95049b8edd"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-mobile.png",
+      "bytes": 53423,
+      "sha256": "ef55070fc64d62ff76c40aacd1bf517efc01e353ce5959ef2ec1a23ade4cf6a3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-mutation-error.png",
+      "bytes": 193522,
+      "sha256": "09815c0e0f607b340f8607082756cbbc723525a2554ae086be97f59a805fb25f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/14-server-with-frontend/m4-network.png",
+      "bytes": 135584,
+      "sha256": "bd5553536a9fbf055e10fcba3e59e077ed6e419fd9931c627746ad49f647168c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/demo-dashboard-desktop.png",
+      "bytes": 193735,
+      "sha256": "78044b7b938745a038e9d0ae5c4d5cc06f0aa4323a103fe58eb1dca86987a0fc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/demo-endpoint-desktop.png",
+      "bytes": 121163,
+      "sha256": "4be4bda89160520558661c7b4d9122ff417e53a550daf2209f2fecde51e8c59d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/demo-endpoint-mobile.png",
+      "bytes": 86681,
+      "sha256": "e55c6a6d2240ae2126ea66165d015b39793238671778f61a9563f36b1490a37f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/demo-endpoints-list-desktop.png",
+      "bytes": 79456,
+      "sha256": "91a74204ff7d09062a440b868dedddb2ffda1ffb38aaff3113ad4000aa46e9b4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/demo-events-desktop.png",
+      "bytes": 90713,
+      "sha256": "b668b9178ba8025d44560ab58884a9d4a7c4e0c6f91d4888aa518f43bfd2317e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/demo-events-mobile.png",
+      "bytes": 54140,
+      "sha256": "27e2de0d77e10f015c3f00d82e94c119af437b1d9300db46f05bd101b063183a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-allow-a.png",
+      "bytes": 117063,
+      "sha256": "fb542a24619609c6752f513765135ae60b988f679b8302b4ac6c272b9336ecbc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-dashboard.png",
+      "bytes": 177796,
+      "sha256": "d37724a6da6742f8f9e6230cf005a91faf7bdb7b5d4df62a8c74a02f0a3cbc87"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-empty.png",
+      "bytes": 74995,
+      "sha256": "8800f4d265732af95b7a87011f746c036cfc48e012aedd37686ae31f6d467d58"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-events.png",
+      "bytes": 76222,
+      "sha256": "452bd07654e54f5b24864f85624d74b68625997d53a4a0f0e295396c6a21db70"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-login.png",
+      "bytes": 291115,
+      "sha256": "8143501d141f0271e706cf8da92338ad7851e206ee28e52650ad3a95049b8edd"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-mobile.png",
+      "bytes": 53423,
+      "sha256": "ef55070fc64d62ff76c40aacd1bf517efc01e353ce5959ef2ec1a23ade4cf6a3"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-mutation-error.png",
+      "bytes": 193522,
+      "sha256": "09815c0e0f607b340f8607082756cbbc723525a2554ae086be97f59a805fb25f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/15-browser-fixture/m4-network.png",
+      "bytes": 135584,
+      "sha256": "bd5553536a9fbf055e10fcba3e59e077ed6e419fd9931c627746ad49f647168c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-allow-a.png",
+      "bytes": 119318,
+      "sha256": "07c7a561b6326cb95c5e75467b1b97fb181ce34e54544fdde48320069483d82f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-dashboard.png",
+      "bytes": 171521,
+      "sha256": "de50cd2c3e60b99cc789221e7c3ae0e23b3a716fbc7a7a4308ff39c9f03126dc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-empty.png",
+      "bytes": 177811,
+      "sha256": "be1fa48b914201486341949a1f7f7e95ec1716b445d29ec9f1b55193a1a0743c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-events.png",
+      "bytes": 73615,
+      "sha256": "fd1134c6580942156ec376dcc2faf7bb5d49400a8946bc5cf2dc107ddff300e9"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-expired-session.png",
+      "bytes": 41529,
+      "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-http-ack.png",
+      "bytes": 117723,
+      "sha256": "52fa16daa40b194638ea96feca522d2a287cb536ee94cb429af2c46cc6c26194"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-login.png",
+      "bytes": 291140,
+      "sha256": "5410d8c3ff94c90ac48b2b4633610796b51f5f350a48d5a35a0ec4f30564936d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-mobile.png",
+      "bytes": 44687,
+      "sha256": "9a881094869a3b876ae24befd429262e92064e508d37d5e416cfb8127693eee4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/16-browser-management/m4-live-revoke-a.png",
+      "bytes": 116532,
+      "sha256": "6a9fa1e5fb05c6d763d7423c9895769831c6c4d927c9203cae468ac84e480f8b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-name-search.png",
+      "bytes": 208982,
+      "sha256": "f761aa35d1813cc66697fc9a5115553b3444e278bb1a7b6626eda7ed48ff0fe4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-real-http-date-filter.png",
+      "bytes": 208727,
+      "sha256": "5a1cb94ae859535ed54b40079d3ed75b17704a42c80e60185e4b477ccce0475a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-real-http-desktop.png",
+      "bytes": 208810,
+      "sha256": "c66bfa5a3eba2103411ce6f48e561dce97ecac1a2157c253925b0825c512d6cf"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-real-http-mobile.png",
+      "bytes": 119513,
+      "sha256": "311392e3979b0e0edd80cad3cb4c0f1f77e3ce60fadb650a6229ebe2d7709163"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-username-substring.png",
+      "bytes": 76347,
+      "sha256": "70bae51b539de698ea6de329ebe4acd807df7c3a5caca415171a3d840fd6988a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-week3-endpoint-a.png",
+      "bytes": 76025,
+      "sha256": "0add7b4653099184c0e5c8ed4d2b0975ebe5d0ca5cf8d25bca140669a5294cf0"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-week3-endpoint-b.png",
+      "bytes": 69746,
+      "sha256": "652c5c52779f96b293fc8476c31a3a32732386f4eb9b5341729d8f93a083eb1b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/18-browser-events/events-week3-unknown-no-serial.png",
+      "bytes": 68879,
+      "sha256": "a9ab6999fc6b34d8b691818bfc9a3a36e6d9e24f15800ed1cc90dd73304eb60b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-name-search.png",
+      "bytes": 203781,
+      "sha256": "b8e6232cfe30341151f64dc331b47feccaa1d87dc71a40c657ecaf01fb2c2fc2"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-real-http-date-filter.png",
+      "bytes": 203545,
+      "sha256": "607ce09892135c04dd901cb0bf15498a36397e9cedb4a7dacdf41ad2c5fd81de"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-real-http-desktop.png",
+      "bytes": 203535,
+      "sha256": "a9455437c51e6f8ae67815a203ede6a90c1701295ad3f8865c3af7c9a0ac9ac6"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-real-http-mobile.png",
+      "bytes": 117635,
+      "sha256": "a6eaef6e725771cd2d19ab71f999a1e524159b1330f6afdf5256564195e4ccd4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-username-substring.png",
+      "bytes": 76708,
+      "sha256": "974cb7b6c538f58a2561867f6cb860e3f530323284c03abacc7aa3802151d042"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-week3-endpoint-a.png",
+      "bytes": 75753,
+      "sha256": "28bd53c313929a9b2fb3b0197a3918f045478fb88671199ce2a345a8b17667a7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-week3-endpoint-b.png",
+      "bytes": 69787,
+      "sha256": "4cc41d009af7aa6cdf8c4d719d6cd833e77f1b2126df918f44d01b55c660b874"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots/19-browser-packaged-rehearsal/events-week3-unknown-no-serial.png",
+      "bytes": 68951,
+      "sha256": "5f60668e7f0b6a22641ebbcfa0868fce71725127ba64a6d0555c586ced8f30eb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/screenshots.json",
+      "bytes": 15659,
+      "sha256": "e9cb892a057ecf3c434a4a7b7bda1ca20286a191e6c4944d141d1e97a6e37351"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/sources/40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759.json",
+      "bytes": 40684,
+      "sha256": "6b1efdd70f4526cfbda784cb707f2b6456ad7b9c68f12258b0b82ed74cfa4058"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/validation-attempts.json",
+      "bytes": 699,
+      "sha256": "4da54892fb2d6754317c15df320be5647a9fa34982875ac73eedababe6e537d8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/validation.json",
+      "bytes": 2024,
+      "sha256": "5d40f0f6ff36d961189b6e21617c97a0788156df36e5ef3e80d68a6bd244e87c"
+    }
+  ]
+}

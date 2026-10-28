@@ -1,0 +1,35 @@
+{
+  "id": "10-frontend-tests",
+  "scope": "Node unit/component/mapper/filter/API regression; synthetic fixtures",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "revisionAfter": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceTreeSHA256After": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\npm.cmd",
+  "args": [
+    "test"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-Command",
+      "& 'C:\\Program Files\\nodejs\\npm.cmd' 'test'; exit $LASTEXITCODE"
+    ]
+  },
+  "startedAt": "2026-10-28T12:45:30.510Z",
+  "endedAt": "2026-10-28T12:45:35.841Z",
+  "startedAtBangkok": "2026-10-28 19:45:30 +07:00",
+  "endedAtBangkok": "2026-10-28 19:45:35 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "9e0a3f57ad171fce7010cbf2f5b00a06a3fa886fdc1cf69833ddba4bba9fe408",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "b1cc4558222c27761834092a54994e9cdee2e6c7f6fb94ad62a856adfd244d34",
+  "screenshots": [],
+  "junit": []
+}

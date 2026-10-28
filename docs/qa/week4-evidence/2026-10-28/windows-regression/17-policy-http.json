@@ -1,0 +1,35 @@
+{
+  "id": "17-policy-http",
+  "scope": "Real isolated backend HTTP; duplicate Revoke idempotency/future ACK rejection and B isolation",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "revisionAfter": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceTreeSHA256After": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "--test",
+    "tests/m4_policy_live.test.mjs"
+  ],
+  "launch": {
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "--test",
+      "tests/m4_policy_live.test.mjs"
+    ]
+  },
+  "startedAt": "2026-10-28T12:52:38.665Z",
+  "endedAt": "2026-10-28T12:52:59.188Z",
+  "startedAtBangkok": "2026-10-28 19:52:38 +07:00",
+  "endedAtBangkok": "2026-10-28 19:52:59 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "f4fef2c9bb24fbfd3874d6101cc45e3225dbd4b7c93b7dada7558962c4a23c45",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "ff300bbbf31053f5594ca6e29fea36f499c8edfd0da94be69cf6d7ca7c409ae6",
+  "screenshots": [],
+  "junit": []
+}
