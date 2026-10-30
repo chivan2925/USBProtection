@@ -11,6 +11,7 @@ import com.group.usbshield.agent.session.ActiveUserResolver;
 import com.group.usbshield.agent.system.SystemInfoProvider;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -19,15 +20,25 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.util.Locale;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class UsbGuardEventListener {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UsbGuardEventListener.class);
+    private static final int MAX_WATCH_LINE = 32768;
+    private static final int MAX_RECENT_EVENTS = 1024;
+    private static final long DEDUP_WINDOW_MILLIS = 1500;
+
+    @FunctionalInterface
+    interface WatchProcessLauncher {
+        Process start() throws IOException;
+    }
     private final UsbGuardEventParser eventParser;
     private final ActiveUserResolver activeUserResolver;
     private final EndpointManager endpointManager;
@@ -35,6 +46,9 @@ public class UsbGuardEventListener {
     private final EventSenderService eventSenderService;
     private final DesktopNotificationService desktopNotificationService;
     private final UsbGuardPresenceParser presenceParser;
+    private final WatchProcessLauncher watchProcessLauncher;
+    private final long reconnectDelayMillis;
+    private final AtomicBoolean started = new AtomicBoolean();
     private final Map<String, Long> recent = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final StringBuilder sectionLines = new StringBuilder();
@@ -46,10 +60,27 @@ public class UsbGuardEventListener {
         NONE, PRESENCE_CHANGED, POLICY_CHANGED, POLICY_APPLIED
     }
 
+    @Autowired
     public UsbGuardEventListener(UsbGuardEventParser eventParser, ActiveUserResolver activeUserResolver,
                                  EndpointManager endpointManager, SystemInfoProvider systemInfoProvider,
                                  EventSenderService eventSenderService,
                                  DesktopNotificationService desktopNotificationService) {
+        this(eventParser, activeUserResolver, endpointManager, systemInfoProvider, eventSenderService,
+                desktopNotificationService,
+                () -> new ProcessBuilder("usbguard", "watch").redirectErrorStream(true).start(),
+                TimeUnit.SECONDS.toMillis(5));
+    }
+
+    UsbGuardEventListener(UsbGuardEventParser eventParser, ActiveUserResolver activeUserResolver,
+                          EndpointManager endpointManager, SystemInfoProvider systemInfoProvider,
+                          EventSenderService eventSenderService,
+                          DesktopNotificationService desktopNotificationService,
+                          WatchProcessLauncher watchProcessLauncher, long reconnectDelayMillis) {
+        if (watchProcessLauncher == null || reconnectDelayMillis < 0) {
+            throw new IllegalArgumentException("watchProcessLauncher / reconnectDelayMillis");
+        }
+        this.watchProcessLauncher = watchProcessLauncher;
+        this.reconnectDelayMillis = reconnectDelayMillis;
         this.eventParser = eventParser;
         this.presenceParser = new UsbGuardPresenceParser(eventParser);
         this.activeUserResolver = activeUserResolver;
@@ -62,6 +93,12 @@ public class UsbGuardEventListener {
     @PostConstruct
     public void startListening() {
         if (System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("linux")) {
+            startWatchWorker();
+        }
+    }
+
+    void startWatchWorker() {
+        if (running && started.compareAndSet(false, true)) {
             executor.submit(this::watchLoop);
         }
     }
@@ -70,18 +107,18 @@ public class UsbGuardEventListener {
         while (running) {
             resetWatchState();
             try {
-                process = new ProcessBuilder("usbguard", "watch").redirectErrorStream(true).start();
+                process = watchProcessLauncher.start();
                 try (BufferedReader reader = new BufferedReader(
                         new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                     String line;
-                    while (running && (line = reader.readLine()) != null) {
+                    while (running && (line = readWatchLine(reader)) != null) {
                         processWatchLine(line);
                     }
                 }
                 if (running) {
                     log.warn("USBGuard watch exited; retrying");
                 }
-            } catch (IOException error) {
+            } catch (IOException | RuntimeException error) {
                 if (running) {
                     log.warn("USBGuard watch IPC failed: {}", error.getMessage());
                 }
@@ -97,7 +134,7 @@ public class UsbGuardEventListener {
                 break;
             }
             try {
-                TimeUnit.SECONDS.sleep(5);
+                TimeUnit.MILLISECONDS.sleep(reconnectDelayMillis);
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
                 break;
@@ -105,10 +142,28 @@ public class UsbGuardEventListener {
         }
     }
 
+    static String readWatchLine(BufferedReader reader) throws IOException {
+        StringBuilder line = new StringBuilder();
+        int next;
+        while ((next = reader.read()) != -1) {
+            if (next == '\n') {
+                return line.toString();
+            }
+            if (line.length() >= MAX_WATCH_LINE) {
+                throw new IOException("USBGuard watch line exceeds safe limit");
+            }
+            line.append((char) next);
+        }
+        return line.isEmpty() ? null : line.toString();
+    }
+
     synchronized void resetWatchState() {
         section = WatchSection.NONE;
         sectionLines.setLength(0);
-        recent.clear();
+    }
+
+    int trackedRecentEventCount() {
+        return recent.size();
     }
 
     public synchronized void processWatchLine(String line) {
@@ -129,7 +184,8 @@ public class UsbGuardEventListener {
         if (section == WatchSection.NONE) {
             return;
         }
-        if (sectionLines.length() + value.length() > 32768) {
+        if (value.length() >= MAX_WATCH_LINE
+                || sectionLines.length() > MAX_WATCH_LINE - value.length() - 1) {
             section = WatchSection.NONE;
             sectionLines.setLength(0);
             return;
@@ -168,14 +224,20 @@ public class UsbGuardEventListener {
         String opposite = base + ("CONNECTED".equals(type) ? ":DISCONNECTED" : ":CONNECTED");
         long now = System.currentTimeMillis();
         Long previous = recent.get(key);
-        if (previous != null && now >= previous && now - previous < 1500) {
+        if (previous != null && now >= previous && now - previous < DEDUP_WINDOW_MILLIS) {
             return;
         }
         recent.remove(opposite);
-        recent.put(key, now);
-        if (recent.size() > 1024) {
-            recent.entrySet().removeIf(entry -> now - entry.getValue() > 3000);
+        if (recent.size() >= MAX_RECENT_EVENTS && !recent.containsKey(key)) {
+            recent.entrySet().removeIf(entry -> now < entry.getValue()
+                    || now - entry.getValue() >= DEDUP_WINDOW_MILLIS);
+            if (recent.size() >= MAX_RECENT_EVENTS) {
+                recent.entrySet().stream()
+                        .min(Comparator.comparingLong(Map.Entry::getValue))
+                        .ifPresent(oldest -> recent.remove(oldest.getKey(), oldest.getValue()));
+            }
         }
+        recent.put(key, now);
 
         UsbGuardPresenceEvent event = new UsbGuardPresenceEvent(
                 "CONNECTED".equals(type) ? UsbGuardPresenceEvent.PresenceType.INSERT
@@ -218,5 +280,6 @@ public class UsbGuardEventListener {
         }
         executor.shutdownNow();
         resetWatchState();
+        recent.clear();
     }
 }
