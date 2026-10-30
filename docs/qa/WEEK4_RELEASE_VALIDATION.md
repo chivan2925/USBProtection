@@ -1,17 +1,33 @@
 # Week 4 — M5 release validation và bàn giao
 
-Ngày: 2026-10-28 (Asia/Bangkok). Owner: M5. Báo cáo này theo dõi công việc Week 4 đã thực hiện trong working tree; không thay thế quyết định release của M1/toàn nhóm.
+Ngày cập nhật: **2026-10-30 (Asia/Bangkok)**. Owner: M5. Báo cáo phân biệt evidence Windows ngày 28/10, đối chiếu source sau pull ngày 30/10 và quyết định candidate của M1/toàn nhóm.
 
 ## Phạm vi và mốc nguồn
 
-- Source baseline: `2013ce726ef8cc960b30720435be23e8ccef1903`. Chưa có xác nhận đây là SHA release candidate cuối của Week 4.
+- Source hiện tại sau pull: **`751387bf166c528326ae91c6a16a820a6d8fc24a`**; chưa được M1 chốt là release candidate cuối. Baseline chạy đầy đủ ngày 28/10 là `2013ce726ef8cc960b30720435be23e8ccef1903`.
+- Bộ QA M5 ngày 28/10 đã commit tại `63ea070`, tích hợp qua `6127766`. Các cập nhật và evidence ngày 30/10 đang ở working tree; không tự nhận đã commit/PR/tag hoặc ký thay owner.
 - Giữ nguyên quyết định [Week 3 PASS (WINDOWS SCOPE)](WEEK3_FINAL_OWNER_CLOSEOUT_20261028.md); không mở lại H05 hoặc ghi đè evidence cũ.
 - [Test matrix và inventory](WEEK4_TEST_INVENTORY.md), [Event History review](WEEK4_EVENT_HISTORY_REVIEW.md), [Demo Script](../DEMO_SCRIPT.md), [Ubuntu acceptance](WEEK4_UBUNTU_ACCEPTANCE.md), [evidence index](week4-evidence/README.md).
 - Maven/unit/mock, static/build, HTTP/browser synthetic và Ubuntu E2E là các mức bằng chứng riêng. Ubuntu/USB vật lý/USBGuard daemon/native GUI/systemd/reboot/package lifecycle không được thực thi trong đợt này.
 
-## Kết quả thực thi Windows
+## Đối chiếu sau pull — 30/10/2026
 
-Đã chạy mới trên baseline trên; source tree SHA-256 `40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759` không đổi trong từng lệnh. Các số dưới đây lấy từ [log/metadata ngày 28/10](week4-evidence/2026-10-28/windows-regression/README.md), không dùng lại số PASS Week 3 làm kết quả mới.
+[Evidence sau pull](week4-evidence/2026-10-30/post-pull-regression/README.md), [scope equivalence](week4-evidence/2026-10-30/post-pull-regression/scope-equivalence.json), [validation](week4-evidence/2026-10-30/post-pull-regression/validation.json) và [build manifest](week4-evidence/2026-10-30/post-pull-regression/build-manifest.json) theo dõi đúng source hiện tại. Frontend, Admin Server và packaging không thay đổi so với source đã kiểm tra ngày 28/10; giữ các kết quả đó bằng đối chiếu source, **không đổi ngày hoặc gọi là test chạy mới ngày 30/10**.
+
+Lượt chạy mới ngày 30/10 dùng HEAD `751387bf166c528326ae91c6a16a820a6d8fc24a`, source-tree SHA-256 **`21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715`**. Agent JAR tạo bởi lượt này có SHA-256 **`26f8d74b450c399a798a9cbc7a0c0fc34d7a80cb34960e34a21c176c74d6e5d9`**. **Validation ngày 30/10 PASS**: đối chiếu source/log/JUnit/JAR/link, source equivalence và bảo toàn evidence cũ; kết quả được ghi riêng trong [validation.json](week4-evidence/2026-10-30/post-pull-regression/validation.json), không suy ra chỉ từ build thành công.
+
+| Thay đổi / kiểm tra | Kết quả hoặc bước hiện tại |
+|---|---|
+| M2 watch hardening | Đã merge `ad57fa4`: đọc dòng/section có giới hạn, giữ dedup ngắn hạn qua reconnect, chặn tăng map không giới hạn. **9/9 test watch/stress mới PASS** trong lượt Agent hiện tại; đây là mock/unit evidence, không phải daemon/USB thật. |
+| Agent `clean package` | **136/136 PASS**, 0 failure/error/skip, executable JAR build thành công; [01-agent-package](week4-evidence/2026-10-30/post-pull-regression/01-agent-package.json). Số 127 ngày 28/10 được giữ riêng trong bảng lịch sử. |
+| Static/JAR verifier | **PASS** trên Agent JAR vừa build; [02-packaging-static](week4-evidence/2026-10-30/post-pull-regression/02-packaging-static.json). Không chạy installer/systemd hoặc tạo `.deb`. |
+| M4 handoff / M5 acknowledgement | **ĐÃ NHẬN / ACK KỸ THUẬT**: [M4 handoff](evidence/M4_WEEK4_HANDOFF.md) và [M5 đối chiếu](evidence/M5_WEEK4_POST_PULL_ACK_20261030.md). Review của M4 ở `6127766` áp dụng cho frontend không đổi trên HEAD hiện tại. Không còn chờ M4 gửi bản review shared frontend này. |
+| Candidate và các owner còn lại | Chờ M1 freeze/security/candidate; M2 phần core 2–3, Q&A/IPC và M3 package/guide cuối. M4 ACK không tự trở thành quyết định release candidate của nhóm. |
+| Demo / Ubuntu | Không chạy demo browser mới, không tạo thêm recording/thuyết minh/video encoded và không thực thi Ubuntu trong lượt đối chiếu này. |
+
+## Kết quả thực thi Windows — lịch sử ngày 28/10/2026
+
+Đã chạy trên baseline `2013ce726ef8cc960b30720435be23e8ccef1903`; source tree SHA-256 `40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759` không đổi trong từng lệnh của ngày đó. Các số dưới đây lấy từ [log/metadata ngày 28/10](week4-evidence/2026-10-28/windows-regression/README.md); không đại diện cho Agent đã thay đổi ở HEAD ngày 30/10.
 
 | Kiểm tra | Kết quả mới | Giới hạn |
 |---|---|---|
@@ -30,23 +46,23 @@ Không phát hiện lỗi P0 ứng dụng mới qua các kiểm tra đã hoàn t
 
 ## Trạng thái công việc M5
 
-Các đầu ra là thay đổi có thể review trong working tree; tác vụ này không tạo commit/PR/tag hoặc ký thay owner. Điều kiện commit/PR và review của nhóm trong kế hoạch được giữ cho bước tích hợp.
+Bộ QA ban đầu đã được commit/merge như trên; cập nhật sau pull là thay đổi có thể review trong working tree. M5 ghi nhận handoff và bằng chứng kỹ thuật, không tạo sự chấp thuận thay M1/các owner.
 
 | Work ID | Đã thực hiện | Phần còn chờ |
 |---|---|---|
 | W4-M5-01 | **DONE — chuẩn bị và cập nhật matrix/inventory**: BP-T01–28, DoD-01–11, owner/môi trường/expected/actual/SHA/status; phân biệt namespace T của Week 1 | Bổ sung kết quả khi candidate thay đổi hoặc Ubuntu chạy; không cần chờ member để dùng matrix hiện tại |
-| W4-M5-02 | **WINDOWS TECHNICAL PASS** trên baseline; chưa chốt “final candidate regression” | M1 chốt candidate/API freeze; M2/M3/M4 bàn giao scope cuối. Nếu source/artifacts đổi, rerun phần bị ảnh hưởng; nếu giữ nguyên thì đối chiếu manifest và chấp nhận bằng chứng hiện có |
-| W4-M5-03 | **TECHNICAL REVIEW/REGRESSION PASS** Event History; production không tự fallback mock | M4 review/handoff shared adapter, auth, browser harness trên candidate Week 4; attribution/enforcement thực tế vẫn hoãn Ubuntu |
-| W4-M5-04 | **DONE trong phạm vi Windows tự động**: script/Q&A, fixture/management/Events và same-origin JAR rehearsal PASS; có recording thực tế | Walkthrough có người thuyết minh chưa thực hiện; live Ubuntu sau Week 4 |
-| W4-M5-05 | **DONE — evidence hiện có đã backup và validation PASS**: logs/metadata, **39 screenshots theo suite sở hữu**, recording, build manifest/checksums lưu riêng Week 4; giữ nguyên evidence cũ | Không có video encoded/narrated. Recording là 207 frame có timing và replay; bổ sung evidence cho các đợt chạy sau khi có |
-| W4-M5-06 | **DONE — báo cáo và danh sách handoff**; quyết định candidate còn BLOCKED do các mục W4-H01–H05 | M1–M4 cung cấp bằng chứng/owner handoffs, M1 ghi quyết định release candidate; report không tự tạo sự chấp thuận |
+| W4-M5-02 | **WINDOWS TECHNICAL PASS sau pull**: Agent **136/136**, suite mới **9/9**, static/JAR và evidence validation PASS ngày 30/10; frontend/server/packaging giữ kết quả ngày 28/10 qua source equivalence, không nhận là đã chạy lại | M1 chọn candidate/API freeze, M2/M3 bàn giao scope cuối. Rerun phần bị ảnh hưởng nếu source/artifacts tiếp tục đổi |
+| W4-M5-03 | **DONE phần technical review và M4 shared-frontend ACK** trên source frontend không đổi ở HEAD hiện tại; production không tự fallback mock | M1 xác nhận candidate cuối; đối chiếu lại nếu frontend/API đổi. Attribution/enforcement thực tế vẫn hoãn Ubuntu; không còn chờ bản handoff M4 đã nhận |
+| W4-M5-04 | **DONE trong phạm vi Windows tự động ngày 28/10**: script/Q&A, các browser rehearsal PASS và recording; đã bổ sung scope sau pull | Chưa có demo mới trên Agent hiện tại; walkthrough thuyết minh chưa thực hiện; live Ubuntu sau Week 4 |
+| W4-M5-05 | **DONE bộ evidence ngày 28/10 và cập nhật sau pull ngày 30/10**: hai capture Agent/static mới, JUnit/build/scope/environment/checksums; **validation source/log/JUnit/JAR/link và bảo toàn evidence cũ PASS** | Không có video encoded/narrated mới; **39 screenshots** và recording **207 frame** có timing/replay vẫn thuộc ngày 28/10. Bổ sung evidence khi candidate thay đổi |
+| W4-M5-06 | **DONE — báo cáo và handoff được cập nhật**; W4-H04 technical review đã ACK, candidate vẫn BLOCKED bởi các handoff còn lại | M1 freeze/security/candidate, M2 core 2–3/Q&A/IPC và M3 package/guide cuối; M1 ghi quyết định nhóm |
 | W4-M5-07 | **DONE — bộ phiếu/checklist Ubuntu** có bước/lệnh/expected/evidence và mẫu ghi nhận | Runtime chỉ sau Week 4, cần M2/M3, Ubuntu/USB/GUI và artifacts tương ứng |
 
 ## Đề xuất go/no-go
 
-**GO cho review/bàn giao các đầu ra M5 đã chuẩn bị và kiểm tra Windows trên baseline.** **NO-GO / BLOCKED cho việc tuyên bố `WEEK 4 — WINDOWS/RELEASE-CANDIDATE PREPARATION PASS` ở cấp nhóm** cho đến khi các handoff bên dưới được ghi nhận và candidate cuối khớp nguồn/artifact đã kiểm tra. Ubuntu full gate tiếp tục **NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4**.
+**GO cho review/bàn giao M5 và ACK shared frontend đã nhận từ M4.** Agent/static và evidence validation hiện tại đã PASS; **NO-GO / BLOCKED cho tuyên bố `WEEK 4 — WINDOWS/RELEASE-CANDIDATE PREPARATION PASS` ở cấp nhóm** cho đến khi M1 chốt freeze/security/candidate, M2 hoàn tất handoff/giải thích contract còn mở và M3 bàn giao package/guide cuối. Candidate cuối phải khớp source/artifact đã kiểm tra. Ubuntu full gate tiếp tục **NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4**.
 
-## Evidence và kiểm tra provenance cuối
+## Evidence và provenance — bộ lịch sử ngày 28/10
 
 [Validation PASS](week4-evidence/2026-10-28/windows-regression/validation.json) xác minh **18 lệnh positive**, log/exit/source hashes, JUnit hiện tại, **39 screenshot** thuộc đúng browser suite, **207 frame** cùng hash/byte/timing và **5 frontend assets** giống byte trong server JAR. Bản ghi màn hình tự động dài khoảng **10,6 giây** phản ánh tốc độ chạy assertions; không phải walkthrough thuyết minh 8–10 phút.
 
@@ -57,7 +73,7 @@ Các đầu ra là thay đổi có thể review trong working tree; tác vụ n�
 
 Lần `npm ci --offline` thiếu cache được lưu FAIL và có lần cài registry đúng lockfile PASS; bootstrap sandbox chặn child process trước khi suite chạy; lần kiểm tra evidence đầu tiên gặp thứ tự tạo link index được ghi ở [validation-attempts](week4-evidence/2026-10-28/windows-regression/validation-attempts.json) và đã sửa. Không coi các lỗi công cụ/môi trường đã giải quyết là bug ứng dụng, cũng không xóa chúng khỏi hồ sơ. Text logs đã che key credential; các ảnh mẫu/đầu-cuối recording đã được xem, dữ liệu là fixture/QA tổng hợp. Không sao lưu H2, token hay browser profile.
 
-Source application/test/packaging không thay đổi trong tác vụ M5 này; evidence Week 1–3 giữ nguyên. Review chỉ ra một thiếu scenario browser (history co lại khi đang ở trang cuối), chưa có failure ứng dụng tái hiện. Không thêm test trùng implementation hoặc sửa code của member khác.
+Trong lượt M5 ngày 28/10, source application/test/packaging không bị sửa; evidence Week 1–3 giữ nguyên. Sau pull ngày 30/10, Agent có thay đổi của M2 như đã nêu; M5 chỉ cập nhật tài liệu/evidence, không sửa implementation của member khác. Giới hạn browser history co lại ở trang cuối vẫn chưa có scenario trực tiếp, chưa có failure ứng dụng tái hiện.
 
 ## Handoff cần từ các member cho Week 4
 
@@ -66,9 +82,9 @@ Source application/test/packaging không thay đổi trong tác vụ M5 này; ev
 | ID | Owner | Cần bàn giao/xác nhận | Điều kiện để M5 chốt |
 |---|---|---|---|
 | W4-H01 | M1 | API/DTO freeze; review security/production; backend guides; SHA/manifest candidate, server JAR và cấu hình chạy | Contract khớp implementation, security finding P0 đã có hướng xử lý, candidate SHA rõ ràng để đối chiếu/rerun |
-| W4-H02 | M2 | Báo cáo core Week 4: stress/watch, policy, session, notification; Q&A và checklist USBGuard/IPC/GUI | Đối chiếu coverage/evidence hiện có và các giới hạn; M2 xác nhận phần core/IPC dùng khi demo/triển khai |
+| W4-H02 | M2 | Watch hardening phần 1 đã merge; còn review core phần 2–3 (policy/session/notification), Q&A và checklist USBGuard/IPC/GUI | Regression Agent hiện tại có evidence; M2 xác nhận phần core/IPC và giới hạn trước demo/triển khai |
 | W4-H03 | M3 | Bàn giao Agent/package, checksum/build/staging logs hoặc khai báo `.deb NOT BUILT` cùng lý do; Installation Guide và permissions/lifecycle notes | Chứng minh artifact đã build đúng source; không dùng synthetic staging probes làm bằng chứng có `.deb`; thống nhất các bước Ubuntu còn hoãn |
-| W4-H04 | M4 | Xác nhận Event API adapter/browser harness dùng chung tại candidate; production frontend handoff, Admin Guide và screenshots cuối | Review phần shared frontend hiện tại được ghi nhận; thay đổi sau baseline phải chạy lại phần bị ảnh hưởng |
+| W4-H04 | M4 → M5 | **ĐÃ NHẬN / ACK KỸ THUẬT** qua [M4 handoff](evidence/M4_WEEK4_HANDOFF.md), Admin Guide final và [M5 ACK](evidence/M5_WEEK4_POST_PULL_ACK_20261030.md); frontend không đổi từ source đã review | Không còn thiếu bản shared-frontend handoff. M1 vẫn phải chọn candidate; đổi frontend/API sau ACK thì đối chiếu/rerun phần bị ảnh hưởng |
 | W4-H05 | M1 + các owner | Chốt source/artifact candidate, nhận bàn giao M5, rà soát issue/P0 và quyết định candidate | Ghi quyết định Week 4 có SHA, scope và các ngoại lệ; không tự đặt tag hoặc tuyên bố FULL RELEASE PASS |
 
 ## Bảo mật và giới hạn triển khai

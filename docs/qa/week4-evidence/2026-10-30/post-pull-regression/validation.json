@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "validatedAtBangkok": "2026-10-30T20:49:54.686950+07:00",
+  "revision": "751387bf166c528326ae91c6a16a820a6d8fc24a",
+  "sourceTreeSHA256": "21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715",
+  "command": {
+    "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/validate-week4-post-pull.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-10-30/post-pull-regression",
+      "--baseline",
+      "751387bf166c528326ae91c6a16a820a6d8fc24a"
+    ],
+    "cwd": "D:\\USBProtection"
+  },
+  "validatorSHA256": "78bafb146069ce606965bc999979eeedee3bfbf9faea80bb50e61b44bfea5471",
+  "successfulChecks": 2,
+  "agentTests": {
+    "tests": 136,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "newWatchTests": 9,
+  "staticJarCheck": "PASS",
+  "unchangedSourceScopes": [
+    "frontend",
+    "admin-server",
+    "packaging"
+  ],
+  "absentScopesAtBothRevisions": [
+    ".github"
+  ],
+  "m4FrontendSourceEquivalent": true,
+  "historicalEvidenceUnchanged": true,
+  "brokenLinks": [],
+  "newScreenshotsOrRecording": false,
+  "scope": "Affected post-pull Windows regression; final candidate/member acceptance pending; Ubuntu NOT EXECUTED/DEFERRED"
+}

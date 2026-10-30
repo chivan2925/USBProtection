@@ -1,0 +1,76 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/.gitattributes",
+      "bytes": 86,
+      "sha256": "bfb8ef753136aa17a81196a792e7e7f7f623eb96cc38fd196344891947a12514"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/01-agent-package.json",
+      "bytes": 9448,
+      "sha256": "ff13c2683bedf367b6c534a96b1e4dddf83ce48fd19692b41bb68d8f61b4c602"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/01-agent-package.txt",
+      "bytes": 97918,
+      "sha256": "46ab59eaa0cc1cd1f5aee28ffa02798124d5148b6b0ad981e4900bc421add473"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/02-packaging-static.json",
+      "bytes": 1523,
+      "sha256": "ecf1833c1533114b52e6acb6a6a4cf5f96b8b824ed0b171e5f4fac6e33d90862"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/02-packaging-static.txt",
+      "bytes": 6166,
+      "sha256": "aa5e1fa00fd05c76b9e8712972425b5dc0b9452d0230323fa7d807c2754fa9c5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/build-manifest.json",
+      "bytes": 1042,
+      "sha256": "9011e30abcf0d1b5e1ac81f2107ecd7b94770564fd9ff2e336b929e1f1e89e2a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/environment.json",
+      "bytes": 824,
+      "sha256": "f6c9c36a23c2b35f6795d728d3a7aaf2549f3fb8d082140e86fffaf3c236af23"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/junit-summary.json",
+      "bytes": 8457,
+      "sha256": "1d7d130587aa34573067bb2369b56f9d3eca9dcf283da54a46a5b9d7ac2ca1fa"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/qa-documents.json",
+      "bytes": 3486,
+      "sha256": "581a3a895b73ce89702932fd91ca7c113ccee13f2ce3ecb9143bf1ec66059072"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/README.md",
+      "bytes": 4923,
+      "sha256": "09d4efc007c15092c5d4e58f5466707b1c2f197410d3eb747f85fd99d22c29cf",
+      "lfNormalizedSHA256": "09d4efc007c15092c5d4e58f5466707b1c2f197410d3eb747f85fd99d22c29cf"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/scope-equivalence.json",
+      "bytes": 1976,
+      "sha256": "ae82f2e034a2d7dbdad350d7fabd1e416959a514cc9438beea90ee70894fbd2c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/sources/21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715.json",
+      "bytes": 40893,
+      "sha256": "aaad8abf26e62dbbcfe82e1ded600e51f588a071882d855afc3ab93a04f90574"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/validation-attempts.json",
+      "bytes": 550,
+      "sha256": "3e8a94cb7f9ae811f4e15efc8e35ca07b6ad71f5debbb3e92040015a446b0080"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/validation.json",
+      "bytes": 1264,
+      "sha256": "4b423cf62317ba8bb776d3eb8379a92cd47c18e60178c3562248122ece2ce3ac"
+    }
+  ]
+}
