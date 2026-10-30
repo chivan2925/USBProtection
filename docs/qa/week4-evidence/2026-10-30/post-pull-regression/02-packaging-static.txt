@@ -1,0 +1,80 @@
+================================================================
+  USBShield Week 3 Packaging & Service Static Verification      
+================================================================
+
+[1/6] Verifying Systemd Service Unit...
+  [OK] packaging/systemd/usbshield-agent.service contains: 'User=usbshield'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'Group=usbshield'
+  [OK] packaging/systemd/usbshield-agent.service contains: '--spring.profiles.active=live'
+  [OK] packaging/systemd/usbshield-agent.service contains: '--spring.config.additional-location=file:/etc/usbshield-agent/application.yml'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'Requires=usbguard.service'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'Restart=on-failure'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'ProtectSystem=full'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'NoNewPrivileges=true'
+
+[2/6] Verifying Debian Package Control & Maintainer Scripts...
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'Package: usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'Version: 1.0.0'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'Architecture: amd64'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'openjdk-21-jre-headless'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'usbguard'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'libnotify-bin'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'groupadd --system usbshield'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'useradd --system --gid usbshield'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 755 /opt/usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 750 /etc/usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 700 /var/lib/usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'mkdir -p /run/usbshield-notifier'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 1777 /run/usbshield-notifier'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'd /run/usbshield-notifier 1777 root root -'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'rm -f /etc/sudoers.d/usbshield'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'ImplicitPolicyTarget=block'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'systemctl daemon-reload'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'systemctl enable usbshield-agent.service'
+  [OK] packaging/agent-deb/DEBIAN/prerm contains: 'systemctl stop usbshield-agent.service'
+  [OK] packaging/agent-deb/DEBIAN/prerm contains: 'systemctl disable usbshield-agent.service'
+  [OK] packaging/agent-deb/DEBIAN/prerm contains: 'ACTION="${1:-remove}"'
+
+[3/6] Verifying Live Configuration Files...
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'data-dir: /var/lib/usbshield-agent'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'config-dir: /etc/usbshield-agent'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'simulation-enabled: false'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'notification-enabled: true'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml correctly omits unsafe value: 'default-enrollment-secret'
+  [OK] client-agent/src/main/resources/application-live.yml contains: 'simulation-enabled: false'
+  [OK] client-agent/src/main/resources/application-live.yml contains: '/var/lib/usbshield-agent'
+
+[4/6] Verifying Desktop Notification Launcher...
+  [OK] packaging/desktop/usbshield-notifier.desktop contains: 'Exec=/opt/usbshield-agent/usbshield-notifier-launcher.sh'
+  [OK] packaging/desktop/usbshield-notifier.desktop contains: 'X-GNOME-Autostart-enabled=true'
+  [OK] packaging/desktop/usbshield-notifier.desktop contains: 'Categories=System;Security;'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: '#!/usr/bin/env bash'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: 'USER_UID="$(id -u)"'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: '(( USER_UID < 1000 ))'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: 'org.springframework.boot.loader.launch.PropertiesLauncher'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: 'com.group.usbshield.agent.notification.DesktopNotificationClientMain'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: '-Dloader.home=/opt/usbshield-agent'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh correctly omits unsafe value: 'exec /usr/bin/java -cp "$JAR_PATH" com.group.usbshield.agent.notification.DesktopNotificationClientMain'
+
+[5/6] Verifying Build Script...
+  [OK] packaging/scripts/build-deb.sh contains: 'agent-deb/etc/usbshield-agent/application.yml'
+  [OK] packaging/scripts/build-deb.sh contains: 'usbshield-notifier-launcher.sh'
+  [OK] packaging/scripts/build-deb.sh contains: 'usbshield-notifier.desktop'
+  [OK] packaging/scripts/build-deb.sh contains: 'dpkg-deb --build "$DEB_STAGING"'
+
+[6/6] Verifying Executable Fat-JAR Structure...
+  [OK] Executable JAR contains: org/springframework/boot/loader/launch/PropertiesLauncher.class
+  [OK] Executable JAR contains: BOOT-INF/classes/com/group/usbshield/agent/notification/DesktopNotificationClientMain.class
+  [OK] Executable JAR contains: BOOT-INF/classes/com/group/usbshield/agent/endpoint/EndpointManager.class
+  [OK] Executable JAR contains: BOOT-INF/classes/com/group/usbshield/agent/sync/HeartbeatCoordinator.class
+  [OK] Executable JAR contains: BOOT-INF/classes/com/group/usbshield/agent/outbox/OutboxSpoolService.class
+
+================================================================
+  WEEK 3 VERIFICATION SUMMARY                                   
+================================================================
+  DECISION: PASS (WINDOWS SCOPE)
+  NOTICE  : Physical USB, Ubuntu daemon enforcement, GUI popup, 
+            and clean install/reboot tests are DEFERRED UNTIL   
+            AFTER WEEK 4 per project plan.                      
+================================================================
+

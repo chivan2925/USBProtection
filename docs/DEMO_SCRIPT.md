@@ -2,7 +2,9 @@
 
 Owner: M5. Prepared and automatically rehearsed: 2026-10-28 (Asia/Bangkok). Work item: **W4-M5-04**. Script/Q&A and fresh automated Windows fixture/management/Events/packaged-JAR rehearsals are **PASS** on the documented baseline; see the [Week 4 run record](qa/week4-evidence/2026-10-28/windows-regression/README.md). An [actual authenticated browser screencast replay](qa/week4-evidence/2026-10-28/windows-regression/recording/replay.html) contains 207 CDP frames with original capture timings. **No encoded video, audio or narrated live walkthrough was produced.** Ubuntu live demonstration remains **NOT EXECUTED / DEFERRED until after Week 4**.
 
-Use the [test inventory](qa/WEEK4_TEST_INVENTORY.md), [release validation](qa/WEEK4_RELEASE_VALIDATION.md), [Event History review](qa/WEEK4_EVENT_HISTORY_REVIEW.md), [evidence index](qa/week4-evidence/README.md) and [Ubuntu recording sheets](qa/WEEK4_UBUNTU_ACCEPTANCE.md) with this script. The current source baseline is `2013ce726ef8cc960b30720435be23e8ccef1903`; record the actual tested HEAD and working-tree hashes again for every run. The [Week 3 owner decision](qa/WEEK3_FINAL_OWNER_CLOSEOUT_20261028.md) is **PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED**, with H05 closed; it is historical acceptance, not a Week 4 test result.
+Use the [test inventory](qa/WEEK4_TEST_INVENTORY.md), [release validation](qa/WEEK4_RELEASE_VALIDATION.md), [Event History review](qa/WEEK4_EVENT_HISTORY_REVIEW.md), [evidence index](qa/week4-evidence/README.md) and [Ubuntu recording sheets](qa/WEEK4_UBUNTU_ACCEPTANCE.md) with this script. The **28 October rehearsal baseline** is `2013ce726ef8cc960b30720435be23e8ccef1903`; its recordings/results keep that date and source. The [Week 3 owner decision](qa/WEEK3_FINAL_OWNER_CLOSEOUT_20261028.md) remains historical **PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED**, H05 closed.
+
+**Post-pull update, 2026-10-30:** current HEAD is `751387bf166c528326ae91c6a16a820a6d8fc24a`, not an accepted final release candidate. [M4's shared-frontend handoff](qa/evidence/M4_WEEK4_HANDOFF.md) has been [technically acknowledged by M5](qa/evidence/M5_WEEK4_POST_PULL_ACK_20261030.md). Frontend/server/packaging source is unchanged; its browser evidence remains dated 28 October. Fresh Agent regression is **136/136 PASS**, including **9/9** new watch/stress tests, and the current Agent JAR passes static verification; see [30 October evidence](qa/week4-evidence/2026-10-30/post-pull-regression/README.md). [Evidence/source/log/JUnit/JAR/link validation also PASS](qa/week4-evidence/2026-10-30/post-pull-regression/validation.json). No new browser demo, recording, narration, encoded video or Ubuntu execution is claimed by this update. M1's candidate decision and remaining M2/M3 handoffs are still open; record actual HEAD and source/build hashes before presenting a later candidate.
 
 ## Windows preparation
 
@@ -75,7 +77,7 @@ For precise policy versions, use the run's printed `beforeA`, `allowedA`, `revok
 | Interactive/narrated walkthrough | NOT EXECUTED; record presenter, reviewer, date, duration, exact source and observed problems when performed |
 | Video | NOT RECORDED; a video file needs checksum, duration and an explicit synthetic-data scope statement |
 | Browser screencast replay | **CAPTURED**, 207 actual CDP JPEG frames / 6,764,775 bytes, login/password excluded; [timings and hashes](qa/week4-evidence/2026-10-28/windows-regression/recording/frames.json), [playable replay](qa/week4-evidence/2026-10-28/windows-regression/recording/replay.html); no encoded video/audio |
-| M4 shared frontend review | Carry Week 3 acceptance as history; obtain Week 4 review for the tested candidate and Event History handoff |
+| M4 shared frontend review | **Received and technically acknowledged on 2026-10-30** for the same frontend reviewed by M4 at `6127766`; [M5 source-equivalence ACK](qa/evidence/M5_WEEK4_POST_PULL_ACK_20261030.md). Recheck if candidate frontend/API changes. |
 | Candidate owner acceptance | M1 and owners confirm final SHA/artifacts/contract; rerun affected checks if the candidate changes |
 | Live Ubuntu rehearsal | NOT EXECUTED / DEFERRED until after Week 4; requires M2/M3, hardware and GUI environment |
 
@@ -101,6 +103,8 @@ Use the [Ubuntu acceptance sheets](qa/WEEK4_UBUNTU_ACCEPTANCE.md), the [Client I
 4. Demonstrate no-serial/hash identity, user switching and UNKNOWN behavior where the lab can reproduce them.
 5. Stop only the isolated test server using M1's recorded process/command; verify physical local enforcement, spool persistence and eventual delivery after recovery.
 6. Demonstrate notification exclusions/helper failure, service recovery, reboot persistence and package lifecycle according to the recording sheets.
+
+For the current Agent watch changes, M2/M3 must also demonstrate recovery after watch/daemon loss, discard incomplete input across reconnects, deduplicate replay within the short dedup window, preserve Remove→Insert transitions and recover from malformed/oversized input without invented events or repeated popups. Windows mocks for these behaviors do not establish actual daemon recovery; use the bounded-input/reconnect extension in the Ubuntu sheets.
 
 Current Ubuntu execution for all six steps: **NOT EXECUTED / DEFERRED**. No Windows result closes this gate.
 
