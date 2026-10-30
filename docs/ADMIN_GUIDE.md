@@ -1,6 +1,6 @@
 # USBShield Admin Web — Hướng dẫn quản trị
 
-**DRAFT — Week 3, 22/10/2026.** Bản final thuộc Week 4. Hướng dẫn đã kiểm tra trên Windows với backend Spring Boot/H2; việc chặn USB thật cần Agent/USBGuard trên Ubuntu.
+**FINAL — Week 4, 30/10/2026.** Hướng dẫn đã kiểm tra trên Windows với backend Spring Boot/H2; việc chặn USB thật cần Agent/USBGuard trên Ubuntu.
 
 ## Mở giao diện
 
@@ -93,4 +93,13 @@ Nút xác nhận bị khóa khi đang gửi. Nếu có lỗi, đọc thông báo
 
 Demo có nhãn **Dữ liệu mock**, chỉ để xem giao diện và luôn khóa thay đổi policy. Dùng **Thoát demo** để trở lại API thật.
 
-Evidence và giới hạn kiểm thử: [M4 Week 3 UI/UX hardening](admin-web/WEEK3_UI_UX_HARDENING.md). Ubuntu/USB vật lý/GUI notification được hoãn sau Week 4; không suy ra hardware PASS từ demo hoặc HTTP test.
+## Xác nhận M4 Week 4
+
+- `npm test`: 96/96 PASS.
+- `npm run lint`: PASS.
+- `npm run build`: PASS; frontend production bundle tích hợp được vào server JAR.
+- `npm run test:browser`: PASS; auth, CSRF, loading/empty/error, Allow/Revoke A/B, demo read-only và responsive routes.
+- `npm run test:live`: PASS; Spring Boot/Spring Security/H2 thật, session, policy version, A/B isolation, controlled HTTP ACK và mobile.
+- Screenshots và log: [Week 4 evidence](qa/week4-evidence/2026-10-28/windows-regression/README.md).
+
+Giới hạn: test trên Windows dùng HTTP/H2 và dữ liệu tổng hợp. Ubuntu/USB vật lý/USBGuard/systemd/reboot/native GUI notification chưa thực thi; không suy ra hardware PASS từ demo hoặc HTTP test.
