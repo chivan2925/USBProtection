@@ -19,7 +19,10 @@ public class AdminServerClient {
 
     @org.springframework.beans.factory.annotation.Autowired
     public AdminServerClient(AgentProperties properties) {
-        this(properties, RestClient.builder().baseUrl(properties.getServerUrl()).build());
+        this(properties, RestClient.builder()
+                .requestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory())
+                .baseUrl(properties.getServerUrl())
+                .build());
     }
 
     public AdminServerClient(AgentProperties properties, RestClient restClient) {

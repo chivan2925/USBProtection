@@ -1,0 +1,88 @@
+﻿================================================================
+  USBShield Week 4 Client Agent & Packaging Verification (M3)   
+================================================================
+
+[1/6] Verifying Systemd Service Unit Hardening...
+  [OK] packaging/systemd/usbshield-agent.service contains: 'User=usbshield'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'Group=usbshield'
+  [OK] packaging/systemd/usbshield-agent.service contains: '--spring.profiles.active=live'
+  [OK] packaging/systemd/usbshield-agent.service contains: '--spring.config.additional-location=file:/etc/usbshield-agent/application.yml'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'Requires=usbguard.service'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'After=network-online.target usbguard.service'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'Restart=on-failure'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'RestartSec=2'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'ProtectSystem=full'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'ProtectHome=read-only'
+  [OK] packaging/systemd/usbshield-agent.service contains: 'NoNewPrivileges=true'
+
+[2/6] Verifying Debian Control & Maintainer Safety...
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'Package: usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'Version: 1.0.0'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'Architecture: amd64'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'openjdk-21-jre-headless'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'usbguard'
+  [OK] packaging/agent-deb/DEBIAN/control contains: 'libnotify-bin'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'groupadd --system usbshield'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'useradd --system --gid usbshield'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 755 /opt/usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 750 /etc/usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 700 /var/lib/usbshield-agent'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'chmod 1777 /run/usbshield-notifier'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'ImplicitPolicyTarget=block'
+  [OK] packaging/agent-deb/DEBIAN/postinst contains: 'systemctl enable usbshield-agent.service'
+  [OK] packaging/agent-deb/DEBIAN/prerm contains: 'ACTION="${1:-remove}"'
+  [OK] packaging/agent-deb/DEBIAN/prerm contains: 'systemctl stop usbshield-agent.service'
+  [OK] packaging/agent-deb/DEBIAN/prerm contains: 'systemctl disable usbshield-agent.service'
+  [OK] packaging/agent-deb/DEBIAN/prerm correctly omits unsafe value: 'rm -rf /var/lib/usbshield-agent'
+
+[3/6] Verifying Live Configuration & Fail-Closed Rules...
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'data-dir: /var/lib/usbshield-agent'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'config-dir: /etc/usbshield-agent'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'simulation-enabled: false'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml contains: 'notification-enabled: true'
+  [OK] packaging/agent-deb/etc/usbshield-agent/application.yml correctly omits unsafe value: 'default-enrollment-secret'
+  [OK] packaging/usbguard/rules-v0.1.conf contains: 'allow with-interface none-of { 08:*:* }'
+
+[4/6] Verifying Desktop Notification Integration...
+  [OK] packaging/desktop/usbshield-notifier.desktop contains: 'Exec=/opt/usbshield-agent/usbshield-notifier-launcher.sh'
+  [OK] packaging/desktop/usbshield-notifier.desktop contains: 'X-GNOME-Autostart-enabled=true'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: 'USER_UID="$(id -u)"'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: '(( USER_UID < 1000 ))'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: 'org.springframework.boot.loader.launch.PropertiesLauncher'
+  [OK] packaging/desktop/usbshield-notifier-launcher.sh contains: 'com.group.usbshield.agent.notification.DesktopNotificationClientMain'
+
+[5/6] Verifying Executable Fat-JAR Structure & Artifact...
+  [OK] Fat-JAR found: 20173441 bytes, SHA256: 219D48CE56050493FF11915FB82DBCF0B4B9F6B23932F483C5FB2AD9C8320928
+  [OK] Fat-JAR contains: org/springframework/boot/loader/launch/PropertiesLauncher.class
+  [OK] Fat-JAR contains: BOOT-INF/classes/com/group/usbshield/agent/ClientAgentApplication.class
+  [OK] Fat-JAR contains: BOOT-INF/classes/com/group/usbshield/agent/notification/DesktopNotificationClientMain.class
+  [OK] Fat-JAR contains: BOOT-INF/classes/com/group/usbshield/agent/endpoint/EndpointManager.class
+  [OK] Fat-JAR contains: BOOT-INF/classes/com/group/usbshield/agent/sync/HeartbeatCoordinator.class
+  [OK] Fat-JAR contains: BOOT-INF/classes/com/group/usbshield/agent/sync/PolicySyncService.class
+  [OK] Fat-JAR contains: BOOT-INF/classes/com/group/usbshield/agent/outbox/OutboxSpoolService.class
+  [OK] Fat-JAR contains: BOOT-INF/classes/com/group/usbshield/agent/event/EventSenderService.class
+
+[6/6] Verifying Debian Packaging Staging Structure...
+  [OK] Staging contains: DEBIAN/control (SHA256: 0A29A72CC4D63E15...)
+  [OK] Staging contains: DEBIAN/postinst (SHA256: 3432E459099785E5...)
+  [OK] Staging contains: DEBIAN/prerm (SHA256: FA64FBC6F6E97A3C...)
+  [OK] Staging contains: opt/usbshield-agent/usbshield-agent.jar (SHA256: 219D48CE56050493...)
+  [OK] Staging contains: opt/usbshield-agent/usbshield-notifier-launcher.sh (SHA256: 283E587B025EDB14...)
+  [OK] Staging contains: etc/usbshield-agent/application.yml (SHA256: 4F04A3312239C531...)
+  [OK] Staging contains: etc/usbshield-agent/rules-v0.1.conf (SHA256: EE1AEA40AB2D9B17...)
+  [OK] Staging contains: etc/xdg/autostart/usbshield-notifier.desktop (SHA256: 0032141669BCEFDC...)
+  [OK] Staging contains: usr/lib/systemd/system/usbshield-agent.service (SHA256: FC5E10FC26891D1A...)
+
+================================================================
+  WEEK 4 CLIENT AGENT & PACKAGING VERIFICATION SUMMARY          
+================================================================
+  M3 VERDICT: PASS (WINDOWS PREPARATION / RELEASE CANDIDATE)    
+  STATUS    : Client Agent Fat-JAR built & verified.            
+              Debian Staging tree assembled & verified.         
+              Debian .deb package: NOT BUILT (dpkg-deb requires 
+              Ubuntu Linux; staging ready for instant build).   
+  NOTICE    : Live Ubuntu installation, physical USB tests, and 
+              systemd daemon enforcement deferred until after   
+              Week 4 per team project plan.                     
+================================================================
+
