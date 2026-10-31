@@ -54,23 +54,26 @@
   ```text
   [INFO] Running com.group.usbshield.agent.ClientAgentTest
   [INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
-  [INFO] Running com.group.usbshield.agent.endpoint.EndpointManagerTest
-  [INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+  ...
+  [INFO] Running com.group.usbshield.agent.usbguard.UsbGuardWeek4PolicyIntegrityTest
+  [INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+  [INFO] Running com.group.usbshield.agent.usbguard.UsbGuardWeek4WatchStressTest
+  [INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
   ...
   [INFO] Results:
-  [INFO] Tests run: 127, Failures: 0, Errors: 0, Skipped: 0
+  [INFO] Tests run: 156, Failures: 0, Errors: 0, Skipped: 0
   [INFO] BUILD SUCCESS
-  [INFO] Total time: 6.493 s
+  [INFO] Total time: 11.184 s
   ```
-* **Nhận xét:** 100% các ca kiểm thử đơn vị, mock, persistence rollback, outbox spool FIFO, và policy synchronization đều đạt (PASS).
+* **Nhận xét:** 100% các ca kiểm thử đơn vị, mock, persistence rollback, outbox spool FIFO, policy synchronization và cả các test M2 mới kéo về từ `main` đều đạt (PASS).
 
 ---
 
 ### 3.2. Kết quả đóng gói Executable Fat-JAR
 * **Lệnh thực thi:** `mvn clean package -DskipTests -f client-agent/pom.xml`
 * **Artifact:** `client-agent/target/usbshield-agent.jar`
-* **Kích thước:** `20,173,441 bytes`
-* **Mã băm SHA-256:** `219D48CE56050493FF11915FB82DBCF0B4B9F6B23932F483C5FB2AD9C8320928`
+* **Kích thước:** `20,177,520 bytes`
+* **Mã băm SHA-256:** `A926974EC256734BBDA1918F26E2E9EBE511959F31E3FBE022E965D0F2523D6D`
 * **Kiểm tra lớp thực thi:** Đã xác minh có đầy đủ `PropertiesLauncher`, `DesktopNotificationClientMain`, `EndpointManager`, `HeartbeatCoordinator`, `PolicySyncService`, `OutboxSpoolService`.
 
 ---
