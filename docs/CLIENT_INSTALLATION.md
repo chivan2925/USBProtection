@@ -1,31 +1,31 @@
 # USBShield Client Agent — Installation & Deployment Guide
 
-> **Phiên bản:** Week 3 — *Productization, Isolation & Packaging*  
+> **Phiên bản:** Week 4 — *Stabilization, Hardening, Staging & Release Candidate*  
 > **Hệ điều hành mục tiêu:** Ubuntu 24.04 LTS (x86_64 / amd64)  
-> **Trạng thái kiểm thử:** **PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED**  
-> *(Toàn bộ các bước cài đặt thực tế, cắm USB vật lý, desktop notification popup và service reboot trên máy trạm Ubuntu 24.04 được hoãn kiểm thử đến sau Week 4 theo thống nhất của nhóm).*
+> **Trạng thái kiểm thử:** **WEEK 4 — WINDOWS/RELEASE-CANDIDATE PREPARATION PASS; UBUNTU E2E DEFERRED**  
+> *(Toàn bộ các bước cài đặt thực tế gói `.deb`, cắm USB vật lý, desktop notification popup và service reboot trên máy trạm Ubuntu 24.04 được chuẩn bị sẵn sàng bằng staging và kiểm thử tĩnh trong Week 4; kiểm thử thực địa được thực hiện sau Week 4 theo thống nhất của nhóm).*
 
 ---
 
 ## 1. Yêu cầu hệ thống
 
 * **Hệ điều hành:** Ubuntu 24.04 LTS (x86_64 / amd64).
-* **Quyền hạn cài đặt:** Quyền `sudo` hoặc `root`.
-* **Gói phụ thuộc hệ thống (tự động cài đặt qua APT):**
-  * `openjdk-21-jre-headless` (Java Runtime Environment)
-  * `usbguard` (Hạt nhân kiểm soát thiết bị USB)
-  * `libnotify-bin` (Tiện ích gửi thông báo GUI `notify-send`)
-* **Kết nối mạng:** Kết nối được đến Admin Server qua giao thức HTTP/HTTPS.
+* **Quyền hạn cài đặt:** Quyền quản trị `sudo` hoặc `root`.
+* **Gói phụ thuộc hệ thống (tự động cài đặt qua APT Dependencies):**
+  * `openjdk-21-jre-headless` (Java Runtime Environment 21)
+  * `usbguard` (Hạt nhân kiểm soát thiết bị USB cấp kernel/daemon)
+  * `libnotify-bin` (Tiện ích phát thông báo đồ họa `notify-send` trong phiên user)
+* **Kết nối mạng:** Kết nối HTTP/HTTPS đến Admin Server qua mạng LAN hoặc VPN.
 
 ---
 
 ## 2. Cấu trúc thư mục & Phân quyền bảo mật (Security Layout)
 
-Gói `.deb` tự động thiết lập mô hình chạy non-root cho tiến trình bảo vệ:
+Gói `.deb` tự động thiết lập mô hình chạy non-root cho tiến trình bảo vệ hệ thống:
 
 | Đường dẫn | Sở hữu | Quyền | Mục đích |
 |---|---|---|---|
-| `/opt/usbshield-agent/` | `root:usbshield` | `755` | Chứa file thực thi `usbshield-agent.jar` và `usbshield-notifier-launcher.sh` |
+| `/opt/usbshield-agent/` | `root:usbshield` | `755` | Chứa binary `usbshield-agent.jar` và `usbshield-notifier-launcher.sh` |
 | `/etc/usbshield-agent/` | `root:usbshield` | `750` | Thư mục cấu hình (chứa `application.yml` quyền `640` và `rules-v0.1.conf` quyền `644`) |
 | `/var/lib/usbshield-agent/` | `usbshield:usbshield` | `700` | Lưu thông tin đăng ký `endpoint.json` và thư mục hàng đợi offline `spool/` |
 | `/run/usbshield-notifier/` | `root:root` | `1777` (Sticky) | Thư mục socket IPC giữa Agent và Desktop Notifier (khởi tạo qua `tmpfiles.d`) |
@@ -33,17 +33,38 @@ Gói `.deb` tự động thiết lập mô hình chạy non-root cho tiến trì
 
 ---
 
-## 3. Hướng dẫn cài đặt bằng gói `.deb`
+## 3. Tạo gói và Cài đặt gói `.deb`
 
-> [!NOTE]
-> Gói `.deb` (`usbshield-agent_1.0.0_amd64.deb`) được tạo từ script `packaging/scripts/build-deb.sh`. Khi triển khai tại môi trường sản xuất hoặc phòng lab, thực hiện các bước sau.
+### 3.1. Đóng gói trên máy Linux / CI Builder
 
-### Bước 1: Sao chép gói `.deb` vào máy trạm
+Khi build trong môi trường Ubuntu hoặc CI có `dpkg-deb`:
+
+```bash
+# Cách 1: Chạy toàn bộ quy trình build Maven và tạo .deb
+./packaging/scripts/build-deb.sh
+
+# Cách 2: Đóng gói từ thư mục staging đã chuẩn bị sẵn
+mkdir -p packaging/dist
+dpkg-deb --build packaging/staging packaging/dist/usbshield-agent_1.0.0_amd64.deb
+```
+
+Kiểm tra tính toàn vẹn của gói đã tạo:
+```bash
+dpkg-deb -I packaging/dist/usbshield-agent_1.0.0_amd64.deb
+dpkg-deb -c packaging/dist/usbshield-agent_1.0.0_amd64.deb
+sha256sum packaging/dist/usbshield-agent_1.0.0_amd64.deb
+```
+
+---
+
+### 3.2. Cài đặt trên máy trạm Ubuntu 24.04 (Yêu cầu quyền Admin / sudo)
+
+#### Bước 1: Sao chép gói `.deb` vào máy trạm
 ```bash
 scp user@build-server:/path/to/packaging/dist/usbshield-agent_1.0.0_amd64.deb .
 ```
 
-### Bước 2: Cài đặt gói qua APT
+#### Bước 2: Cài đặt gói qua APT
 ```bash
 sudo apt update
 sudo apt install -y ./usbshield-agent_1.0.0_amd64.deb
@@ -103,7 +124,7 @@ sudo systemctl restart usbshield-agent
 
 ## 5. Kiểm tra & Giám sát dịch vụ (Verification & Monitoring)
 
-### 5.1. Kiểm tra trạng thái dịch vụ nền
+### 5.1. Kiểm tra trạng thái dịch vụ nền (Admin / sudo)
 ```bash
 # Kiểm tra dịch vụ USBGuard
 sudo systemctl status usbguard
@@ -112,7 +133,7 @@ sudo systemctl status usbguard
 sudo systemctl status usbshield-agent
 ```
 
-### 5.2. Xem log trực tiếp của Agent
+### 5.2. Xem log trực tiếp của Agent (Admin / sudo)
 ```bash
 sudo journalctl -u usbshield-agent -f
 ```
@@ -121,7 +142,7 @@ sudo journalctl -u usbshield-agent -f
 * `Heartbeat sent successfully, status=ONLINE`.
 * `DesktopNotificationPublisher: IPC socket ready`.
 
-### 5.3. Kiểm tra thông tin Endpoint và Policy đã lưu
+### 5.3. Kiểm tra thông tin Endpoint và Policy đã lưu (Admin / sudo)
 ```bash
 # Xem file đăng ký và phiên bản chính sách đã lưu trữ
 sudo cat /var/lib/usbshield-agent/endpoint.json
@@ -130,22 +151,38 @@ sudo cat /var/lib/usbshield-agent/endpoint.json
 sudo ls -la /var/lib/usbshield-agent/spool/
 ```
 
-### 5.4. Kiểm tra Desktop Notifier trong phiên người dùng
-Trong phiên đăng nhập đồ họa (GNOME/Wayland/X11) của user thường (UID >= 1000):
+### 5.4. Kiểm tra Desktop Notifier trong phiên người dùng (Normal User: UID >= 1000)
+Trong phiên đăng nhập đồ họa (GNOME/Wayland/X11) của user thường, lệnh này **không cần `sudo`**:
 ```bash
+# Kiểm tra helper tiến trình thông báo đang chạy
 ps aux | grep DesktopNotificationClientMain
+
+# Kiểm tra socket IPC của phiên hiện tại
+ls -la /run/usbshield-notifier/
 ```
 Khi cắm USB bị chặn (BLOCKED Mass Storage), desktop notification popup sẽ lập tức xuất hiện góc trên màn hình.
 
 ---
 
-## 6. Khắc phục sự cố & Ngoại lệ (Troubleshooting & Recovery)
+## 6. Nâng cấp & Cài đặt lại (Upgrade & Reinstallation Safety)
 
-1. **Agent không kết nối được Admin Server:**
+### 6.1. Nâng cấp gói phiên bản mới
+Khi nâng cấp gói:
+```bash
+sudo apt install -y ./usbshield-agent_1.1.0_amd64.deb
+```
+*Cơ chế bảo vệ dữ liệu khi nâng cấp:*
+* Script `prerm` chỉ dừng dịch vụ tạm thời, **không disable** service.
+* Dữ liệu nhận dạng `/var/lib/usbshield-agent/endpoint.json` và hàng đợi sự kiện `/var/lib/usbshield-agent/spool/` được **bảo toàn 100%**.
+* Tiến trình tự động khởi động lại với cấu hình và endpoint ID cũ.
+
+### 6.2. Khắc phục sự cố & Ngoại lệ (Troubleshooting & Recovery)
+
+1. **Agent không kết nối được Admin Server (Mất mạng / Server Offline):**
    * Agent tự động chuyển sang cơ chế Offline Spool: toàn bộ sự kiện cắm/rút USB vẫn được lưu an toàn tại `/var/lib/usbshield-agent/spool/event_*.json`.
-   * Khi mạng khôi phục, `HeartbeatCoordinator` sẽ tự động gửi lại pending ACK và đẩy toàn bộ hàng đợi outbox lên server mà không làm mất sự kiện.
+   * Khi mạng khôi phục, `HeartbeatCoordinator` sẽ tự động gửi lại pending ACK và đẩy toàn bộ hàng đợi outbox lên server theo thứ tự FIFO mà không làm mất sự kiện.
 2. **File đăng ký `endpoint.json` bị hỏng hoặc mất:**
-   * Agent phát hiện file bị lỗi, ghi log cảnh báo và tự động kích hoạt quy trình tái đăng ký (`ensureEnrolled`) với server qua bootstrap token.
+   * Agent phát hiện file bị lỗi cú pháp, ghi log cảnh báo và tự động kích hoạt quy trình tái đăng ký (`ensureEnrolled`) với server qua bootstrap token.
 3. **USBGuard Daemon bị dừng:**
    * Systemd service của Agent khai báo `Requires=usbguard.service`. Khi USBGuard gặp sự cố, Agent dừng an toàn và tự khởi động lại (`Restart=on-failure`, `RestartSec=2`).
 
@@ -153,23 +190,22 @@ Khi cắm USB bị chặn (BLOCKED Mass Storage), desktop notification popup s�
 
 ## 7. Hướng dẫn gỡ cài đặt hoàn toàn (Uninstall & Rollback)
 
-Khi cần gỡ bỏ phần mềm khỏi máy trạm:
-
+### 7.1. Gỡ cài đặt thông thường (Giữ dữ liệu Endpoint & Spool)
 ```bash
-# Dừng và gỡ bỏ gói phần mềm
-sudo apt remove --purge -y usbshield-agent
+sudo apt remove -y usbshield-agent
 ```
-
-Script `prerm` sẽ tự động:
+Script `prerm` sẽ:
 1. Dừng dịch vụ `usbshield-agent.service`.
 2. Disable dịch vụ khỏi hệ thống khởi động.
-3. Dọn dẹp các tệp nhị phân trong `/opt/usbshield-agent`.
+3. Giữ nguyên `/var/lib/usbshield-agent/` để có thể cài lại mà không mất ID endpoint.
 
-Nếu muốn dọn dẹp sạch toàn bộ dữ liệu máy trạm (bao gồm ID đăng ký cũ):
+### 7.2. Gỡ cài đặt triệt để (Purge - Xóa sạch cấu hình và dữ liệu)
 ```bash
+sudo apt purge -y usbshield-agent
 sudo rm -rf /var/lib/usbshield-agent
 sudo rm -rf /etc/usbshield-agent
 sudo rm -f /etc/tmpfiles.d/usbshield-notifier.conf
+sudo rm -rf /run/usbshield-notifier
 ```
 
 ---
@@ -177,5 +213,5 @@ sudo rm -f /etc/tmpfiles.d/usbshield-notifier.conf
 ## 8. Trạng thái kiểm thử & Bàn giao (Test Status & Handoff)
 
 > [!IMPORTANT]
-> * **Đã nghiệm thu (Windows Scope):** Kiểm tra cấu trúc metadata gói `.deb`, service systemd, launcher script, phân quyền, cấu hình live, và FAT JAR executable (`packaging/tests/verify-week3-windows.ps1`).
-> * **Hoãn kiểm thử (Ubuntu Scope):** Thao tác cài đặt trực tiếp gói `.deb` trên hệ điều hành Ubuntu 24.04 thật, thử nghiệm cắm rút USB vật lý, kiểm tra pop-up đồ họa GUI thực tế, và reboot máy trạm được bảo lưu thực hiện **sau Week 4** theo kế hoạch của nhóm.
+> * **Đã nghiệm thu Week 4 (Windows Scope):** Kiểm tra cấu trúc metadata gói `.deb`, service systemd hardening, launcher script, phân quyền, cấu hình live, FAT JAR executable và Debian Staging directory (`packaging/tests/verify-week4-windows.ps1` PASS).
+> * **Hoãn kiểm thử thực địa (Ubuntu Scope):** Thao tác cài đặt trực tiếp gói `.deb` trên hệ điều hành Ubuntu 24.04 thật, thử nghiệm cắm rút USB vật lý, kiểm tra pop-up đồ họa GUI thực tế, và reboot máy trạm được bảo lưu thực hiện **sau Week 4** theo kế hoạch của nhóm.
