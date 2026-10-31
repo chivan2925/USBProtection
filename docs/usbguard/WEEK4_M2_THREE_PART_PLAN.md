@@ -1,27 +1,31 @@
 # USBShield — M2 Week 4: Three-Part Execution Plan
 
 **Repository:** `chivan2925/USBProtection`  
-**Baseline:** `main` at `1614f9b4e325e8cb42da87946601810d3c5e53de` (2026-10-30)  
-**Owner:** Member 2 (USBGuard, active sessions, desktop notification)  
+**Part 2 base:** `main` at `ab346931d8d0994b5c4e015feb823b4cf8df5a2f` (2026-10-30 UTC)  
+**Owner:** Member 2 — USBGuard, active-user attribution and desktop notification  
 **Week 3 gate:** `PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED`.
 
-Week 4 is stabilization, documentation, and release-candidate preparation. No new product feature, global policy, or API contract change is authorized. Ubuntu 24.04 hardware/daemon/GUI/systemd/reboot/installer E2E remains deferred until **after Week 4**.
+Week 4 is limited to stabilization, documentation, tests and release-candidate preparation. No new product feature or Agent–Server API change is included. Actual Ubuntu 24.04 USBGuard/USB hardware, GUI and systemd testing remains deferred until after Week 4.
 
-| Part | Work IDs from the Week 4 plan | Focus | Intended output | Status |
-| --- | --- | --- | --- | --- |
-| **Part 1 — USBGuard watch and recovery resilience** | **W4-M2-01** | Bound watch input, reconnect after daemon unavailability, dedup across restart, malformed/oversized frames, Insert/Remove and event/notification independence | `UsbGuardEventListener.java`, new regression tests, Part 1 report | **PATCH PREPARED — Maven owner validation pending** |
-| **Part 2 — Policy, identity and session correctness** | **W4-M2-02**, **W4-M2-03** | Rule order/class-08, hash/no-serial identity, fail-closed foreign/base policy, local/remote/ambiguous sessions and `UNKNOWN` | Focused tests/fixtures and policy/session review | NOT STARTED |
-| **Part 3 — Notification, documentation and handoff** | **W4-M2-04**, **W4-M2-05**, **W4-M2-06**, **W4-M2-07 (P1)** | Correct-UID notification and failure isolation, core explanations, technical Q&A, IPC handoff to M3, deferred Ubuntu test checklist for M5 | Notification regression, `docs/usbguard/` final technical docs and demo Q&A | NOT STARTED |
+| Part | Work IDs | Focus | Status |
+|---|---|---|---|
+| **Part 1 — Watch/recovery resilience** | `W4-M2-01` | Reconnect, bounded input, duplicate suppression, daemon unavailable | **MERGED on `main`** in PR #37, `2b963a1`; owner reported Maven test/package BUILD SUCCESS |
+| **Part 2 — USBGuard policy and active-user attribution** | `W4-M2-02`, `W4-M2-03` | Canonical base rule, class 08, hash/serialless, managed rule integrity/ordering, foreign-rule guard, active/remote/ambiguous sessions | **IMPLEMENTED IN PACKAGE — owner Maven verification pending**; see `WEEK4_PART2_POLICY_SESSION.md` |
+| **Part 3 — Notification/docs/handoff** | `W4-M2-04`–`W4-M2-07` | Native notification correctness, core guide, Q&A, Ubuntu checklist, IPC review with M3 | **NOT STARTED** |
 
-## Boundaries and sequence
+## Owner boundary
 
-1. Each part is applied to an identified clean repository commit and validated with `mvn -B -f client-agent/pom.xml clean test` and `mvn -B -f client-agent/pom.xml -DskipTests package` before the owner commits/pushes.
-2. M2 changes only `client-agent/.../{usbguard,session,notification}/**`, M2 event enrichment, corresponding tests, `packaging/usbguard/**`, and `docs/usbguard/**`. M3 retains Agent sync, endpoint, outbox, packaging and runtime installer ownership.
-3. Part 2 should be based on the committed Part 1 result; Part 3 should be based on the committed Part 2 result. Independent review must compare against the correct HEAD.
-4. The owner and M5 record actual Maven results (including test counts, exit status, SHA, and platform). A patch prepared by this document is **not** an execution PASS.
-5. Native Ubuntu watch/USBGuard IPC, real device removal/reinsert, real graphical notifications, and reboot **remain NOT EXECUTED** under the agreed schedule.
+M2 changes only `client-agent/.../{usbguard,session,notification}/**`, M2-specific tests and `docs/usbguard/**`, plus `packaging/usbguard/**` where needed. This Part 2 package does **not** modify M3-owned `sync/`, `endpoint/`, `outbox/`, `system/`, `packaging/agent-deb/`, or shared API contracts.
 
-## Integration handoff
+## Gates
 
-M3: no modification to Agent API contracts, lifecycle scripts, or service permissions in Part 1. The watch process still calls `usbguard watch` using argument-array `ProcessBuilder`, with the established 5-second reconnect delay in production.  
-M5: use the new Week 4 test class for Windows evidence; do not relabel it as native USBGuard validation.
+- Part 2 needs a successful Windows `client-agent` Maven test run and executable-JAR build **on the applied, reviewed source**, with SHA, test counts and log evidence. Neither source inspection nor a minimal Java compile substitutes for Maven/JUnit.
+- Test and review must show that policy reconciliation cannot ACK an unverified or overtaken managed Allow rule; missing or unsafe base rules must not cause silent success. Matching unmanaged device-specific Allow rules are preserved rather than silently deleted; their presence is a separately disclosed policy-audit caveat.
+- Session attribution must preserve genuine local `username`/UID/session when uniquely known, while avoiding false attribution for remote-only, missing, duplicated, malformed or ambiguous sessions. Lack of a GUI does not erase a known local tty identity; GUI notification delivery is a separate Part 3 check.
+- The full Ubuntu E2E release gate **remains DEFERRED**, not PASS.
+
+## Handoff
+
+M3: no Agent sync or `.deb` changes in Part 2; coordinate any previously existing unmanaged USBGuard rules in installed policy.  
+M5: record Part 2 Windows unit coverage and unresolved Ubuntu runtime checks under the correct base/final SHA.  
+M1: no REST/API/DTO changes.
