@@ -1,0 +1,45 @@
+{
+  "id": "02-packaging-static",
+  "scope": "Static service/config/helper checks against freshly built post-pull Agent JAR; no Ubuntu installation",
+  "revision": "751387bf166c528326ae91c6a16a820a6d8fc24a",
+  "revisionAfter": "751387bf166c528326ae91c6a16a820a6d8fc24a",
+  "sourceTreeSHA256": "21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715",
+  "sourceTreeSHA256After": "21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "powershell.exe",
+  "args": [
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "packaging/tests/verify-week3-windows.ps1",
+    "-CheckBuiltJar"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "packaging/tests/verify-week3-windows.ps1",
+      "-CheckBuiltJar"
+    ]
+  },
+  "startedAt": "2026-10-30T13:42:47.831Z",
+  "endedAt": "2026-10-30T13:42:48.706Z",
+  "startedAtBangkok": "2026-10-30 20:42:47 +07:00",
+  "endedAtBangkok": "2026-10-30 20:42:48 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "aa5e1fa00fd05c76b9e8712972425b5dc0b9452d0230323fa7d807c2754fa9c5",
+  "screenshots": [],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-10-30/post-pull-regression"
+}

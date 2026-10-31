@@ -1,0 +1,14 @@
+{
+  "revision": "751387bf166c528326ae91c6a16a820a6d8fc24a",
+  "sourceTreeSHA256": "21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715",
+  "agent": {
+    "path": "client-agent/target/usbshield-agent.jar",
+    "sha256": "26f8d74b450c399a798a9cbc7a0c0fc34d7a80cb34960e34a21c176c74d6e5d9",
+    "bytes": 20175259,
+    "modifiedAt": "2026-10-30T13:42:05.100Z",
+    "builtBy": "01-agent-package",
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: Maven JAR Plugin 3.4.2\r\nBuild-Jdk-Spec: 22\r\nImplementation-Title: USBShield Client Agent\r\nImplementation-Version: 1.0.0-SNAPSHOT\r\nMain-Class: org.springframework.boot.loader.launch.JarLauncher\r\nStart-Class: com.group.usbshield.agent.ClientAgentApplication\r\nSpring-Boot-Version: 3.3.4\r\nSpring-Boot-Classes: BOOT-INF/classes/\r\nSpring-Boot-Lib: BOOT-INF/lib/\r\nSpring-Boot-Classpath-Index: BOOT-INF/classpath.idx\r\nSpring-Boot-Layers-Index: BOOT-INF/layers.idx\r\n\r\n"
+  },
+  "staticCheck": "02-packaging-static PASS",
+  "deb": "NOT BUILT IN THIS RUN"
+}

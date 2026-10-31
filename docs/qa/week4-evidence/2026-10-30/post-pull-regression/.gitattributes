@@ -1,0 +1,2 @@
+# Keep execution logs/manifests byte-identical through Windows Git checkouts.
+* -text

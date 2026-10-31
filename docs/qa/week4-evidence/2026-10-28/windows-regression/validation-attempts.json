@@ -1,0 +1,15 @@
+{
+  "scope": "Evidence utility validation attempts, separate from application test outcomes",
+  "attempts": [
+    {
+      "date": "2026-10-28",
+      "command": "python docs/qa/scripts/validate-week4.py",
+      "exitCode": 1,
+      "observedError": "Documentation link check ran before its own validation.json and checksums.json outputs were generated",
+      "missingLinks": ["validation.json", "checksums.json"],
+      "resolution": "Defer only those two self-generated link targets, then verify both files exist after generation; all other links still checked",
+      "applicationTestFailure": false
+    }
+  ],
+  "finalResult": "See validation.json for the actual successful validation result"
+}

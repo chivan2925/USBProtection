@@ -1,0 +1,85 @@
+{
+  "id": "18-browser-events",
+  "scope": "Real HTTP/H2 Event History browser; 28 synthetic events, dates/paging/no-serial/UNKNOWN and injected failures/recovery",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "revisionAfter": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceTreeSHA256After": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\npm.cmd",
+  "args": [
+    "run",
+    "test:browser:live"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-Command",
+      "& 'C:\\Program Files\\nodejs\\npm.cmd' 'run' 'test:browser:live'; exit $LASTEXITCODE"
+    ]
+  },
+  "startedAt": "2026-10-28T12:53:50.164Z",
+  "endedAt": "2026-10-28T12:54:27.376Z",
+  "startedAtBangkok": "2026-10-28 19:53:50 +07:00",
+  "endedAtBangkok": "2026-10-28 19:54:27 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "f4fef2c9bb24fbfd3874d6101cc45e3225dbd4b7c93b7dada7558962c4a23c45",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "ef2822ed1d43891516f86b3899ede0ad3ac9a7ff1de262e178e12075350de086",
+  "screenshots": [
+    {
+      "path": "screenshots/18-browser-events/events-name-search.png",
+      "sha256": "f761aa35d1813cc66697fc9a5115553b3444e278bb1a7b6626eda7ed48ff0fe4",
+      "bytes": 208982,
+      "modifiedAt": "2026-10-28T12:54:19.955Z"
+    },
+    {
+      "path": "screenshots/18-browser-events/events-real-http-date-filter.png",
+      "sha256": "5a1cb94ae859535ed54b40079d3ed75b17704a42c80e60185e4b477ccce0475a",
+      "bytes": 208727,
+      "modifiedAt": "2026-10-28T12:54:21.454Z"
+    },
+    {
+      "path": "screenshots/18-browser-events/events-real-http-desktop.png",
+      "sha256": "c66bfa5a3eba2103411ce6f48e561dce97ecac1a2157c253925b0825c512d6cf",
+      "bytes": 208810,
+      "modifiedAt": "2026-10-28T12:54:17.744Z"
+    },
+    {
+      "path": "screenshots/18-browser-events/events-real-http-mobile.png",
+      "sha256": "311392e3979b0e0edd80cad3cb4c0f1f77e3ce60fadb650a6229ebe2d7709163",
+      "bytes": 119513,
+      "modifiedAt": "2026-10-28T12:54:22.180Z"
+    },
+    {
+      "path": "screenshots/18-browser-events/events-username-substring.png",
+      "sha256": "70bae51b539de698ea6de329ebe4acd807df7c3a5caca415171a3d840fd6988a",
+      "bytes": 76347,
+      "modifiedAt": "2026-10-28T12:54:23.632Z"
+    },
+    {
+      "path": "screenshots/18-browser-events/events-week3-endpoint-a.png",
+      "sha256": "0add7b4653099184c0e5c8ed4d2b0975ebe5d0ca5cf8d25bca140669a5294cf0",
+      "bytes": 76025,
+      "modifiedAt": "2026-10-28T12:54:24.976Z"
+    },
+    {
+      "path": "screenshots/18-browser-events/events-week3-endpoint-b.png",
+      "sha256": "652c5c52779f96b293fc8476c31a3a32732386f4eb9b5341729d8f93a083eb1b",
+      "bytes": 69746,
+      "modifiedAt": "2026-10-28T12:54:24.359Z"
+    },
+    {
+      "path": "screenshots/18-browser-events/events-week3-unknown-no-serial.png",
+      "sha256": "a9ab6999fc6b34d8b691818bfc9a3a36e6d9e24f15800ed1cc90dd73304eb60b",
+      "bytes": 68879,
+      "modifiedAt": "2026-10-28T12:54:23.876Z"
+    }
+  ],
+  "junit": []
+}

@@ -1,0 +1,101 @@
+{
+  "status": "PASS",
+  "date": "2026-10-28",
+  "timezone": "Asia/Bangkok",
+  "preparedAt": "2026-10-28T13:00:43.335Z",
+  "revision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "node": "v24.22.1",
+  "platform": "win32",
+  "architecture": "x64",
+  "source": {
+    "path": "frontend\\tests\\browser-live.mjs",
+    "sha256": "d7679a7cc6b5f8bab971d9d2fae2a67588e681f04e3dafccb8d604a8df4e083b"
+  },
+  "variant": {
+    "path": "frontend\\.artifacts\\week4-packaged-rehearsal-1c9ca220-f23b-4eba-980c-335600a8fb4e.mjs",
+    "sha256": "1c5a8c9b56b0030b93246b6b44c590565f89eb2beda373defa782e9a6821354f",
+    "syntaxCheckExitCode": 0
+  },
+  "jar": {
+    "path": "admin-server\\target\\usbshield-admin-server.jar",
+    "sha256": "a9f3407c348e731455b69743618062d810d9f99cc946d95f9db7ed239f53ef3a"
+  },
+  "wrapper": {
+    "path": "docs\\qa\\scripts\\rehearse-week4.mjs",
+    "sha256": "f09fd76f494baaf36251699319e1913ea0d94d765c3115e815915d262502aea1"
+  },
+  "originalAssertionLinesPreserved": 31,
+  "reversibleToOriginalSource": true,
+  "substitutions": [
+    {
+      "label": "serve UI from packaged JAR",
+      "before": "const web = 'http://127.0.0.1:4174'",
+      "after": "const web = api",
+      "count": 1
+    },
+    {
+      "label": "remove Vite preview process",
+      "before": "  start(process.execPath, [join(root, 'node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', '4174', '--strictPort'], { env: { ...process.env, USBSHIELD_API_TARGET: api } })",
+      "after": "  // Week 4: the existing JAR serves both React assets and /api on its isolated port.",
+      "count": 1
+    },
+    {
+      "label": "recording cleanup handle",
+      "before": "let socket\n",
+      "after": "let socket\nlet week4FinishRecording = async () => {}\n",
+      "count": 1
+    },
+    {
+      "label": "install bounded CDP recorder",
+      "before": "  socket.addEventListener('message', event => {",
+      "after": "  const week4Recorder = await (async function installScreencast(cdp, socket, directory) {\n  const { createHash } = await import('node:crypto')\n  const framesDirectory = join(directory, 'frames')\n  await mkdir(framesDirectory)\n  const limits = { maxFrames: 600, maxTotalBytes: 32 * 1024 * 1024, maxFrameBytes: 512 * 1024 }\n  const options = { format: 'jpeg', quality: 45, maxWidth: 1280, maxHeight: 960, everyNthFrame: 2 }\n  const frames = []\n  const errors = []\n  let suppressedErrorCount = 0\n  let active = false\n  let streamStarted = false\n  let firstClock\n  let startedAt\n  let reservedFrames = 0\n  let reservedBytes = 0\n  let capReason\n  let writes = Promise.resolve()\n  let finishing\n  const errorText = error => error instanceof Error ? error.message : String(error)\n  const addError = error => { if (errors.length < 20) errors.push(errorText(error)); else suppressedErrorCount++ }\n  const elapsed = () => firstClock === undefined ? 0 : Math.round((performance.now() - firstClock) * 1000) / 1000\n  function onMessage(event) {\n    const message = JSON.parse(event.data)\n    if (message.method !== 'Page.screencastFrame') return\n    const { data, sessionId, metadata } = message.params\n    // Acknowledge even a skipped/capped frame so recording cannot stall Chrome.\n    void cdp('Page.screencastFrameAck', { sessionId }).catch(addError)\n    if (!active) return\n    const bytes = Buffer.from(data, 'base64')\n    if (reservedFrames >= limits.maxFrames || reservedBytes + bytes.length > limits.maxTotalBytes) {\n      capReason = reservedFrames >= limits.maxFrames ? 'frame limit' : 'total byte limit'\n      active = false\n      return\n    }\n    if (bytes.length > limits.maxFrameBytes) {\n      addError(`Skipped an oversized JPEG (${bytes.length} bytes)`)\n      return\n    }\n    if (bytes[0] !== 0xff || bytes[1] !== 0xd8) { addError('Skipped a non-JPEG frame'); return }\n    const index = ++reservedFrames\n    reservedBytes += bytes.length\n    const file = `frames/${String(index).padStart(5, '0')}.jpg`\n    const frame = {\n      index, file, elapsedMs: elapsed(), receivedAt: new Date().toISOString(),\n      cdpTimestampSeconds: metadata?.timestamp ?? null,\n      deviceWidth: metadata?.deviceWidth ?? null, deviceHeight: metadata?.deviceHeight ?? null,\n      bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex'),\n    }\n    writes = writes.then(async () => {\n      await writeFile(join(directory, file), bytes, { flag: 'wx' })\n      frames.push(frame)\n    }).catch(addError)\n  }\n  socket.addEventListener('message', onMessage)\n  async function start() {\n    firstClock = performance.now()\n    startedAt = new Date().toISOString()\n    active = true\n    try { await cdp('Page.startScreencast', options); streamStarted = true }\n    catch (error) { active = false; addError(error) }\n  }\n  function stop(reason = 'before logout') {\n    if (finishing) return finishing\n    finishing = (async () => {\n      active = false\n      const durationMs = elapsed()\n      if (streamStarted && socket.readyState === 1) {\n        try { await cdp('Page.stopScreencast') } catch (error) { addError(error) }\n      }\n      await writes\n      socket.removeEventListener('message', onMessage)\n      const manifest = {\n        format: 'CDP JPEG screencast with original capture timings',\n        status: frames.length > 0 ? 'CAPTURED' : 'NOT CAPTURED',\n        scope: 'Actual browser recording, Windows, isolated H2, synthetic HTTP QA events; no audio; no encoded video file; no physical USB or Ubuntu claim.',\n        privacy: 'Started after successful login on populated Events; stopped before logout. Login/password phase excluded.',\n        startedAt: startedAt ?? null, endedAt: new Date().toISOString(), durationMs,\n        stopReason: capReason ?? reason, capped: Boolean(capReason),\n        limits, options, frameCount: frames.length,\n        totalBytes: frames.reduce((sum, frame) => sum + frame.bytes, 0), errors, suppressedErrorCount, frames,\n      }\n      await writeFile(join(directory, 'frames.json'), JSON.stringify(manifest, null, 2) + '\\n', { flag: 'wx' })\n      if (frames.length) {\n        const embedded = []\n        for (const frame of frames) embedded.push({ t: frame.elapsedMs, src: `data:image/jpeg;base64,${(await readFile(join(directory, frame.file))).toString('base64')}` })\n        const payload = JSON.stringify({ durationMs, frames: embedded }).replaceAll('<', '\\\\u003c')\n        const html = `<!doctype html>\n<html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>USBShield Week 4 — CDP screencast replay</title>\n<style>body{font:16px system-ui;margin:20px;background:#101827;color:#e2e8f0}main{max-width:1280px;margin:auto}h1{font-size:22px}p{line-height:1.5}img{width:100%;height:auto;background:#fff;border:1px solid #475569}section{display:flex;align-items:center;gap:12px;margin:12px 0}input{flex:1}button{padding:8px 18px}small{color:#cbd5e1}</style>\n<main><h1>USBShield Week 4 — recorded browser screencast</h1>\n<p>Actual CDP JPEG frames replayed at their capture timings. Windows · synthetic HTTP QA events · isolated H2 · no audio. This is a self-contained screencast replay, without an encoded video file. Ubuntu/physical USB acceptance is deferred.</p>\n<section><button id=\"play\">Play</button><input id=\"time\" type=\"range\" min=\"0\" max=\"${Math.max(1, Math.ceil(durationMs))}\" step=\"10\" value=\"0\" aria-label=\"Recording position\"><output id=\"clock\"></output></section>\n<img id=\"frame\" alt=\"Recorded USBShield Events browser frame\"><p><small>${frames.length} captured frames. Login/password phase excluded. ${capReason ? `Capture stopped at ${capReason}; later actions are outside this recording.` : 'Capture ends before logout.'}</small></p></main>\n<script id=\"capture\" type=\"application/json\">${payload}</script>\n<script>\nconst capture=JSON.parse(document.getElementById('capture').textContent);\nconst image=document.getElementById('frame'), seek=document.getElementById('time'), play=document.getElementById('play'), clock=document.getElementById('clock');\nlet position=0, playing=false, anchor=0, anchorPosition=0, shown=-1;\nfunction draw(){let i=0;while(i+1<capture.frames.length&&capture.frames[i+1].t<=position)i++;if(shown!==i){image.src=capture.frames[i].src;shown=i;}seek.value=String(position);clock.textContent=(position/1000).toFixed(1)+' / '+(capture.durationMs/1000).toFixed(1)+' s';}\nfunction tick(now){if(!playing)return;position=Math.min(capture.durationMs,anchorPosition+now-anchor);draw();if(position>=capture.durationMs){playing=false;play.textContent='Replay';return;}requestAnimationFrame(tick);}\nplay.onclick=()=>{if(playing){playing=false;play.textContent='Play';return;}if(position>=capture.durationMs)position=0;playing=true;anchor=performance.now();anchorPosition=position;play.textContent='Pause';requestAnimationFrame(tick);};\nseek.oninput=()=>{position=Number(seek.value);anchor=performance.now();anchorPosition=position;draw();};draw();\n</script></html>`\n        await writeFile(join(directory, 'replay.html'), html, { flag: 'wx' })\n      }\n      console.log(`RECORDING: ${manifest.status}; ${frames.length} CDP JPEG frames, ${manifest.totalBytes} bytes; ${directory}`)\n      return manifest\n    })()\n    return finishing\n  }\n  return { start, stop }\n})(cdp, socket, \"D:\\\\USBProtection\\\\docs\\\\qa\\\\week4-evidence\\\\2026-10-28\\\\windows-regression\\\\recording\")\n  week4FinishRecording = reason => week4Recorder.stop(reason)\n  socket.addEventListener('message', event => {",
+      "count": 1
+    },
+    {
+      "label": "start recording after successful login and populated Events",
+      "before": "  await screenshot('events-real-http-desktop.png')",
+      "after": "  await week4Recorder.start()\n  await screenshot('events-real-http-desktop.png')",
+      "count": 1
+    },
+    {
+      "label": "stop recording before logout",
+      "before": "  await evaluate(`document.querySelector('[aria-label=\"Đăng xuất\"]').click()`)",
+      "after": "  await week4FinishRecording('before logout')\n  await evaluate(`document.querySelector('[aria-label=\"Đăng xuất\"]').click()`)",
+      "count": 1
+    },
+    {
+      "label": "finish recording before WebSocket cleanup",
+      "before": "} finally {\n  socket?.close()",
+      "after": "} finally {\n  try { await week4FinishRecording('harness cleanup') } catch (error) { console.error('RECORDING FINALIZATION FAILED:', error.message); process.exitCode = 1 }\n  socket?.close()",
+      "count": 1
+    },
+    {
+      "label": "verify process termination before runtime removal",
+      "before": "  for (const child of children.reverse()) {\n    if (child.exitCode !== null || child.signalCode !== null || !child.pid) continue\n    if (process.platform === 'win32') {\n      // Windows Java/Chrome launchers may spawn additional processes.\n      await new Promise(resolveKill => {\n        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, () => resolveKill())\n      })\n    } else child.kill()\n  }\n  await delay(1000)",
+      "after": "  const week4Cleanup = []\n  let week4TerminationConfirmed = true\n  for (const child of children.reverse()) {\n    if (child.exitCode !== null || child.signalCode !== null || !child.pid) continue\n    let killError = null\n    if (process.platform === 'win32') {\n      killError = await new Promise(resolveKill => {\n        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, error => resolveKill(error ? { code: error.code, message: error.message } : null))\n      })\n    } else {\n      try { child.kill() } catch (error) { killError = { message: error.message } }\n    }\n    for (let attempt = 0; attempt < 50 && child.exitCode === null && child.signalCode === null; attempt++) await delay(100)\n    const confirmed = child.exitCode !== null || child.signalCode !== null\n    week4Cleanup.push({ pid: child.pid, killError, exitCode: child.exitCode, signalCode: child.signalCode, confirmed })\n    if (!confirmed) week4TerminationConfirmed = false\n  }\n  // A taskkill error for a child whose exit is confirmed is not a test failure.\n  if (!week4TerminationConfirmed) {\n    console.error('CLEANUP: child termination unconfirmed; retaining ignored runtime:', runtime)\n    process.exitCode = 1\n  }\n  await writeFile(join(\"D:\\\\USBProtection\\\\docs\\\\qa\\\\week4-evidence\\\\2026-10-28\\\\windows-regression\\\\recording\", 'cleanup.json'), JSON.stringify({ terminationConfirmed: week4TerminationConfirmed, runtimeRetained: !week4TerminationConfirmed, children: week4Cleanup }, null, 2) + '\\n', { flag: 'wx' })",
+      "count": 1
+    },
+    {
+      "label": "retain runtime when process exit is unconfirmed",
+      "before": "  await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })",
+      "after": "  if (week4TerminationConfirmed) {\n  await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })\n  }",
+      "count": 1
+    }
+  ],
+  "recordingRequested": true,
+  "scope": "Packaged JAR same-origin Events browser regression, Windows synthetic HTTP/H2 input; no actual Agent/USBGuard/physical USB/Ubuntu claim.",
+  "recording": "Optional actual CDP JPEG screencast plus capture timeline and self-contained replay; no encoded video or audio. Login/password phase excluded.",
+  "startedAt": "2026-10-28T13:00:43.443Z",
+  "recordingResult": {
+    "status": "CAPTURED",
+    "frameCount": 207,
+    "totalBytes": 6764775,
+    "capped": false,
+    "errors": [],
+    "suppressedErrorCount": 0
+  },
+  "exitCode": 0,
+  "signal": null,
+  "originalSourceUnchangedAfterRun": true,
+  "endedAt": "2026-10-28T13:01:23.727Z"
+}

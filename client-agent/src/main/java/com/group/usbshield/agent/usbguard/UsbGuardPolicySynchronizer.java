@@ -1,6 +1,7 @@
 package com.group.usbshield.agent.usbguard;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -25,7 +26,11 @@ public class UsbGuardPolicySynchronizer {
         Objects.requireNonNull(desiredWhitelist, "desiredWhitelist");
         Map<String, DeviceFingerprint> desired = new LinkedHashMap<>();
         for (DeviceFingerprint fingerprint : desiredWhitelist) {
-            desired.put(builder.key(fingerprint), fingerprint);
+            String key = builder.key(fingerprint);
+            DeviceFingerprint existing = desired.putIfAbsent(key, fingerprint);
+            if (existing != null && !builder.allowRule(existing).equals(builder.allowRule(fingerprint))) {
+                throw new IllegalArgumentException("Conflicting whitelist definitions for identity: " + key);
+            }
         }
 
         requireBlockedDefault();
@@ -33,16 +38,20 @@ public class UsbGuardPolicySynchronizer {
         requireBaseRule(before);
         Map<String, UsbGuardRuleInfo> current = managedRules(before);
         requireNoForeignConflict(before, desired.keySet(), current.keySet());
+        requireSafeRuleOrder(before, desired);
 
-        Set<String> previouslyManaged = Set.copyOf(current.keySet());
+        Set<String> appendAttempted = new LinkedHashSet<>();
         try {
             for (Map.Entry<String, UsbGuardRuleInfo> entry : current.entrySet()) {
-                if (!desired.containsKey(entry.getKey())) {
+                DeviceFingerprint wanted = desired.get(entry.getKey());
+                if (wanted == null || !matchesDefinition(entry.getValue(), wanted)) {
                     requireSuccess(runner.run("remove-rule", Long.toString(entry.getValue().ruleId())), "remove-rule");
                 }
             }
             for (Map.Entry<String, DeviceFingerprint> entry : desired.entrySet()) {
-                if (!current.containsKey(entry.getKey())) {
+                UsbGuardRuleInfo present = current.get(entry.getKey());
+                if (present == null || !matchesDefinition(present, entry.getValue())) {
+                    appendAttempted.add(entry.getKey());
                     requireSuccess(runner.run("append-rule", builder.allowRule(entry.getValue())), "append-rule");
                 }
             }
@@ -54,11 +63,17 @@ public class UsbGuardPolicySynchronizer {
             if (!actual.keySet().equals(desired.keySet())) {
                 throw new IllegalStateException("USBGuard reconcile verification failed");
             }
+            for (Map.Entry<String, DeviceFingerprint> entry : desired.entrySet()) {
+                if (!matchesDefinition(actual.get(entry.getKey()), entry.getValue())) {
+                    throw new IllegalStateException("USBGuard rule differs from desired whitelist: " + entry.getKey());
+                }
+            }
             requireNoForeignConflict(after, desired.keySet(), actual.keySet());
+            requireSafeRuleOrder(after, desired);
         } catch (RuntimeException failure) {
-            if (!previouslyManaged.containsAll(desired.keySet())) {
+            if (!appendAttempted.isEmpty()) {
                 try {
-                    removeNewManagedRules(previouslyManaged);
+                    removeAttemptedManagedRules(appendAttempted);
                 } catch (RuntimeException cleanupFailure) {
                     failure.addSuppressed(cleanupFailure);
                 }
@@ -72,12 +87,22 @@ public class UsbGuardPolicySynchronizer {
         reconcile(legacy.stream().map(builder::parseLegacy).toList());
     }
 
-    private void removeNewManagedRules(Set<String> previouslyManaged) {
+    private void removeAttemptedManagedRules(Set<String> attemptedKeys) {
         for (Map.Entry<String, UsbGuardRuleInfo> entry : managedRules(rules()).entrySet()) {
-            if (!previouslyManaged.contains(entry.getKey())) {
+            if (attemptedKeys.contains(entry.getKey())) {
                 requireSuccess(runner.run("remove-rule", Long.toString(entry.getValue().ruleId())), "rollback remove-rule");
             }
         }
+    }
+
+    private boolean matchesDefinition(UsbGuardRuleInfo current, DeviceFingerprint desired) {
+        String raw = current.rawRule();
+        if (raw == null || !raw.contains(":")) {
+            return false;
+        }
+        String actualDefinition = raw.substring(raw.indexOf(':') + 1).strip().replaceAll("\\s+", " ");
+        String desiredDefinition = builder.allowRule(desired).replaceAll("\\s+", " ");
+        return actualDefinition.equals(desiredDefinition);
     }
 
     private void requireBlockedDefault() {
@@ -127,10 +152,73 @@ public class UsbGuardPolicySynchronizer {
                 if (desired.contains(key) || currentManaged.contains(key)) {
                     throw new IllegalStateException("Unmanaged rule conflicts with USBShield whitelist: " + key);
                 }
-            } catch (IllegalArgumentException ignored) {
-                continue;
+            } catch (IllegalArgumentException invalid) {
+                throw new IllegalStateException("Unverifiable foreign USBGuard allow rule: " + rule.ruleId(), invalid);
             }
         }
+    }
+
+    private void requireSafeRuleOrder(List<UsbGuardRuleInfo> rules, Map<String, DeviceFingerprint> desired) {
+        int baseIndex = -1;
+        for (int i = 0; i < rules.size(); i++) {
+            if (rules.get(i).isBaseNonStorageRule()) {
+                baseIndex = i;
+                break;
+            }
+        }
+        if (baseIndex < 0) {
+            throw new IllegalStateException("USBGuard base non-storage rule missing");
+        }
+        for (int i = 0; i < baseIndex; i++) {
+            if (isDeny(rules.get(i))) {
+                throw new IllegalStateException("USBGuard deny rule precedes base non-storage allow rule: "
+                        + rules.get(i).ruleId());
+            }
+        }
+        for (Map.Entry<String, DeviceFingerprint> entry : desired.entrySet()) {
+            int grantIndex = rules.size();
+            for (int i = 0; i < rules.size(); i++) {
+                UsbGuardRuleInfo candidate = rules.get(i);
+                if (isManaged(candidate)
+                        && entry.getKey().equals(builder.key(new DeviceFingerprint(
+                                candidate.vendorId(), candidate.productId(), candidate.serial(), candidate.hash())))
+                        && matchesDefinition(candidate, entry.getValue())) {
+                    grantIndex = i;
+                    break;
+                }
+            }
+            for (int i = 0; i < grantIndex; i++) {
+                UsbGuardRuleInfo candidate = rules.get(i);
+                if (isDeny(candidate) && mightOverlap(candidate, entry.getValue())) {
+                    throw new IllegalStateException("USBGuard deny rule may precede desired grant: "
+                            + candidate.ruleId());
+                }
+            }
+        }
+    }
+
+    private static boolean isDeny(UsbGuardRuleInfo rule) {
+        return "block".equalsIgnoreCase(rule.target()) || "reject".equalsIgnoreCase(rule.target());
+    }
+
+    private static boolean mightOverlap(UsbGuardRuleInfo rule, DeviceFingerprint wanted) {
+        if (hasValue(rule.vendorId()) && hasValue(rule.productId())
+                && hasValue(wanted.vendorId()) && hasValue(wanted.productId())
+                && (!rule.vendorId().equalsIgnoreCase(wanted.vendorId())
+                        || !rule.productId().equalsIgnoreCase(wanted.productId()))) {
+            return false;
+        }
+        if (hasValue(rule.hash()) && hasValue(wanted.hash()) && !rule.hash().equals(wanted.hash())) {
+            return false;
+        }
+        if (hasValue(rule.serial()) && hasValue(wanted.serial()) && !rule.serial().equals(wanted.serial())) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean hasValue(String value) {
+        return value != null && !value.isBlank();
     }
 
     private boolean isManaged(UsbGuardRuleInfo rule) {
@@ -145,6 +233,12 @@ public class UsbGuardPolicySynchronizer {
         long parsedManaged = parsed.stream().filter(this::isManaged).count();
         if (rawManaged != parsedManaged) {
             throw new IllegalStateException("Unparseable USBShield-managed rule; refusing policy changes");
+        }
+        long rawRuleHeaders = result.output().lines()
+                .filter(line -> line.matches("(?i)^\\s*\\d+:\\s*(?:allow|block|reject)(?:\\s|$).*"))
+                .count();
+        if (rawRuleHeaders != parsed.size()) {
+            throw new IllegalStateException("Unparseable USBGuard rule; refusing policy changes");
         }
         return parsed;
     }

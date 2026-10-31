@@ -1,0 +1,10 @@
+{
+  "capturedAtBangkok": "2026-10-30T20:49:53.398011+07:00",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "java": "java version \"22.0.2\" 2024-07-16\nJava(TM) SE Runtime Environment (build 22.0.2+9-70)\nJava HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)",
+  "maven": "Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: C:\\maven\nJava version: 22.0.2, vendor: Oracle Corporation, runtime: C:\\Program Files\\Java\\jdk-22\nDefault locale: en_US, platform encoding: UTF-8\nOS name: \"windows 11\", version: \"10.0\", arch: \"amd64\", family: \"windows\"",
+  "node": "v24.22.1",
+  "python": "3.11.7 (main, Dec  7 2023, 09:09:57)  [GCC UCRT 13.2.0 64 bit (AMD64)]",
+  "timezone": "Asia/Bangkok",
+  "scope": "Fresh Agent/static execution only; no browser/Ubuntu run"
+}

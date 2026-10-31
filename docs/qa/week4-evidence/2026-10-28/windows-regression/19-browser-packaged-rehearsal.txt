@@ -1,0 +1,9 @@
+REHEARSAL: prepared frontend\.artifacts\week4-packaged-rehearsal-1c9ca220-f23b-4eba-980c-335600a8fb4e.mjs; original assertions retained: 31; evidence docs\qa\week4-evidence\2026-10-28\windows-regression\recording
+PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.
+PASS: Week 3 HTTP synthetic no-serial storage, UNKNOWN/source timestamp, user-switch history and endpoint A/B isolation (28 persisted events).
+PASS: Endpoint/USB searches accept visible names and IDs with server-side filtering/global pagination; Linux User accepts a case-insensitive part of the username.
+RECORDING: CAPTURED; 207 CDP JPEG frames, 6764775 bytes; D:\USBProtection\docs\qa\week4-evidence\2026-10-28\windows-regression\recording
+PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.
+PASS: browser-injected 403/500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png
+LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.
+REHEARSAL: PASS; recording CAPTURED; docs\qa\week4-evidence\2026-10-28\windows-regression\recording

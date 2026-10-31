@@ -1,0 +1,61 @@
+{
+  "baseRevision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "scope": "Uncommitted M5 documentation and QA tools, separate from unchanged application manifest",
+  "files": [
+    {
+      "path": "docs/DEMO_SCRIPT.md",
+      "bytes": 13251,
+      "sha256": "8a1576c8dfe5f668f06143a85c2fce6b3966d4409af446955cca75c0fe42a399"
+    },
+    {
+      "path": "docs/TEST_PLAN.md",
+      "bytes": 15084,
+      "sha256": "2fbb76746bf5dc3eb19a24f27ec91a26b8b8b974ae1d0bfb0dadeedd54d5b19a"
+    },
+    {
+      "path": "docs/qa/WEEK4_EVENT_HISTORY_REVIEW.md",
+      "bytes": 11217,
+      "sha256": "cceda116208b6507becdd0d683eb19366adac7a36ce76bd5a1657556b9ce5389"
+    },
+    {
+      "path": "docs/qa/WEEK4_RELEASE_VALIDATION.md",
+      "bytes": 11328,
+      "sha256": "76473cfaad322b42c5e2b339f588dcda3ed8b7c21fbb90261ab19386c2d3242c"
+    },
+    {
+      "path": "docs/qa/WEEK4_TEST_INVENTORY.md",
+      "bytes": 31777,
+      "sha256": "b35e9226158e845abbb029562d998ffbd97e5dcc040a1035736d4142ec75fded"
+    },
+    {
+      "path": "docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md",
+      "bytes": 23007,
+      "sha256": "4010501ec71f350f7a0bc8acef35d96c9999ef95845fb39f17844f89b814d9e0"
+    },
+    {
+      "path": "docs/qa/week4-evidence/README.md",
+      "bytes": 1462,
+      "sha256": "bfde1a8766379598b72c6529f514d5898f9793265a18b1ae7b9602e42c2be38c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-28/windows-regression/README.md",
+      "bytes": 6616,
+      "sha256": "c28309b9720843c0c331a89beb35efb8c2b13338b61cc8333c8a91fd5719c042"
+    },
+    {
+      "path": "docs/qa/scripts/capture-week4.mjs",
+      "bytes": 6887,
+      "sha256": "f4fef2c9bb24fbfd3874d6101cc45e3225dbd4b7c93b7dada7558962c4a23c45"
+    },
+    {
+      "path": "docs/qa/scripts/rehearse-week4.mjs",
+      "bytes": 19921,
+      "sha256": "f09fd76f494baaf36251699319e1913ea0d94d765c3115e815915d262502aea1"
+    },
+    {
+      "path": "docs/qa/scripts/validate-week4.py",
+      "bytes": 15481,
+      "sha256": "5649b389d243bd37ffc31c160e88e7f58bb8af127b99a8b142ec3c0b1988ce56"
+    }
+  ]
+}

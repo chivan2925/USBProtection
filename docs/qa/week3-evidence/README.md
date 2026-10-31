@@ -1,17 +1,20 @@
 # Week 3 evidence index — M5
 
-## Current status — 2026-10-24
+## Current status — 2026-10-28
 
-Branch `huy`; tested revision `a0ad421901d5cb67fbe1b27ea9a74c05dfe2c3c1`. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [M5 completion / pending owners](../WEEK3_M5_COMPLETION_20261024.md).
+Branch `huy`; tested revision `39561907ef92f97234f449140bc394ddfe4f30e8`. [Inventory](../WEEK3_TEST_INVENTORY.md), [QA summary](../WEEK3_QA_SUMMARY.md), [M1 handoff](../../member1/WEEK3_SERVER_HARDENING.md), [M3 persistence closure](../WEEK3_M5_M3_PERSISTENCE_CLOSURE_20261028.md), [previous M3 follow-up](../WEEK3_M5_M3_FOLLOWUP_20261027.md).
 
-- [Integrated regression commands](2026-10-24/integrated-regression/README.md): 21 attempts; 16 positive checks PASS, four resolved Git Bash launch failures, one reproduced negative staging FAIL (M5-W3-06). Frontend **96**, server **26**, Agent **117**, separate policy HTTP **1**, fixture/management/Events/packaged-JAR browser, install/lint/build, static and shell checks.
+- [M3 persistence/ACK closure](2026-10-28/m3-persistence-closure/README.md): Agent **127/127**, static verifier with fresh JAR PASS. M5-W3-07 is resolved for Windows unit/mock scope; [validation](2026-10-28/m3-persistence-closure/VALIDATION.md).
+- [M3 follow-up evidence](2026-10-27/m3-followup/README.md): Agent **122/122**, staging verifier **3/3**, static verifier with JAR and four shell parsers PASS. M5-W3-06 is resolved; the later persistence closure supersedes its then-open M5-W3-07 status.
+- [M1 handoff](../../member1/WEEK3_SERVER_HARDENING.md): H01 is acknowledged for Windows scope. It adds no executable source delta from the tested revision, so no test rerun is required; deployment secret rotation/re-enrollment remains external and **NOT VERIFIED**.
+- [Integrated regression commands](2026-10-24/integrated-regression/README.md): previous frontend/server/browser baseline, still applicable because those sources did not change in the M3 pull. Frontend **96**, server **26**, Agent then **117**, separate policy HTTP **1**.
 - [Environment](2026-10-24/integrated-regression/environment.json), [source manifest](2026-10-24/integrated-regression/sources/117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6.json), [JUnit summary](2026-10-24/integrated-regression/junit-summary.json), [validation/artifacts](2026-10-24/integrated-regression/validation.json). Source SHA-256 `117de4465bd08ad8604fe940475e1699ba8cb539c060f6bfb8316f0c3b7b6fd6`.
-- [Staging negative probe](2026-10-24/integrated-regression/staging-probe.json): absent directory still produces exit 0/PASS. The assertion is FAIL; this is not package or staging success.
+- [Historical staging negative probe](2026-10-24/integrated-regression/staging-probe.json): recorded the defect that M3 resolved and M5 retested on 27/10.
 - [Packaged browser provenance](2026-10-24/integrated-regression/packaged-browser-variant.json), [screenshot hashes/command attribution](2026-10-24/integrated-regression/screenshots.json), [desktop](2026-10-24/integrated-regression/screenshots/events-real-http-desktop.png), [partial username](2026-10-24/integrated-regression/screenshots/events-username-substring.png), [mobile](2026-10-24/integrated-regression/screenshots/events-real-http-mobile.png), [UNKNOWN/no-serial](2026-10-24/integrated-regression/screenshots/events-week3-unknown-no-serial.png), [session expiry](2026-10-24/integrated-regression/screenshots/m4-live-expired-session.png).
 
-Each command has a UTF-8 text log and adjacent JSON with argv/cwd/revision/start/end +07:00/scope/source manifest/exit. Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3, Vite 8.3.1, Chrome. Synthetic HTTP/ACK, unit/mock/static and default-profile packaged browser results do not prove Ubuntu/USB/GUI/production HTTPS behavior. QA H2/runtime are isolated; application DB is not used.
+The 24/10 command captures each have a UTF-8 text log and adjacent JSON with argv/cwd/revision/start/end +07:00/scope/source manifest/exit; the 27/10 M3 follow-up has its scoped command/result index and validation record. Windows 11 amd64, JDK 22.0.2, Maven 3.9.11, Node 22.20.0, npm 10.9.3, Vite 8.3.1, Chrome. Synthetic HTTP/ACK, unit/mock/static and default-profile packaged browser results do not prove Ubuntu/USB/GUI/production HTTPS behavior. QA H2/runtime are isolated; application DB is not used.
 
-**M5 Windows QA work complete; group gate OPEN; M3 verifier issue OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
+**M5 Windows QA work complete; H01 M1 acknowledged for Windows scope; M5-W3-06 and M5-W3-07 resolved; H02 M4 DONE (owner acknowledged 2026-10-28); M3 package provenance and H05 group gate OPEN; U01–U09 NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4.** No `.deb` artifact/staging was found: NOT BUILT / NOT VERIFIED.
 
 ## Previous captures retained
 

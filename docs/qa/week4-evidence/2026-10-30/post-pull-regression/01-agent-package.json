@@ -1,0 +1,293 @@
+{
+  "id": "01-agent-package",
+  "scope": "Post-pull Agent unit/mock regression, including new M2 Week4 watch stress suite; no native Ubuntu execution",
+  "revision": "751387bf166c528326ae91c6a16a820a6d8fc24a",
+  "revisionAfter": "751387bf166c528326ae91c6a16a820a6d8fc24a",
+  "sourceTreeSHA256": "21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715",
+  "sourceTreeSHA256After": "21318e741b1571ab31b887a969d05e10e462490063f686403b33098f79173715",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\maven\\bin\\mvn.cmd",
+  "args": [
+    "-o",
+    "-B",
+    "-f",
+    "client-agent/pom.xml",
+    "clean",
+    "package"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-Command",
+      "& 'C:\\maven\\bin\\mvn.cmd' '-o' '-B' '-f' 'client-agent/pom.xml' 'clean' 'package'; exit $LASTEXITCODE"
+    ]
+  },
+  "startedAt": "2026-10-30T13:41:28.333Z",
+  "endedAt": "2026-10-30T13:42:05.398Z",
+  "startedAtBangkok": "2026-10-30 20:41:28 +07:00",
+  "endedAtBangkok": "2026-10-30 20:42:05 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "46ab59eaa0cc1cd1f5aee28ffa02798124d5148b6b0ad981e4900bc421add473",
+  "screenshots": [],
+  "junit": [
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.ClientAgentTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "1951636bd5dc7dea24f1bd28670ccc7a5145e10532ff48132b841475c3cc6941"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.endpoint.EndpointManagerTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "bd0862da9162a48e0367230915ad3d8d6fe840e32bb0097105e8cd26a619dc44"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.event.EventSenderServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "4d529122d6db2a7185a0b92f303295b974cd4bc9d833a75a4adfe4e4100b1971"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.event.UsbEventEnricherTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "69d6c3c514836c6d338cc088df68eebd239563f7a8c147dce26482c10a5f7986"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.notification.BlockNotificationPolicyTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "d8ee9922dc3c8c58e4a6187e1de34626641a86be6f15471510843abcd7007327"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.notification.DesktopNotificationServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "230e13d92488e31cae3440f0cae7819dcde4928b92d4600e6410dfc98888c7ef"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.notification.Week3NotificationPolicyTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "7f0535e5d4ae4e9e0a46a2f49e1339d9cbd1bdef6c03919124bedd8ae972bf87"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.outbox.OutboxSpoolServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "0624bdaf758678dd4369a79f3add9e9bb71302eaeae58bcf0eccde94bbd66574"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.session.ActiveUserInfoTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "f5a84b306076002f4fce483450919d7c414f6f60edd659773ed32dc09d41e752"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.session.LinuxActiveUserResolverTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "8ad3966f13be3119baf5437378f40cd3aa985ee9835eaf2277e21033a548107a"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.session.LoginctlActiveUserResolverTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "b35055bbb03f3df5ae57847a7a016202c385f51d3de256bd6552c1a5efbce0a5"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.session.Week3ActiveSessionTransitionTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "4574c48579c5fdf2f3e2ad3bcbe3ace0050a6c84aa9141fd67b7c6d8450883e9"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.sync.AdminServerClientContractTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "adfbaf4aefd90d83133eedc44beff55b38f6c36da05059ba527bc29ce59d4c75"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.sync.HeartbeatCoordinatorTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "902b79c44af9649a5535281c7be9b7370e9f765ba251de3d7f2daa5ae8f4dcba"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.sync.PolicyAckRecoveryTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "5815720bf142cd53e6fc6a871f2d5fa9e25cf0d0129e5459b4fee65d9675779c"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.sync.PolicySyncServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "83a783c07bb075a104f7578addb87de65d8b8258a790bea342cbda7ad9ada4d3"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbDeviceInfoTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "a3e168a33bc160506f477348dfdcc6d80f624e77d65e17c445eb972c9a6485c5"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardEventListenerTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "1083390f00ca1922260e23c720b040be28700caf50a24aacd15b2475edc056c0"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardEventParserTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "e6a5489d78a5e3514a85936c5eed4cc0bae977a72d9f044aa65a0d9e849c2c33"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardOutputParserTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "2f823cec70ddc5763a2b9082f8270823513c1eada0b33755e556ff42e426a3b7"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardPolicySynchronizerTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "eb552219f8df2eba2c31aa7490d27b39d4618f8ed1ae5e9196f6bf2b121b8718"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardPresenceParserTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "57cb15748cfca3551da0293a5a20553dd0c0fc3ab72adb1cdc8b9ac8ed88cede"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3CloseoutAuditTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "90083ee51aab03fe7e5d115f24bed0acc06b19d798da95a46969f68c3a08abea"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3ParsingAndIdentityTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "e685dee5ea6323299def9d64d71eb5f615deed3fdf99b1cc9a63da71e2d7a06b"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3PolicyAndGatewayTest",
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "650705183dacd6b0a49711cf77f2901afbc1fb38c5c175b24a8250aa58f2a723"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek3WatchRecoveryTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "795de7d5b1954906438642afad0dce5f890a1f178aeb130685aa54235c88378c"
+    },
+    {
+      "module": "client-agent",
+      "name": "com.group.usbshield.agent.usbguard.UsbGuardWeek4WatchStressTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "eb5fe352f4e8d18f8d51bcb36b280c83f217f2f441666877f3630e60fccdac8c"
+    }
+  ],
+  "buildArtifacts": [
+    {
+      "path": "client-agent/target/usbshield-agent.jar",
+      "sha256": "26f8d74b450c399a798a9cbc7a0c0fc34d7a80cb34960e34a21c176c74d6e5d9",
+      "bytes": 20175259,
+      "modifiedAt": "2026-10-30T13:42:05.100Z"
+    }
+  ],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-10-30/post-pull-regression"
+}

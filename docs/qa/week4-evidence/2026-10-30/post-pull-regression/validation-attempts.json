@@ -1,0 +1,13 @@
+{
+  "scope": "Evidence utility validation attempts, separate from application test outcomes",
+  "attempts": [
+    {
+      "date": "2026-10-30",
+      "exitCode": 1,
+      "observedError": "Initial scope lookup assumed .github was tracked; Git reports it is only present on disk",
+      "resolution": "Use git ls-tree to record absent scopes explicitly and verify both revisions agree; no CI source/execution claim",
+      "applicationTestFailure": false
+    }
+  ],
+  "finalResult": "See validation.json for the actual successful validation result"
+}

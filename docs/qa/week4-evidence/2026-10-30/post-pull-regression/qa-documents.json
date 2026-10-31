@@ -1,0 +1,78 @@
+{
+  "baseRevision": "751387bf166c528326ae91c6a16a820a6d8fc24a",
+  "scope": "Current working-tree QA documents/tools; raw and LF-normalized hashes, separate from source evidence",
+  "files": [
+    {
+      "path": "docs/TEST_PLAN.md",
+      "bytes": 18719,
+      "sha256": "ec42842a16a9123883bec2c5bc1249483b090d3b2a27c16fbc472f958e62d094",
+      "lfNormalizedSHA256": "435ecca282bd27f9f93bce298ab87b53440a7640d8ad2e09c369de2691206b4c"
+    },
+    {
+      "path": "docs/DEMO_SCRIPT.md",
+      "bytes": 14760,
+      "sha256": "ed7f3b7d84bdf746a67a6f384a8f4bfa6f53184d9dad8001d10aa28f9ad1402e",
+      "lfNormalizedSHA256": "ed7f3b7d84bdf746a67a6f384a8f4bfa6f53184d9dad8001d10aa28f9ad1402e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/README.md",
+      "bytes": 2176,
+      "sha256": "208649ee4359ed2631db2c0b79669021fb1fc0b2694786e2560f49ad82e76995",
+      "lfNormalizedSHA256": "208649ee4359ed2631db2c0b79669021fb1fc0b2694786e2560f49ad82e76995"
+    },
+    {
+      "path": "docs/qa/evidence/M5_WEEK4_POST_PULL_ACK_20261030.md",
+      "bytes": 7916,
+      "sha256": "bd010b00980623440a8263e6c30bceba7d8f2b9866036c5f01034cfcfbc21e68",
+      "lfNormalizedSHA256": "bd010b00980623440a8263e6c30bceba7d8f2b9866036c5f01034cfcfbc21e68"
+    },
+    {
+      "path": "docs/qa/evidence/M4_WEEK4_HANDOFF.md",
+      "bytes": 2112,
+      "sha256": "441f92bc7e14338afde69c903e9dde3010e88c939ad962b3a817f40c028a6ec6",
+      "lfNormalizedSHA256": "7a936d844ff65288f345928ead4f5a00e0693f6ad79268fe8920edacf1ffe36c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-30/post-pull-regression/README.md",
+      "bytes": 4923,
+      "sha256": "09d4efc007c15092c5d4e58f5466707b1c2f197410d3eb747f85fd99d22c29cf",
+      "lfNormalizedSHA256": "09d4efc007c15092c5d4e58f5466707b1c2f197410d3eb747f85fd99d22c29cf"
+    },
+    {
+      "path": "docs/qa/WEEK4_EVENT_HISTORY_REVIEW.md",
+      "bytes": 13563,
+      "sha256": "8c69ff1362298b29a1e80f11914b1fed11a46b5824bc17a728e53ec1d40d8449",
+      "lfNormalizedSHA256": "8c69ff1362298b29a1e80f11914b1fed11a46b5824bc17a728e53ec1d40d8449"
+    },
+    {
+      "path": "docs/qa/WEEK4_RELEASE_VALIDATION.md",
+      "bytes": 15190,
+      "sha256": "ee2cbadfb044671789877427c48d3998ca3c9bcda2eacdf3d6973e706fa7b812",
+      "lfNormalizedSHA256": "ee2cbadfb044671789877427c48d3998ca3c9bcda2eacdf3d6973e706fa7b812"
+    },
+    {
+      "path": "docs/qa/WEEK4_TEST_INVENTORY.md",
+      "bytes": 39946,
+      "sha256": "d6a2ca98727463ac5efbc1c2cbbdb743e84fc5f2ed7e2378bc2335138e77be3d",
+      "lfNormalizedSHA256": "d6a2ca98727463ac5efbc1c2cbbdb743e84fc5f2ed7e2378bc2335138e77be3d"
+    },
+    {
+      "path": "docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md",
+      "bytes": 25235,
+      "sha256": "0d8e2a62d3528b6b7a7fcf68b6b5091faac5405628129a9a6ac631baa0bd4092",
+      "lfNormalizedSHA256": "0d8e2a62d3528b6b7a7fcf68b6b5091faac5405628129a9a6ac631baa0bd4092"
+    },
+    {
+      "path": "docs/qa/scripts/capture-week4.mjs",
+      "bytes": 8523,
+      "sha256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+      "lfNormalizedSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8"
+    },
+    {
+      "path": "docs/qa/scripts/validate-week4-post-pull.py",
+      "bytes": 10640,
+      "sha256": "78bafb146069ce606965bc999979eeedee3bfbf9faea80bb50e61b44bfea5471",
+      "lfNormalizedSHA256": "78bafb146069ce606965bc999979eeedee3bfbf9faea80bb50e61b44bfea5471"
+    }
+  ]
+}

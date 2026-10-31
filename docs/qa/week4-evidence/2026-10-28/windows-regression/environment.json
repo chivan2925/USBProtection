@@ -1,0 +1,22 @@
+{
+  "capturedAtBangkok": "2026-10-28T20:07:34.221422+07:00",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "architecture": "AMD64",
+  "java": "java version \"22.0.2\" 2024-07-16\nJava(TM) SE Runtime Environment (build 22.0.2+9-70)\nJava HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)",
+  "maven": "Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)\nMaven home: C:\\maven\nJava version: 22.0.2, vendor: Oracle Corporation, runtime: C:\\Program Files\\Java\\jdk-22\nDefault locale: en_US, platform encoding: UTF-8\nOS name: \"windows 11\", version: \"10.0\", arch: \"amd64\", family: \"windows\"",
+  "node": "v24.22.1",
+  "npm": "11.19.1",
+  "chromium": "156.0.8078.49",
+  "timezone": "Asia/Bangkok",
+  "sourceRevision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "sourceTreeSHA256": "40b49888fa950c01ecc1381702e6f3ca15d95370b55319b614be2a12dcb3c759",
+  "registryAudit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "privacy": "Only selected tool versions are captured; no environment secret dump or deployment accounts."
+}
