@@ -1,0 +1,187 @@
+{
+  "status": "PASS",
+  "revision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "startedAt": "2026-10-31T15:49:49.437321+00:00",
+  "startedAtBangkok": "2026-10-31T22:49:49.437321+07:00",
+  "jar": {
+    "path": "client-agent/target/usbshield-agent.jar",
+    "bytes": 20177551,
+    "sha256": "06e96129d308fd1bfb059d0885c8f2f378772cfeba76e24d649d8d3f43430a30"
+  },
+  "harness": {
+    "path": "docs/qa/scripts/AgentHttpTransportSmoke.java",
+    "bytes": 18518,
+    "sha256": "d7ec5f63b9f7b7c649acf41e5e5e4a758c1ea7071ea0f8e38e7be96c38abe303"
+  },
+  "runner": {
+    "path": "docs/qa/scripts/run-agent-http-smoke.py",
+    "bytes": 8205,
+    "sha256": "b0f6828550b2acbf6d9906b7d48ed3f4c49f9c04eeccde97ca7ace59b7620801"
+  },
+  "assertionCount": 255,
+  "exitCode": 0,
+  "scope": "Production AdminServerClient constructor over real loopback HTTP to a controlled JDK HttpServer; synthetic credentials/data. Not real Admin Server/Spring Security, retry scheduler, USBGuard, physical USB, Ubuntu or GUI acceptance.",
+  "runtimeDirectory": "client-agent/target/qa-http-629hair9",
+  "runtimeRetained": true,
+  "extraction": {
+    "fileCount": 104,
+    "bytes": 20101563,
+    "source": "Built Agent BOOT-INF/classes and BOOT-INF/lib only"
+  },
+  "java": {
+    "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+    "version": "java version \"22.0.2\" 2024-07-16\nJava(TM) SE Runtime Environment (build 22.0.2+9-70)\nJava HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)"
+  },
+  "launch": {
+    "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+    "args": [
+      "--add-modules",
+      "jdk.httpserver",
+      "-Dlogback.configurationFile=D:\\USBProtection\\client-agent\\target\\qa-http-629hair9\\logback-qa.xml",
+      "-cp",
+      "D:\\USBProtection\\client-agent\\target\\qa-http-629hair9\\classes;D:\\USBProtection\\client-agent\\target\\qa-http-629hair9\\lib\\*",
+      "D:\\USBProtection\\docs\\qa\\scripts\\AgentHttpTransportSmoke.java",
+      "D:\\USBProtection\\client-agent\\target\\qa-http-629hair9\\java-result.json"
+    ],
+    "cwd": "D:\\USBProtection",
+    "timeoutSeconds": 90
+  },
+  "javaStdoutSHA256": "8a32c8752f6df9a25208c5ca7970b0b70a04ef64b33e27db8751b41a8a7743b4",
+  "javaStderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "javaResult": {
+    "constructor": "AdminServerClient(AgentProperties)",
+    "scope": "Real loopback HTTP using production client and controlled JDK HttpServer; synthetic credentials/data. No real Admin Server/Spring Security, retry scheduler, USBGuard, USB, Ubuntu or GUI execution.",
+    "startedAt": "2026-10-31T15:49:53.367511400Z",
+    "status": "PASS",
+    "endedAt": "2026-10-31T15:49:54.104886700Z",
+    "assertionCount": 255,
+    "requestCount": 14,
+    "scenarioCount": 15,
+    "scenarios": [
+      {
+        "name": "enroll",
+        "method": "POST",
+        "path": "/api/agent/enroll",
+        "expectedHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 18
+      },
+      {
+        "name": "heartbeat",
+        "method": "POST",
+        "path": "/api/agent/heartbeat",
+        "expectedHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 17
+      },
+      {
+        "name": "policy",
+        "method": "GET",
+        "path": "/api/agent/policy",
+        "expectedHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 16
+      },
+      {
+        "name": "ack",
+        "method": "POST",
+        "path": "/api/agent/policy/ack",
+        "expectedHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 17
+      },
+      {
+        "name": "event",
+        "method": "POST",
+        "path": "/api/agent/events",
+        "expectedHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 23
+      },
+      {
+        "name": "heartbeat-rejected-token",
+        "method": "POST",
+        "path": "/api/agent/heartbeat",
+        "expectedHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 16
+      },
+      {
+        "name": "policy-rejected-token",
+        "method": "GET",
+        "path": "/api/agent/policy",
+        "expectedHttpStatus": 403,
+        "status": "PASS",
+        "assertionCount": 13
+      },
+      {
+        "name": "ack-rejected-token",
+        "method": "POST",
+        "path": "/api/agent/policy/ack",
+        "expectedHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 17
+      },
+      {
+        "name": "event-rejected-token",
+        "method": "POST",
+        "path": "/api/agent/events",
+        "expectedHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 23
+      },
+      {
+        "name": "future-ack",
+        "method": "POST",
+        "path": "/api/agent/policy/ack",
+        "expectedHttpStatus": 409,
+        "status": "PASS",
+        "assertionCount": 17
+      },
+      {
+        "name": "policy-503",
+        "method": "GET",
+        "path": "/api/agent/policy",
+        "expectedHttpStatus": 503,
+        "status": "PASS",
+        "assertionCount": 13
+      },
+      {
+        "name": "policy-recovery",
+        "method": "GET",
+        "path": "/api/agent/policy",
+        "expectedHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 16
+      },
+      {
+        "name": "event-503",
+        "method": "POST",
+        "path": "/api/agent/events",
+        "expectedHttpStatus": 503,
+        "status": "PASS",
+        "assertionCount": 23
+      },
+      {
+        "name": "event-recovery",
+        "method": "POST",
+        "path": "/api/agent/events",
+        "expectedHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 23
+      },
+      {
+        "status": "PASS",
+        "name": "connection-refused-after-stop",
+        "assertionCount": 2
+      }
+    ],
+    "instantWireTypes": {
+      "ack.appliedAt": "NUMBER",
+      "event.occurredAt": "NUMBER"
+    }
+  },
+  "revisionAfter": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "endedAt": "2026-10-31T15:49:54.288248+00:00",
+  "durationSeconds": 4.812
+}

@@ -1,0 +1,49 @@
+{
+  "id": "04-staging-integrity",
+  "scope": "Independent full-byte comparison of all nine staged files against current source and freshly built JAR; no POSIX-mode claim",
+  "revision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "revisionAfter": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "sourceTreeSHA256": "3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a",
+  "sourceTreeSHA256After": "3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+  "args": [
+    "docs/qa/scripts/validate-week4-post-pull.py",
+    "--run-dir",
+    "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging",
+    "--baseline",
+    "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+    "--profile",
+    "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/run-spec.json",
+    "--stage-only"
+  ],
+  "launch": {
+    "exe": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/validate-week4-post-pull.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging",
+      "--baseline",
+      "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+      "--profile",
+      "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/run-spec.json",
+      "--stage-only"
+    ]
+  },
+  "startedAt": "2026-10-31T15:45:01.896Z",
+  "endedAt": "2026-10-31T15:45:04.771Z",
+  "startedAtBangkok": "2026-10-31 22:45:01 +07:00",
+  "endedAtBangkok": "2026-10-31 22:45:04 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "c7bfaf36c6e5d5bea0cf7ae772a0816914ec4f0fa516e13cca0d8e391c0ff742",
+  "screenshots": [],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging"
+}

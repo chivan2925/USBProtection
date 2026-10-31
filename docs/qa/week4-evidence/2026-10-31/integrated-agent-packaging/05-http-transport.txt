@@ -1,0 +1,1 @@
+{"status": "FAIL", "assertionCount": 66, "exitCode": 1, "summary": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/http-transport-summary.json"}

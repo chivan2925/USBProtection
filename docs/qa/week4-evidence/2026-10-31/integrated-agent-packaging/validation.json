@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "validatedAtBangkok": "2026-10-31T22:54:15.522220+07:00",
+  "revision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "sourceTreeSHA256": "3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a",
+  "command": {
+    "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/validate-week4-post-pull.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging",
+      "--baseline",
+      "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+      "--profile",
+      "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/run-spec.json"
+    ],
+    "cwd": "D:\\USBProtection"
+  },
+  "validatorSHA256": "099b94d158578f4efb495bf2f27a1b2b44334e3e63904bcb5fdf09326d3dea15",
+  "successfulChecks": 5,
+  "retainedFailedCaptures": [
+    "05-http-transport"
+  ],
+  "agentTests": {
+    "tests": 156,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "newWatchTests": 9,
+  "staticJarCheck": "PASS",
+  "requiredSuites": {
+    "UsbGuardWeek4WatchStressTest": 9,
+    "UsbGuardWeek4PolicyIntegrityTest": 12,
+    "Week4ActiveSessionSafetyTest": 8
+  },
+  "stagingFilesByteEqual": 9,
+  "productionHttpAssertions": 255,
+  "unchangedSourceScopes": [
+    "frontend",
+    "admin-server"
+  ],
+  "absentScopesAtBothRevisions": [
+    ".github"
+  ],
+  "m4FrontendSourceEquivalent": true,
+  "historicalEvidenceUnchanged": true,
+  "brokenLinks": [],
+  "newScreenshotsOrRecording": false,
+  "scope": "Affected post-pull Windows regression; final candidate/member acceptance pending; Ubuntu NOT EXECUTED/DEFERRED"
+}

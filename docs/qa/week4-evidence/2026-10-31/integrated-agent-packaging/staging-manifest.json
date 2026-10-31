@@ -1,0 +1,126 @@
+{
+  "status": "PASS",
+  "revision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "verifiedAtBangkok": "2026-10-31T22:54:14.254378+07:00",
+  "files": [
+    {
+      "source": {
+        "path": "packaging/agent-deb/DEBIAN/control",
+        "bytes": 454,
+        "sha256": "027e56de601420dde55ded3ff459697b964f63440a9a962cb55b91069ebb9320"
+      },
+      "staged": {
+        "path": "packaging/staging/DEBIAN/control",
+        "bytes": 454,
+        "sha256": "027e56de601420dde55ded3ff459697b964f63440a9a962cb55b91069ebb9320"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "packaging/agent-deb/DEBIAN/postinst",
+        "bytes": 3455,
+        "sha256": "4e55c031adaf4ac9904c5d3a441eac472025c6c2ccc90d6dfd012a69d0ef2f41"
+      },
+      "staged": {
+        "path": "packaging/staging/DEBIAN/postinst",
+        "bytes": 3455,
+        "sha256": "4e55c031adaf4ac9904c5d3a441eac472025c6c2ccc90d6dfd012a69d0ef2f41"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "packaging/agent-deb/DEBIAN/prerm",
+        "bytes": 601,
+        "sha256": "59bda2b53a89d68a08f614a2542968d8fd17411521b0c30dc722eb45523b0d5d"
+      },
+      "staged": {
+        "path": "packaging/staging/DEBIAN/prerm",
+        "bytes": 601,
+        "sha256": "59bda2b53a89d68a08f614a2542968d8fd17411521b0c30dc722eb45523b0d5d"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "client-agent/target/usbshield-agent.jar",
+        "bytes": 20177551,
+        "sha256": "06e96129d308fd1bfb059d0885c8f2f378772cfeba76e24d649d8d3f43430a30"
+      },
+      "staged": {
+        "path": "packaging/staging/opt/usbshield-agent/usbshield-agent.jar",
+        "bytes": 20177551,
+        "sha256": "06e96129d308fd1bfb059d0885c8f2f378772cfeba76e24d649d8d3f43430a30"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "packaging/desktop/usbshield-notifier-launcher.sh",
+        "bytes": 1364,
+        "sha256": "283e587b025edb14ec89d70ce24cbe7c9d4e3239393fb564f1ac24814f99dcb9"
+      },
+      "staged": {
+        "path": "packaging/staging/opt/usbshield-agent/usbshield-notifier-launcher.sh",
+        "bytes": 1364,
+        "sha256": "283e587b025edb14ec89d70ce24cbe7c9d4e3239393fb564f1ac24814f99dcb9"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "packaging/agent-deb/etc/usbshield-agent/application.yml",
+        "bytes": 755,
+        "sha256": "4f04a3312239c531924efd3b6a5a651af13dcecba6f7dac42d202202f4f6b5e9"
+      },
+      "staged": {
+        "path": "packaging/staging/etc/usbshield-agent/application.yml",
+        "bytes": 755,
+        "sha256": "4f04a3312239c531924efd3b6a5a651af13dcecba6f7dac42d202202f4f6b5e9"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "packaging/usbguard/rules-v0.1.conf",
+        "bytes": 205,
+        "sha256": "ee1aea40ab2d9b17710056fc2737bc6d02a1df9211f4100b4d164352e69364f5"
+      },
+      "staged": {
+        "path": "packaging/staging/etc/usbshield-agent/rules-v0.1.conf",
+        "bytes": 205,
+        "sha256": "ee1aea40ab2d9b17710056fc2737bc6d02a1df9211f4100b4d164352e69364f5"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "packaging/desktop/usbshield-notifier.desktop",
+        "bytes": 322,
+        "sha256": "4d39ea3c20de8489cbe73bb67ea844a76eba3639155c68aa5443c01852b551f5"
+      },
+      "staged": {
+        "path": "packaging/staging/etc/xdg/autostart/usbshield-notifier.desktop",
+        "bytes": 322,
+        "sha256": "4d39ea3c20de8489cbe73bb67ea844a76eba3639155c68aa5443c01852b551f5"
+      },
+      "byteEqual": true
+    },
+    {
+      "source": {
+        "path": "packaging/systemd/usbshield-agent.service",
+        "bytes": 899,
+        "sha256": "fc5e10fc26891d1a9792aa606386511e81fc9a81dbd2ac66ded5d4a0e820086e"
+      },
+      "staged": {
+        "path": "packaging/staging/usr/lib/systemd/system/usbshield-agent.service",
+        "bytes": 899,
+        "sha256": "fc5e10fc26891d1a9792aa606386511e81fc9a81dbd2ac66ded5d4a0e820086e"
+      },
+      "byteEqual": true
+    }
+  ],
+  "fileCount": 9,
+  "scope": "Windows byte equality against current source/JAR; no POSIX modes, Debian build or Ubuntu install verified"
+}
