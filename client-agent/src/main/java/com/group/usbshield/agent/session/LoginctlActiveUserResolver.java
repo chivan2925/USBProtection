@@ -14,7 +14,8 @@ public class LoginctlActiveUserResolver implements ActiveUserResolver {
     public ActiveUserInfo resolveCurrentActiveUser() {
         try {
             List<String> sessionIds = loginctl.listSessionIds();
-            if (sessionIds == null || sessionIds.stream().anyMatch(Objects::isNull)) {
+            if (sessionIds == null || sessionIds.stream().anyMatch(
+                    id -> id == null || !id.matches("[A-Za-z0-9_-]{1,64}"))) {
                 return ActiveUserInfo.unknown("loginctl-error");
             }
             if (sessionIds.size() != sessionIds.stream().distinct().count()) {

@@ -12,7 +12,7 @@ public record UsbGuardRuleInfo(
         String rawRule
 ) {
     private static final Pattern BASE_NON_STORAGE = Pattern.compile(
-            "^\\s*\\d+:\\s*allow\\s+with-interface\\s+none-of\\s*\\{\\s*08:\\*:\\*\\s*\\}(?:\\s+.*)?$",
+            "^\\s*\\d+:\\s*allow\\s+with-interface\\s+none-of\\s*\\{\\s*08:\\*:\\*\\s*\\}\\s*$",
             Pattern.CASE_INSENSITIVE);
 
     public boolean isBaseNonStorageRule() {
