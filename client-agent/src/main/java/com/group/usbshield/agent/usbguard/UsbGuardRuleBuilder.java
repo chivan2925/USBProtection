@@ -8,6 +8,8 @@ public class UsbGuardRuleBuilder {
     public static final String MARKER = "usbshield-managed";
     private static final Pattern HEX4 = Pattern.compile("[a-fA-F0-9]{4}");
     private static final Pattern SAFE = Pattern.compile("[a-zA-Z0-9+/=_:.\\-]{1,255}");
+    private static final Pattern VID_PID_ONLY = Pattern.compile("[a-fA-F0-9]{4}:[a-fA-F0-9]{4}");
+    private static final Pattern ALPHANUMERIC = Pattern.compile(".*[a-zA-Z0-9].*");
     private static final Pattern ATTRIBUTE = Pattern.compile("(?:id\\s+([0-9a-fA-F]{4}):([0-9a-fA-F]{4})|serial\\s+\"([^\"]*)\"|hash\\s+\"([^\"]*)\")(?=\\s|$)");
 
     public String allowRule(DeviceFingerprint id) {
@@ -19,6 +21,9 @@ public class UsbGuardRuleBuilder {
         boolean serial = valid(id.serial());
         boolean hash = valid(id.hash());
         if (!serial && !hash) throw new IllegalArgumentException("Insufficient USB fingerprint: require hash or serial");
+        if (hash && VID_PID_ONLY.matcher(id.hash()).matches()) {
+            throw new IllegalArgumentException("VID:PID alone is not a USBGuard hash");
+        }
         if (serial && !pair) throw new IllegalArgumentException("serial needs VID/PID");
         StringBuilder rule = new StringBuilder("allow");
         if (pair) rule.append(" id ").append(id.vendorId().toLowerCase(Locale.ROOT)).append(':').append(id.productId().toLowerCase(Locale.ROOT));
@@ -29,7 +34,9 @@ public class UsbGuardRuleBuilder {
 
     private static boolean valid(String value) {
         if (value == null || value.isBlank()) return false;
-        if (!SAFE.matcher(value).matches()) throw new IllegalArgumentException("Unsafe fingerprint attribute");
+        if (!SAFE.matcher(value).matches() || !ALPHANUMERIC.matcher(value).matches()) {
+            throw new IllegalArgumentException("Unsafe or empty-identity fingerprint attribute");
+        }
         return true;
     }
 

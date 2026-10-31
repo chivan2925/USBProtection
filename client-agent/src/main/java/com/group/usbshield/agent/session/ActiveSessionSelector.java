@@ -30,9 +30,10 @@ final class ActiveSessionSelector {
             }
             selected = graphical.getFirst();
         }
-        if (selected.sessionId() == null || selected.sessionId().isBlank()
+        if (selected.sessionId() == null || !selected.sessionId().matches("[A-Za-z0-9_-]{1,64}")
                 || selected.name() == null || selected.name().isBlank()
                 || "UNKNOWN".equalsIgnoreCase(selected.name())
+                || selected.name().chars().anyMatch(Character::isISOControl)
                 || selected.user() == null || !selected.user().matches("[0-9]+")) {
             return ActiveUserInfo.unknown("invalid-session-identity");
         }
