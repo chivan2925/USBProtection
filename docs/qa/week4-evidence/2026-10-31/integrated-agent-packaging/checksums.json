@@ -1,0 +1,131 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/.gitattributes",
+      "bytes": 73,
+      "sha256": "a313af61ba1df9dadb377d8daa6828a444eccf81ffae1dd4834b7f8ddc08cedb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/01-agent-package.json",
+      "bytes": 10045,
+      "sha256": "ce711775ad6528d2f3d728edc655075812ac47f8516767109a4d6ae38c84140e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/01-agent-package.txt",
+      "bytes": 97572,
+      "sha256": "aad74be64d2039d399084f533ebd0e63d2ff89531616e84698929d190b593315"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/02-staging-prepare.json",
+      "bytes": 1481,
+      "sha256": "f093c15508939965a1f518f2daf0056f480301dfc060c2400db07ffa628c677b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/02-staging-prepare.txt",
+      "bytes": 380,
+      "sha256": "02162e94162c3709a1bb9f3fd460302008626dd383537e34bf28360ec5b6663f"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/03-packaging-week4.json",
+      "bytes": 1467,
+      "sha256": "0b6b35097281a47df2f6a993e4157071a73fa60b867da70a97a5fe0fe42a8a49"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/03-packaging-week4.txt",
+      "bytes": 6776,
+      "sha256": "3b82082fd422a5597de042f421af1c5dc96695c9ffbd493b4fbeadf483161ef4"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/04-staging-integrity.json",
+      "bytes": 1962,
+      "sha256": "064179d4da6351eed188f9bfab899b4e11ffc90cb464ff325ae3830996ad2589"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/04-staging-integrity.txt",
+      "bytes": 48,
+      "sha256": "c7bfaf36c6e5d5bea0cf7ae772a0816914ec4f0fa516e13cca0d8e391c0ff742"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/05-http-transport.json",
+      "bytes": 1575,
+      "sha256": "5dc61917ae389f627cdca5c3ccd36f1707bb9010dc750fa51e70fd5cb0ef67c5"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/05-http-transport.txt",
+      "bytes": 160,
+      "sha256": "20a45b9d776635da1602bd50f885b095870a595bb0aca4bc3fdddb491fe1d273"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/06-http-transport.json",
+      "bytes": 1692,
+      "sha256": "3b4be813e385179ec04430c2b52b31a30f8ee92d4caff44999337d38841b1bb8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/06-http-transport.txt",
+      "bytes": 164,
+      "sha256": "2c8cde2e343f224178a1de7a199ccd99cca2b577e5e5ace4b592f9a75a8a1205"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/build-manifest.json",
+      "bytes": 1041,
+      "sha256": "8c0a07a094aa6c941dee01840c92b71fa5a299146b789f813b167b53efae81ea"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/environment.json",
+      "bytes": 825,
+      "sha256": "8f441c19411aa2b00fa4ce5d356a5426d74b69683d0d85d4239a8cb6e79d9604"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/http-transport-summary-02.json",
+      "bytes": 6222,
+      "sha256": "86928497f66817634f94f759083624daeec766e7283fff2198e80abe80f2a489"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/http-transport-summary.json",
+      "bytes": 3922,
+      "sha256": "555049c1f4e9d0b63695d1bd77943f422b19ef8277e23bce70153e5244c24758"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/junit-summary.json",
+      "bytes": 9212,
+      "sha256": "9f6eacd0fc69b784aef714281194bdf95555a74b0d51f8f7627e003e3e5e522e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/qa-documents.json",
+      "bytes": 4632,
+      "sha256": "507448d91a4fc8a7f5fd5b3f210098b3eddda72fb56bd988f7c1bb781e88e28a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/README.md",
+      "bytes": 7799,
+      "sha256": "228c340f388794b66662e967bbac03f12004ff7f51c405b8a86310bbe7264e01",
+      "lfNormalizedSHA256": "228c340f388794b66662e967bbac03f12004ff7f51c405b8a86310bbe7264e01"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/run-spec.json",
+      "bytes": 3073,
+      "sha256": "62812b6b697f6e23fa591faefa4e7cee4591d39a09cd36a568fd191bbb2e36f1"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/scope-equivalence.json",
+      "bytes": 2735,
+      "sha256": "582fcff3b85cf2f87d23d94ebd5cafc18729ad252fa923aaf4972d3c4113ab67"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/sources/3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a.json",
+      "bytes": 41619,
+      "sha256": "dc24f3366376ce6b8d429d62cf55dddf873c1a2532ebe4aedef21d737bb3f2eb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/staging-manifest.json",
+      "bytes": 4354,
+      "sha256": "556bf2f1c9935afb4460305ab01f4bcc1b71c7a8a2e825d53bf47ac044eca173"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/validation.json",
+      "bytes": 1639,
+      "sha256": "9f050a8a0508d10126fb6d46b650dd41b8c6d6d318545e3669fb3a83bda9afeb"
+    }
+  ]
+}

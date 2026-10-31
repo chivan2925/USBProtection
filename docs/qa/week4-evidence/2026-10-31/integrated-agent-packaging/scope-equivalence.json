@@ -1,0 +1,53 @@
+{
+  "referenceRevision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "currentRevision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "referenceRun": "docs/qa/week4-evidence/2026-10-28/windows-regression",
+  "scopes": [
+    {
+      "scope": "frontend",
+      "referenceTree": "85938291c72c25de0fc7716261440cfe136128e7",
+      "currentTree": "85938291c72c25de0fc7716261440cfe136128e7",
+      "status": "UNCHANGED_SOURCE",
+      "execution": "Historical 28/10 result remains source-applicable; NOT RERUN in this capture"
+    },
+    {
+      "scope": "admin-server",
+      "referenceTree": "38147afb13fd3ac9d0e8aba23ec5d05630751d63",
+      "currentTree": "38147afb13fd3ac9d0e8aba23ec5d05630751d63",
+      "status": "UNCHANGED_SOURCE",
+      "execution": "Historical 28/10 result remains source-applicable; NOT RERUN in this capture"
+    },
+    {
+      "scope": ".github",
+      "referenceTree": null,
+      "currentTree": null,
+      "status": "NO_TRACKED_ENTRY_AT_EITHER_REVISION",
+      "execution": "No tracked CI source or CI execution claimed"
+    }
+  ],
+  "changedSourceScopes": [
+    "client-agent",
+    "packaging"
+  ],
+  "agentAndPackaging": {
+    "changedPaths": [
+      "client-agent/pom.xml",
+      "client-agent/src/main/java/com/group/usbshield/agent/session/ActiveSessionSelector.java",
+      "client-agent/src/main/java/com/group/usbshield/agent/session/LoginctlActiveUserResolver.java",
+      "client-agent/src/main/java/com/group/usbshield/agent/sync/AdminServerClient.java",
+      "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardEventListener.java",
+      "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardPolicySynchronizer.java",
+      "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardRuleBuilder.java",
+      "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardRuleInfo.java",
+      "client-agent/src/test/java/com/group/usbshield/agent/session/Week4ActiveSessionSafetyTest.java",
+      "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek4PolicyIntegrityTest.java",
+      "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek4WatchStressTest.java",
+      "packaging/scripts/prepare-staging.ps1",
+      "packaging/tests/verify-week4-windows.ps1"
+    ],
+    "action": "Fresh checks listed in reviewed run profile; changed packaging is not source-equivalent"
+  },
+  "m4ReviewedRevision": "6127766a1d3b982efa0ad0f9414ff1abc368cbb5",
+  "m4FrontendTreeMatches": true,
+  "limits": "Source equivalence does not redate historical execution, audit, artifact hashes or screenshots; changed future delivery/config requires affected checks."
+}

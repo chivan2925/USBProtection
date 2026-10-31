@@ -1,0 +1,6 @@
+Verified generated staging cleanup target: D:\USBProtection\packaging\staging
+=== USBShield Staging Preparation ===
+Creating staging directory tree...
+Copying packaging files into staging...
+=== Staging Directory Prepared Successfully at D:\USBProtection\packaging\staging ===
+PASS: guarded staging preparation; all 9 required files exist. Byte equality is verified separately.

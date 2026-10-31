@@ -1,0 +1,105 @@
+{
+  "baseRevision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "scope": "Current working-tree QA documents/tools; raw and LF-normalized hashes, separate from source evidence",
+  "files": [
+    {
+      "path": "docs/TEST_PLAN.md",
+      "bytes": 23746,
+      "sha256": "83d26b128266e83e26675957acf8fdca7c1d15519f8ae4a9ca2cc6e5583263dd",
+      "lfNormalizedSHA256": "50c78aade8412f71f4dffbbba29d21029a2b2d0ed32518ed15e2cdfc6afcf3e6"
+    },
+    {
+      "path": "docs/DEMO_SCRIPT.md",
+      "bytes": 16110,
+      "sha256": "9562893b289cdf9de7186e56a15768e15861dd8342a6347c01572b4f79d8335b",
+      "lfNormalizedSHA256": "9562893b289cdf9de7186e56a15768e15861dd8342a6347c01572b4f79d8335b"
+    },
+    {
+      "path": "docs/qa/week4-evidence/README.md",
+      "bytes": 2939,
+      "sha256": "0e1d3b9f50f204dc9da3a6c9525376d37de449ede0506dc757936dda24d693b4",
+      "lfNormalizedSHA256": "0e1d3b9f50f204dc9da3a6c9525376d37de449ede0506dc757936dda24d693b4"
+    },
+    {
+      "path": "docs/qa/evidence/M5_WEEK4_POST_PULL_ACK_20261030.md",
+      "bytes": 7916,
+      "sha256": "bd010b00980623440a8263e6c30bceba7d8f2b9866036c5f01034cfcfbc21e68",
+      "lfNormalizedSHA256": "bd010b00980623440a8263e6c30bceba7d8f2b9866036c5f01034cfcfbc21e68"
+    },
+    {
+      "path": "docs/qa/evidence/M4_WEEK4_HANDOFF.md",
+      "bytes": 2112,
+      "sha256": "441f92bc7e14338afde69c903e9dde3010e88c939ad962b3a817f40c028a6ec6",
+      "lfNormalizedSHA256": "7a936d844ff65288f345928ead4f5a00e0693f6ad79268fe8920edacf1ffe36c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/README.md",
+      "bytes": 7799,
+      "sha256": "228c340f388794b66662e967bbac03f12004ff7f51c405b8a86310bbe7264e01",
+      "lfNormalizedSHA256": "228c340f388794b66662e967bbac03f12004ff7f51c405b8a86310bbe7264e01"
+    },
+    {
+      "path": "docs/qa/WEEK4_EVENT_HISTORY_REVIEW.md",
+      "bytes": 17755,
+      "sha256": "99d9a6aa659e3ea577b92709073ec07f4e9285c81d10300359c45bef479490a4",
+      "lfNormalizedSHA256": "99d9a6aa659e3ea577b92709073ec07f4e9285c81d10300359c45bef479490a4"
+    },
+    {
+      "path": "docs/qa/WEEK4_RELEASE_VALIDATION.md",
+      "bytes": 20059,
+      "sha256": "b56d34c99a375c4777a7a909cbcc78c5332e15d87f7bdc1619eaca698472a9fd",
+      "lfNormalizedSHA256": "b56d34c99a375c4777a7a909cbcc78c5332e15d87f7bdc1619eaca698472a9fd"
+    },
+    {
+      "path": "docs/qa/WEEK4_TEST_INVENTORY.md",
+      "bytes": 51474,
+      "sha256": "db2c61a8ea78e560e7d525393d0d99e56abe03a1b3382597c01c266cc086eeec",
+      "lfNormalizedSHA256": "db2c61a8ea78e560e7d525393d0d99e56abe03a1b3382597c01c266cc086eeec"
+    },
+    {
+      "path": "docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md",
+      "bytes": 29582,
+      "sha256": "c14d445dfbb1af8a9d0bddca708afa6bd434f55101985c54ec63a123a2e71694",
+      "lfNormalizedSHA256": "c14d445dfbb1af8a9d0bddca708afa6bd434f55101985c54ec63a123a2e71694"
+    },
+    {
+      "path": "docs/qa/evidence/M5_WEEK4_M2_M3_ACK_20261031.md",
+      "bytes": 7858,
+      "sha256": "6e8d406f2777fff62571e924d6d37f1e2c189e67a23ae5ac5d5efb93ce6d8ad4",
+      "lfNormalizedSHA256": "6e8d406f2777fff62571e924d6d37f1e2c189e67a23ae5ac5d5efb93ce6d8ad4"
+    },
+    {
+      "path": "docs/qa/scripts/capture-week4.mjs",
+      "bytes": 8523,
+      "sha256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+      "lfNormalizedSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8"
+    },
+    {
+      "path": "docs/qa/scripts/validate-week4-post-pull.py",
+      "bytes": 15306,
+      "sha256": "099b94d158578f4efb495bf2f27a1b2b44334e3e63904bcb5fdf09326d3dea15",
+      "lfNormalizedSHA256": "099b94d158578f4efb495bf2f27a1b2b44334e3e63904bcb5fdf09326d3dea15"
+    },
+    {
+      "path": "docs/qa/scripts/prepare-week4-staging.ps1",
+      "bytes": 2958,
+      "sha256": "4fb2afe8733494edc8b15e02cdfde99924d5949d67b499b5c16ca594374f6295"
+    },
+    {
+      "path": "docs/qa/scripts/AgentHttpTransportSmoke.java",
+      "bytes": 18518,
+      "sha256": "d7ec5f63b9f7b7c649acf41e5e5e4a758c1ea7071ea0f8e38e7be96c38abe303"
+    },
+    {
+      "path": "docs/qa/scripts/run-agent-http-smoke.py",
+      "bytes": 8205,
+      "sha256": "b0f6828550b2acbf6d9906b7d48ed3f4c49f9c04eeccde97ca7ace59b7620801",
+      "lfNormalizedSHA256": "b0f6828550b2acbf6d9906b7d48ed3f4c49f9c04eeccde97ca7ace59b7620801"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/run-spec.json",
+      "bytes": 3073,
+      "sha256": "62812b6b697f6e23fa591faefa4e7cee4591d39a09cd36a568fd191bbb2e36f1"
+    }
+  ]
+}

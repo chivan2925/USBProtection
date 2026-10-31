@@ -1,0 +1,39 @@
+{
+  "id": "05-http-transport",
+  "scope": "Production AdminServerClient constructor over real loopback HTTP with synthetic data; not real backend authentication or Ubuntu",
+  "revision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "revisionAfter": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "sourceTreeSHA256": "3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a",
+  "sourceTreeSHA256After": "3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+  "args": [
+    "docs/qa/scripts/run-agent-http-smoke.py",
+    "--run-dir",
+    "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging"
+  ],
+  "launch": {
+    "exe": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/run-agent-http-smoke.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging"
+    ]
+  },
+  "startedAt": "2026-10-31T15:47:29.081Z",
+  "endedAt": "2026-10-31T15:47:35.573Z",
+  "startedAtBangkok": "2026-10-31 22:47:29 +07:00",
+  "endedAtBangkok": "2026-10-31 22:47:35 +07:00",
+  "exitCode": 1,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "FAIL",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "20a45b9d776635da1602bd50f885b095870a595bb0aca4bc3fdddb491fe1d273",
+  "screenshots": [],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging"
+}

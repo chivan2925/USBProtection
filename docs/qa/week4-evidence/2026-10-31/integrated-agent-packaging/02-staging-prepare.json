@@ -1,0 +1,43 @@
+{
+  "id": "02-staging-prepare",
+  "scope": "Guarded generated-directory staging using unmodified M3 script; Windows copy only, no Debian build",
+  "revision": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "revisionAfter": "0b726304a29a78ac36aefbbc71e40fbd7758ae2e",
+  "sourceTreeSHA256": "3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a",
+  "sourceTreeSHA256After": "3e312fbc65aa9bc71bb99f7dc4a9b1d0747fd1a19bf181430b54fa5e514bc59a",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "powershell.exe",
+  "args": [
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "docs/qa/scripts/prepare-week4-staging.ps1"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      "docs/qa/scripts/prepare-week4-staging.ps1"
+    ]
+  },
+  "startedAt": "2026-10-31T15:43:00.742Z",
+  "endedAt": "2026-10-31T15:43:01.356Z",
+  "startedAtBangkok": "2026-10-31 22:43:00 +07:00",
+  "endedAtBangkok": "2026-10-31 22:43:01 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "02162e94162c3709a1bb9f3fd460302008626dd383537e34bf28360ec5b6663f",
+  "screenshots": [],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging"
+}

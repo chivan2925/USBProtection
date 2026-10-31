@@ -1,0 +1,1 @@
+{"status": "PASS", "assertionCount": 255, "exitCode": 0, "summary": "docs/qa/week4-evidence/2026-10-31/integrated-agent-packaging/http-transport-summary-02.json"}

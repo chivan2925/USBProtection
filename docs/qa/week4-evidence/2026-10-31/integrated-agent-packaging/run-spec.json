@@ -1,0 +1,40 @@
+{
+  "referenceRevision": "2013ce726ef8cc960b30720435be23e8ccef1903",
+  "referenceRun": "docs/qa/week4-evidence/2026-10-28/windows-regression",
+  "requiredCaptures": ["01-agent-package", "02-staging-prepare", "03-packaging-week4", "04-staging-integrity", "06-http-transport"],
+  "failedCaptures": ["05-http-transport"],
+  "expectedAgentTests": 156,
+  "requiredSuites": {"UsbGuardWeek4WatchStressTest": 9, "UsbGuardWeek4PolicyIntegrityTest": 12, "Week4ActiveSessionSafetyTest": 8},
+  "staticCapture": "03-packaging-week4",
+  "httpSummary": "http-transport-summary-02.json",
+  "sameSourceScopes": ["frontend", "admin-server", ".github"],
+  "deltaScopes": ["client-agent", "packaging"],
+  "allowedChangedPaths": [
+    "client-agent/pom.xml",
+    "client-agent/src/main/java/com/group/usbshield/agent/session/ActiveSessionSelector.java",
+    "client-agent/src/main/java/com/group/usbshield/agent/session/LoginctlActiveUserResolver.java",
+    "client-agent/src/main/java/com/group/usbshield/agent/sync/AdminServerClient.java",
+    "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardEventListener.java",
+    "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardPolicySynchronizer.java",
+    "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardRuleBuilder.java",
+    "client-agent/src/main/java/com/group/usbshield/agent/usbguard/UsbGuardRuleInfo.java",
+    "client-agent/src/test/java/com/group/usbshield/agent/session/Week4ActiveSessionSafetyTest.java",
+    "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek4PolicyIntegrityTest.java",
+    "client-agent/src/test/java/com/group/usbshield/agent/usbguard/UsbGuardWeek4WatchStressTest.java",
+    "packaging/scripts/prepare-staging.ps1",
+    "packaging/tests/verify-week4-windows.ps1"
+  ],
+  "stagingFiles": [
+    {"source": "packaging/agent-deb/DEBIAN/control", "destination": "DEBIAN/control"},
+    {"source": "packaging/agent-deb/DEBIAN/postinst", "destination": "DEBIAN/postinst"},
+    {"source": "packaging/agent-deb/DEBIAN/prerm", "destination": "DEBIAN/prerm"},
+    {"source": "client-agent/target/usbshield-agent.jar", "destination": "opt/usbshield-agent/usbshield-agent.jar"},
+    {"source": "packaging/desktop/usbshield-notifier-launcher.sh", "destination": "opt/usbshield-agent/usbshield-notifier-launcher.sh"},
+    {"source": "packaging/agent-deb/etc/usbshield-agent/application.yml", "destination": "etc/usbshield-agent/application.yml"},
+    {"source": "packaging/usbguard/rules-v0.1.conf", "destination": "etc/usbshield-agent/rules-v0.1.conf"},
+    {"source": "packaging/desktop/usbshield-notifier.desktop", "destination": "etc/xdg/autostart/usbshield-notifier.desktop"},
+    {"source": "packaging/systemd/usbshield-agent.service", "destination": "usr/lib/systemd/system/usbshield-agent.service"}
+  ],
+  "acknowledgmentDocuments": ["docs/qa/evidence/M5_WEEK4_M2_M3_ACK_20261031.md"],
+  "qaTools": ["docs/qa/scripts/prepare-week4-staging.ps1", "docs/qa/scripts/AgentHttpTransportSmoke.java", "docs/qa/scripts/run-agent-http-smoke.py"]
+}
