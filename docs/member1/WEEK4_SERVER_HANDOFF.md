@@ -68,6 +68,19 @@ The JAR is `admin-server/target/usbshield-admin-server.jar` (57,314,825 bytes).
 | API docs hidden in production | PASS | Maven MockMvc and HTTP smoke both confirm 404 for `/api-docs` and `/swagger-ui.html` |
 | Browser live regression | M4/M5-owned | Not attributed to M1 |
 
+### Independent re-verification (2026-11-01, 19:35 +07:00)
+
+| Field | Value |
+|---|---|
+| Owner / Work ID | M1 / W4-M1-02, W4-M1-03 |
+| Base SHA | `324d10a` (`van`, clean tree, equal to `origin/van`); `git diff d78189b..324d10a -- admin-server frontend` is empty, so the manifest artifact source is unchanged |
+| Environment | Windows, Maven 3.9.9, JDK 22 (`JAVA_HOME=C:\Program Files\Java\jdk-22`) |
+| Command + exit code | `mvn -B clean test` in `admin-server/` → exit 0, **28 tests, 0 failures/errors/skips** |
+| Code re-review | SecurityConfig, Agent auth filter/credential service, enrollment, heartbeat, event ingestion, policy service, Admin auth/bootstrap and prod profile re-read; no new P0 finding |
+| Finding | With the machine default JDK 24 the compile fails (`TypeTag :: UNKNOWN`) because Lombok 1.18.36 does not support JDK 24. Dependency not changed (freeze); workaround documented in README and Developer Guide |
+| Residual P1 notes (not blockers) | No login rate limiting/lockout; unknown-username login skips BCrypt (timing difference). Accepted for the loopback-bound demo deployment; revisit before any exposed deployment |
+| Verdict | PASS — M1 Windows scope. No Ubuntu/USBGuard/systemd/GUI claim |
+
 ## Final gate
 
 M1's Windows preparation and server artifact checks are complete on the source

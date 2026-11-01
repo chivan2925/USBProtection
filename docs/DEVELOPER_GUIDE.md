@@ -25,10 +25,16 @@ not claim Ubuntu USBGuard, systemd, desktop notification or `.deb` runtime tests
 
 Use JDK 21; the Week 4 Windows release build was verified with JDK 22.0.2, Maven
 3.9.9, Node.js 22.19.0 and npm 10.9.3. The Maven compiler targets Java 21. Validate
-other JDK versions against the pinned Lombok compiler integration. Install frontend
+other JDK versions against the pinned Lombok compiler integration. JDK 24 is known
+to fail with the pinned Lombok 1.18.36 (`Fatal error compiling ... TypeTag :: UNKNOWN`);
+if the default `java` is newer than 22, point `JAVA_HOME` at JDK 21/22 for the
+build instead of changing the frozen dependency. Install frontend
 dependencies from the lockfile and build the backend tests:
 
 ```powershell
+# Only needed when the default JDK is unsupported (example path):
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-22'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
 cd frontend
 npm ci
 npm run build
