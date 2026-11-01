@@ -1,0 +1,38 @@
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 19:16:32.310 [main] INFO  c.g.u.s.UsbShieldServerApplication - Starting UsbShieldServerApplication v1.0.0-SNAPSHOT using Java 22.0.2 with PID 30440 (D:\USBProtection\admin-server\target\usbshield-admin-server.jar started by DELL in D:\USBProtection\admin-server)
+2026-11-01 19:16:32.314 [main] INFO  c.g.u.s.UsbShieldServerApplication - The following 1 profile is active: "prod"
+2026-11-01 19:16:33.720 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 19:16:33.799 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 64 ms. Found 5 JPA repository interfaces.
+2026-11-01 19:16:34.683 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 18083 (http)
+2026-11-01 19:16:34.704 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-11-01 19:16:34.705 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.30]
+2026-11-01 19:16:34.778 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-11-01 19:16:34.781 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2391 ms
+2026-11-01 19:16:34.968 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 19:16:35.078 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-11-01 19:16:35.137 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 19:16:35.722 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 19:16:35.763 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-11-01 19:16:36.009 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:file:D:/USBProtection/admin-server/target/week3-1be8b506b4da40f284927196b9cdd61c/server-db user=SA
+2026-11-01 19:16:36.011 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-11-01 19:16:36.033 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 19:16:36.943 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 19:16:37.056 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 19:16:37.702 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-01 19:16:38.970 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 19:16:39.263 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 19:16:40.125 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 18083 (http) with context path '/'
+2026-11-01 19:16:40.154 [main] INFO  c.g.u.s.UsbShieldServerApplication - Started UsbShieldServerApplication in 8.63 seconds (process running for 9.314)
+2026-11-01 19:16:40.642 [http-nio-127.0.0.1-18083-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-01 19:16:40.643 [http-nio-127.0.0.1-18083-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-11-01 19:16:40.646 [http-nio-127.0.0.1-18083-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-11-01 19:16:42.196 [http-nio-127.0.0.1-18083-exec-6] INFO  c.g.u.s.a.AgentEventController - Accepted USB event id=1 endpointId=EP-cf96ba76-fe85-4ef2-bd3a-b82c4c70526c

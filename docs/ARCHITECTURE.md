@@ -164,16 +164,16 @@ erDiagram
 3. Thiết bị không có class `08` khớp base allow rule. Mass Storage chưa có rule allow cụ thể sẽ rơi vào implicit **BLOCK** ở tầng nhân.
 4. `UsbGuardEventListener` trong Client Agent bắt được tín hiệu từ `usbguard watch`.
 5. `ActiveUserResolver` truy vấn `systemd-logind` để lấy session local đang active (user, uid, session type).
-6. Client Agent đóng gói `AgentEventRequest` và gửi `POST /api/agent/events` tới Admin Server.
+6. Client Agent đóng gói `AgentEventRequest` và gửi `POST /api/agent/events` với cả `X-Endpoint-Id` và `X-Agent-Token` tới Admin Server.
 7. Admin Server lưu trữ sự kiện vào bảng `usb_events` và thông báo tới Admin Console.
 
 ### 5.2. Luồng đồng bộ chính sách (Policy Synchronization Flow)
-1. Định kỳ mỗi 15-30 giây, Client Agent gửi `POST /api/agent/heartbeat` chứa `currentPolicyVersion`.
+1. Định kỳ mỗi 15-30 giây, Client Agent gửi `POST /api/agent/heartbeat` chứa `currentPolicyVersion`, kèm cả `X-Endpoint-Id` và `X-Agent-Token`.
 2. Admin Server kiểm tra nếu `desiredPolicyVersion > currentPolicyVersion`, phản hồi desired version để Agent quyết định đồng bộ.
-3. Client Agent gọi `GET /api/agent/policy` kèm định danh máy qua header `X-Endpoint-Id`.
+3. Client Agent gọi `GET /api/agent/policy` kèm cả `X-Endpoint-Id` và `X-Agent-Token`; cặp credential xác thực và giới hạn request vào một endpoint.
 4. Admin Server chỉ trả về danh sách Whitelist được gán riêng cho máy đó.
 5. Client Agent sinh luật tương thích với USBGuard, cập nhật file `/etc/usbguard/rules.conf` và nạp lại daemon.
-6. Client Agent gửi `POST /api/agent/policy/ack` xác nhận đã áp dụng thành công phiên bản mới.
+6. Client Agent gửi `POST /api/agent/policy/ack` với cùng cặp header xác thực, chỉ sau khi đã áp dụng thành công phiên bản mới.
 
 ---
 
@@ -193,3 +193,25 @@ redirects to the existing hash router. Fresh endpoints remain OFFLINE until hear
 corrupt Agent credentials fail closed. See [API deployment addendum](API.md) and
 [Week 3 server report](member1/WEEK3_SERVER_HARDENING.md). Windows verification and
 Ubuntu/USB/GUI/systemd/install/reboot deferred work are recorded separately.
+
+## Week 4 M1 server freeze and deployment boundary — 2026-11-01
+
+The Admin Server API remains frozen at v0.2: Admin session/CSRF is separate from
+Agent endpoint-token authentication; each Agent token is bound to one endpoint;
+whitelist intent is per endpoint; and desired policy is distinct from the
+Agent-reported applied version. Heartbeat updates liveness only. See the canonical
+[API freeze](API.md#week-4-apidto-freeze-v02) and [Developer Guide](DEVELOPER_GUIDE.md).
+
+The `prod` profile requires externally supplied DB URL/password and enrollment
+bootstrap token, creates an Admin account only when an initial password is
+configured, binds to loopback by default, sets Secure/HttpOnly/SameSite session
+cookies, disables the H2 console and Swagger/OpenAPI, and does not trust forwarded
+headers. Remote browser access therefore requires HTTPS termination at a trusted
+reverse proxy. The server JAR serves the React build and `/api` on the same origin.
+H2 file data and other runtime state belong in private persistent storage and are
+excluded from Git. This application has no clustering or HA database layer.
+
+Week 4 Windows/JAR evidence and open release dependencies are tracked in
+[M1 Week 4 handoff](member1/WEEK4_SERVER_HANDOFF.md). None of that evidence claims
+physical USB, USBGuard daemon, systemd, desktop notification, Ubuntu installation,
+or reboot execution.

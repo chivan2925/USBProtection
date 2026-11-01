@@ -37,23 +37,9 @@ public class AgentEventController {
         String effectiveEndpointId = principal.getName();
         AgentCredentialService.bind(effectiveEndpointId, request.getEndpointId());
 
-        log.info("[USB EVENT INGESTION] Received event from endpoint: '{}', User: '{}' (UID: {}), Session: '{}' ({}), Event: '{}', Decision: '{}', Time: '{}'",
-                effectiveEndpointId,
-                request.getLinuxUsername(),
-                request.getLinuxUid(),
-                request.getSessionId(),
-                request.getSessionType(),
-                request.getEventType(),
-                request.getDecision(),
-                request.getOccurredAt());
-
         Long usbDeviceId = null;
         AgentUsbDeviceDto deviceDto = request.getDevice();
         if (deviceDto != null) {
-            log.info("[USB DEVICE INFO] VID: {}, PID: {}, Serial: '{}', Name: '{}', Hash: '{}'",
-                    deviceDto.getVendorId(), deviceDto.getProductId(), deviceDto.getSerial(),
-                    deviceDto.getName(), deviceDto.getHash());
-
             UsbDevice savedDevice = null;
             if (deviceDto.getHash() != null && !deviceDto.getHash().isBlank()) {
                 savedDevice = usbDeviceRepository.findByDeviceHash(deviceDto.getHash()).orElse(null);
@@ -89,7 +75,8 @@ public class AgentEventController {
 
         usbEvent = usbEventRepository.save(usbEvent);
 
-        log.info("[USB EVENT SAVED] Persisted event ID #{} successfully", usbEvent.getId());
+        // Do not copy usernames, session identifiers, serials, hashes or raw event details into logs.
+        log.info("Accepted USB event id={} endpointId={}", usbEvent.getId(), effectiveEndpointId);
 
         return ResponseEntity.ok(Map.of(
                 "success", true,

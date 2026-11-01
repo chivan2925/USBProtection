@@ -19,8 +19,9 @@ public class AgentEnrollmentController {
     @PostMapping @Transactional
     public AgentEnrollmentResponse enroll(@RequestBody AgentEnrollmentRequest request){
         if(bootstrap.isBlank())throw new ResponseStatusException(SERVICE_UNAVAILABLE,"Enrollment not configured");
-        if(request.getEnrollmentToken()==null || !MessageDigest.isEqual(bootstrap.getBytes(StandardCharsets.UTF_8),request.getEnrollmentToken().getBytes(StandardCharsets.UTF_8)))throw new ResponseStatusException(UNAUTHORIZED,"Invalid enrollment credential");
-        if(request.getMachineId()==null || request.getMachineId().isBlank() || request.getMachineId().length()>100 || request.getHostname()==null || request.getHostname().isBlank() || request.getHostname().length()>150)throw new ResponseStatusException(BAD_REQUEST,"machineId and hostname required");
+        String submittedToken=request.getEnrollmentToken();
+        if(submittedToken==null || submittedToken.length()>256 || !MessageDigest.isEqual(bootstrap.getBytes(StandardCharsets.UTF_8),submittedToken.getBytes(StandardCharsets.UTF_8)))throw new ResponseStatusException(UNAUTHORIZED,"Invalid enrollment credential");
+        if(request.getMachineId()==null || request.getMachineId().isBlank() || request.getMachineId().length()>100 || request.getHostname()==null || request.getHostname().isBlank() || request.getHostname().length()>150 || (request.getIpAddress()!=null && request.getIpAddress().length()>50))throw new ResponseStatusException(BAD_REQUEST,"Invalid enrollment fields");
         if(endpoints.findByMachineId(request.getMachineId()).isPresent())throw new ResponseStatusException(CONFLICT,"Machine already enrolled; retain existing credentials or request administrator recovery");
         String token=UUID.randomUUID().toString()+UUID.randomUUID();
         var e=Endpoint.builder().endpointId("EP-"+UUID.randomUUID()).hostname(request.getHostname()).machineId(request.getMachineId()).ipAddress(request.getIpAddress()).agentTokenHash(encoder.encode(token)).build();

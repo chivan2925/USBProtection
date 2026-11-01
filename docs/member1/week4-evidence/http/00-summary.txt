@@ -1,0 +1,6 @@
+Owner: M1
+Command: admin-server/verify-week3.ps1 -JavaHome "C:\Program Files\Java\jdk-22" -EvidencePath "docs/member1/week4-evidence/http"
+Exit code: 0
+Result: PASS (Windows production-profile JAR HTTP smoke with isolated H2 and synthetic credentials/events)
+Verified: React index and assets; same-origin API; hash-route redirect; missing asset 404; Swagger/OpenAPI 404; Admin session/CSRF; Agent token binding; event persistence/query; A/B Allow/Revoke isolation; policy ACK validation.
+Scope: No browser interaction or physical USB/Ubuntu/USBGuard/systemd/notification/installer/reboot test is claimed.

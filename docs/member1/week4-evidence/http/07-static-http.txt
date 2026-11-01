@@ -1,0 +1,1 @@
+PASS: production JAR serves React index/assets; /events redirects; missing assets and Swagger/OpenAPI return 404.

@@ -22,8 +22,10 @@ public class AgentEventRequest {
     private String hostname;
 
     @Builder.Default
+    @jakarta.validation.constraints.Size(max=100)
     private String linuxUsername = "UNKNOWN";
 
+    @jakarta.validation.constraints.PositiveOrZero
     private Long linuxUid;
 
     @jakarta.validation.constraints.Size(max=50)

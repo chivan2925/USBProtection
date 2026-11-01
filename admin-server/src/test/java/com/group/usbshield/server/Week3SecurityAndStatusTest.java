@@ -2,6 +2,7 @@ package com.group.usbshield.server;
 
 import com.group.usbshield.server.endpoint.*;
 import com.group.usbshield.server.policy.EndpointPolicyService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ class Week3SecurityAndStatusTest {
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired EndpointPolicyService policies;
+    @Autowired PasswordEncoder passwordEncoder;
 
     Endpoint endpoint(String hash) {
         return endpoints.saveAndFlush(Endpoint.builder().endpointId("W3-"+UUID.randomUUID())
@@ -47,6 +49,15 @@ class Week3SecurityAndStatusTest {
                     .andExpect(status().isUnauthorized());
         }
         mvc.perform(get("/api/agent/policy")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void oversizedUtf8AgentTokenIsRejectedAsUnauthorized() throws Exception {
+        var e=endpoint(passwordEncoder.encode("expected-agent-token"));
+        mvc.perform(get("/api/agent/policy")
+                        .header("X-Endpoint-Id",e.getEndpointId())
+                        .header("X-Agent-Token","é".repeat(72)))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test @WithMockUser(roles="AGENT")
