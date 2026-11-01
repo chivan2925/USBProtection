@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "owner": "M1",
-  "builtAtUtc": "2026-11-01T11:37:10.6787677Z",
-  "sourceCommit": "d0769a35b86d7c090d1d025c59b297ea9302b5c0",
-  "sourceTree": "83ed1cb1f5d8e7613c6584b6d5907d9a46e7cf59",
+  "builtAtUtc": "2026-11-01T11:47:10.2134034Z",
+  "sourceCommit": "1edbd603d4032a5a2143d9d09161812e5e6e4055",
+  "sourceTree": "7211546673f0b61cb318de570844f6a0f3f901d8",
   "branch": "van",
   "workingTreeCleanAtStart": true,
   "environment": {
@@ -26,7 +26,7 @@
   "artifact": {
     "path": "admin-server/target/usbshield-admin-server.jar",
     "sizeBytes": 57314825,
-    "sha256": "d7fb3f8a2bb30b12ac8cdeb66009caa537336ac635180382ee1b74a1bf500f40",
+    "sha256": "334900ab48d515d66cf782f9b27ceccb6aebbef709304f6a102881f96fd177f8",
     "includesReactDist": true
   }
 }
