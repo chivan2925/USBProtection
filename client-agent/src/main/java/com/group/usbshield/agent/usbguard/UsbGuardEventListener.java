@@ -259,7 +259,13 @@ public class UsbGuardEventListener {
             } else if (device.massStorage()
                     && ("block".equalsIgnoreCase(target) || "reject".equalsIgnoreCase(target))
                     && "RESOLVED".equals(user.status())) {
-                desktopNotificationService.notifyBlockedUsb(user, device);
+                UsbDeviceInfo notifyDevice = device;
+                if (!target.equalsIgnoreCase(device.state())) {
+                    notifyDevice = new UsbDeviceInfo(device.runtimeId(), target, device.vendorId(),
+                            device.productId(), device.serial(), device.name(), device.hash(),
+                            device.interfaces(), device.massStorage(), device.rawRule());
+                }
+                desktopNotificationService.notifyBlockedUsb(user, notifyDevice);
             }
         } catch (RuntimeException error) {
             log.warn("Notification failed independently of event transport: {}", error.getMessage());
