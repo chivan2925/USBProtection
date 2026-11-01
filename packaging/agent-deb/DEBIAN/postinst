@@ -27,11 +27,25 @@ if getent group usbguard >/dev/null; then
     usermod -aG usbguard usbshield
 fi
 
-mkdir -p /run/usbshield-notifier
-chmod 1777 /run/usbshield-notifier
-
-if [ -d /etc/tmpfiles.d ]; then
-    echo "d /run/usbshield-notifier 1777 root root -" > /etc/tmpfiles.d/usbshield-notifier.conf
+# Week 4 IPC correction: retire the shared root-owned 1777 socket namespace.
+# The notifier helper now owns a private path under /run/user/<GUI-uid>.
+# Do not remove a nonempty legacy directory or change an admin-created file.
+legacy_tmpfiles=/etc/tmpfiles.d/usbshield-notifier.conf
+if [ -f "$legacy_tmpfiles" ] && [ ! -L "$legacy_tmpfiles" ] && \
+        [ "$(cat "$legacy_tmpfiles")" = 'd /run/usbshield-notifier 1777 root root -' ]; then
+    rm -f "$legacy_tmpfiles"
+fi
+if [ -d /run/usbshield-notifier ] && [ ! -L /run/usbshield-notifier ]; then
+    if [ "$(stat -c '%u' /run/usbshield-notifier)" = '0' ]; then
+        chmod 0700 /run/usbshield-notifier
+        rmdir /run/usbshield-notifier 2>/dev/null || true
+    else
+        echo 'WARNING: legacy notifier directory is not root-owned; inspect manually.' >&2
+    fi
+fi
+if [ ! -x /usr/bin/setfacl ]; then
+    echo 'ERROR: acl package is missing: /usr/bin/setfacl is required by the notifier.' >&2
+    exit 1
 fi
 
 if [ -f /etc/sudoers.d/usbshield ]; then

@@ -1,0 +1,96 @@
+{
+  "base_commit": "63e4dc61b15b86859dd4ca2ca4be60021a293091",
+  "source_repo": "chivan2925/USBProtection",
+  "status": "candidate_patch_only; owner_checks_and_approval_pending",
+  "overlay_files": [
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/DesktopNotificationClient.java",
+      "bytes": 7358,
+      "sha256": "8db7e4d543894ec20c6c51960129506939620ff8210f6f26ffb32d99778cc90e"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/DesktopNotificationClientMain.java",
+      "bytes": 797,
+      "sha256": "b495970cab1216376759566702aeda9fa3a7ae798a1110d598721984d7d9cd29"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/NotifierSocketPaths.java",
+      "bytes": 2000,
+      "sha256": "1cf9ed9ebace19ac13d4708e2cfd11d5887c581f1ba4e490a1e450a02cf42a8d"
+    },
+    {
+      "path": "client-agent/src/main/java/com/group/usbshield/agent/notification/UnixSocketNotificationPublisher.java",
+      "bytes": 5025,
+      "sha256": "e4d25dfc773da63e96835e898fd354cfc08730307d19f6a05ced8c61406bb6e8"
+    },
+    {
+      "path": "client-agent/src/test/java/com/group/usbshield/agent/notification/Week4NotifierSocketContractTest.java",
+      "bytes": 2615,
+      "sha256": "3474564146abbe8544394db2f26e855ba98eb566003e170958969c9c1a078989"
+    },
+    {
+      "path": "docs/rc/WEEK4_APPLY_AND_VERIFY.md",
+      "bytes": 5568,
+      "sha256": "2a34575de6b780ffb4e9c559634c2a4a60b62b18a43a0ac494562ed230c62219"
+    },
+    {
+      "path": "docs/rc/WEEK4_OWNER_SIGNOFF_TEMPLATE.md",
+      "bytes": 3596,
+      "sha256": "7f4c98c15dc3eb4cfdab7d9d64a91303aacdaee8d3fb08ff97647ec3242c5009"
+    },
+    {
+      "path": "docs/rc/WEEK4_PACKAGE_SCOPE.md",
+      "bytes": 2065,
+      "sha256": "f8204814ef4b49bc65332637c83d10401b74c02a882c487278b2efb6adef6a7a"
+    },
+    {
+      "path": "docs/usbguard/WEEK4_IPC_ACL_DESIGN.md",
+      "bytes": 6880,
+      "sha256": "59e5fc80a9f30f5482a7f57f8a376e24057d582bf412cd22eb3f1d75e4bb8b5b"
+    },
+    {
+      "path": "packaging/agent-deb/DEBIAN/control",
+      "bytes": 554,
+      "sha256": "1cd45136aa16d2045279da8c09f033a26711e0234163ee98a5ef86db138d99fe"
+    },
+    {
+      "path": "packaging/agent-deb/DEBIAN/postinst",
+      "bytes": 4117,
+      "sha256": "e1c98d7908d94b79050a4b71cfe1468b4a89f62d90032f4f6d1bc287d6112301"
+    },
+    {
+      "path": "packaging/desktop/usbshield-notifier-launcher.sh",
+      "bytes": 1404,
+      "sha256": "3bd528cf66472030a3549c61d380c7a1951bbf86c91f4cd3d664aabe94a807fa"
+    },
+    {
+      "path": "packaging/tests/test-notifier-ipc-ubuntu.sh",
+      "bytes": 1305,
+      "sha256": "f689bc62d5e98e987025a0376ad97061d87772314ef301281ae4716683e55535"
+    },
+    {
+      "path": "week4-apply-doc-sync.py",
+      "bytes": 14086,
+      "sha256": "88d7664f8c90fe2f1e3ca62ad57923e8b58579e09e1c2bf530a64809a54961e9"
+    }
+  ],
+  "after_unpack_run": "python .\\week4-apply-doc-sync.py --check && python .\\week4-apply-doc-sync.py --apply",
+  "on_apply_modified_existing_paths": [
+    "packaging/tests/verify-week3-windows.ps1",
+    "packaging/tests/verify-week4-windows.ps1",
+    "docs/API.md",
+    "docs/CLIENT_INSTALLATION.md",
+    "docs/usbguard/WEEK4_M2_CORE_OPERATIONS_GUIDE.md",
+    "docs/usbguard/WEEK4_M2_M3_M5_UBUNTU_HANDOFF.md",
+    "docs/usbguard/WEEK4_M2_THREE_PART_PLAN.md",
+    "docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md",
+    "docs/qa/WEEK4_RELEASE_VALIDATION.md",
+    "docs/member1/WEEK4_SERVER_HANDOFF.md",
+    "docs/client-agent/WEEK4_CLIENT_AGENT_CLOSEOUT.md"
+  ],
+  "nonclaims": [
+    "No Maven or JUnit full repo execution",
+    "No Ubuntu/USBGuard/GUI runtime evidence",
+    "No credential rotation, owner signatures, RC tag or binary artifact delivered"
+  ]
+}
