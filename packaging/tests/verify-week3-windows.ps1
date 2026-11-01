@@ -1,3 +1,5 @@
+# This historical Week 3 verifier now checks CURRENT packaging syntax.
+# Original Week 3 logs/evidence are immutable; no regression is inferred.
 # USBShield Week 3 - Static Packaging & Service Verification (Windows Scope)
 # Validates packaging metadata, systemd units, maintainer scripts, desktop launcher,
 # and live configuration without requiring physical USB, Ubuntu, or root access.
@@ -57,15 +59,20 @@ Assert-Contains $control 'Architecture: amd64'
 Assert-Contains $control 'openjdk-21-jre-headless'
 Assert-Contains $control 'usbguard'
 Assert-Contains $control 'libnotify-bin'
+Assert-Contains $control ', acl'
 
 Assert-Contains $postinst 'groupadd --system usbshield'
 Assert-Contains $postinst 'useradd --system --gid usbshield'
 Assert-Contains $postinst 'chmod 755 /opt/usbshield-agent'
 Assert-Contains $postinst 'chmod 750 /etc/usbshield-agent'
 Assert-Contains $postinst 'chmod 700 /var/lib/usbshield-agent'
-Assert-Contains $postinst 'mkdir -p /run/usbshield-notifier'
-Assert-Contains $postinst 'chmod 1777 /run/usbshield-notifier'
-Assert-Contains $postinst 'd /run/usbshield-notifier 1777 root root -'
+Assert-NotContains $postinst 'mkdir -p /run/usbshield-notifier'
+Assert-NotContains $postinst 'chmod 1777 /run/usbshield-notifier'
+Assert-Contains $postinst 'legacy_tmpfiles=/etc/tmpfiles.d/usbshield-notifier.conf'
+Assert-Contains $postinst 'rmdir /run/usbshield-notifier 2>/dev/null || true'
+Assert-Contains $postinst '/usr/bin/setfacl'
+Assert-Contains $postinst 'Missing or empty /opt/usbshield-agent/usbshield-agent.jar'
+Assert-Contains $postinst 'refusing successful postinst exit'
 Assert-Contains $postinst 'rm -f /etc/sudoers.d/usbshield'
 Assert-Contains $postinst 'ImplicitPolicyTarget=block'
 Assert-Contains $postinst 'systemctl daemon-reload'
@@ -100,6 +107,8 @@ Assert-Contains $desktop 'Categories=System;Security;'
 
 Assert-Contains $launcher '#!/usr/bin/env bash'
 Assert-Contains $launcher 'USER_UID="$(id -u)"'
+Assert-Contains $launcher 'EXPECTED_RUNTIME="/run/user/${USER_UID}"'
+Assert-Contains $launcher 'XDG_RUNTIME_DIR'
 Assert-Contains $launcher '(( USER_UID < 1000 ))'
 Assert-Contains $launcher 'org.springframework.boot.loader.launch.PropertiesLauncher'
 Assert-Contains $launcher 'com.group.usbshield.agent.notification.DesktopNotificationClientMain'
@@ -112,7 +121,7 @@ $buildScript = 'packaging/scripts/build-deb.sh'
 Assert-Contains $buildScript 'agent-deb/etc/usbshield-agent/application.yml'
 Assert-Contains $buildScript 'usbshield-notifier-launcher.sh'
 Assert-Contains $buildScript 'usbshield-notifier.desktop'
-Assert-Contains $buildScript 'dpkg-deb --build "$DEB_STAGING"'
+Assert-Contains $buildScript 'dpkg-deb --root-owner-group --build "$DEB_STAGING"'
 
 # 6. Executable JAR Inspection (Optional with -CheckBuiltJar)
 Write-Host "`n[6/6] Verifying Executable Fat-JAR Structure..." -ForegroundColor Yellow
@@ -181,7 +190,7 @@ if ($CheckStaging -or $CustomStagingPath) {
 Write-Host "`n================================================================" -ForegroundColor Cyan
 Write-Host "  WEEK 3 VERIFICATION SUMMARY                                   " -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "  DECISION: PASS (WINDOWS SCOPE)" -ForegroundColor Green
+Write-Host "  DECISION: CURRENT PACKAGING STATIC CONTRACT PASS" -ForegroundColor Green
 Write-Host "  NOTICE  : Physical USB, Ubuntu daemon enforcement, GUI popup, " -ForegroundColor Yellow
 Write-Host "            and clean install/reboot tests are DEFERRED UNTIL   " -ForegroundColor Yellow
 Write-Host "            AFTER WEEK 4 per project plan.                      " -ForegroundColor Yellow

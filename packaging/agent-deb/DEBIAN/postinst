@@ -48,6 +48,12 @@ if [ ! -x /usr/bin/setfacl ]; then
     exit 1
 fi
 
+# A configured Debian package without its executable Agent is not usable.
+if [ ! -s /opt/usbshield-agent/usbshield-agent.jar ]; then
+    echo 'ERROR: Missing or empty /opt/usbshield-agent/usbshield-agent.jar.' >&2
+    exit 1
+fi
+
 if [ -f /etc/sudoers.d/usbshield ]; then
     rm -f /etc/sudoers.d/usbshield
 fi
@@ -112,7 +118,9 @@ systemctl enable usbshield-agent.service
 if systemctl restart usbshield-agent.service; then
     echo "USBShield Agent installed and started successfully."
 else
-    echo "WARNING: usbshield-agent.service was enabled but failed to restart immediately. Check systemctl status."
+    echo "ERROR: usbshield-agent.service failed to restart; refusing successful postinst exit." >&2
+    echo "Inspect systemctl status usbshield-agent.service and journalctl -u usbshield-agent.service." >&2
+    exit 1
 fi
 
 exit 0

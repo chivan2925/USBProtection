@@ -22,8 +22,11 @@ The frozen security and state semantics are:
 
 Request limits mirror persisted columns: enrollment hostname 150, machine ID 100,
 optional IP address 50, bootstrap token 256 characters; event Linux username 100,
-session fields 50 and device identifiers use the limits in their DTO. Malformed or
-oversized requests return 400; these limits do not change valid v0.2 payloads.
+session fields 50 and device identifiers use the limits in their DTO. Malformed or oversized DTO fields generally return HTTP 400 after request validation.
+Authentication guards may reject a request earlier: a bootstrap enrollment token
+longer than 256 characters can return HTTP 401, as observed in the M5 S4
+production Agent-to-Spring smoke. Error codes are route/guard dependent; this
+clarification does not change valid v0.2 payloads or the wire contract.
 `desiredPolicyVersion` is server-owned intent; `appliedPolicyVersion` is an Agent
 report and does not independently prove USBGuard enforcement. No global Allow API
 or endpoint deletion API is part of this freeze.

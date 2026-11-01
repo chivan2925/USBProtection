@@ -1,2 +1,7 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+# Unix runtime/packaging scripts must remain executable with bash on Linux.
+*.sh text eol=lf
+packaging/agent-deb/DEBIAN/postinst text eol=lf
+packaging/agent-deb/DEBIAN/prerm text eol=lf

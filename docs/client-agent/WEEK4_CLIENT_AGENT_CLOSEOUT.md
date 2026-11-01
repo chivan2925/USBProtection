@@ -1,5 +1,7 @@
 # USBShield Client Agent — Week 4 Closeout Report (Member 3)
 
+> **Historical owner report (31/10/2026):** The table, 127-test count, artifact hashes and `1777` socket description below document that owner submission, **not current source after PR #50**. At `main` `d5e156afdad382dc19d3b0a7198bf681fd36763e`, the notifier uses `/run/user/<UID>/usbshield-notifier/notice.sock` with named-user ACLs from `acl`; the shared `1777` runtime design was retired. M5 separately verified 174 Agent tests on S3 and 28 server tests / browser on S4. The user reports both updated Agent Maven commands `BUILD SUCCESS`, but package/static/native ACL and cross-owner sign-off remain pending. See [design](../usbguard/WEEK4_IPC_ACL_DESIGN.md) and [current review](../rc/WEEK4_POST_MERGE_REVIEW_D5E156A.md). The following historical PASS labels must not be promoted to a group decision.
+
 > **Thành viên:** Member 3 — *Client Agent / System Service / Packaging Engineer*  
 > **Chủ đề Week 4:** Stabilization, Documentation, Packaging Staging & Release Candidate  
 > **Căn cứ kế hoạch:** `docs/USBShield_Week4_Work_Plan_M1_M2_M3_M4_M5.md` — Mục 5 (M3)  
