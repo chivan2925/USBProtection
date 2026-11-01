@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "owner": "M1",
+  "builtAtUtc": "2026-11-01T11:37:10.6787677Z",
+  "sourceCommit": "d0769a35b86d7c090d1d025c59b297ea9302b5c0",
+  "sourceTree": "83ed1cb1f5d8e7613c6584b6d5907d9a46e7cf59",
+  "branch": "van",
+  "workingTreeCleanAtStart": true,
+  "environment": {
+    "os": "Microsoft Windows 10.0.26200",
+    "powershell": "7.6.5",
+    "processArchitecture": "X64"
+  },
+  "toolchain": {
+    "java": "java version \"22.0.2\" 2024-07-16",
+    "maven": "Apache Maven 3.9.9 (8e8579a9e76f7d015ee5ec7bfcdc97d260186937)",
+    "node": "v22.19.0",
+    "npm": "10.9.3",
+    "javaTarget": "21"
+  },
+  "build": {
+    "command": "admin-server/build-release.ps1",
+    "result": "PASS",
+    "lifecycle": "mvn -B -Pwith-frontend clean package"
+  },
+  "artifact": {
+    "path": "admin-server/target/usbshield-admin-server.jar",
+    "sizeBytes": 57314825,
+    "sha256": "d7fb3f8a2bb30b12ac8cdeb66009caa537336ac635180382ee1b74a1bf500f40",
+    "includesReactDist": true
+  }
+}

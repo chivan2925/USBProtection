@@ -9,11 +9,11 @@ integration review. This report separates M1 evidence from group/Ubuntu gates.
 | Work ID | Status | Evidence / disposition |
 |---|---|---|
 | W4-M1-01 API/DTO freeze | DONE | API remains v0.2 with no breaking wire changes. Canonical route/auth/state rules and validated field limits are summarized in [API](../API.md) and [protocol](../AGENT_SERVER_PROTOCOL.md). Final source SHA is recorded after build. |
-| W4-M1-02 security/code review | REVIEWED | Admin/Agent separation, session/CSRF, endpoint-bound token, bootstrap, production configuration and log handling reviewed. Hardened UTF-8 token byte limit, request sizes, production Swagger/OpenAPI exposure and event log minimization. Backend regression passes. Deployment credential rotation remains external/open. |
-| W4-M1-03 regression | PARTIAL | Maven backend/integration suite: PASS, 28 tests, 0 failures/errors/skips on JDK 22.0.2/Maven 3.9.9. Packaged-JAR HTTP check remains pending. Browser regression is M4/M5 evidence. |
+| W4-M1-02 security/code review | REVIEWED | Admin/Agent separation, session/CSRF, endpoint-bound token, bootstrap, production configuration and log handling reviewed. Hardened UTF-8 token byte limit, request sizes, production Swagger/OpenAPI exposure and event log minimization. No remaining M1 P0 code finding identified; deployment credential rotation remains external/open. |
+| W4-M1-03 regression | PASS — M1 Windows scope | Maven backend/integration suite: 28 tests, 0 failures/errors/skips; production-profile packaged-JAR HTTP smoke PASS. Browser regression remains M4/M5 evidence and is not attributed to M1. |
 | W4-M1-04 documentation | DONE | README, Architecture, API and Agent protocol aligned; [Developer Guide](../DEVELOPER_GUIDE.md) added. |
-| W4-M1-05 server JAR | NOT BUILT | Release script now requires a clean tree and emits a provenance manifest. Build and same-origin HTTP verification are pending. |
-| W4-M1-06 integration owner | OPEN | M1 contract review is recorded here. Do not create a release-candidate tag until all owners sign off and the QA blocker below is closed or formally dispositioned. |
+| W4-M1-05 server JAR | PASS — Windows artifact | React production bundle + Spring JAR built from source commit `d0769a35b86d7c090d1d025c59b297ea9302b5c0`; SHA-256 and toolchain are in the [release manifest](week4-evidence/server-release-manifest.json). Packaged JAR served React and `/api` over same-origin HTTP. |
+| W4-M1-06 integration owner | OPEN | M1 contract review and artifact provenance are recorded here. Other owner sign-offs are still pending; do not create a release-candidate tag until all owners sign off and the QA blocker below is closed or formally dispositioned. |
 | W4-M1-07 credential rotation | OPEN | A credential appeared in public Git history. The deployment secret is not available in this workspace; the environment administrator must rotate it and re-enroll affected Agents. No success claim is made. |
 
 ## Review findings and changes
@@ -37,27 +37,32 @@ and enrollment settings. Regression evidence is pending.
 The latest available QA handoff records **M5-W3-07 OPEN (M3)**: policy sync may send
 an ACK after local applied-policy persistence fails. M1 does not own the Agent sync
 implementation and will not mark the release gate complete until M3 closes this or
-the group formally dispositions it. Ubuntu USBGuard/systemd/GUI/installer/reboot
-tests remain deferred under the Week 4 plan.
+the group formally dispositions it. The other owners' Week 4 handoffs/signatures are
+not inferred from their earlier Week 3 evidence. Ubuntu USBGuard/systemd/GUI/installer/
+reboot tests remain deferred under the Week 4 plan.
 
 ## Build and verification evidence
 
-This section must be completed from the generated manifest and command results. Do
-not infer PASS from a prior Week 3 run.
+Artifact source revision is `d0769a35b86d7c090d1d025c59b297ea9302b5c0`, Git tree
+`83ed1cb1f5d8e7613c6584b6d5907d9a46e7cf59`. Build environment was Windows 11,
+PowerShell 7.6.5, JDK 22.0.2 targeting Java 21, Maven 3.9.9, Node 22.19.0 and npm
+10.9.3. The build started from a clean `van` worktree. The JAR is
+`admin-server/target/usbshield-admin-server.jar` (57,314,825 bytes).
 
 | Check | Result | Provenance |
 |---|---|---|
-| React production build | PASS | `npm run build`, Node 22.19.0, npm 10.9.3; will be repeated by release script |
-| Maven backend/integration tests | PASS: 28 tests, 0 failures/errors/skips | `mvn -B -f admin-server/pom.xml clean test`, JDK 22.0.2, Maven 3.9.9 |
-| Maven clean package with React profile | PENDING | `admin-server/build-release.ps1` |
-| Server JAR SHA-256 and source tree | PENDING | [Release manifest](week4-evidence/server-release-manifest.json) |
-| Production-profile JAR HTTP (React + `/api`, synthetic data) | PENDING | `week4-evidence/http/` |
-| API docs hidden in production | PENDING | Maven and HTTP checks |
+| React production build | PASS | Included in `admin-server/build-release.ps1`; Node 22.19.0, npm 10.9.3; see [build log](week4-evidence/server-build.log) |
+| Maven backend/integration tests | PASS: 28 tests, 0 failures/errors/skips | `mvn -B -f admin-server/pom.xml clean test`, JDK 22.0.2, Maven 3.9.9; [build log](week4-evidence/server-build.log) |
+| Maven clean package with React profile | PASS | `admin-server/build-release.ps1`; [build log](week4-evidence/server-build.log) |
+| Server JAR SHA-256 and source tree | PASS | [Release manifest](week4-evidence/server-release-manifest.json), SHA-256 `d7fb3f8a2bb30b12ac8cdeb66009caa537336ac635180382ee1b74a1bf500f40` |
+| Production-profile JAR HTTP (React + `/api`, synthetic data) | PASS | [HTTP summary](week4-evidence/http/00-summary.txt), detailed synthetic auth/event/policy evidence in `week4-evidence/http/` |
+| API docs hidden in production | PASS | Maven MockMvc and HTTP smoke both confirm 404 for `/api-docs` and `/swagger-ui.html` |
 | Browser live regression | M4/M5-owned | Not attributed to M1 |
 
 ## Final gate
 
-M1 will report its Windows preparation status after build and HTTP evidence exist.
-Group-wide Week 4 readiness still requires M2–M5 owner reviews, resolution or
-disposition of M5-W3-07, the release report, and credential rotation confirmation.
+M1's Windows preparation and server artifact checks are complete on the source
+revision above. Group-wide Week 4 readiness still requires M2–M5 owner reviews,
+resolution or disposition of M5-W3-07, the release report, and credential rotation
+confirmation.
 No Ubuntu E2E or full release PASS is asserted by this document.

@@ -81,15 +81,17 @@ screenshots or release evidence.
 
 ## Production profile
 
-Set all secret values through a secret manager or the service environment, not in
-source files or command history. Required values are:
+Set secret values through a secret manager or the service environment, not in source
+files or command history. Server startup requires the DB URL, DB password and
+enrollment token. Set an initial Admin password before the first Admin login; if it
+is absent, the server starts without creating an Admin account.
 
 | Variable | Purpose |
 |---|---|
 | `USBSHIELD_DB_URL` | Persistent H2 file URL, for example `jdbc:h2:file:/var/lib/usbshield/usbshield;DB_CLOSE_ON_EXIT=FALSE` |
 | `USBSHIELD_DB_PASSWORD` | Password for the H2 file; keep it stable when reopening that database |
 | `USBSHIELD_ENROLLMENT_TOKEN` | Bootstrap credential for new Agent enrollment |
-| `USBSHIELD_ADMIN_PASSWORD` | Initial Admin password; it does not reset an existing account |
+| `USBSHIELD_ADMIN_PASSWORD` | Initial Admin password; needed to create the first account and does not reset an existing account |
 | `USBSHIELD_ADMIN_USERNAME` | Initial Admin username; defaults to `admin` |
 
 Optional values: `USBSHIELD_DB_USERNAME` (default `sa`), `USBSHIELD_BIND_ADDRESS`

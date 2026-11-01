@@ -1,0 +1,326 @@
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+vite v8.3.1 building client environment for production...
+transforming...
+✓ 51 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.67 kB │ gzip:  0.42 kB
+dist/assets/index-Bsv2V3We.css   25.53 kB │ gzip:  6.65 kB
+dist/assets/index-DMSlTEoj.js   290.39 kB │ gzip: 88.22 kB
+
+✓ built in 355ms
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------< com.group.usbshield:admin-server >------------------
+[INFO] Building USBShield Admin Server 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO]
+[INFO] --- clean:3.3.2:clean (default-clean) @ admin-server ---
+[INFO] Deleting D:\USBProtection\admin-server\target
+[INFO]
+[INFO] --- resources:3.3.1:resources (default-resources) @ admin-server ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO]
+[INFO] --- resources:3.3.1:copy-resources (package-react) @ admin-server ---
+[INFO] Copying 5 resources from ..\frontend\dist to target\classes\static
+[INFO]
+[INFO] --- compiler:3.13.0:compile (default-compile) @ admin-server ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 35 source files with javac [debug parameters release 21] to target\classes
+[INFO]
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ admin-server ---
+[INFO] skip non existing resourceDirectory D:\USBProtection\admin-server\src\test\resources
+[INFO]
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ admin-server ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 9 source files with javac [debug parameters release 21] to target\test-classes
+[INFO]
+[INFO] --- surefire:3.2.5:test (default-test) @ admin-server ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO]
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.group.usbshield.server.agentapi.AgentEventContractTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.575 s -- in com.group.usbshield.server.agentapi.AgentEventContractTest
+[INFO] Running com.group.usbshield.server.agentapi.AgentHttpIntegrationTest
+18:36:41.858 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.group.usbshield.server.agentapi.AgentHttpIntegrationTest]: AgentHttpIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:36:42.221 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.group.usbshield.server.UsbShieldServerApplication for test class com.group.usbshield.server.agentapi.AgentHttpIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 18:36:43.107 [main] INFO  c.g.u.s.a.AgentHttpIntegrationTest - Starting AgentHttpIntegrationTest using Java 22.0.2 with PID 24276 (started by DELL in D:\USBProtection\admin-server)
+2026-11-01 18:36:43.108 [main] DEBUG c.g.u.s.a.AgentHttpIntegrationTest - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-11-01 18:36:43.110 [main] INFO  c.g.u.s.a.AgentHttpIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-11-01 18:36:44.558 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 18:36:44.683 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 104 ms. Found 5 JPA repository interfaces.
+2026-11-01 18:36:45.860 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 0 (http)
+2026-11-01 18:36:45.897 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-11-01 18:36:45.899 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.30]
+2026-11-01 18:36:46.016 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-11-01 18:36:46.017 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2859 ms
+2026-11-01 18:36:46.319 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 18:36:46.446 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-11-01 18:36:46.491 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 18:36:46.857 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 18:36:46.890 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-11-01 18:36:47.057 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:week1-http user=SA
+2026-11-01 18:36:47.057 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-11-01 18:36:47.082 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 18:36:48.074 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 18:36:48.129 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 18:36:48.703 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-01 18:36:49.845 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-01 18:36:49.891 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 18:36:50.156 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 18:36:51.224 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 61044 (http) with context path '/'
+2026-11-01 18:36:51.235 [main] INFO  c.g.u.s.a.AgentHttpIntegrationTest - Started AgentHttpIntegrationTest in 8.768 seconds (process running for 11.516)
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\DELL\.m2\repository\net\bytebuddy\byte-buddy-agent\1.14.19\byte-buddy-agent-1.14.19.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-11-01 18:36:52.113 [http-nio-127.0.0.1-auto-1-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-01 18:36:52.113 [http-nio-127.0.0.1-auto-1-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-11-01 18:36:52.117 [http-nio-127.0.0.1-auto-1-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 4 ms
+2026-11-01 18:36:52.691 [http-nio-127.0.0.1-auto-1-exec-2] INFO  c.g.u.s.a.AgentEventController - Accepted USB event id=1 endpointId=POC-UNENROLLED-LAB-PC-01
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.19 s -- in com.group.usbshield.server.agentapi.AgentHttpIntegrationTest
+[INFO] Running com.group.usbshield.server.EventSearchIntegrationTest
+2026-11-01 18:36:52.724 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.group.usbshield.server.EventSearchIntegrationTest]: EventSearchIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-01 18:36:52.942 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.group.usbshield.server.UsbShieldServerApplication for test class com.group.usbshield.server.EventSearchIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 18:36:52.980 [main] INFO  c.g.u.s.EventSearchIntegrationTest - Starting EventSearchIntegrationTest using Java 22.0.2 with PID 24276 (started by DELL in D:\USBProtection\admin-server)
+2026-11-01 18:36:52.980 [main] DEBUG c.g.u.s.EventSearchIntegrationTest - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-11-01 18:36:52.981 [main] INFO  c.g.u.s.EventSearchIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-11-01 18:36:53.629 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 18:36:53.650 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 16 ms. Found 5 JPA repository interfaces.
+2026-11-01 18:36:53.753 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 18:36:53.756 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 18:36:53.763 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 18:36:53.763 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-11-01 18:36:53.763 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:event-name-search user=SA
+2026-11-01 18:36:53.763 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-11-01 18:36:53.763 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 18:36:53.908 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 18:36:53.920 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 18:36:54.057 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-01 18:36:54.057 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 18:36:54.091 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 18:36:54.286 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-11-01 18:36:54.287 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-11-01 18:36:54.288 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-11-01 18:36:54.307 [main] INFO  c.g.u.s.EventSearchIntegrationTest - Started EventSearchIntegrationTest in 1.354 seconds (process running for 14.587)
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.100 s -- in com.group.usbshield.server.EventSearchIntegrationTest
+[INFO] Running com.group.usbshield.server.PolicyConsumerContractTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.756 s -- in com.group.usbshield.server.PolicyConsumerContractTest
+[INFO] Running com.group.usbshield.server.UsbShieldServerApplicationTests
+2026-11-01 18:36:57.589 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.group.usbshield.server.UsbShieldServerApplicationTests]: UsbShieldServerApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-01 18:36:57.593 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.group.usbshield.server.UsbShieldServerApplication for test class com.group.usbshield.server.UsbShieldServerApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 18:36:57.647 [main] INFO  c.g.u.s.UsbShieldServerApplicationTests - Starting UsbShieldServerApplicationTests using Java 22.0.2 with PID 24276 (started by DELL in D:\USBProtection\admin-server)
+2026-11-01 18:36:57.648 [main] DEBUG c.g.u.s.UsbShieldServerApplicationTests - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-11-01 18:36:57.648 [main] INFO  c.g.u.s.UsbShieldServerApplicationTests - No active profile set, falling back to 1 default profile: "default"
+2026-11-01 18:36:57.981 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 18:36:57.999 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 21 ms. Found 5 JPA repository interfaces.
+2026-11-01 18:36:58.182 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 18:36:58.188 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 18:36:58.207 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 18:36:58.209 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2026-11-01 18:36:58.213 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:context-test user=SA
+2026-11-01 18:36:58.213 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2026-11-01 18:36:58.214 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 18:36:58.391 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 18:36:58.442 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 18:36:58.589 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-01 18:36:58.604 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 18:36:58.640 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 18:36:58.819 [main] INFO  c.g.u.s.UsbShieldServerApplicationTests - Started UsbShieldServerApplicationTests in 1.22 seconds (process running for 19.1)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.245 s -- in com.group.usbshield.server.UsbShieldServerApplicationTests
+[INFO] Running com.group.usbshield.server.Week2ExistingH2Test
+2026-11-01 18:36:58.837 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.group.usbshield.server.Week2ExistingH2Test]: Week2ExistingH2Test does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-01 18:36:58.844 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.group.usbshield.server.UsbShieldServerApplication for test class com.group.usbshield.server.Week2ExistingH2Test
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 18:36:58.961 [main] INFO  c.g.u.server.Week2ExistingH2Test - Starting Week2ExistingH2Test using Java 22.0.2 with PID 24276 (started by DELL in D:\USBProtection\admin-server)
+2026-11-01 18:36:58.961 [main] DEBUG c.g.u.server.Week2ExistingH2Test - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-11-01 18:36:58.961 [main] INFO  c.g.u.server.Week2ExistingH2Test - No active profile set, falling back to 1 default profile: "default"
+2026-11-01 18:36:59.235 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 18:36:59.252 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 15 ms. Found 5 JPA repository interfaces.
+2026-11-01 18:36:59.333 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 18:36:59.340 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 18:36:59.348 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 18:36:59.349 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2026-11-01 18:36:59.387 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection conn31: url=jdbc:h2:file:D:/USBProtection/admin-server/target/week2-migration-6730850c-26e5-425a-b548-998b319e976c/legacy user=SA
+2026-11-01 18:36:59.387 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2026-11-01 18:36:59.388 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 18:36:59.545 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 18:36:59.596 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 18:36:59.787 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-01 18:36:59.816 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 18:36:59.855 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 18:37:00.111 [main] INFO  c.g.u.server.Week2ExistingH2Test - Started Week2ExistingH2Test in 1.26 seconds (process running for 20.392)
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.320 s -- in com.group.usbshield.server.Week2ExistingH2Test
+[INFO] Running com.group.usbshield.server.Week2ServerIntegrationTest
+2026-11-01 18:37:00.160 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.group.usbshield.server.Week2ServerIntegrationTest]: Week2ServerIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-01 18:37:00.191 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.group.usbshield.server.UsbShieldServerApplication for test class com.group.usbshield.server.Week2ServerIntegrationTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 18:37:00.236 [main] INFO  c.g.u.s.Week2ServerIntegrationTest - Starting Week2ServerIntegrationTest using Java 22.0.2 with PID 24276 (started by DELL in D:\USBProtection\admin-server)
+2026-11-01 18:37:00.236 [main] DEBUG c.g.u.s.Week2ServerIntegrationTest - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-11-01 18:37:00.236 [main] INFO  c.g.u.s.Week2ServerIntegrationTest - No active profile set, falling back to 1 default profile: "default"
+2026-11-01 18:37:00.673 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 18:37:00.709 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 35 ms. Found 5 JPA repository interfaces.
+2026-11-01 18:37:00.852 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 18:37:00.858 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 18:37:00.875 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 18:37:00.876 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Starting...
+2026-11-01 18:37:00.879 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-5 - Added connection conn42: url=jdbc:h2:mem:week2 user=SA
+2026-11-01 18:37:00.880 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Start completed.
+2026-11-01 18:37:00.881 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 18:37:01.063 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 18:37:01.079 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 18:37:01.228 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-01 18:37:01.241 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 18:37:01.272 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 18:37:01.521 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-11-01 18:37:01.522 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-11-01 18:37:01.526 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 4 ms
+2026-11-01 18:37:01.536 [main] INFO  c.g.u.s.Week2ServerIntegrationTest - Started Week2ServerIntegrationTest in 1.339 seconds (process running for 21.818)
+2026-11-01 18:37:04.616 [main] INFO  c.g.u.s.a.AgentEventController - Accepted USB event id=1 endpointId=EP-b5cc3d5b-942d-49c9-bb6b-3bcf7232ffcf
+2026-11-01 18:37:05.185 [main] INFO  c.g.u.s.a.AgentEventController - Accepted USB event id=2 endpointId=EP-46b28b90-7e93-4855-ae01-2dd2b7db3e77
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.136 s -- in com.group.usbshield.server.Week2ServerIntegrationTest
+[INFO] Running com.group.usbshield.server.Week3ProductionProfileTest
+2026-11-01 18:37:05.301 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.group.usbshield.server.Week3ProductionProfileTest]: Week3ProductionProfileTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-01 18:37:05.301 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.group.usbshield.server.UsbShieldServerApplication for test class com.group.usbshield.server.Week3ProductionProfileTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 18:37:05.340 [main] INFO  c.g.u.s.Week3ProductionProfileTest - Starting Week3ProductionProfileTest using Java 22.0.2 with PID 24276 (started by DELL in D:\USBProtection\admin-server)
+2026-11-01 18:37:05.340 [main] INFO  c.g.u.s.Week3ProductionProfileTest - The following 1 profile is active: "prod"
+2026-11-01 18:37:05.503 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 18:37:05.517 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 13 ms. Found 5 JPA repository interfaces.
+2026-11-01 18:37:05.591 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 18:37:05.591 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 18:37:05.603 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 18:37:05.603 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Starting...
+2026-11-01 18:37:05.608 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-6 - Added connection conn52: url=jdbc:h2:mem:prod-test user=SA
+2026-11-01 18:37:05.608 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Start completed.
+2026-11-01 18:37:05.608 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 18:37:05.730 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 18:37:05.753 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 18:37:05.878 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 18:37:05.891 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 18:37:05.991 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-11-01 18:37:05.991 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-11-01 18:37:05.991 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-11-01 18:37:05.991 [main] INFO  c.g.u.s.Week3ProductionProfileTest - Started Week3ProductionProfileTest in 0.683 seconds (process running for 26.285)
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.723 s -- in com.group.usbshield.server.Week3ProductionProfileTest
+[INFO] Running com.group.usbshield.server.Week3SecurityAndStatusTest
+2026-11-01 18:37:06.036 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.group.usbshield.server.Week3SecurityAndStatusTest]: Week3SecurityAndStatusTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-11-01 18:37:06.040 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.group.usbshield.server.UsbShieldServerApplication for test class com.group.usbshield.server.Week3SecurityAndStatusTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.3.4)
+
+2026-11-01 18:37:06.067 [main] INFO  c.g.u.s.Week3SecurityAndStatusTest - Starting Week3SecurityAndStatusTest using Java 22.0.2 with PID 24276 (started by DELL in D:\USBProtection\admin-server)
+2026-11-01 18:37:06.067 [main] DEBUG c.g.u.s.Week3SecurityAndStatusTest - Running with Spring Boot v3.3.4, Spring v6.1.13
+2026-11-01 18:37:06.067 [main] INFO  c.g.u.s.Week3SecurityAndStatusTest - No active profile set, falling back to 1 default profile: "default"
+2026-11-01 18:37:06.308 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-01 18:37:06.330 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 21 ms. Found 5 JPA repository interfaces.
+2026-11-01 18:37:06.420 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-01 18:37:06.422 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-11-01 18:37:06.430 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-01 18:37:06.430 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Starting...
+2026-11-01 18:37:06.430 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-7 - Added connection conn62: url=jdbc:h2:mem:week3 user=SA
+2026-11-01 18:37:06.430 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-7 - Start completed.
+2026-11-01 18:37:06.430 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-11-01 18:37:06.545 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-01 18:37:06.555 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-01 18:37:06.682 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-11-01 18:37:06.700 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name users
+2026-11-01 18:37:06.724 [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome page: class path resource [static/index.html]
+2026-11-01 18:37:06.844 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-11-01 18:37:06.844 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-11-01 18:37:06.845 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-11-01 18:37:06.851 [main] INFO  c.g.u.s.Week3SecurityAndStatusTest - Started Week3SecurityAndStatusTest in 0.808 seconds (process running for 27.132)
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.071 s -- in com.group.usbshield.server.Week3SecurityAndStatusTest
+[INFO]
+[INFO] Results:
+[INFO]
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
+[INFO]
+[INFO]
+[INFO] --- jar:3.4.2:jar (default-jar) @ admin-server ---
+[INFO] Building jar: D:\USBProtection\admin-server\target\usbshield-admin-server.jar
+[INFO]
+[INFO] --- spring-boot:3.3.4:repackage (repackage) @ admin-server ---
+[INFO] Replacing main artifact D:\USBProtection\admin-server\target\usbshield-admin-server.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to D:\USBProtection\admin-server\target\usbshield-admin-server.jar.original
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  41.677 s
+[INFO] Finished at: 2026-11-01T18:37:10+07:00
+[INFO] ------------------------------------------------------------------------
+PASS: built admin-server/target/usbshield-admin-server.jar
+SHA-256: d7fb3f8a2bb30b12ac8cdeb66009caa537336ac635180382ee1b74a1bf500f40
+Manifest: D:\USBProtection\docs\member1\week4-evidence\server-release-manifest.json
