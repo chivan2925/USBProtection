@@ -1,0 +1,1 @@
+{"status": "PASS", "assertionCount": 255, "exitCode": 0, "summary": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/http-transport-summary.json"}

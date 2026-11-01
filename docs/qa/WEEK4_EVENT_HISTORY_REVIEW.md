@@ -1,6 +1,16 @@
 # Week 4 — rà soát Event History của M5
 
-## Áp dụng hiện tại — 2026-10-31 / S2
+## Áp dụng hiện tại — 2026-11-01 / S3
+
+HEAD **`3efa50b50031dac9cec5738e286ec0a7730529ae`** đã nhận M2 Part 3 qua `942527c`; QA S2 trước đó đã commit `48a13b3` và merge `176e547` (PR #43). [Part 3 closeout](../usbguard/WEEK4_M2_PART3_FINAL_CLOSEOUT.md), [core guide](../usbguard/WEEK4_M2_CORE_OPERATIONS_GUIDE.md), [Q&A](../usbguard/WEEK4_M2_TECHNICAL_QA.md) và [M2/M3/M5 handoff](../usbguard/WEEK4_M2_M3_M5_UBUNTU_HANDOFF.md) **đã nhận**; không còn chờ giao các tài liệu này. [M5 Part 3 ACK](evidence/M5_WEEK4_M2_PART3_ACK_20261101.md) ghi technical review/verification riêng, không thay quyết định RC của M1.
+
+Đối chiếu Git tree S3/S2: frontend **`85938291c72c25de0fc7716261440cfe136128e7`**, Admin Server **`38147afb13fd3ac9d0e8aba23ec5d05630751d63`**, packaging **`5c0128b85b4c69f346baff694fadf2a49d257f35`** đều không đổi. M4 shared-frontend ACK và evidence Events/backend cũ tiếp tục áp dụng đúng source, giữ nguyên ngày/SHA gốc. Không có lượt frontend/server/browser mới. Agent policy/listener/notification thay đổi nên số 156 của S2 không phải kết quả S3; JAR mới cần staging/hash riêng dù script packaging không đổi.
+
+[Evidence 01/11](week4-evidence/2026-11-01/m2-part3-regression/README.md) đã có [Agent clean package 01](week4-evidence/2026-11-01/m2-part3-regression/01-agent-package.json) **174/174 PASS**, 0 failures/errors/skips, gồm 18 test mới theo bốn suite **9/7/1/1**, cùng policy **12**, session **8** và watch **9** trước đó. Guarded staging [02](week4-evidence/2026-11-01/m2-part3-regression/02-staging-prepare.json), full verifier [03](week4-evidence/2026-11-01/m2-part3-regression/03-packaging-week4.json) không Skip và independent integrity [04](week4-evidence/2026-11-01/m2-part3-regression/04-staging-integrity.json) **PASS 9/9 exact source/JAR bytes**. Production HTTP smoke [05](week4-evidence/2026-11-01/m2-part3-regression/05-http-transport.json) **PASS 255 assertions / 15 scenarios / 14 loopback requests**, dùng constructor thật với JDK HttpServer được kiểm soát, dữ liệu tổng hợp; không phải backend-security/retry scheduler/Ubuntu/GUI test. **[Final evidence validation PASS](week4-evidence/2026-11-01/m2-part3-regression/validation.json)** xác minh năm capture thành công, JUnit/build/staging/HTTP/source/tool/link/hash và bảo toàn evidence cũ; S3 không có capture FAIL. Đây là evidence S3 mới, không dùng lại 156 của S2; Windows mocks/byte checks không xác minh popup thực, native peer credentials/ACL hoặc POSIX modes.
+
+**W4-M5-03 hoàn tất review/ACK frontend không đổi; M5 đã nhận, review source/test và xác minh Windows khả thi cho Agent Part 3 hiện tại.** Không còn execution/evidence check M5 hiện tại ở trạng thái pending, và không mở lại toàn bộ Event History. Parser chỉ nhận subset đã xác minh; native `SO_PEERCRED`, socket ACL/reachability/name-squatting, đúng UID/GUI và rendering popup vẫn chưa được chứng minh bằng predicate/queue-publication tests. M1 final freeze/security/candidate, external PR-resolution/owner signoff và M3 IPC/provenance/runtime follow-up còn riêng biệt. Các phần bên dưới bảo toàn S2/S1/S0 cùng kết quả/giới hạn tại thời điểm đó.
+
+## Review/evidence lịch sử — 2026-10-31 / S2
 
 HEAD hiện tại: **`0b726304a29a78ac36aefbbc71e40fbd7758ae2e`**, chưa phải RC cuối do M1 chọn. Đối chiếu Git tree chỉ đọc xác nhận frontend **`85938291c72c25de0fc7716261440cfe136128e7`** và Admin Server **`38147afb13fd3ac9d0e8aba23ec5d05630751d63`** giống S1 `751387b` và source đã kiểm tra trước đó. Vì vậy [M4 handoff](evidence/M4_WEEK4_HANDOFF.md) và [M5 technical ACK](evidence/M5_WEEK4_POST_PULL_ACK_20261030.md) tiếp tục áp dụng cho đúng frontend không đổi tại S2. Các kết quả Events/browser ngày 28/10 và Agent ngày 30/10 giữ nguyên ngày/SHA gốc; lần cập nhật này không chạy lại frontend/server/browser.
 
@@ -57,7 +67,7 @@ Source/test chính:
 
 Events được seed bằng HTTP trong test là **dữ liệu tổng hợp đã lưu vào backend thật trong H2 cô lập**. Harness dùng tên `Windows-HTTP-QA`, `Windows HTTP QA storage` và các user `qa-*`; logs và report phải ghi rõ nguồn tổng hợp. UI gọi chúng là **“Dữ liệu máy chủ”**, vì đó là dữ liệu từ server; DTO hiện không có trường provenance để tự phân biệt event USB vật lý với event HTTP do QA tạo. Vì vậy screenshots/logs từ harness cần caption/index ghi **synthetic HTTP / Windows**, và không được dùng làm evidence USBGuard, Linux attribution thực tế hoặc GUI Ubuntu. Đây là giới hạn bằng chứng, không phải phát hiện production tự fallback mock.
 
-## Những phần còn phải đóng cho Week 4
+## Các mục được ghi nhận tại review lịch sử 28–30/10
 
 | Mục | Trạng thái và bước tiếp theo |
 |---|---|

@@ -1,0 +1,111 @@
+{
+  "baseRevision": "3efa50b50031dac9cec5738e286ec0a7730529ae",
+  "scope": "Current working-tree QA documents/tools; raw and LF-normalized hashes, separate from source evidence",
+  "files": [
+    {
+      "path": "docs/TEST_PLAN.md",
+      "bytes": 27693,
+      "sha256": "7da965a2d5e22e79bbbe5f8cffcddb5648087f93448ae52fa389e074f5e53617",
+      "lfNormalizedSHA256": "639de8d1230e2d14802137494f3c59462951b0c94b9e61f20cb09901bea9461c"
+    },
+    {
+      "path": "docs/DEMO_SCRIPT.md",
+      "bytes": 17522,
+      "sha256": "880019e3f84357c6631a703db35ae331e4ffdbfc6fec6851877f398d25df74c7",
+      "lfNormalizedSHA256": "880019e3f84357c6631a703db35ae331e4ffdbfc6fec6851877f398d25df74c7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/README.md",
+      "bytes": 3456,
+      "sha256": "53f09695b26fc0da36fadd75c351ffe205ea83c8db24a4720ef02e4bf0667a18",
+      "lfNormalizedSHA256": "53f09695b26fc0da36fadd75c351ffe205ea83c8db24a4720ef02e4bf0667a18"
+    },
+    {
+      "path": "docs/qa/evidence/M5_WEEK4_POST_PULL_ACK_20261030.md",
+      "bytes": 7916,
+      "sha256": "bd010b00980623440a8263e6c30bceba7d8f2b9866036c5f01034cfcfbc21e68",
+      "lfNormalizedSHA256": "bd010b00980623440a8263e6c30bceba7d8f2b9866036c5f01034cfcfbc21e68"
+    },
+    {
+      "path": "docs/qa/evidence/M4_WEEK4_HANDOFF.md",
+      "bytes": 2112,
+      "sha256": "441f92bc7e14338afde69c903e9dde3010e88c939ad962b3a817f40c028a6ec6",
+      "lfNormalizedSHA256": "7a936d844ff65288f345928ead4f5a00e0693f6ad79268fe8920edacf1ffe36c"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/README.md",
+      "bytes": 8173,
+      "sha256": "247c236f627f726f6003aac3c88e39cbe3c09650e07a7970862ae7b866b680ec",
+      "lfNormalizedSHA256": "247c236f627f726f6003aac3c88e39cbe3c09650e07a7970862ae7b866b680ec"
+    },
+    {
+      "path": "docs/qa/WEEK4_EVENT_HISTORY_REVIEW.md",
+      "bytes": 21153,
+      "sha256": "f23c2399eeca9b15ce717861cca9c30d166fb4a8369c9a3bcfb6ce3df4e72b66",
+      "lfNormalizedSHA256": "f23c2399eeca9b15ce717861cca9c30d166fb4a8369c9a3bcfb6ce3df4e72b66"
+    },
+    {
+      "path": "docs/qa/WEEK4_RELEASE_VALIDATION.md",
+      "bytes": 24097,
+      "sha256": "54acab0d4036cf93ef1bd089811ddf45044c4027f9b5227832a968bfd11bf36e",
+      "lfNormalizedSHA256": "54acab0d4036cf93ef1bd089811ddf45044c4027f9b5227832a968bfd11bf36e"
+    },
+    {
+      "path": "docs/qa/WEEK4_TEST_INVENTORY.md",
+      "bytes": 61593,
+      "sha256": "1c00fdf5dbbef6f447d7355b3eebaf15e84e9128c202cd42955f948259895041",
+      "lfNormalizedSHA256": "1c00fdf5dbbef6f447d7355b3eebaf15e84e9128c202cd42955f948259895041"
+    },
+    {
+      "path": "docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md",
+      "bytes": 32790,
+      "sha256": "b547711b3db4fbe498ec81004746d052cbec3fa59e5ef2acca30dc9aa2b8ce8a",
+      "lfNormalizedSHA256": "b547711b3db4fbe498ec81004746d052cbec3fa59e5ef2acca30dc9aa2b8ce8a"
+    },
+    {
+      "path": "docs/qa/evidence/M5_WEEK4_M2_M3_ACK_20261031.md",
+      "bytes": 7858,
+      "sha256": "6e8d406f2777fff62571e924d6d37f1e2c189e67a23ae5ac5d5efb93ce6d8ad4",
+      "lfNormalizedSHA256": "6e8d406f2777fff62571e924d6d37f1e2c189e67a23ae5ac5d5efb93ce6d8ad4"
+    },
+    {
+      "path": "docs/qa/evidence/M5_WEEK4_M2_PART3_ACK_20261101.md",
+      "bytes": 13451,
+      "sha256": "97b884c98f3f2193d039114a7ee4f40e12fbc45ae3803e8690bfac4ea4cf8f86",
+      "lfNormalizedSHA256": "97b884c98f3f2193d039114a7ee4f40e12fbc45ae3803e8690bfac4ea4cf8f86"
+    },
+    {
+      "path": "docs/qa/scripts/capture-week4.mjs",
+      "bytes": 8523,
+      "sha256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+      "lfNormalizedSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8"
+    },
+    {
+      "path": "docs/qa/scripts/validate-week4-post-pull.py",
+      "bytes": 16389,
+      "sha256": "06fcef9a6432a5cbea47387f9c50f1ba7e03913e606f34e65111461803c3d3d1",
+      "lfNormalizedSHA256": "06fcef9a6432a5cbea47387f9c50f1ba7e03913e606f34e65111461803c3d3d1"
+    },
+    {
+      "path": "docs/qa/scripts/prepare-week4-staging.ps1",
+      "bytes": 2958,
+      "sha256": "4fb2afe8733494edc8b15e02cdfde99924d5949d67b499b5c16ca594374f6295"
+    },
+    {
+      "path": "docs/qa/scripts/AgentHttpTransportSmoke.java",
+      "bytes": 18518,
+      "sha256": "d7ec5f63b9f7b7c649acf41e5e5e4a758c1ea7071ea0f8e38e7be96c38abe303"
+    },
+    {
+      "path": "docs/qa/scripts/run-agent-http-smoke.py",
+      "bytes": 8205,
+      "sha256": "b0f6828550b2acbf6d9906b7d48ed3f4c49f9c04eeccde97ca7ace59b7620801",
+      "lfNormalizedSHA256": "b0f6828550b2acbf6d9906b7d48ed3f4c49f9c04eeccde97ca7ace59b7620801"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/run-spec.json",
+      "bytes": 4758,
+      "sha256": "da270001dce153c2460636787d856f1d4160482ed5afe749b001c832251983da"
+    }
+  ]
+}
