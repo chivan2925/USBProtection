@@ -138,56 +138,42 @@ fields `vendorId,productId,serial,name,hash,interfaceClass`. Hostname is capture
 ingestion; legacy rows fall back to registry hostname. FE maps enums to its view
 model at the adapter boundary; no backend contract change or mock fallback.
 
-## Errors
+## Client request examples
+
+The Bash examples use curl and jq and assume the endpoint has already enrolled.
+Provide its endpoint ID and Agent token from enrollment through local environment
+variables or a secret store; never commit or record a real token. The body endpointId
+must match the X-Endpoint-Id header.
 
 ### 6.1. Gửi Heartbeat thử nghiệm:
 ```bash
-curl -X POST http://localhost:8080/api/agent/heartbeat \
-  -H "Content-Type: application/json" \
-  -d '{
-    "endpointId": "POC-UNENROLLED-LAB-PC-01",
-    "hostname": "usbshield-lab",
-    "agentVersion": "1.0.0-SNAPSHOT",
-    "currentPolicyVersion": 1
-  }'
+jq -n --arg endpoint "$AGENT_ENDPOINT_ID" \
+  '{endpointId:$endpoint,hostname:"usbshield-lab",agentVersion:"1.0.0-SNAPSHOT",currentPolicyVersion:1}' | \
+  curl -X POST http://localhost:8080/api/agent/heartbeat \
+    -H "X-Endpoint-Id: ${AGENT_ENDPOINT_ID}" \
+    -H "X-Agent-Token: ${AGENT_TOKEN}" \
+    -H "Content-Type: application/json" \
+    --data-binary @-
 ```
 
 ### 6.2. Gửi sự kiện USB kèm Active User:
-```bash
-curl -X POST http://localhost:8080/api/agent/events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "endpointId": "POC-UNENROLLED-LAB-PC-01",
-    "hostname": "usbshield-lab",
-    "linuxUsername": "usbdev",
-    "linuxUid": 1000,
-    "sessionId": "21",
-    "sessionType": "wayland",
-    "seat": "seat0",
-    "device": {
-      "vendorId": "093a",
-      "productId": "2510",
-      "serial": "",
-      "name": "USB Optical Mouse",
-      "hash": "L46bZEAKg59EA+puzjHMh8D4jLliJqK4sYxKSd/DRz8=",
-      "interface": "03:01:02"
-    },
-    "eventType": "CONNECTED",
-    "decision": "ALLOWED",
-    "occurredAt": "2026-09-28T14:10:16+07:00"
-  }'
-```
 
-Ví dụ event trên phải khớp `docs/agent-contract/sample-usb-event.json` của M2: USB Optical Mouse (class `03:01:02`) được `ALLOWED`, session `21`. Đây là sample peripheral, không phải evidence chặn Flash Disk. Để gửi nguyên sample từ repo root, dùng:
+Lệnh trên đọc trực tiếp sample M2 và chỉ thay endpoint tham chiếu bằng ID đã enroll.
+USB Optical Mouse (class `03:01:02`) được `ALLOWED`, session `21`; đây là sample
+peripheral, không phải evidence chặn Flash Disk.
 
 ```bash
-curl -X POST http://localhost:8080/api/agent/events \
-  -H "Content-Type: application/json" \
-  --data-binary @docs/agent-contract/sample-usb-event.json
+jq --arg endpoint "$AGENT_ENDPOINT_ID" '.endpointId = $endpoint' docs/agent-contract/sample-usb-event.json | \
+  curl -X POST http://localhost:8080/api/agent/events \
+    -H "X-Endpoint-Id: ${AGENT_ENDPOINT_ID}" \
+    -H "X-Agent-Token: ${AGENT_TOKEN}" \
+    -H "Content-Type: application/json" \
+    --data-binary @-
 ```
 
 ### 6.3. Kéo chính sách Whitelist của Endpoint:
 ```bash
 curl -X GET http://localhost:8080/api/agent/policy \
-  -H "X-Endpoint-Id: POC-UNENROLLED-LAB-PC-01"
+  -H "X-Endpoint-Id: ${AGENT_ENDPOINT_ID}" \
+  -H "X-Agent-Token: ${AGENT_TOKEN}"
 ```

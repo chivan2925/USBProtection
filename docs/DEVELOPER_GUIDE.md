@@ -23,8 +23,10 @@ not claim Ubuntu USBGuard, systemd, desktop notification or `.deb` runtime tests
 
 ## Requirements and local development
 
-Use JDK 21 or newer, Maven 3.9+, Node.js and npm. The Maven compiler targets Java
-21. Install frontend dependencies from the lockfile and build the backend tests:
+Use JDK 21; the Week 4 Windows release build was verified with JDK 22.0.2, Maven
+3.9.9, Node.js 22.19.0 and npm 10.9.3. The Maven compiler targets Java 21. Validate
+other JDK versions against the pinned Lombok compiler integration. Install frontend
+dependencies from the lockfile and build the backend tests:
 
 ```powershell
 cd frontend

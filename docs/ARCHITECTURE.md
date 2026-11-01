@@ -164,16 +164,16 @@ erDiagram
 3. Thiết bị không có class `08` khớp base allow rule. Mass Storage chưa có rule allow cụ thể sẽ rơi vào implicit **BLOCK** ở tầng nhân.
 4. `UsbGuardEventListener` trong Client Agent bắt được tín hiệu từ `usbguard watch`.
 5. `ActiveUserResolver` truy vấn `systemd-logind` để lấy session local đang active (user, uid, session type).
-6. Client Agent đóng gói `AgentEventRequest` và gửi `POST /api/agent/events` tới Admin Server.
+6. Client Agent đóng gói `AgentEventRequest` và gửi `POST /api/agent/events` với cả `X-Endpoint-Id` và `X-Agent-Token` tới Admin Server.
 7. Admin Server lưu trữ sự kiện vào bảng `usb_events` và thông báo tới Admin Console.
 
 ### 5.2. Luồng đồng bộ chính sách (Policy Synchronization Flow)
-1. Định kỳ mỗi 15-30 giây, Client Agent gửi `POST /api/agent/heartbeat` chứa `currentPolicyVersion`.
+1. Định kỳ mỗi 15-30 giây, Client Agent gửi `POST /api/agent/heartbeat` chứa `currentPolicyVersion`, kèm cả `X-Endpoint-Id` và `X-Agent-Token`.
 2. Admin Server kiểm tra nếu `desiredPolicyVersion > currentPolicyVersion`, phản hồi desired version để Agent quyết định đồng bộ.
-3. Client Agent gọi `GET /api/agent/policy` kèm định danh máy qua header `X-Endpoint-Id`.
+3. Client Agent gọi `GET /api/agent/policy` kèm cả `X-Endpoint-Id` và `X-Agent-Token`; cặp credential xác thực và giới hạn request vào một endpoint.
 4. Admin Server chỉ trả về danh sách Whitelist được gán riêng cho máy đó.
 5. Client Agent sinh luật tương thích với USBGuard, cập nhật file `/etc/usbguard/rules.conf` và nạp lại daemon.
-6. Client Agent gửi `POST /api/agent/policy/ack` xác nhận đã áp dụng thành công phiên bản mới.
+6. Client Agent gửi `POST /api/agent/policy/ack` với cùng cặp header xác thực, chỉ sau khi đã áp dụng thành công phiên bản mới.
 
 ---
 

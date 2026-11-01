@@ -47,7 +47,9 @@ configuration and operations instructions are in the [Developer Guide](docs/DEVE
 
 ### Local development
 
-Requirements: JDK 21 or newer, Maven 3.9+, Node.js/npm for the React bundle.
+Requirements: JDK 21; the Week 4 Windows release build was verified with JDK
+22.0.2, Maven 3.9.9, Node.js 22.19.0 and npm 10.9.3. The project targets Java 21;
+validate other JDK versions against the pinned Lombok compiler integration.
 The default profile is for local development. It binds to port 8080, uses an
 ignored local H2 file under `admin-server/data/`, and does not create an Admin
 account or enable enrollment until their secrets are configured.

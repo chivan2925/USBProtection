@@ -13,7 +13,7 @@ integration review. This report separates M1 evidence from group/Ubuntu gates.
 | W4-M1-03 regression | PASS — M1 Windows scope | Rebased source: Maven backend/integration suite 28 tests, 0 failures/errors/skips; production-profile packaged-JAR HTTP smoke PASS with isolated file H2 and synthetic credentials/events. Browser regression remains M4/M5 evidence and is not attributed to M1. |
 | W4-M1-04 documentation | DONE | README, Architecture, API and Agent protocol aligned; [Developer Guide](../DEVELOPER_GUIDE.md) added. |
 | W4-M1-05 server JAR | PASS — Windows artifact | React production bundle + Spring JAR built from source commit `044cb1d2a9107632f0e1f4cc984afb20b1381200`; SHA-256, source tree and toolchain are in the [release manifest](week4-evidence/server-release-manifest.json). Packaged JAR served React and `/api` over same-origin HTTP. |
-| W4-M1-06 integration owner | PROPOSED — group decision pending | M1 proposes the source/artifact in the manifest as the Windows candidate. Group acceptance remains open for M2/M3 dispositions/sign-offs and credential rotation; do not create a release-candidate tag or claim group-wide PASS. |
+| W4-M1-06 integration owner | M1 REVIEW COMPLETE — GROUP SIGN-OFF PENDING | M1 reviewed the current M2/M3/M4/M5 handoffs and selected the manifest artifact as the M1 Windows preparation candidate. Group release acceptance remains NO-GO pending M2/M3 dispositions and owner sign-offs; no RC tag or group-wide PASS is asserted. |
 | W4-M1-07 credential rotation | OPEN | A credential appeared in public Git history. The deployment secret is not available in this workspace; the environment administrator must rotate it and re-enroll affected Agents. No success claim is made. |
 
 ## Review findings and changes
@@ -34,11 +34,17 @@ and enrollment settings. Refreshed regression evidence is summarized below.
 
 ## Integration dependency
 
-The latest QA handoff records M5-W3-07 as resolved. Remaining cross-owner items are
-M3's per-UID socket ACL/ownership/startup disposition (shared directory and GUI-owned
-socket access have not been demonstrated), plus M2 external PR review and contract,
-native, and cross-owner confirmations. M4's shared frontend handoff has been received
-and technically acknowledged. These are owner decisions; M1 does not sign for them.
+M1 reviewed the latest available owner/QA handoffs and selected the Windows candidate
+recorded in the manifest: source `044cb1d2a9107632f0e1f4cc984afb20b1381200`, JAR
+SHA-256 `357742ea65acdfe7a3a5afa899b14b76e7c57b5a28cd7b850305b46037c70bab`. M5-W3-07
+is resolved. M2 Part 3 has technical Windows ACK/evidence, while external PR review,
+contract/native and cross-owner confirmations remain open. M3's per-UID socket
+ACL/ownership/startup design is not proven; `.deb` remains NOT BUILT per the documented
+environment deferral. M4's shared frontend handoff is received and technically
+acknowledged. M5's S3 report records Windows evidence PASS but group release NO-GO;
+M1 now records its candidate decision, without changing or signing for other owners.
+No RC tag or group-wide PASS is appropriate until the required owner dispositions and
+sign-offs are recorded. Credential rotation/re-enrollment remains external and open.
 Ubuntu USBGuard/systemd/GUI/installer/reboot tests remain deferred under the Week 4 plan.
 
 ## Build and verification evidence
