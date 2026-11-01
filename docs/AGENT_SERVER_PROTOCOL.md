@@ -1,6 +1,6 @@
 # Agent–Server Protocol v0.2 — Week 2
 
-Updated 2026-10-16 (Asia/Saigon), owner M1.
+Updated 2026-11-01 (Asia/Saigon), owner M1. Wire contract remains v0.2.
 Authoritative current routes, fields, authentication/errors and examples are in
 [API v0.2](API.md). Changes from v0.1:
 
@@ -11,6 +11,15 @@ Authoritative current routes, fields, authentication/errors and examples are in
 - Heartbeat never updates applied version. Validated ACK is the only update path.
 - M2 event shape remains unchanged; its frozen mouse sample is session 21 / ALLOWED.
 - Admin APIs use session cookies and CSRF; errors and pagination have explicit shape.
+
+## Week 4 freeze
+
+Week 4 makes no breaking wire changes. The canonical route, request and response
+definitions are in [API v0.2](API.md#week-4-apidto-freeze-v02). Agent tokens remain
+bound to the endpoint identity; the authenticated endpoint is authoritative for
+event attribution. Heartbeat is connectivity/telemetry only, desired policy is
+separate from the Agent-reported applied version, and only a valid ACK advances the
+applied version. Production disables Swagger/OpenAPI; local development may use it.
 
 M2/M3 review and hardware interoperability remain integration work; no team sign-off
 is implied by publishing v0.2. Week 1 remains closed under its original scope.

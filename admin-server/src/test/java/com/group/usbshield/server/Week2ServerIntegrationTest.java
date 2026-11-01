@@ -71,7 +71,9 @@ class Week2ServerIntegrationTest {
     }
     @Test void enrollmentRejectsInvalidAndDuplicateAndHashesCredential() throws Exception {
         mvc.perform(post("/api/agent/enroll").contentType("application/json").content("{\"enrollmentToken\":\"wrong\"}" )).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/agent/enroll").contentType("application/json").content(mapper.writeValueAsString(Map.of("enrollmentToken","x".repeat(257))))).andExpect(status().isUnauthorized());
         mvc.perform(post("/api/agent/enroll").contentType("application/json").content("{\"enrollmentToken\":\"integration-test-bootstrap\"}" )).andExpect(status().isBadRequest());
+        mvc.perform(post("/api/agent/enroll").contentType("application/json").content(mapper.writeValueAsString(Map.of("hostname","host","machineId","machine","ipAddress","1".repeat(51),"enrollmentToken","integration-test-bootstrap")))).andExpect(status().isBadRequest());
         var a=enroll();var e=endpoints.findByEndpointId(a.id()).orElseThrow();
         assertThat(e.getAgentTokenHash()).isNotEqualTo(a.token());assertThat(encoder.matches(a.token(),e.getAgentTokenHash())).isTrue();
         mvc.perform(post("/api/agent/enroll").contentType("application/json").content(mapper.writeValueAsString(Map.of("machineId",e.getMachineId(),"hostname","duplicate","enrollmentToken","integration-test-bootstrap"))))

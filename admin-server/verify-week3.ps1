@@ -1,7 +1,11 @@
-param([string]$JavaHome = $env:JAVA_HOME, [int]$Port = 18083)
+param(
+    [string]$JavaHome = $env:JAVA_HOME,
+    [int]$Port = 18083,
+    [string]$EvidencePath = 'docs/member1/week3-evidence'
+)
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path $PSScriptRoot -Parent
-$evidence = Join-Path $repo 'docs/member1/week3-evidence'
+$evidence = if ([System.IO.Path]::IsPathRooted($EvidencePath)) { $EvidencePath } else { Join-Path $repo $EvidencePath }
 $runId = [guid]::NewGuid().ToString('N')
 $runtime = Join-Path $PSScriptRoot "target/week3-$runId"
 New-Item -ItemType Directory -Force $evidence, $runtime | Out-Null
@@ -52,7 +56,11 @@ try {
     if ($navigation.Headers.Location -notmatch '/#/events$') { throw 'SPA navigation mapping failed.' }
     $missingAsset = Invoke-WebRequest "$base/assets/missing.js" -SkipHttpErrorCheck
     if ($missingAsset.StatusCode -ne 404) { throw 'Missing asset must not fall back to SPA.' }
-    'PASS: production profile JAR serves React index and assets; /events redirects to hash route; missing assets 404.' | Set-Content "$evidence/07-static-http.txt"
+    foreach ($docsPath in @('/api-docs','/swagger-ui.html')) {
+        $docsResponse = Invoke-WebRequest "$base$docsPath" -SkipHttpErrorCheck
+        if ($docsResponse.StatusCode -ne 404) { throw "Production API docs should be disabled: $docsPath returned $($docsResponse.StatusCode)." }
+    }
+    'PASS: production JAR serves React index/assets; /events redirects; missing assets and Swagger/OpenAPI return 404.' | Set-Content "$evidence/07-static-http.txt"
     $web = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
     $csrf = Assert-Http '/api/auth/csrf' GET $null @{} 200 $web
     Assert-Http '/api/auth/me' GET $null @{} 401 | Out-Null

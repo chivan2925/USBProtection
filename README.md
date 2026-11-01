@@ -39,31 +39,43 @@ USBProtection/
 
 ---
 
-## 3. Hướng dẫn khởi chạy Admin Server (`admin-server`)
+## 3. Admin Server development and deployment
 
-### Yêu cầu môi trường:
-- Java JDK 21 trở lên (Khuyến nghị JDK 21 hoặc JDK 22).
-- Maven 3.9+ (hoặc dùng `./mvnw`).
+The supported API contract is frozen at v0.2; see [API](docs/API.md) and the
+[Agent–Server protocol](docs/AGENT_SERVER_PROTOCOL.md). Detailed build, test,
+configuration and operations instructions are in the [Developer Guide](docs/DEVELOPER_GUIDE.md).
 
-### Các bước khởi chạy:
-```bash
+### Local development
+
+Requirements: JDK 21 or newer, Maven 3.9+, Node.js/npm for the React bundle.
+The default profile is for local development. It binds to port 8080, uses an
+ignored local H2 file under `admin-server/data/`, and does not create an Admin
+account or enable enrollment until their secrets are configured.
+
+```powershell
+$env:USBSHIELD_ADMIN_PASSWORD = '<local-only password>'
+$env:USBSHIELD_ENROLLMENT_TOKEN = '<local-only bootstrap token>'
 cd admin-server
-
-# Build và chạy kiểm thử
-mvn clean test
-
-# Cấu hình secret ngoài repo trước khi chạy (biến môi trường):
-# USBSHIELD_ADMIN_PASSWORD, USBSHIELD_ENROLLMENT_TOKEN
-# USBSHIELD_ADMIN_USERNAME optional, mặc định admin
 mvn spring-boot:run
 ```
 
-Sau khi server khởi động thành công:
-- **Server URL:** `http://localhost:8080`
-- **Swagger UI (Interactive API Docs):** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-- **H2 Console:** tắt và bị chặn qua HTTP ở Week 2. File DB được giữ nguyên.
-- **Week 2 API/auth/CSRF:** [API v0.2](docs/API.md); [báo cáo M1](docs/member1/WEEK2_SERVER_INTEGRATION.md).
-- Frontend dev cần proxy `/api` cùng origin (M4); không mở CORS wildcard.
+Local API docs are available at `http://localhost:8080/swagger-ui.html` and
+`http://localhost:8080/api-docs`. They are disabled in the `prod` profile.
+
+### Production profile
+
+Set `USBSHIELD_DB_URL`, `USBSHIELD_DB_PASSWORD`, `USBSHIELD_ADMIN_PASSWORD`, and
+`USBSHIELD_ENROLLMENT_TOKEN` outside the repository, then run the packaged JAR
+with `--spring.profiles.active=prod`. Production binds to loopback by default,
+uses secure HttpOnly SameSite cookies, and requires HTTPS for Admin browser access.
+For remote access, terminate TLS at a trusted reverse proxy and proxy to the
+loopback listener. Do not expose the server over plain HTTP or set
+`USBSHIELD_COOKIE_SECURE=false` outside isolated local smoke tests.
+
+The H2 console and interactive API docs are disabled in production. Keep the DB
+file in a persistent private directory, restrict it to the service account, and
+back it up while the server is stopped. Runtime DB, endpoint credentials and event
+spool data are local state and must not be committed.
 
 ---
 

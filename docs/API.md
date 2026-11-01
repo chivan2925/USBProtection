@@ -1,9 +1,32 @@
 # USBShield REST API v0.2 — Week 2
 
-Owner: M1. Updated 2026-10-16 (Asia/Saigon).
+Owner: M1. Contract freeze reaffirmed 2026-11-01 (Asia/Saigon); wire version remains v0.2.
 Canonical Admin routes are `/api/admin/**`, not `/api/endpoints` or `/api/events`.
 [Week 1 draft archive](member1/API_V0_1_ARCHIVE.md) is historical; no Week 1 Gate is reopened.
 OpenAPI: `/api-docs`; Swagger: `/swagger-ui.html`.
+These interactive docs are for local development only and are disabled by the `prod` profile.
+
+## Week 4 API/DTO freeze (v0.2)
+
+No breaking API or JSON field changes are introduced for Week 4. This file is the
+canonical route/DTO reference; the Agent protocol summary below is subordinate to it.
+The frozen security and state semantics are:
+
+| Surface | Identity / authorization | Frozen behavior |
+|---|---|---|
+| Admin `/api/auth/**`, `/api/admin/**` | Admin session; CSRF header on mutations | Agent credentials do not authorize Admin calls. Session cookie is HttpOnly and SameSite Strict; `prod` also sets Secure. |
+| `POST /api/agent/enroll` | Bootstrap token in request; no Agent token yet | Invalid/missing bootstrap → 401; enrollment disabled → 503; duplicate `machineId` → 409; existing credentials are not silently rotated. |
+| Other `/api/agent/**` | `X-Endpoint-Id` + `X-Agent-Token` | Token is verified against the stored hash and bound to one endpoint. Missing/invalid token → 401; a claimed body/query endpoint mismatch → 403. |
+| Heartbeat and policy ACK | Authenticated Agent identity | Heartbeat changes connectivity only. ACK alone changes `appliedPolicyVersion`; it cannot exceed desired or regress below applied. |
+| Allow/Revoke and events | Admin session for policy changes; Agent identity for event ingestion | Policy is isolated per endpoint. Event endpoint identity comes from the authenticated token and must match the body. |
+
+Request limits mirror persisted columns: enrollment hostname 150, machine ID 100,
+optional IP address 50, bootstrap token 256 characters; event Linux username 100,
+session fields 50 and device identifiers use the limits in their DTO. Malformed or
+oversized requests return 400; these limits do not change valid v0.2 payloads.
+`desiredPolicyVersion` is server-owned intent; `appliedPolicyVersion` is an Agent
+report and does not independently prove USBGuard enforcement. No global Allow API
+or endpoint deletion API is part of this freeze.
 
 ## Authentication and deployment
 
@@ -37,7 +60,8 @@ Passwords/tokens must not be stored in source, screenshots or evidence logs.
 All Agent routes except enrollment require BOTH `X-Endpoint-Id` and `X-Agent-Token`.
 Agent credentials do not grant Admin access. Admin session alone does not grant
 Agent access. CSRF is exempted only on Agent routes, which use explicit credentials.
-Tokens are returned once and stored as BCrypt hashes. Re-enrollment of an existing
+Generated Agent tokens are 72 ASCII characters, returned once and stored as BCrypt hashes.
+Re-enrollment of an existing
 machineId returns 409 (no silent rotation); retain its credential. Legacy endpoints
 without a hash are rejected until an administrator performs controlled recovery.
 Concurrent duplicate machine enrollments are protected by a unique machineId constraint.
