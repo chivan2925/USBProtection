@@ -1,0 +1,84 @@
+{
+  "id": "05-browser-events",
+  "scope": "Chromium Event History integration against updated Spring/H2: paging/date/search/UNKNOWN/no-serial/user-switch/A-B and injected failures; synthetic HTTP seed",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceTreeSHA256After": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "tests/browser-live.mjs"
+  ],
+  "launch": {
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "tests/browser-live.mjs"
+    ]
+  },
+  "startedAt": "2026-11-01T13:58:43.645Z",
+  "endedAt": "2026-11-01T13:59:06.024Z",
+  "startedAtBangkok": "2026-11-01 20:58:43 +07:00",
+  "endedAtBangkok": "2026-11-01 20:59:06 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "9f7800285e1dc0d25d51669507af36997acf388e7df042b20590c5cf43823435",
+  "screenshots": [
+    {
+      "path": "screenshots/05-browser-events/events-name-search.png",
+      "sha256": "d1c21ddd45b7eb1eb22e0cbdbf32dcce5f1d1fa573beb1221e34b986031249bc",
+      "bytes": 207398,
+      "modifiedAt": "2026-11-01T13:59:00.481Z"
+    },
+    {
+      "path": "screenshots/05-browser-events/events-real-http-date-filter.png",
+      "sha256": "10ba8a7fc522d29fd4cb53c3e68dcf3b62c05a2aee3077c44941266cf1677641",
+      "bytes": 207130,
+      "modifiedAt": "2026-11-01T13:59:01.260Z"
+    },
+    {
+      "path": "screenshots/05-browser-events/events-real-http-desktop.png",
+      "sha256": "c1470ad998558d3e5fb7fd6800bba741f90d1b8c237b23b823fbe249b5ada1ea",
+      "bytes": 207118,
+      "modifiedAt": "2026-11-01T13:58:59.081Z"
+    },
+    {
+      "path": "screenshots/05-browser-events/events-real-http-mobile.png",
+      "sha256": "c5be64773d6791ea3c951abc277ab968d2b62770b165becdcb014f1e044715b6",
+      "bytes": 118346,
+      "modifiedAt": "2026-11-01T13:59:01.647Z"
+    },
+    {
+      "path": "screenshots/05-browser-events/events-username-substring.png",
+      "sha256": "671c167a6b5c61c48c50719acc3da323567963971d4527a84f50e8d5d884ac92",
+      "bytes": 76526,
+      "modifiedAt": "2026-11-01T13:59:02.896Z"
+    },
+    {
+      "path": "screenshots/05-browser-events/events-week3-endpoint-a.png",
+      "sha256": "05b3302036558b324299bc7961f78c2d4243bca47c1cb262c9ffe144a99ef6f7",
+      "bytes": 76027,
+      "modifiedAt": "2026-11-01T13:59:04.031Z"
+    },
+    {
+      "path": "screenshots/05-browser-events/events-week3-endpoint-b.png",
+      "sha256": "2a47f62575d90a582d265f7883f0baf74844b1ef3d31541ffc096ee894dea226",
+      "bytes": 69615,
+      "modifiedAt": "2026-11-01T13:59:03.497Z"
+    },
+    {
+      "path": "screenshots/05-browser-events/events-week3-unknown-no-serial.png",
+      "sha256": "163bbd2e4fe5f988fa16e1fc94e0b40944dea24136c1426a62e9aeff36d58158",
+      "bytes": 68975,
+      "modifiedAt": "2026-11-01T13:59:03.094Z"
+    }
+  ],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression"
+}

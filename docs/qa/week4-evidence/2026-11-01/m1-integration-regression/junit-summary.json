@@ -1,0 +1,92 @@
+{
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "totals": {
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "suites": [
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.agentapi.AgentEventContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "ae0d36e7ee420b5d0b735632d84c0ba1eca4a075e49116dfedd8e70c4e18b86c"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.agentapi.AgentHttpIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "768e2547029248561e77ff1b24ec3533cc7bb65634f3e4a2adf41fd9bcb321fb"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.EventSearchIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "2c22a50e7a85c7edd217f1807dcfeccdc4549902edbefe5569d2822bfd13f5a6"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.PolicyConsumerContractTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "802ccaf34f68b9fc486d4cc07a72ab56fe35967ed7edc36db2975052064a67e3"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.UsbShieldServerApplicationTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "e6f6f7e8e1bc6096ab02d944b4dbad84f69b553c748404c21976a8ab8a7861c1"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week2ExistingH2Test",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "625dee3c5e8d51f16d1c89f2faad34f6e97e244d409f1a725caacc6569ef48a1"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week2ServerIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "184566f675409096a2e53f9cfd39ebf483b2c8ce90e5d36a149a2d41aab4d3ab"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week3ProductionProfileTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "7a34241ac4f2c590febc923a335b7ef1d9c5439f46f7c2c69d5f1e98961cffc1"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week3SecurityAndStatusTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "b3d63aefa8296820c4824f3762c874413db29bb68d5afbc7e80cfc798412090f"
+    }
+  ]
+}

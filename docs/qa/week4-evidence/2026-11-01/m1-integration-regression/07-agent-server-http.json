@@ -1,0 +1,43 @@
+{
+  "id": "07-agent-server-http",
+  "scope": "Actual built production Agent client to real prod-profile Spring server: auth, event bounds, A-B policy/ACK, canonical history and INFO log minimization; synthetic QA only",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceTreeSHA256After": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+  "args": [
+    "docs/qa/scripts/run-agent-server-smoke.py",
+    "--run-dir",
+    "docs/qa/week4-evidence/2026-11-01/m1-integration-regression",
+    "--java-home",
+    "C:\\Program Files\\Java\\jdk-22"
+  ],
+  "launch": {
+    "exe": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/run-agent-server-smoke.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-11-01/m1-integration-regression",
+      "--java-home",
+      "C:\\Program Files\\Java\\jdk-22"
+    ]
+  },
+  "startedAt": "2026-11-01T14:01:23.326Z",
+  "endedAt": "2026-11-01T14:01:46.934Z",
+  "startedAtBangkok": "2026-11-01 21:01:23 +07:00",
+  "endedAtBangkok": "2026-11-01 21:01:46 +07:00",
+  "exitCode": 1,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "FAIL",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "98df2de53c66e56fdcf8bc57f97c89cc430679e7557527c52368929907086493",
+  "screenshots": [],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression"
+}

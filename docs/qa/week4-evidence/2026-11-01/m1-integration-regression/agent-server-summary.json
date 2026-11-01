@@ -1,0 +1,393 @@
+{
+  "status": "FAIL",
+  "startedAt": "2026-11-01T14:01:23.597183+00:00",
+  "assertionCount": 27,
+  "exitCode": 1,
+  "scope": "Actual built production AdminServerClient -> actual packaged Spring Admin Server/prod over loopback. Synthetic credentials/data; no native daemon, durable retries, IPC, GUI, USB or Ubuntu execution.",
+  "commands": {
+    "server": {
+      "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+      "args": [
+        "-jar",
+        "D:\\USBProtection\\admin-server\\target\\usbshield-admin-server.jar",
+        "--spring.profiles.active=prod",
+        "--server.address=127.0.0.1",
+        "--server.port=10900",
+        "--server.servlet.session.cookie.secure=false",
+        "--spring.datasource.url=jdbc:h2:file:D:/USBProtection/admin-server/target/qa-integration-_j1208ao/server-db;DB_CLOSE_ON_EXIT=FALSE"
+      ],
+      "cwd": "D:\\USBProtection\\admin-server\\target\\qa-integration-_j1208ao",
+      "secretDelivery": "Synthetic environment variables, values omitted"
+    },
+    "harness": {
+      "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+      "args": [
+        "-Dlogback.configurationFile=D:\\USBProtection\\admin-server\\target\\qa-integration-_j1208ao\\logback-agent-off.xml",
+        "-cp",
+        "D:\\USBProtection\\admin-server\\target\\qa-integration-_j1208ao\\classes;D:\\USBProtection\\admin-server\\target\\qa-integration-_j1208ao\\lib\\*",
+        "D:\\USBProtection\\docs\\qa\\scripts\\AgentServerIntegrationSmoke.java",
+        "http://127.0.0.1:10900",
+        "D:\\USBProtection\\admin-server\\target\\qa-integration-_j1208ao\\java-result.json"
+      ],
+      "cwd": "D:\\USBProtection",
+      "timeoutSeconds": 150
+    }
+  },
+  "scenarios": [
+    {
+      "name": "prod-api-docs-hidden",
+      "method": "GET",
+      "route": "/api-docs",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 404,
+      "actualHttpStatus": 404,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "prod-swagger-hidden",
+      "method": "GET",
+      "route": "/swagger-ui.html",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 404,
+      "actualHttpStatus": 404,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-session-required",
+      "method": "GET",
+      "route": "/api/admin/endpoints",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-csrf-before-login",
+      "method": "GET",
+      "route": "/api/auth/csrf",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-invalid-password",
+      "method": "POST",
+      "route": "/api/auth/login",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-login",
+      "method": "POST",
+      "route": "/api/auth/login",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-csrf-after-login",
+      "method": "GET",
+      "route": "/api/auth/csrf",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-me",
+      "method": "GET",
+      "route": "/api/auth/me",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-enroll-A",
+      "method": "POST",
+      "route": "/api/agent/enroll",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-enroll-B",
+      "method": "POST",
+      "route": "/api/agent/enroll",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-heartbeat-not-ACK",
+      "method": "POST",
+      "route": "/api/agent/heartbeat",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "FAIL",
+      "error": "heartbeat liveness only",
+      "assertionCount": 2
+    }
+  ],
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceBefore": {
+    "scopes": [
+      "admin-server",
+      "client-agent",
+      "frontend",
+      "packaging",
+      "docs/agent-contract"
+    ],
+    "fileCount": 241,
+    "workingTreeSHA256": "4540bee4f6f37c18ca653e1eb0a60826b103b811a92d9109f80b347f02e239c8"
+  },
+  "serverJar": {
+    "path": "admin-server/target/usbshield-admin-server.jar",
+    "bytes": 57314805,
+    "sha256": "0772ae2af64d855bc6f4c6c6ba08e311df6fa1792ecb6d0eb7944ee5a71d8ba5"
+  },
+  "agentJar": {
+    "path": "client-agent/target/usbshield-agent.jar",
+    "bytes": 20186115,
+    "sha256": "63255be52082dd8883b102633d8ec962b2d3e864a4204861b6b69cd8f532dd24"
+  },
+  "harness": {
+    "path": "docs/qa/scripts/AgentServerIntegrationSmoke.java",
+    "bytes": 26250,
+    "sha256": "1949fbfbcee6f8b2d9ab5cb1467db843e12314d2267809f6a36604e8a2427b08"
+  },
+  "runner": {
+    "path": "docs/qa/scripts/run-agent-server-smoke.py",
+    "bytes": 17719,
+    "sha256": "86a9c3f815595de43e73af4160b7ff2abccbefeb6180606b56728b6ff4ce1fdc"
+  },
+  "runtimeDirectory": "admin-server/target/qa-integration-_j1208ao",
+  "runtimeRetained": true,
+  "runtimeScope": "Private generated H2/runtime logs, not copied into evidence; no recursive cleanup",
+  "extraction": {
+    "files": 107,
+    "bytes": 20117086,
+    "source": "Built Agent BOOT-INF/classes and BOOT-INF/lib"
+  },
+  "java": {
+    "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+    "version": "java version \"22.0.2\" 2024-07-16\nJava(TM) SE Runtime Environment (build 22.0.2+9-70)\nJava HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)",
+    "requiredMajor": 22
+  },
+  "loopback": {
+    "address": "127.0.0.1",
+    "port": 10900,
+    "profile": "prod",
+    "testOverride": "Session Secure=false permits this isolated HTTP-only loopback exercise; production defaults are not changed"
+  },
+  "serverReady": true,
+  "harnessOutput": {
+    "stdoutSHA256": "05d613326a6d26d7e0856eff4520a37fe09fba42a5796dd6d49766a4b5058590",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rawOutputPersisted": false
+  },
+  "javaResult": {
+    "startedAt": "2026-11-01T14:01:43.954626300Z",
+    "constructor": "AdminServerClient(AgentProperties)",
+    "scope": "Built production Agent client against real packaged Spring Admin Server/prod profile over loopback; synthetic identities only. No daemon, durable retry, native IPC, GUI, Ubuntu or physical USB execution.",
+    "status": "FAIL",
+    "error": "heartbeat liveness only",
+    "endedAt": "2026-11-01T14:01:45.677360200Z",
+    "assertionCount": 27,
+    "requestCount": 11,
+    "requestCountScope": "Harness initiated HTTP operations, including production-client calls; not a server access-log counter",
+    "scenarioCount": 11,
+    "scenarios": [
+      {
+        "name": "prod-api-docs-hidden",
+        "method": "GET",
+        "route": "/api-docs",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 404,
+        "actualHttpStatus": 404,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "prod-swagger-hidden",
+        "method": "GET",
+        "route": "/swagger-ui.html",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 404,
+        "actualHttpStatus": 404,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-session-required",
+        "method": "GET",
+        "route": "/api/admin/endpoints",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-csrf-before-login",
+        "method": "GET",
+        "route": "/api/auth/csrf",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-invalid-password",
+        "method": "POST",
+        "route": "/api/auth/login",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-login",
+        "method": "POST",
+        "route": "/api/auth/login",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-csrf-after-login",
+        "method": "GET",
+        "route": "/api/auth/csrf",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-me",
+        "method": "GET",
+        "route": "/api/auth/me",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-enroll-A",
+        "method": "POST",
+        "route": "/api/agent/enroll",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-enroll-B",
+        "method": "POST",
+        "route": "/api/agent/enroll",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-heartbeat-not-ACK",
+        "method": "POST",
+        "route": "/api/agent/heartbeat",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "FAIL",
+        "error": "heartbeat liveness only",
+        "assertionCount": 2
+      }
+    ],
+    "sourceInstant": "2026-11-01T14:01:42.953619Z"
+  },
+  "scenarioCount": 11,
+  "requestCount": 11,
+  "error": {
+    "type": "AssertionError",
+    "message": "Agent-to-server assertions failed"
+  },
+  "serverTermination": {
+    "confirmed": true,
+    "exitCode": 1,
+    "scope": "Direct Java child only; no shell wrapper or recursive deletion",
+    "loopbackPortClosed": true
+  },
+  "logMinimization": {
+    "status": "FAIL",
+    "infoAcceptancePresent": false,
+    "uniqueSyntheticMarkersAbsent": true,
+    "infoMarkersAbsent": true,
+    "otherMarkersAbsent": true,
+    "markerPresenceByLevel": {
+      "username": {
+        "infoLines": 0,
+        "otherLines": 0
+      },
+      "session": {
+        "infoLines": 0,
+        "otherLines": 0
+      },
+      "serial": {
+        "infoLines": 0,
+        "otherLines": 0
+      },
+      "hash": {
+        "infoLines": 0,
+        "otherLines": 0
+      }
+    },
+    "syntheticSecretsAbsent": false,
+    "markersChecked": [
+      "username",
+      "session",
+      "serial",
+      "hash"
+    ],
+    "logs": [
+      {
+        "file": "server.stdout.log",
+        "bytes": 101479,
+        "sha256": "4acf498b34bb95bae400e7a95fd1cc04c645d2c80fbdd8fb0b4214e8ff8465f0"
+      },
+      {
+        "file": "server.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "rawLogsCopiedToEvidence": false,
+    "scope": "Private prod server stdout/stderr: INFO acceptance plus separate INFO/other marker scan, including validation warnings. Strict overall absence required; Agent logging disabled separately"
+  },
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceAfter": {
+    "scopes": [
+      "admin-server",
+      "client-agent",
+      "frontend",
+      "packaging",
+      "docs/agent-contract"
+    ],
+    "fileCount": 241,
+    "workingTreeSHA256": "4540bee4f6f37c18ca653e1eb0a60826b103b811a92d9109f80b347f02e239c8"
+  },
+  "sourceStable": true,
+  "endedAt": "2026-11-01T14:01:46.903327+00:00",
+  "durationSeconds": 23.312
+}

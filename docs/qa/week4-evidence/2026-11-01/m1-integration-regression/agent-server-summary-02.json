@@ -1,0 +1,1391 @@
+{
+  "status": "PASS",
+  "startedAt": "2026-11-01T14:05:07.373252+00:00",
+  "assertionCount": 215,
+  "exitCode": 0,
+  "scope": "Actual built production AdminServerClient -> actual packaged Spring Admin Server/prod over loopback. Synthetic credentials/data; no native daemon, durable retries, IPC, GUI, USB or Ubuntu execution.",
+  "commands": {
+    "server": {
+      "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+      "args": [
+        "-jar",
+        "D:\\USBProtection\\admin-server\\target\\usbshield-admin-server.jar",
+        "--spring.profiles.active=prod",
+        "--debug=false",
+        "--trace=false",
+        "--server.address=127.0.0.1",
+        "--server.port=14149",
+        "--server.servlet.session.cookie.secure=false",
+        "--spring.datasource.url=jdbc:h2:file:D:/USBProtection/admin-server/target/qa-integration-7dv4et87/server-db;DB_CLOSE_ON_EXIT=FALSE"
+      ],
+      "cwd": "D:\\USBProtection\\admin-server\\target\\qa-integration-7dv4et87",
+      "secretDelivery": "Synthetic environment variables, values omitted"
+    },
+    "harness": {
+      "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+      "args": [
+        "-Dlogback.configurationFile=D:\\USBProtection\\admin-server\\target\\qa-integration-7dv4et87\\logback-agent-off.xml",
+        "-cp",
+        "D:\\USBProtection\\admin-server\\target\\qa-integration-7dv4et87\\classes;D:\\USBProtection\\admin-server\\target\\qa-integration-7dv4et87\\lib\\*",
+        "D:\\USBProtection\\docs\\qa\\scripts\\AgentServerIntegrationSmoke.java",
+        "http://127.0.0.1:14149",
+        "D:\\USBProtection\\admin-server\\target\\qa-integration-7dv4et87\\java-result.json"
+      ],
+      "cwd": "D:\\USBProtection",
+      "timeoutSeconds": 150
+    }
+  },
+  "scenarios": [
+    {
+      "name": "prod-api-docs-hidden",
+      "method": "GET",
+      "route": "/api-docs",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 404,
+      "actualHttpStatus": 404,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "prod-swagger-hidden",
+      "method": "GET",
+      "route": "/swagger-ui.html",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 404,
+      "actualHttpStatus": 404,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-session-required",
+      "method": "GET",
+      "route": "/api/admin/endpoints",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-csrf-before-login",
+      "method": "GET",
+      "route": "/api/auth/csrf",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-invalid-password",
+      "method": "POST",
+      "route": "/api/auth/login",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-login",
+      "method": "POST",
+      "route": "/api/auth/login",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-csrf-after-login",
+      "method": "GET",
+      "route": "/api/auth/csrf",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-me",
+      "method": "GET",
+      "route": "/api/auth/me",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-enroll-A",
+      "method": "POST",
+      "route": "/api/agent/enroll",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-enroll-B",
+      "method": "POST",
+      "route": "/api/agent/enroll",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-heartbeat-not-ACK",
+      "method": "POST",
+      "route": "/api/agent/heartbeat",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 3
+    },
+    {
+      "name": "initial-policy-A",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "initial-policy-B",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-invalid-token",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "production-agent-cross-endpoint-token",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "missing-agent-token-401",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "invalid-agent-token-401",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "cross-endpoint-token-401",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "agent-cannot-read-admin",
+      "method": "GET",
+      "route": "/api/admin/endpoints",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-session-cannot-authorize-agent",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-spoofed-event",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "spoofed-event-403",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 403,
+      "actualHttpStatus": 403,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-event",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "canonical-event-filtered",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "canonical-event-detail",
+      "method": "GET",
+      "route": "/api/admin/events/{id}",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "allow-without-csrf-403",
+      "method": "POST",
+      "route": "/api/admin/endpoints/{endpointId}/whitelist",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 403,
+      "actualHttpStatus": 403,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "allow-A",
+      "method": "POST",
+      "route": "/api/admin/endpoints/{endpointId}/whitelist",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "allow-A-idempotent",
+      "method": "POST",
+      "route": "/api/admin/endpoints/{endpointId}/whitelist",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "allow-policy-A",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 3
+    },
+    {
+      "name": "allow-leaves-policy-B",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-future-ACK",
+      "method": "POST",
+      "route": "/api/agent/policy/ack",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "future-ACK-409",
+      "method": "POST",
+      "route": "/api/agent/policy/ack",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 409,
+      "actualHttpStatus": 409,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "negative-ACK-400",
+      "method": "POST",
+      "route": "/api/agent/policy/ack",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 400,
+      "actualHttpStatus": 400,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-valid-ACK",
+      "method": "POST",
+      "route": "/api/agent/policy/ack",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "production-agent-idempotent-ACK",
+      "method": "POST",
+      "route": "/api/agent/policy/ack",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "production-agent-heartbeat-after-ACK",
+      "method": "POST",
+      "route": "/api/agent/heartbeat",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "stale-ACK-409",
+      "method": "POST",
+      "route": "/api/agent/policy/ack",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 409,
+      "actualHttpStatus": 409,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "cross-endpoint-revoke-404",
+      "method": "DELETE",
+      "route": "/api/admin/endpoints/{endpointId}/whitelist/{id}",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 404,
+      "actualHttpStatus": 404,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "revoke-A",
+      "method": "DELETE",
+      "route": "/api/admin/endpoints/{endpointId}/whitelist/{id}",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 204,
+      "actualHttpStatus": 204,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "revoke-A-idempotent",
+      "method": "DELETE",
+      "route": "/api/admin/endpoints/{endpointId}/whitelist/{id}",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 204,
+      "actualHttpStatus": 204,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "revoke-policy-A",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "revoke-leaves-policy-B",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "production-agent-revoke-ACK",
+      "method": "POST",
+      "route": "/api/agent/policy/ack",
+      "transport": "AdminServerClient(AgentProperties)",
+      "status": "PASS",
+      "assertionCount": 1
+    },
+    {
+      "name": "registry-A",
+      "method": "GET",
+      "route": "/api/admin/endpoints/{endpointId}",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "registry-B",
+      "method": "GET",
+      "route": "/api/admin/endpoints/{endpointId}",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "bootstrap-257-401",
+      "method": "POST",
+      "route": "/api/agent/enroll",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "enrollment-IP-51-400",
+      "method": "POST",
+      "route": "/api/agent/enroll",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 400,
+      "actualHttpStatus": 400,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "UTF8-token-over-72-bytes-401",
+      "method": "GET",
+      "route": "/api/agent/policy",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "username-100-UID-zero-accepted",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "username-101-rejected-400",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 400,
+      "actualHttpStatus": 400,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "negative-UID-rejected-400",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 400,
+      "actualHttpStatus": 400,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "nullable-UID-accepted",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "UNKNOWN-normalization",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "blank-user-normalization",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "absent-user-normalization",
+      "method": "POST",
+      "route": "/api/agent/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "username-100-history",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "nullable-UID-history",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "UNKNOWN-history",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "paged-history-0",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "paged-history-1",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "paged-history-2",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "B-history-isolated",
+      "method": "GET",
+      "route": "/api/admin/events",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "admin-logout",
+      "method": "POST",
+      "route": "/api/auth/logout",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 200,
+      "actualHttpStatus": 200,
+      "status": "PASS",
+      "assertionCount": 2
+    },
+    {
+      "name": "logout-invalidates-session",
+      "method": "GET",
+      "route": "/api/auth/me",
+      "transport": "JDK HttpClient",
+      "expectedHttpStatus": 401,
+      "actualHttpStatus": 401,
+      "status": "PASS",
+      "assertionCount": 2
+    }
+  ],
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceBefore": {
+    "scopes": [
+      "admin-server",
+      "client-agent",
+      "frontend",
+      "packaging",
+      "docs/agent-contract"
+    ],
+    "fileCount": 241,
+    "workingTreeSHA256": "4540bee4f6f37c18ca653e1eb0a60826b103b811a92d9109f80b347f02e239c8"
+  },
+  "serverJar": {
+    "path": "admin-server/target/usbshield-admin-server.jar",
+    "bytes": 57314805,
+    "sha256": "0772ae2af64d855bc6f4c6c6ba08e311df6fa1792ecb6d0eb7944ee5a71d8ba5"
+  },
+  "agentJar": {
+    "path": "client-agent/target/usbshield-agent.jar",
+    "bytes": 20186115,
+    "sha256": "63255be52082dd8883b102633d8ec962b2d3e864a4204861b6b69cd8f532dd24"
+  },
+  "harness": {
+    "path": "docs/qa/scripts/AgentServerIntegrationSmoke.java",
+    "bytes": 26502,
+    "sha256": "f617df736e6c74145d83583f2482f973d0862b6c36ae2dceb411f5f0da478c85"
+  },
+  "runner": {
+    "path": "docs/qa/scripts/run-agent-server-smoke.py",
+    "bytes": 17908,
+    "sha256": "4aaaab148f4c555fac7b192cf2ef8065f80434dad57f9309ad17001c1821d59a"
+  },
+  "runtimeDirectory": "admin-server/target/qa-integration-7dv4et87",
+  "runtimeRetained": true,
+  "runtimeScope": "Private generated H2/runtime logs, not copied into evidence; no recursive cleanup",
+  "extraction": {
+    "files": 107,
+    "bytes": 20117086,
+    "source": "Built Agent BOOT-INF/classes and BOOT-INF/lib"
+  },
+  "java": {
+    "executable": "C:\\Program Files\\Java\\jdk-22\\bin\\java.exe",
+    "version": "java version \"22.0.2\" 2024-07-16\nJava(TM) SE Runtime Environment (build 22.0.2+9-70)\nJava HotSpot(TM) 64-Bit Server VM (build 22.0.2+9-70, mixed mode, sharing)",
+    "requiredMajor": 22
+  },
+  "loopback": {
+    "address": "127.0.0.1",
+    "port": 14149,
+    "profile": "prod",
+    "testOverride": "Session Secure=false permits this isolated HTTP-only loopback exercise; production defaults are not changed"
+  },
+  "ambientEnvironmentRemoved": [
+    "DEBUG"
+  ],
+  "serverReady": true,
+  "harnessOutput": {
+    "stdoutSHA256": "e66b3d9b5b7720088f6b8ef92d3bff4025699747c8e93470482d1c89bdbcf652",
+    "stderrSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "rawOutputPersisted": false
+  },
+  "javaResult": {
+    "startedAt": "2026-11-01T14:05:23.771107900Z",
+    "constructor": "AdminServerClient(AgentProperties)",
+    "scope": "Built production Agent client against real packaged Spring Admin Server/prod profile over loopback; synthetic identities only. No daemon, durable retry, native IPC, GUI, Ubuntu or physical USB execution.",
+    "status": "PASS",
+    "endedAt": "2026-11-01T14:05:28.702235Z",
+    "assertionCount": 215,
+    "requestCount": 64,
+    "requestCountScope": "Harness initiated HTTP operations, including production-client calls; not a server access-log counter",
+    "scenarioCount": 64,
+    "scenarios": [
+      {
+        "name": "prod-api-docs-hidden",
+        "method": "GET",
+        "route": "/api-docs",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 404,
+        "actualHttpStatus": 404,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "prod-swagger-hidden",
+        "method": "GET",
+        "route": "/swagger-ui.html",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 404,
+        "actualHttpStatus": 404,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-session-required",
+        "method": "GET",
+        "route": "/api/admin/endpoints",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-csrf-before-login",
+        "method": "GET",
+        "route": "/api/auth/csrf",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-invalid-password",
+        "method": "POST",
+        "route": "/api/auth/login",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-login",
+        "method": "POST",
+        "route": "/api/auth/login",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-csrf-after-login",
+        "method": "GET",
+        "route": "/api/auth/csrf",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-me",
+        "method": "GET",
+        "route": "/api/auth/me",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-enroll-A",
+        "method": "POST",
+        "route": "/api/agent/enroll",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-enroll-B",
+        "method": "POST",
+        "route": "/api/agent/enroll",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-heartbeat-not-ACK",
+        "method": "POST",
+        "route": "/api/agent/heartbeat",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 3
+      },
+      {
+        "name": "initial-policy-A",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "initial-policy-B",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-invalid-token",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "production-agent-cross-endpoint-token",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "missing-agent-token-401",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "invalid-agent-token-401",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "cross-endpoint-token-401",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "agent-cannot-read-admin",
+        "method": "GET",
+        "route": "/api/admin/endpoints",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-session-cannot-authorize-agent",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-spoofed-event",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "spoofed-event-403",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 403,
+        "actualHttpStatus": 403,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-event",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "canonical-event-filtered",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "canonical-event-detail",
+        "method": "GET",
+        "route": "/api/admin/events/{id}",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "allow-without-csrf-403",
+        "method": "POST",
+        "route": "/api/admin/endpoints/{endpointId}/whitelist",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 403,
+        "actualHttpStatus": 403,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "allow-A",
+        "method": "POST",
+        "route": "/api/admin/endpoints/{endpointId}/whitelist",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "allow-A-idempotent",
+        "method": "POST",
+        "route": "/api/admin/endpoints/{endpointId}/whitelist",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "allow-policy-A",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 3
+      },
+      {
+        "name": "allow-leaves-policy-B",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-future-ACK",
+        "method": "POST",
+        "route": "/api/agent/policy/ack",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "future-ACK-409",
+        "method": "POST",
+        "route": "/api/agent/policy/ack",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 409,
+        "actualHttpStatus": 409,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "negative-ACK-400",
+        "method": "POST",
+        "route": "/api/agent/policy/ack",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 400,
+        "actualHttpStatus": 400,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-valid-ACK",
+        "method": "POST",
+        "route": "/api/agent/policy/ack",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "production-agent-idempotent-ACK",
+        "method": "POST",
+        "route": "/api/agent/policy/ack",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "production-agent-heartbeat-after-ACK",
+        "method": "POST",
+        "route": "/api/agent/heartbeat",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "stale-ACK-409",
+        "method": "POST",
+        "route": "/api/agent/policy/ack",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 409,
+        "actualHttpStatus": 409,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "cross-endpoint-revoke-404",
+        "method": "DELETE",
+        "route": "/api/admin/endpoints/{endpointId}/whitelist/{id}",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 404,
+        "actualHttpStatus": 404,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "revoke-A",
+        "method": "DELETE",
+        "route": "/api/admin/endpoints/{endpointId}/whitelist/{id}",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 204,
+        "actualHttpStatus": 204,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "revoke-A-idempotent",
+        "method": "DELETE",
+        "route": "/api/admin/endpoints/{endpointId}/whitelist/{id}",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 204,
+        "actualHttpStatus": 204,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "revoke-policy-A",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "revoke-leaves-policy-B",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "production-agent-revoke-ACK",
+        "method": "POST",
+        "route": "/api/agent/policy/ack",
+        "transport": "AdminServerClient(AgentProperties)",
+        "status": "PASS",
+        "assertionCount": 1
+      },
+      {
+        "name": "registry-A",
+        "method": "GET",
+        "route": "/api/admin/endpoints/{endpointId}",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "registry-B",
+        "method": "GET",
+        "route": "/api/admin/endpoints/{endpointId}",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "bootstrap-257-401",
+        "method": "POST",
+        "route": "/api/agent/enroll",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "enrollment-IP-51-400",
+        "method": "POST",
+        "route": "/api/agent/enroll",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 400,
+        "actualHttpStatus": 400,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "UTF8-token-over-72-bytes-401",
+        "method": "GET",
+        "route": "/api/agent/policy",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "username-100-UID-zero-accepted",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "username-101-rejected-400",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 400,
+        "actualHttpStatus": 400,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "negative-UID-rejected-400",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 400,
+        "actualHttpStatus": 400,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "nullable-UID-accepted",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "UNKNOWN-normalization",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "blank-user-normalization",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "absent-user-normalization",
+        "method": "POST",
+        "route": "/api/agent/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "username-100-history",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "nullable-UID-history",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "UNKNOWN-history",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "paged-history-0",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "paged-history-1",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "paged-history-2",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "B-history-isolated",
+        "method": "GET",
+        "route": "/api/admin/events",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "admin-logout",
+        "method": "POST",
+        "route": "/api/auth/logout",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 200,
+        "actualHttpStatus": 200,
+        "status": "PASS",
+        "assertionCount": 2
+      },
+      {
+        "name": "logout-invalidates-session",
+        "method": "GET",
+        "route": "/api/auth/me",
+        "transport": "JDK HttpClient",
+        "expectedHttpStatus": 401,
+        "actualHttpStatus": 401,
+        "status": "PASS",
+        "assertionCount": 2
+      }
+    ],
+    "sourceInstant": "2026-11-01T14:05:22.771107Z"
+  },
+  "scenarioCount": 64,
+  "requestCount": 64,
+  "serverTermination": {
+    "confirmed": true,
+    "exitCode": 1,
+    "scope": "Direct Java child only; no shell wrapper or recursive deletion",
+    "loopbackPortClosed": true
+  },
+  "logMinimization": {
+    "status": "PASS",
+    "infoAcceptancePresent": true,
+    "uniqueSyntheticMarkersAbsent": true,
+    "infoMarkersAbsent": true,
+    "otherMarkersAbsent": true,
+    "markerPresenceByLevel": {
+      "username": {
+        "infoLines": 0,
+        "otherLines": 0
+      },
+      "session": {
+        "infoLines": 0,
+        "otherLines": 0
+      },
+      "serial": {
+        "infoLines": 0,
+        "otherLines": 0
+      },
+      "hash": {
+        "infoLines": 0,
+        "otherLines": 0
+      }
+    },
+    "syntheticSecretsAbsent": true,
+    "markersChecked": [
+      "username",
+      "session",
+      "serial",
+      "hash"
+    ],
+    "logs": [
+      {
+        "file": "server.stdout.log",
+        "bytes": 5386,
+        "sha256": "c5cb41c4303937a351903a65a2d4fd279d652e718bb111e17f0d0b9f12113ea1"
+      },
+      {
+        "file": "server.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "rawLogsCopiedToEvidence": false,
+    "scope": "Private prod server stdout/stderr: INFO acceptance plus separate INFO/other marker scan, including validation warnings. Strict overall absence required; Agent logging disabled separately"
+  },
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceAfter": {
+    "scopes": [
+      "admin-server",
+      "client-agent",
+      "frontend",
+      "packaging",
+      "docs/agent-contract"
+    ],
+    "fileCount": 241,
+    "workingTreeSHA256": "4540bee4f6f37c18ca653e1eb0a60826b103b811a92d9109f80b347f02e239c8"
+  },
+  "sourceStable": true,
+  "endedAt": "2026-11-01T14:05:29.794575+00:00",
+  "durationSeconds": 22.422
+}

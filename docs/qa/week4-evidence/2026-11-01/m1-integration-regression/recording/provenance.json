@@ -1,0 +1,67 @@
+{
+  "status": "PASS",
+  "date": "2026-11-01",
+  "timezone": "Asia/Bangkok",
+  "preparedAt": "2026-11-01T13:59:33.579Z",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "node": "v24.22.1",
+  "platform": "win32",
+  "architecture": "x64",
+  "source": {
+    "path": "frontend\\tests\\browser-live.mjs",
+    "sha256": "d7679a7cc6b5f8bab971d9d2fae2a67588e681f04e3dafccb8d604a8df4e083b"
+  },
+  "variant": {
+    "path": "frontend\\.artifacts\\week4-packaged-rehearsal-d11a5209-8d54-4629-bed9-39340d3e1b8f.mjs",
+    "sha256": "190914fc2969baf2eecb24b30819738ca464cc742968c29066c01c9c3ea8521c",
+    "syntaxCheckExitCode": 0
+  },
+  "jar": {
+    "path": "admin-server\\target\\usbshield-admin-server.jar",
+    "sha256": "0772ae2af64d855bc6f4c6c6ba08e311df6fa1792ecb6d0eb7944ee5a71d8ba5"
+  },
+  "wrapper": {
+    "path": "docs\\qa\\scripts\\rehearse-week4.mjs",
+    "sha256": "a9eca4c142385fb362ce94f558ca29e3dd1e65d33bfbc1649c0113915e5bd4a6"
+  },
+  "originalAssertionLinesPreserved": 31,
+  "reversibleToOriginalSource": true,
+  "substitutions": [
+    {
+      "label": "serve UI from packaged JAR",
+      "before": "const web = 'http://127.0.0.1:4174'",
+      "after": "const web = api",
+      "count": 1
+    },
+    {
+      "label": "remove Vite preview process",
+      "before": "  start(process.execPath, [join(root, 'node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', '4174', '--strictPort'], { env: { ...process.env, USBSHIELD_API_TARGET: api } })",
+      "after": "  // Week 4: the existing JAR serves both React assets and /api on its isolated port.",
+      "count": 1
+    },
+    {
+      "label": "verify process termination before runtime removal",
+      "before": "  for (const child of children.reverse()) {\n    if (child.exitCode !== null || child.signalCode !== null || !child.pid) continue\n    if (process.platform === 'win32') {\n      // Windows Java/Chrome launchers may spawn additional processes.\n      await new Promise(resolveKill => {\n        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, () => resolveKill())\n      })\n    } else child.kill()\n  }\n  await delay(1000)",
+      "after": "  const week4Cleanup = []\n  let week4TerminationConfirmed = true\n  for (const child of children.reverse()) {\n    if (child.exitCode !== null || child.signalCode !== null || !child.pid) continue\n    let killError = null\n    if (process.platform === 'win32') {\n      killError = await new Promise(resolveKill => {\n        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, error => resolveKill(error ? { code: error.code, message: error.message } : null))\n      })\n    } else {\n      try { child.kill() } catch (error) { killError = { message: error.message } }\n    }\n    for (let attempt = 0; attempt < 50 && child.exitCode === null && child.signalCode === null; attempt++) await delay(100)\n    const confirmed = child.exitCode !== null || child.signalCode !== null\n    week4Cleanup.push({ pid: child.pid, killError, exitCode: child.exitCode, signalCode: child.signalCode, confirmed })\n    if (!confirmed) week4TerminationConfirmed = false\n  }\n  // A taskkill error for a child whose exit is confirmed is not a test failure.\n  if (!week4TerminationConfirmed) {\n    console.error('CLEANUP: child termination unconfirmed; retaining ignored runtime:', runtime)\n    process.exitCode = 1\n  }\n  await writeFile(join(\"D:\\\\USBProtection\\\\docs\\\\qa\\\\week4-evidence\\\\2026-11-01\\\\m1-integration-regression\\\\recording\", 'cleanup.json'), JSON.stringify({ terminationConfirmed: week4TerminationConfirmed, runtimeRetained: !week4TerminationConfirmed, children: week4Cleanup }, null, 2) + '\\n', { flag: 'wx' })",
+      "count": 1
+    },
+    {
+      "label": "retain runtime when process exit is unconfirmed",
+      "before": "  await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })",
+      "after": "  if (week4TerminationConfirmed) {\n  await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })\n  }",
+      "count": 1
+    }
+  ],
+  "recordingRequested": false,
+  "scope": "Packaged JAR same-origin Events browser regression, Windows synthetic HTTP/H2 input; no actual Agent/USBGuard/physical USB/Ubuntu claim.",
+  "recording": "Optional actual CDP JPEG screencast plus capture timeline and self-contained replay; no encoded video or audio. Login/password phase excluded.",
+  "startedAt": "2026-11-01T13:59:33.663Z",
+  "recordingResult": {
+    "status": "DISABLED",
+    "frameCount": 0
+  },
+  "exitCode": 0,
+  "signal": null,
+  "originalSourceUnchangedAfterRun": true,
+  "endedAt": "2026-11-01T13:59:55.960Z"
+}

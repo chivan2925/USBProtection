@@ -1,19 +1,37 @@
 // Run after the release-candidate server JAR (with React assets) has been built.
-// node docs/qa/scripts/rehearse-week4.mjs [--no-recording] [--prepare-only]
+// node docs/qa/scripts/rehearse-week4.mjs [--run-dir PATH --expected-revision SHA] [--no-recording] [--prepare-only]
 // The tracked frontend harness stays unchanged. Its temporary variant retains
 // every original assertion and uses the JAR directly, without Vite preview.
 import assert from 'node:assert/strict'
 import { createHash, randomUUID } from 'node:crypto'
 import { spawn, spawnSync } from 'node:child_process'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, join, relative, resolve } from 'node:path'
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 const frontend = join(repository, 'frontend')
-const evidence = join(repository, 'docs/qa/week4-evidence/2026-10-28/windows-regression')
-const args = new Set(process.argv.slice(2))
+const input = process.argv.slice(2)
+const options = {}
+const args = new Set()
+while (input.length) {
+  const option = input.shift()
+  if (['--run-dir', '--expected-revision'].includes(option)) {
+    assert.ok(!options[option] && input[0] && !input[0].startsWith('--'), `Invalid or repeated option: ${option}`)
+    options[option] = input.shift()
+  } else args.add(option)
+}
 assert.ok([...args].every(value => ['--no-recording', '--prepare-only'].includes(value)), 'Unknown rehearsal argument')
+const evidenceRoot = join(repository, 'docs/qa/week4-evidence')
+const evidence = resolve(repository, options['--run-dir'] ?? 'docs/qa/week4-evidence/2026-10-28/windows-regression')
+const evidenceRelative = relative(evidenceRoot, evidence)
+assert.ok(evidenceRelative && !evidenceRelative.startsWith('..') && !isAbsolute(evidenceRelative), 'Evidence must stay inside a run directory')
+if (options['--run-dir']) {
+  assert.match(options['--expected-revision'] ?? '', /^[0-9a-f]{40}$/, 'New runs require a full expected SHA')
+  const current = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repository, windowsHide: true, encoding: 'utf8' })
+  assert.equal(current.status, 0, 'Cannot inspect HEAD')
+  assert.equal(current.stdout.trim(), options['--expected-revision'], 'Unexpected source revision')
+}
 const recordingRequested = !args.has('--no-recording')
 const hash = value => createHash('sha256').update(value).digest('hex')
 const sourcePath = join(frontend, 'tests/browser-live.mjs')
@@ -225,7 +243,7 @@ const revision = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: repository, wind
 assert.equal(revision.status, 0, 'Cannot record source revision')
 const jarPath = join(repository, 'admin-server/target/usbshield-admin-server.jar')
 const provenance = {
-  status: 'PREPARED', date: '2026-10-28', timezone: 'Asia/Bangkok',
+  status: 'PREPARED', date: options['--run-dir'] ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Bangkok', dateStyle: 'short' }).format(new Date()) : '2026-10-28', timezone: 'Asia/Bangkok',
   preparedAt: new Date().toISOString(), revision: revision.stdout.trim(),
   node: process.version, platform: process.platform, architecture: process.arch,
   source: { path: relative(repository, sourcePath), sha256: hash(originalBytes) },
