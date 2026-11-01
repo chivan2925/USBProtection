@@ -2,6 +2,7 @@
 
 **Repository:** `chivan2925/USBProtection`  
 **Part 2 base:** `main` at `ab346931d8d0994b5c4e015feb823b4cf8df5a2f` (2026-10-30 UTC)  
+**Part 3 base:** `main` at `176e547f5bf093ef8c9aebdfabd29cab7177d73e` (2026-10-31 15:57 UTC)  
 **Owner:** Member 2 — USBGuard, active-user attribution and desktop notification  
 **Week 3 gate:** `PASS (WINDOWS SCOPE) / UBUNTU E2E DEFERRED`.
 
@@ -10,8 +11,8 @@ Week 4 is limited to stabilization, documentation, tests and release-candidate p
 | Part | Work IDs | Focus | Status |
 |---|---|---|---|
 | **Part 1 — Watch/recovery resilience** | `W4-M2-01` | Reconnect, bounded input, duplicate suppression, daemon unavailable | **MERGED on `main`** in PR #37, `2b963a1`; owner reported Maven test/package BUILD SUCCESS |
-| **Part 2 — USBGuard policy and active-user attribution** | `W4-M2-02`, `W4-M2-03` | Canonical base rule, class 08, hash/serialless, managed rule integrity/ordering, foreign-rule guard, active/remote/ambiguous sessions | **IMPLEMENTED IN PACKAGE — owner Maven verification pending**; see `WEEK4_PART2_POLICY_SESSION.md` |
-| **Part 3 — Notification/docs/handoff** | `W4-M2-04`–`W4-M2-07` | Native notification correctness, core guide, Q&A, Ubuntu checklist, IPC review with M3 | **NOT STARTED** |
+| **Part 2 — USBGuard policy and active-user attribution** | `W4-M2-02`, `W4-M2-03` | Canonical base rule, class 08, hash/serialless, managed rule integrity/ordering, foreign-rule guard, active/remote/ambiguous sessions | **MERGED in PR #40**; owner reported Part 2 Maven test/package BUILD SUCCESS; Copilot's 2 HIGH/1 MEDIUM follow-up addressed by Part 3 patch (review pending) |
+| **Part 3 — Notification/docs/handoff** | `W4-M2-04`–`W4-M2-07` | Native notification correctness, core guide, Q&A, Ubuntu checklist, IPC review with M3 | **IMPLEMENTATION PREPARED — owner Maven/independent review pending; native Ubuntu and M3 IPC ACL signoff deferred/open** |
 
 ## Owner boundary
 
@@ -29,3 +30,10 @@ M2 changes only `client-agent/.../{usbguard,session,notification}/**`, M2-specif
 M3: no Agent sync or `.deb` changes in Part 2; coordinate any previously existing unmanaged USBGuard rules in installed policy.  
 M5: record Part 2 Windows unit coverage and unresolved Ubuntu runtime checks under the correct base/final SHA.  
 M1: no REST/API/DTO changes.
+
+
+## Part 3 completion and review follow-up (2026-11-01)
+
+Part 3 delivers `WEEK4_M2_PART3_FINAL_CLOSEOUT.md`, `WEEK4_M2_CORE_OPERATIONS_GUIDE.md`, `WEEK4_M2_TECHNICAL_QA.md` and `WEEK4_M2_M3_M5_UBUNTU_HANDOFF.md`; associated Java regression covers notification filtering, UID-peer authentication, effective event target and rule-reconciliation review findings from PR #40.
+
+Three GitHub Copilot findings in PR #40 (two HIGH, one MEDIUM) were independently read and code-fix candidates are included. They are **not yet marked independently resolved** until the owner applies, runs full Maven tests and obtains review feedback. The rule-line grammar validation intentionally fails on unsupported foreign conditions rather than claiming arbitrary USBGuard syntax is safe. M3's live socket ACL/reachability and native Ubuntu notification remain explicit follow-ups; do not mark them PASS from Windows tests.
