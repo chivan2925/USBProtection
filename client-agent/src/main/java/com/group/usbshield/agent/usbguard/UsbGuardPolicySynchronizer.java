@@ -43,16 +43,27 @@ public class UsbGuardPolicySynchronizer {
         Set<String> appendAttempted = new LinkedHashSet<>();
         try {
             for (Map.Entry<String, UsbGuardRuleInfo> entry : current.entrySet()) {
-                DeviceFingerprint wanted = desired.get(entry.getKey());
-                if (wanted == null || !matchesDefinition(entry.getValue(), wanted)) {
-                    requireSuccess(runner.run("remove-rule", Long.toString(entry.getValue().ruleId())), "remove-rule");
+                String key = entry.getKey();
+                DeviceFingerprint wanted = desired.get(key);
+                if (wanted != null && matchesDefinition(entry.getValue(), wanted)) {
+                    continue;
+                }
+                List<UsbGuardRuleInfo> liveRules = rules();
+                requireBaseRule(liveRules);
+                UsbGuardRuleInfo live = managedRules(liveRules).get(key);
+                if (live != null && (wanted == null || !matchesDefinition(live, wanted))) {
+                    requireSuccess(runner.run("remove-rule", Long.toString(live.ruleId())), "remove-rule");
                 }
             }
             for (Map.Entry<String, DeviceFingerprint> entry : desired.entrySet()) {
-                UsbGuardRuleInfo present = current.get(entry.getKey());
-                if (present == null || !matchesDefinition(present, entry.getValue())) {
+                List<UsbGuardRuleInfo> liveRules = rules();
+                requireBaseRule(liveRules);
+                UsbGuardRuleInfo present = managedRules(liveRules).get(entry.getKey());
+                if (present == null) {
                     appendAttempted.add(entry.getKey());
                     requireSuccess(runner.run("append-rule", builder.allowRule(entry.getValue())), "append-rule");
+                } else if (!matchesDefinition(present, entry.getValue())) {
+                    throw new IllegalStateException("Managed USBGuard rule changed during reconciliation");
                 }
             }
 
@@ -88,9 +99,12 @@ public class UsbGuardPolicySynchronizer {
     }
 
     private void removeAttemptedManagedRules(Set<String> attemptedKeys) {
-        for (Map.Entry<String, UsbGuardRuleInfo> entry : managedRules(rules()).entrySet()) {
-            if (attemptedKeys.contains(entry.getKey())) {
-                requireSuccess(runner.run("remove-rule", Long.toString(entry.getValue().ruleId())), "rollback remove-rule");
+        for (String key : attemptedKeys) {
+            List<UsbGuardRuleInfo> liveRules = rules();
+            requireBaseRule(liveRules);
+            UsbGuardRuleInfo live = managedRules(liveRules).get(key);
+            if (live != null) {
+                requireSuccess(runner.run("remove-rule", Long.toString(live.ruleId())), "rollback remove-rule");
             }
         }
     }
@@ -234,9 +248,7 @@ public class UsbGuardPolicySynchronizer {
         if (rawManaged != parsedManaged) {
             throw new IllegalStateException("Unparseable USBShield-managed rule; refusing policy changes");
         }
-        long rawRuleHeaders = result.output().lines()
-                .filter(line -> line.matches("(?i)^\\s*\\d+:\\s*(?:allow|block|reject)(?:\\s|$).*"))
-                .count();
+        long rawRuleHeaders = UsbGuardRuleSyntax.validateList(result.output());
         if (rawRuleHeaders != parsed.size()) {
             throw new IllegalStateException("Unparseable USBGuard rule; refusing policy changes");
         }

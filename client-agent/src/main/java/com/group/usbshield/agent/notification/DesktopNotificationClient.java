@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import java.nio.channels.*;
 import java.nio.file.*;
+import jdk.net.ExtendedSocketOptions;
+import jdk.net.UnixDomainPrincipal;
 
 /** Member 2 — Week 2 user-session helper. M3 owns invocation, socket directory/ACL and autostart. */
 public class DesktopNotificationClient implements AutoCloseable {
@@ -25,6 +27,16 @@ public class DesktopNotificationClient implements AutoCloseable {
             catch(UnsupportedOperationException e) {throw new IOException("Unix permissions unavailable",e);}
             while(live.isOpen()) {
                 try(SocketChannel peer=live.accept()) {
+                    UnixDomainPrincipal credentials;
+                    try {
+                        credentials = peer.getOption(ExtendedSocketOptions.SO_PEERCRED);
+                    } catch (UnsupportedOperationException | SecurityException unavailable) {
+                        continue;
+                    }
+                    if (credentials == null || credentials.user() == null
+                            || !authorizedAgentPeer(credentials.user().getName())) {
+                        continue;
+                    }
                     DataInputStream input=new DataInputStream(Channels.newInputStream(peer));
                     long target=input.readLong();String title=input.readUTF();String body=input.readUTF();
                     if(target!=uid || !"USBShield — USB Mass Storage bị chặn".equals(title)
@@ -33,6 +45,9 @@ public class DesktopNotificationClient implements AutoCloseable {
                 } catch (IOException e) {if(!live.isOpen())break;}
             }
         } finally {server=null;Files.deleteIfExists(socketPath);}
+    }
+    static boolean authorizedAgentPeer(String username) {
+        return "usbshield".equals(username);
     }
     @Override public void close() throws IOException {if(server!=null)server.close();}
 }

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class DesktopNotificationService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DesktopNotificationService.class);
     private final AgentProperties properties;
     private final ClientNotificationPublisher publisher;
     private final BlockNotificationPolicy policy = new BlockNotificationPolicy();
@@ -23,7 +24,7 @@ public class DesktopNotificationService {
                 Thread thread = new Thread(task, "usbshield-notification");
                 thread.setDaemon(true);
                 return thread;
-            }, new ThreadPoolExecutor.DiscardPolicy());
+            }, (task, executor) -> log.warn("USBShield notification queue full; dropping best-effort notification"));
 
     @Autowired
     public DesktopNotificationService(AgentProperties properties, ClientNotificationPublisher publisher) {
@@ -43,8 +44,15 @@ public class DesktopNotificationService {
                         device.state(), device), user, Instant.now())
                 .ifPresent(notice -> queue.execute(() -> {
                     try {
-                        publisher.publish(notice);
-                    } catch (RuntimeException ignored) {
+                        ClientNotificationPublisher.Delivery result = publisher.publish(notice);
+                        if (result == ClientNotificationPublisher.Delivery.FAILED || result == null) {
+                            log.warn("USBShield notification delivery failed; local enforcement remains independent");
+                        } else if (result == ClientNotificationPublisher.Delivery.SKIPPED_NO_GUI) {
+                            log.debug("USBShield notification skipped: no eligible desktop helper");
+                        }
+                    } catch (RuntimeException failure) {
+                        log.warn("USBShield notification publisher failed independently of event transport: {}",
+                                failure.getClass().getSimpleName());
                     }
                 }));
     }

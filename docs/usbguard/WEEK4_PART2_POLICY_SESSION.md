@@ -63,3 +63,14 @@ M5 should capture the exact commit/diff base, Windows environment, command outpu
 - **M1:** The REST/DTO contract is unchanged.
 
 **Official USBGuard rule evaluation reference:** https://usbguard.github.io/documentation/rule-language
+
+
+## Part 3 corrective follow-up — PR #40 Copilot review (2026-11-01)
+
+Part 2 was merged in PR #40 and the owner reported its two Maven commands BUILD SUCCESS, but the PR review subsequently reported **2 HIGH and 1 MEDIUM** issues not covered by that result. Part 3's corrective patch, based on `main` `176e547f5bf093ef8c9aebdfabd29cab7177d73e`, updates `UsbGuardPolicySynchronizer` and adds `UsbGuardRuleSyntax`:
+
+1. Re-list after each managed removal and rollback removal because numeric USBGuard IDs may renumber.
+2. Reject unrecognized trailing tokens in all numeric rules, including foreign allows, before any mutation. Supported syntax is conservative; unsupported conditions require manual operator review.
+3. Reject every malformed numeric header, including an unrecognized target like `2: permit`, regardless of what the permissive output parser extracts.
+
+See `WEEK4_M2_PART3_FINAL_CLOSEOUT.md` for regression/evidence scope. These review findings remain **CODE PATCH PREPARED / OWNER MAVEN & INDEPENDENT REVIEW PENDING**, not closed by the historical Part 2 BUILD SUCCESS. Native Ubuntu remains deferred.
