@@ -30,7 +30,7 @@ logs retain only event and endpoint IDs. Agent token size is checked in UTF-8 by
 before BCrypt so oversized input fails with 401. Enrollment and event limits now
 match persistence bounds. The production profile disables Swagger/OpenAPI in
 addition to the H2 console, binds to loopback by default and requires external DB
-and enrollment settings. Regression evidence is pending.
+and enrollment settings. Refreshed regression evidence is summarized below.
 
 ## Integration dependency
 
