@@ -1,5 +1,7 @@
 # USBShield Week 4 — Apply and verification commands
 
+> **ARCHIVED INSTRUCTIONS — DO NOT REAPPLY THIS OLD PACKAGE.** The original ZIP-overlay instructions below targeted pre-fix `63e4dc6` and required an apply script. That candidate was merged as PR #50 into `main` `d5e156a`. The new documentation-only package for current `main` is applied by manual ZIP overwrite; it has **no apply script**, and owner-reported two Maven passes are already recorded in [post-merge review](WEEK4_POST_MERGE_REVIEW_D5E156A.md). Remaining M3 static/packaging checks are **not reported as executed**; owner sign-off remains pending.
+
 **Exact baseline:** `63e4dc61b15b86859dd4ca2ca4be60021a293091` (`main`, PR #49).  
 **Package role:** proposed M2 notifier/M3 packaging IPC correction, tests, documentation and group sign-off templates; not a signed release.  
 **Ubuntu 24.04 E2E:** intentionally deferred per team Week 4 plan; no native PASS is claimed.

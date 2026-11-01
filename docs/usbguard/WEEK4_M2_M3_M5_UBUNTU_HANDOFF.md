@@ -1,22 +1,22 @@
 # USBShield — M2 Week 4: M3/M5 Handoff & Ubuntu Verification Checklist
 
 **Owner:** M2 · **Work IDs:** W4-M2-06 and W4-M2-07 (P1)  
-**Baseline:** `main` @ `176e547f5bf093ef8c9aebdfabd29cab7177d73e`  
+**Current source review baseline:** `main` @ `d5e156afdad382dc19d3b0a7198bf681fd36763e` (PR #50); earlier M2 evidence remains at its original SHA.  
 **Verdict:** HANDOFF READY; M3 IPC review and native Ubuntu E2E **PENDING / NOT EXECUTED**.
 
 ## Ownership boundaries
 
 - **M2:** `usbguard/`, `session/`, `notification/`, M2 event enrichment and tests; USBGuard core documentation.
-- **M3:** `/run/usbshield-notifier` provisioning, POSIX ACL and socket startup, XDG autostart, `systemd`, Agent sync/ACK, outbox and `.deb` installer. M2's patch does not modify M3 files.
+- **M3:** `acl` Debian dependency and `postinst` legacy-retirement, XDG autostart, `systemd`, Agent sync/ACK, outbox and `.deb` installer; the GUI helper (M2-owned Java) provisions `/run/user/<UID>/usbshield-notifier/notice.sock` and named-user ACLs. Coordinate modifications to either owner's files.
 - **M5:** record actual end-to-end results, capture evidence, publish release gate with separate Windows/Ubuntu verdicts; no synthetic-to-native promotion.
 
 ## M3 IPC/permission review — action required
 
-Current deployed-source inspection (2026-11-01): `packaging/agent-deb/DEBIAN/postinst` creates shared `/run/usbshield-notifier` as root-owned `1777`; M2 user helper binds `/run/usbshield-notifier/<UID>.sock` and chmods it `0660` (GUI user's default group); Agent process runs under system user `usbshield` according to `packaging/systemd/usbshield-agent.service`.
+**Historical risk (pre PR #50):** the global root-owned `1777` directory and GUI-owned `0660` `<UID>.sock` could prevent the `usbshield` service user connecting and allow a second local user to occupy another UID's pathname. This is no longer the intended source design.
 
-**Risk 1 — connectivity:** `usbshield` may have no group write permission to the user's socket. **Risk 2 — availability:** in a shared sticky directory another local user can pre-create the socket pathname and prevent the legitimate helper from binding. **Risk 3 — authenticated sender:** M2 now checks peer UID-derived username with Linux `SO_PEERCRED`, requires service user `usbshield`, and checks target UID. These are necessary but do not themselves resolve socket ACL or name-squatting.
+**Merged candidate (`d5e156a`, PR #50):** Java now routes to `/run/user/<UID>/usbshield-notifier/notice.sock` with named-user POSIX ACLs (`u:usbshield:--x` on runtime/private directories; `u:usbshield:rw-` on the socket), refuses symlinks/wrong owners/stale socket, and validates Linux peer credentials. Packaging declares `acl` and retires known legacy tmpfiles; desktop autostart requires exact `XDG_RUNTIME_DIR`. **Two Maven commands BUILD SUCCESS are owner-reported; not native Ubuntu evidence.**
 
-M3 must choose and document a secure, reproducible provisioning/ACL design. Avoid `chmod 666` as an unreviewed workaround, do not give normal users USBGuard policy privileges, and preserve the per-user D-Bus isolation. Confirm with M2 before changing M2-owned Java, and with M5 before marking the test PASS.
+**Review needed from M2 + M3:** actual effective ACL mask and uid/session ownership; whether logind runtime ACL change affects the desktop; installed `setfacl` executable; old helper during package upgrade and first fresh login; static Debian staging/source check; malicious peer, name collision and stale socket handling. Do not use `chmod 666`, share USBGuard modify privileges with GUI users or silently accept `DELIVERED` as a real popup. [Design and constraints](WEEK4_IPC_ACL_DESIGN.md). Record signed dispositions in [group template](../rc/WEEK4_OWNER_SIGNOFF_TEMPLATE.md).
 
 ## Post-Week-4 Ubuntu acceptance cases
 

@@ -1,8 +1,8 @@
 # Week 4 — Ubuntu acceptance recording sheets
 
-Owner: M5; technical owners: M1/M2/M3/M4. Prepared: 2026-10-28; updated after pull: **2026-11-01 (Asia/Bangkok)**. Work item: **W4-M5-07**; input to W4-M5-01/02/04/06. **Every runtime case below is NOT EXECUTED / DEFERRED until after Week 4.** This document prepares execution; it contains no new Linux, physical USB, daemon, GUI, package or reboot result.
+Owner: M5; technical owners: M1/M2/M3/M4. Prepared: 2026-10-28; source-correction draft against `main` **d5e156a (2026-11-01)** (requires M5 review). Work item: **W4-M5-07**; input to W4-M5-01/02/04/06. **Every runtime case below is NOT EXECUTED / DEFERRED until after Week 4.** This document prepares execution; it contains no new Linux, physical USB, daemon, GUI, package or reboot result.
 
-Sources: [Blueprint](../../USBShield_Project_Blueprint_Week2_Client_Notification_Updated(1).md), [inventory](WEEK4_TEST_INVENTORY.md), [release validation](WEEK4_RELEASE_VALIDATION.md), [Installation Guide](../CLIENT_INSTALLATION.md), [M3 input](../client-agent/WEEK4_ACCEPTANCE_TEST_CHECKLIST.md), [M2 core](../usbguard/WEEK4_M2_CORE_OPERATIONS_GUIDE.md), [native handoff](../usbguard/WEEK4_M2_M3_M5_UBUNTU_HANDOFF.md) and [M1 handoff](../member1/WEEK4_SERVER_HANDOFF.md). Current **S4 = `c6cc1df21283588d70a792a37d42870bdea49497`**, [Windows execution/evidence PASS](week4-evidence/2026-11-01/m1-integration-regression/README.md); M1 proposed its artifact, group acceptance not selected by M5. Preserve S0 `2013ce7`, S1 `751387b`, S2 `0b72630`, S3 `3efa50b` with original dates/SHA. [S3 evidence](week4-evidence/2026-11-01/m2-part3-regression/README.md) was committed `bf067ef`/merged `c07cb2f`. No Windows result closes Ubuntu cases.
+Sources: [Blueprint](../../USBShield_Project_Blueprint_Week2_Client_Notification_Updated(1).md), [inventory](WEEK4_TEST_INVENTORY.md), [release validation](WEEK4_RELEASE_VALIDATION.md), [Installation Guide](../CLIENT_INSTALLATION.md), [M3 input](../client-agent/WEEK4_ACCEPTANCE_TEST_CHECKLIST.md), [M2 core](../usbguard/WEEK4_M2_CORE_OPERATIONS_GUIDE.md), [native handoff](../usbguard/WEEK4_M2_M3_M5_UBUNTU_HANDOFF.md) and [M1 handoff](../member1/WEEK4_SERVER_HANDOFF.md). Historical **S4 = `c6cc1df21283588d70a792a37d42870bdea49497`** (unchanged server/frontend); current post-merge notifier baseline **`d5e156afdad382dc19d3b0a7198bf681fd36763e`** (Agent/packaging changed). [Windows execution/evidence PASS](week4-evidence/2026-11-01/m1-integration-regression/README.md); M1 proposed its artifact, group acceptance not selected by M5. Preserve S0 `2013ce7`, S1 `751387b`, S2 `0b72630`, S3 `3efa50b` with original dates/SHA. [S3 evidence](week4-evidence/2026-11-01/m2-part3-regression/README.md) was committed `bf067ef`/merged `c07cb2f`. No Windows result closes Ubuntu cases.
 
 ## Before execution
 
@@ -12,11 +12,11 @@ Use isolated Ubuntu 24.04 amd64 clients A/B with local console/recovery access, 
 
 The checked-in installer starts/enables services during installation. Its addition of group `usbguard` is not proof that the actual daemon ACL permits every required command. M2/M3 must verify device list/listen, policy list/modify and parameter-list rights as service user before treating apply as operational. Do not repair a failing test with a global allow, VID:PID-only allow, weakened default policy or broad file permissions. Preserve foreign/base rules. Use the endpoint-scoped Admin workflow to exercise the real Agent.
 
-The new helper authenticates sender `usbshield` through Linux `SO_PEERCRED`. Native T27 must separately demonstrate real Agent connectivity, denial of a different local peer and correct target UID. Current source still has a shared root-owned **1777** directory and GUI-owned **0660** socket; verify effective group/ACL and bind/startup behavior. A second user may pre-create a conflicting path. M3/M2 must supply a lab-only procedure and restore the path/helper safely; do not use `chmod 666`, grant USBGuard modify to normal users or claim Windows username-unit checks verify native credentials.
+The helper authenticates sender `usbshield` through Linux `SO_PEERCRED`, and the Agent checks the peer GUI owner. **Current PR #50 source no longer provisions global `1777`/GUI `0660` sockets**: it uses `/run/user/<UID>/usbshield-notifier/notice.sock`, directory traversal ACLs `u:usbshield:--x` and socket ACL `u:usbshield:rw-` (requires `acl`). Native T27 must measure real Agent connectivity, peer rejection, correct UID, effective ACL mask, login/upgrade startup and absence of cross-user pathname collisions. The old `1777`/`0660` figures describe prior implementation only. Avoid `chmod 666`, granting GUI users USBGuard modification rights, or claiming Java unit tests verify native kernel credentials.
 
 M2 Part 2 preserves valid device-specific **foreign Allow** rules. A device outside USBShield's desired whitelist may still match such a rule; the mere presence of the base rule and implicit block does not prove every external policy is fail-closed. Capture the ordered effective rules and have an authorized administrator resolve unauthorized grants before the unknown-storage tests. Do not delete foreign rules as a hidden QA setup step. A unique active local **tty** session may have a known username/UID/session without any GUI popup; distinguish that state from no local session, remote-only or ambiguity, which must not invent a user.
 
-The installation guide contains historical examples and raw `endpoint.json` inspection. That file contains the Agent token: do not copy it into public evidence. Review current scripts and actual results when guide text differs. In particular, `Requires=usbguard.service` does **not** itself establish that restarting USBGuard will automatically revive a stopped Agent; T24 must measure recovery.
+The updated installation guide uses file metadata only. `endpoint.json` contains the Agent token: never display or copy its raw content into public evidence. Review current scripts and actual results when guide text differs. In particular, `Requires=usbguard.service` does **not** itself establish that restarting USBGuard will automatically revive a stopped Agent; T24 must measure recovery.
 
 | Role | Test activity |
 |---|---|
@@ -55,7 +55,7 @@ sudo apt update
 sudo apt install ./usbshield-agent_1.0.0_amd64.deb
 sudoedit /etc/usbshield-agent/application.yml
 sudo systemctl restart usbshield-agent
-dpkg-query -W usbshield-agent usbguard openjdk-21-jre-headless libnotify-bin
+dpkg-query -W usbshield-agent usbguard openjdk-21-jre-headless libnotify-bin acl
 ```
 
 In the protected config, M3 sets `usbshield.agent.server-url` to M1's QA server, the QA enrollment credential, absolute `data-dir`/`config-dir`, `simulation-enabled: false` and `notification-enabled: true`. The default enrollment value is empty; an unconfigured package is not an enrollment PASS. Temporary shell environment variables are not automatically inherited by systemd.
@@ -75,7 +75,7 @@ sudo usbguard list-devices
 sudo -u usbshield usbguard get-parameter ImplicitPolicyTarget
 sudo -u usbshield usbguard list-rules
 sudo -u usbshield usbguard list-devices
-sudo stat -c '%U:%G %a %n' /opt/usbshield-agent /opt/usbshield-agent/usbshield-agent.jar /etc/usbshield-agent /etc/usbshield-agent/application.yml /var/lib/usbshield-agent /run/usbshield-notifier
+sudo stat -c '%U:%G %a %n' /opt/usbshield-agent /opt/usbshield-agent/usbshield-agent.jar /etc/usbshield-agent /etc/usbshield-agent/application.yml /var/lib/usbshield-agent
 sudo journalctl -u usbguard -u usbshield-agent --since '10 minutes ago' --no-pager
 sudo ls -la /var/lib/usbshield-agent/spool
 ```
@@ -89,8 +89,11 @@ id
 loginctl list-sessions --no-legend --no-pager
 loginctl show-session SESSION_ID -p Name -p User -p Active -p Remote -p Seat -p Type --no-pager
 pgrep -a -f DesktopNotificationClientMain
-ls -ld /run/usbshield-notifier
-ls -l /run/usbshield-notifier
+printf 'XDG_RUNTIME_DIR=%s\n' "$XDG_RUNTIME_DIR"
+ls -ld "$XDG_RUNTIME_DIR" "$XDG_RUNTIME_DIR/usbshield-notifier"
+ls -l "$XDG_RUNTIME_DIR/usbshield-notifier/notice.sock"
+getfacl -p -- "$XDG_RUNTIME_DIR" "$XDG_RUNTIME_DIR/usbshield-notifier" "$XDG_RUNTIME_DIR/usbshield-notifier/notice.sock"
+# M2/M3: với đúng quyền và trên máy thử nghiệm, chạy read-only packaging/tests/test-notifier-ipc-ubuntu.sh <UID>.
 /usr/bin/notify-send 'USBShield QA helper probe' 'Manual GUI probe; not a blocked USB event'
 ```
 
@@ -150,7 +153,7 @@ curl -i "$QA_SERVER_URL/api/admin/events"
 
 M1 confirms the frozen status contract (current tests expect 401 for invalid Agent credential and unauthenticated Admin read). Preserve exact status and verify no protected data leaked. Valid browser login/CSRF coverage belongs to integrated server/UI tests.
 
-M1's v0.2 freeze is now supplied in [API](../API.md) and [protocol](../AGENT_SERVER_PROTOCOL.md). Capture route-specific rejection: normal DTO size/blank limits can return 400; bootstrap-token length over 256 can be rejected 401 before DTO validation. The API summary's blanket oversized→400 wording is an **M1 documentation follow-up**, not permission to relabel observed responses. Server production HTTP evidence uses a deliberate Secure-cookie override for loopback; it does not replace TLS/deployed-browser checks. Any Windows rebuild should use JDK 21/22, not JDK 24 with the pinned Lombok compiler integration.
+M1's v0.2 freeze is now supplied in [API](../API.md) and [protocol](../AGENT_SERVER_PROTOCOL.md). Capture route-specific rejection: normal DTO size/blank limits can return 400; bootstrap-token length over 256 can be rejected 401 before DTO validation. The canonical API summary is **corrected in the post-PR#50 documentation patch** to distinguish HTTP 400 DTO validation from HTTP 401 bootstrap auth guard; M1 must review the doc-only change. Never relabel captured HTTP results. Server production HTTP evidence uses a deliberate Secure-cookie override for loopback; it does not replace TLS/deployed-browser checks. Any Windows rebuild should use JDK 21/22, not JDK 24 with the pinned Lombok compiler integration.
 
 **C8 — removal/reinstall (administrator; disposable client only).** After other cases, privately back up protected config/registration/policy/spool with owner-approved permissions and record hashes/metadata. Retention is a behavior to measure; no upgrade-runtime result is proven. Do not use the guide's optional `rm -rf` cleanup for this test.
 

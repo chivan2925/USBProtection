@@ -53,7 +53,7 @@ Native notification remains **best-effort feedback** after a USBGuard `PresenceC
 
 The listener resolves a UID/session, then M2's notification publisher attempts to connect over a per-UID **local Unix socket** to the GUI session helper. The helper checks the target UID/title/body *and now verifies the connecting process via Linux `SO_PEERCRED` as user `usbshield`*. `ClientNotificationPublisher.DELIVERED` means message passed to the helper, **not proof that a popup was displayed**. A missing helper, D-Bus or notification daemon must leave enforcement/event transport unaffected.
 
-**M3 packaging/ACL dependency:** Current `postinst` creates `/run/usbshield-notifier` (root-owned, mode `1777`), while the user-session helper makes `<UID>.sock` mode `0660` with the GUI user's default group. The `usbshield` service user may **not** have permission to connect to that socket. An arbitrary local user may also pre-create a conflicting pathname (availability issue). M3 must review secure per-UID socket ACL/ownership and start-up race handling; M2 does not change M3-owned installer/scripts. Do not resolve this by blindly making all sockets world-writable. Native Ubuntu tests and cross-owner signoff are pending.
+**Post-merge IPC candidate (`d5e156a`, PR #50):** The former global `1777` directory is retired. The GUI helper now binds `/run/user/<UID>/usbshield-notifier/notice.sock` in a logind-owned UID runtime directory, grants only `u:usbshield:--x` search permission on its parent/private directories and `u:usbshield:rw-` on the socket via `setfacl` (`acl` package), and refuses stale/symlink or wrong-owner paths. Both peers validate Linux `SO_PEERCRED`; this does not prove a visual popup or successful Ubuntu connectivity. M2 and M3 must still review effective ACL masks, GNOME/Wayland compatibility, startup after upgrade, and native denial/availability tests. See [IPC design](WEEK4_IPC_ACL_DESIGN.md). The old `1777`/`0660` risk was a **prior-source observation**, not current checked-in behavior.
 
 ## 7. Inspection commands for post-Week-4 Ubuntu test
 
@@ -67,7 +67,10 @@ sudo systemctl status usbguard usbshield-agent
 sudo journalctl -u usbguard -u usbshield-agent --since '10 minutes ago'
 loginctl list-sessions --no-legend
 loginctl show-session <session-id> -p Name -p User -p Active -p Remote -p Type -p Seat
-stat -c '%n %U:%G %a' /run/usbshield-notifier /run/usbshield-notifier/*.sock
+# Normal GUI account in the graphical session:
+printf '%s\n' "$XDG_RUNTIME_DIR"
+stat -c '%n %U:%G %a' "$XDG_RUNTIME_DIR" "$XDG_RUNTIME_DIR/usbshield-notifier" "$XDG_RUNTIME_DIR/usbshield-notifier/notice.sock"
+getfacl -p -- "$XDG_RUNTIME_DIR" "$XDG_RUNTIME_DIR/usbshield-notifier" "$XDG_RUNTIME_DIR/usbshield-notifier/notice.sock"
 id usbshield
 ```
 

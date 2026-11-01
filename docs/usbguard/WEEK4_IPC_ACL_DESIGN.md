@@ -1,8 +1,8 @@
 # USBShield — Week 4 Notifier IPC Design (M2 + M3 review candidate)
 
-**Baseline:** `main` `63e4dc61b15b86859dd4ca2ca4be60021a293091` (2026-11-01).  
+**Merged implementation baseline:** `main` `d5e156afdad382dc19d3b0a7198bf681fd36763e` (2026-11-01; PR #50).  
 **Owners:** M2 (`notification/**`), M3 (`packaging/**`), review M5, final integration decision M1.  
-**Status:** CODE PREPARED / JAVA 21 ISOLATED COMPILE PASS; owner Maven/JUnit, cross-owner review and Ubuntu native tests **PENDING**. This is **not** owner sign-off or notification runtime acceptance.
+**Status:** Source merged / **two Agent Maven commands `BUILD SUCCESS` owner-reported** after cross-platform Windows fix; raw test totals, packaging/static verification, cross-owner sign-off and native Ubuntu tests **not supplied/verified on final SHA**. This is **not** owner sign-off or notification runtime acceptance.
 
 ## 1. Problem resolved in the candidate code
 
@@ -26,7 +26,7 @@ The previous `/run/usbshield-notifier` directory was root-owned `1777` (sticky) 
 - This code does **not** guarantee that `notify-send` painted a popup, merely that the helper ran a command. A real blocked USB plus GUI observation remains required.
 - The initial M2 rule parser intentionally validates a bounded rule subset; unknown foreign `if`/attributes fail closed. Existing foreign device-specific Allows can still affect effective policy. These are separate from IPC.
 
-## 3. Windows checks — owner to run
+## 3. Windows verification evidence (partial)
 
 ```powershell
 mvn -B -f client-agent/pom.xml clean test
@@ -37,7 +37,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File packaging/tests/verify-week4
 powershell -NoProfile -ExecutionPolicy Bypass -File packaging/tests/test-staging-verifier.ps1
 ```
 
-Use the executable SHA and JUnit totals from **this modified source**, never reuse M5's historical 174 PASS as the new result. Check `git diff --check` and actual exit codes.
+Owner reported the first two Maven commands `BUILD SUCCESS` after patching, but did not attach raw output/exit-code evidence to this document. Additional static/staging commands above are **not reported as executed for PR #50**, and native permission behavior remains unverified. Preserve historical S3 174 Agent tests as S3-only evidence. Record final Agent JAR checksum and any targeted test totals before signing.
 
 ## 4. Native Ubuntu — owner/M5 acceptance (DEFERRED)
 

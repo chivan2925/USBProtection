@@ -1,5 +1,7 @@
 # Week 4 finalization patch — scope and limits
 
+> **Historical PR #50 package scope.** Code changes described here have been merged to `main` at `d5e156a`. This document does not establish group sign-off. For the post-merge *documentation-only* review, see [post-merge review](WEEK4_POST_MERGE_REVIEW_D5E156A.md).
+
 **Baseline:** `main` `63e4dc61b15b86859dd4ca2ca4be60021a293091`.  
 **Delivery:** ZIP overlay + a single deterministic doc/static-verifier synchronization script.  
 **No owner sign-offs, credential rotations or Ubuntu E2E tests are fabricated.**

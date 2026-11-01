@@ -59,13 +59,20 @@ Assert-Contains $control 'Architecture: amd64'
 Assert-Contains $control 'openjdk-21-jre-headless'
 Assert-Contains $control 'usbguard'
 Assert-Contains $control 'libnotify-bin'
+Assert-Contains $control ', acl'
 
 Assert-Contains $postinst 'groupadd --system usbshield'
 Assert-Contains $postinst 'useradd --system --gid usbshield'
 Assert-Contains $postinst 'chmod 755 /opt/usbshield-agent'
 Assert-Contains $postinst 'chmod 750 /etc/usbshield-agent'
 Assert-Contains $postinst 'chmod 700 /var/lib/usbshield-agent'
-Assert-Contains $postinst 'chmod 1777 /run/usbshield-notifier'
+Assert-NotContains $postinst 'chmod 1777 /run/usbshield-notifier'
+Assert-NotContains $postinst 'mkdir -p /run/usbshield-notifier'
+Assert-Contains $postinst 'legacy_tmpfiles=/etc/tmpfiles.d/usbshield-notifier.conf'
+Assert-Contains $postinst 'rmdir /run/usbshield-notifier 2>/dev/null || true'
+Assert-Contains $postinst '/usr/bin/setfacl'
+Assert-Contains $postinst 'Missing or empty /opt/usbshield-agent/usbshield-agent.jar'
+Assert-Contains $postinst 'refusing successful postinst exit'
 Assert-Contains $postinst 'ImplicitPolicyTarget=block'
 Assert-Contains $postinst 'systemctl enable usbshield-agent.service'
 
@@ -97,9 +104,16 @@ $launcher = 'packaging/desktop/usbshield-notifier-launcher.sh'
 Assert-Contains $desktop 'Exec=/opt/usbshield-agent/usbshield-notifier-launcher.sh'
 Assert-Contains $desktop 'X-GNOME-Autostart-enabled=true'
 Assert-Contains $launcher 'USER_UID="$(id -u)"'
+Assert-Contains $launcher 'EXPECTED_RUNTIME="/run/user/${USER_UID}"'
+Assert-Contains $launcher 'XDG_RUNTIME_DIR'
+Assert-Contains $launcher '/usr/bin/setfacl'
 Assert-Contains $launcher '(( USER_UID < 1000 ))'
 Assert-Contains $launcher 'org.springframework.boot.loader.launch.PropertiesLauncher'
 Assert-Contains $launcher 'com.group.usbshield.agent.notification.DesktopNotificationClientMain'
+Assert-Contains 'client-agent/src/main/java/com/group/usbshield/agent/notification/NotifierSocketPaths.java' 'notice.sock'
+Assert-Contains 'client-agent/src/main/java/com/group/usbshield/agent/notification/DesktopNotificationClient.java' 'u:usbshield:rw-'
+Assert-Contains 'client-agent/src/main/java/com/group/usbshield/agent/notification/UnixSocketNotificationPublisher.java' 'SO_PEERCRED'
+Assert-Contains 'packaging/scripts/build-deb.sh' 'dpkg-deb --root-owner-group --build'
 
 # 5. Executable JAR Verification (W4-M3-03)
 if (-not $SkipJarCheck) {
@@ -169,12 +183,17 @@ if (-not $SkipStagingCheck) {
 Write-Host "`n================================================================" -ForegroundColor Cyan
 Write-Host "  WEEK 4 CLIENT AGENT & PACKAGING VERIFICATION SUMMARY          " -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "  M3 VERDICT: PASS (WINDOWS PREPARATION / RELEASE CANDIDATE)    " -ForegroundColor Green
-Write-Host "  STATUS    : Client Agent Fat-JAR built & verified.            " -ForegroundColor Green
-Write-Host "              Debian Staging tree assembled & verified.         " -ForegroundColor Green
-Write-Host "              Debian .deb package: NOT BUILT (dpkg-deb requires " -ForegroundColor Yellow
-Write-Host "              Ubuntu Linux; staging ready for instant build).   " -ForegroundColor Yellow
-Write-Host "  NOTICE    : Live Ubuntu installation, physical USB tests, and " -ForegroundColor Yellow
-Write-Host "              systemd daemon enforcement deferred until after   " -ForegroundColor Yellow
-Write-Host "              Week 4 per team project plan.                     " -ForegroundColor Yellow
+Write-Host "  M3 STATIC CONTRACT: PASS (WINDOWS SCOPE; NOT NATIVE)" -ForegroundColor Green
+if ($SkipJarCheck) {
+    Write-Host "  JAR: NOT VERIFIED (SkipJarCheck requested)" -ForegroundColor Yellow
+} else {
+    Write-Host "  JAR: STRUCTURE/CHECKSUM INSPECTION PASS" -ForegroundColor Green
+}
+if ($SkipStagingCheck) {
+    Write-Host "  STAGING: NOT VERIFIED (SkipStagingCheck requested)" -ForegroundColor Yellow
+} else {
+    Write-Host "  STAGING: CONTENT PRESENCE INSPECTION PASS" -ForegroundColor Green
+}
+Write-Host "  DEB/NATIVE: NOT VERIFIED by this Windows script" -ForegroundColor Yellow
+Write-Host "  GROUP RELEASE: PENDING separate cross-owner sign-off" -ForegroundColor Yellow
 Write-Host "================================================================`n" -ForegroundColor Cyan
