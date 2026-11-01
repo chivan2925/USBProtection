@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "validatedAtBangkok": "2026-11-01T21:11:32.469808+07:00",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "command": {
+    "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/validate-week4-server-integration.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-11-01/m1-integration-regression",
+      "--baseline",
+      "c6cc1df21283588d70a792a37d42870bdea49497",
+      "--profile",
+      "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/run-spec.json"
+    ],
+    "cwd": "D:\\USBProtection"
+  },
+  "validatorSHA256": "6816d708e40b2cef602e02024c6eb2b6885dc9c48ee14905e8b9ecf18a7fb70d",
+  "successfulCaptures": 7,
+  "retainedFailedCaptures": [
+    "07-agent-server-http"
+  ],
+  "serverTests": {
+    "tests": 28,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontendAssetsByteEqual": 5,
+  "agentServerAssertions": 215,
+  "logMinimization": "PASS",
+  "browserScreenshots": 25,
+  "packagedBrowser": "PASS",
+  "historicalEvidenceUnchanged": true,
+  "brokenLinks": [],
+  "newRecording": false,
+  "scope": "Current Windows technical verification only; group owner decisions, credential rotation and Ubuntu gates remain separate"
+}

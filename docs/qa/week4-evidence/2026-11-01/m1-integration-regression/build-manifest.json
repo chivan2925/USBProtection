@@ -1,0 +1,92 @@
+{
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "server": {
+    "path": "admin-server/target/usbshield-admin-server.jar",
+    "sha256": "0772ae2af64d855bc6f4c6c6ba08e311df6fa1792ecb6d0eb7944ee5a71d8ba5",
+    "bytes": 57314805,
+    "modifiedAt": "2026-11-01T13:56:10.086Z",
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: Maven JAR Plugin 3.4.2\r\nBuild-Jdk-Spec: 22\r\nImplementation-Title: USBShield Admin Server\r\nImplementation-Version: 1.0.0-SNAPSHOT\r\nMain-Class: org.springframework.boot.loader.launch.JarLauncher\r\nStart-Class: com.group.usbshield.server.UsbShieldServerApplication\r\nSpring-Boot-Version: 3.3.4\r\nSpring-Boot-Classes: BOOT-INF/classes/\r\nSpring-Boot-Lib: BOOT-INF/lib/\r\nSpring-Boot-Classpath-Index: BOOT-INF/classpath.idx\r\nSpring-Boot-Layers-Index: BOOT-INF/layers.idx\r\n\r\n",
+    "builtBy": "02-server-package"
+  },
+  "frontendAssets": [
+    {
+      "path": "frontend/dist/assets/index-BbW3k3pm.js",
+      "bytes": 290316,
+      "sha256": "6f618c91ace708f85ef904cdd700a0fd878bb96f8bbe1409dc645c4e978ef091",
+      "jarEntry": "BOOT-INF/classes/static/assets/index-BbW3k3pm.js",
+      "byteEqual": true
+    },
+    {
+      "path": "frontend/dist/assets/index-Bsv2V3We.css",
+      "bytes": 25533,
+      "sha256": "1130c64799639636632664b983ec455b37eea0f1e52178333375cd895a2efee6",
+      "jarEntry": "BOOT-INF/classes/static/assets/index-Bsv2V3We.css",
+      "byteEqual": true
+    },
+    {
+      "path": "frontend/dist/favicon.svg",
+      "bytes": 354,
+      "sha256": "4445683956f9132f7c4297809c9066c5f23fdc95c144a61ed87885028b4bcbea",
+      "jarEntry": "BOOT-INF/classes/static/favicon.svg",
+      "byteEqual": true
+    },
+    {
+      "path": "frontend/dist/icons.svg",
+      "bytes": 5031,
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a",
+      "jarEntry": "BOOT-INF/classes/static/icons.svg",
+      "byteEqual": true
+    },
+    {
+      "path": "frontend/dist/index.html",
+      "bytes": 656,
+      "sha256": "22e91000a40a0c799b7e80312177dad924a517000bb06021a28223f3870b3d0a",
+      "jarEntry": "BOOT-INF/classes/static/index.html",
+      "byteEqual": true
+    }
+  ],
+  "agent": {
+    "path": "client-agent/target/usbshield-agent.jar",
+    "sha256": "63255be52082dd8883b102633d8ec962b2d3e864a4204861b6b69cd8f532dd24",
+    "bytes": 20186115,
+    "modifiedAt": "2026-11-01T07:38:37.525Z",
+    "builtBy": "01-agent-package",
+    "manifest": "Manifest-Version: 1.0\r\nCreated-By: Maven JAR Plugin 3.4.2\r\nBuild-Jdk-Spec: 22\r\nImplementation-Title: USBShield Client Agent\r\nImplementation-Version: 1.0.0-SNAPSHOT\r\nMain-Class: org.springframework.boot.loader.launch.JarLauncher\r\nStart-Class: com.group.usbshield.agent.ClientAgentApplication\r\nSpring-Boot-Version: 3.3.4\r\nSpring-Boot-Classes: BOOT-INF/classes/\r\nSpring-Boot-Lib: BOOT-INF/lib/\r\nSpring-Boot-Classpath-Index: BOOT-INF/classpath.idx\r\nSpring-Boot-Layers-Index: BOOT-INF/layers.idx\r\n\r\n",
+    "execution": "Existing S3 JAR consumed by fresh Agent-to-server integration; Agent unit suite not rerun"
+  },
+  "m1SubmittedArtifact": {
+    "schemaVersion": 1,
+    "owner": "M1",
+    "builtAtUtc": "2026-11-01T12:16:25.0065915Z",
+    "sourceCommit": "d78189be42a5fa00a07e46446019c55fc547a592",
+    "sourceTree": "3d8ea28977ae653323bd28dca442f777d5104924",
+    "branch": "van",
+    "workingTreeCleanAtStart": true,
+    "environment": {
+      "os": "Microsoft Windows 10.0.26200",
+      "powershell": "7.6.5",
+      "processArchitecture": "X64"
+    },
+    "toolchain": {
+      "java": "java version \"22.0.2\" 2024-07-16",
+      "maven": "Apache Maven 3.9.9 (8e8579a9e76f7d015ee5ec7bfcdc97d260186937)",
+      "node": "v22.19.0",
+      "npm": "10.9.3",
+      "javaTarget": "21"
+    },
+    "build": {
+      "command": "admin-server/build-release.ps1",
+      "result": "PASS",
+      "lifecycle": "mvn -B -Pwith-frontend clean package"
+    },
+    "artifact": {
+      "path": "admin-server/target/usbshield-admin-server.jar",
+      "sizeBytes": 57314825,
+      "sha256": "43269264cf7cd3af5c785a12b15507ee89ce3ce3c6b42ff8e92ceb601604240d",
+      "includesReactDist": true
+    }
+  },
+  "m1ArtifactTreatment": "Owner artifact source matches; fresh M5 build identity remains separate",
+  "deb": "NOT BUILT IN THIS RUN"
+}

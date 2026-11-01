@@ -1,0 +1,206 @@
+{
+  "count": 25,
+  "scope": "Actual Windows browser screenshots; synthetic HTTP/H2 data",
+  "files": [
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-allow-a.png",
+      "bytes": 119152,
+      "sha256": "20cb301ddbcbd3c1a95ced376686a49e9fe8d84df24a789313c1e0be6ef7b780",
+      "capture": "04-browser-management",
+      "width": 1425,
+      "height": 1726
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-dashboard.png",
+      "bytes": 171295,
+      "sha256": "e1b0e0bdab5fdbbe698dc36e4538f0bd2bedcd71e6d8b4a985056c48fccbfa9c",
+      "capture": "04-browser-management",
+      "width": 1425,
+      "height": 1476
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-empty.png",
+      "bytes": 177740,
+      "sha256": "26e9109cbfb582c4dfa2b84d7fd5a9152041a88b45b4d1642d02c26bd61aabef",
+      "capture": "04-browser-management",
+      "width": 1425,
+      "height": 1476
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-events.png",
+      "bytes": 73458,
+      "sha256": "649f3a9a0ac8c21773f6459897de205c22d7ce11b03689131e859694cf7ae73c",
+      "capture": "04-browser-management",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-expired-session.png",
+      "bytes": 41529,
+      "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6",
+      "capture": "04-browser-management",
+      "width": 375,
+      "height": 812
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-http-ack.png",
+      "bytes": 117554,
+      "sha256": "65bc4659ba5785e1aca0ae38a9edbc25f91c19b8fe42dce04a0e7c508b912059",
+      "capture": "04-browser-management",
+      "width": 1425,
+      "height": 1726
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-login.png",
+      "bytes": 291140,
+      "sha256": "5410d8c3ff94c90ac48b2b4633610796b51f5f350a48d5a35a0ec4f30564936d",
+      "capture": "04-browser-management",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-mobile.png",
+      "bytes": 44433,
+      "sha256": "0ffe1498d80ab855912844d5207cc5bb9b34e52aa20b7993220aaf0ee73ff1b0",
+      "capture": "04-browser-management",
+      "width": 375,
+      "height": 991
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/04-browser-management/m4-live-revoke-a.png",
+      "bytes": 116330,
+      "sha256": "0af9754ef2f61043585622558670d546d4b840067eadb83bc84784b8d9e927c1",
+      "capture": "04-browser-management",
+      "width": 1425,
+      "height": 1862
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-name-search.png",
+      "bytes": 207398,
+      "sha256": "d1c21ddd45b7eb1eb22e0cbdbf32dcce5f1d1fa573beb1221e34b986031249bc",
+      "capture": "05-browser-events",
+      "width": 1425,
+      "height": 1978
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-real-http-date-filter.png",
+      "bytes": 207130,
+      "sha256": "10ba8a7fc522d29fd4cb53c3e68dcf3b62c05a2aee3077c44941266cf1677641",
+      "capture": "05-browser-events",
+      "width": 1425,
+      "height": 1978
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-real-http-desktop.png",
+      "bytes": 207118,
+      "sha256": "c1470ad998558d3e5fb7fd6800bba741f90d1b8c237b23b823fbe249b5ada1ea",
+      "capture": "05-browser-events",
+      "width": 1425,
+      "height": 1978
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-real-http-mobile.png",
+      "bytes": 118346,
+      "sha256": "c5be64773d6791ea3c951abc277ab968d2b62770b165becdcb014f1e044715b6",
+      "capture": "05-browser-events",
+      "width": 375,
+      "height": 2530
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-username-substring.png",
+      "bytes": 76526,
+      "sha256": "671c167a6b5c61c48c50719acc3da323567963971d4527a84f50e8d5d884ac92",
+      "capture": "05-browser-events",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-week3-endpoint-a.png",
+      "bytes": 76027,
+      "sha256": "05b3302036558b324299bc7961f78c2d4243bca47c1cb262c9ffe144a99ef6f7",
+      "capture": "05-browser-events",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-week3-endpoint-b.png",
+      "bytes": 69615,
+      "sha256": "2a47f62575d90a582d265f7883f0baf74844b1ef3d31541ffc096ee894dea226",
+      "capture": "05-browser-events",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/05-browser-events/events-week3-unknown-no-serial.png",
+      "bytes": 68975,
+      "sha256": "163bbd2e4fe5f988fa16e1fc94e0b40944dea24136c1426a62e9aeff36d58158",
+      "capture": "05-browser-events",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-name-search.png",
+      "bytes": 209207,
+      "sha256": "f12406ae64faa4eb1de78f129638f062242deb819e1c365d82b60eb9479beefb",
+      "capture": "06-browser-packaged",
+      "width": 1425,
+      "height": 1978
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-real-http-date-filter.png",
+      "bytes": 208911,
+      "sha256": "da56077b9ad2f7325c5cbc02b46b820bb34192e9375427d3f2b07e67b518b7f1",
+      "capture": "06-browser-packaged",
+      "width": 1425,
+      "height": 1978
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-real-http-desktop.png",
+      "bytes": 209068,
+      "sha256": "a4c945be60178f82e590b5c22374f861d5d326960ea73a22960a109bb3001cc0",
+      "capture": "06-browser-packaged",
+      "width": 1425,
+      "height": 1978
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-real-http-mobile.png",
+      "bytes": 120850,
+      "sha256": "898eb61ddc83be135bb8637d8b014ce069960d88eb90671c7e81bef1ef86c86d",
+      "capture": "06-browser-packaged",
+      "width": 375,
+      "height": 2530
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-username-substring.png",
+      "bytes": 76678,
+      "sha256": "4609d594a98a1660d8379342b269417c062269922d2360f244170402c43392d9",
+      "capture": "06-browser-packaged",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-week3-endpoint-a.png",
+      "bytes": 76138,
+      "sha256": "dbc9cf4231cbc35f3346b63a751eda60012eab58c02f22ff2f605fac6ed39e8b",
+      "capture": "06-browser-packaged",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-week3-endpoint-b.png",
+      "bytes": 69590,
+      "sha256": "7f6f71a50972fa55849b21d8b931bcc8c9fbfcddb6c6e8419b0df73a5ba37d50",
+      "capture": "06-browser-packaged",
+      "width": 1440,
+      "height": 1050
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/screenshots/06-browser-packaged/events-week3-unknown-no-serial.png",
+      "bytes": 68943,
+      "sha256": "48737cb08bde3afacb8cccda7e171ecc161af00c04bdc57b19c1ecaf24c9a703",
+      "capture": "06-browser-packaged",
+      "width": 1440,
+      "height": 1050
+    }
+  ]
+}

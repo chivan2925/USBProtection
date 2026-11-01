@@ -1,0 +1,144 @@
+{
+  "id": "02-server-package",
+  "scope": "Fresh updated M1 backend full test/package with current React assets; JDK22 targeting Java21; independent M5 Windows execution",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceTreeSHA256After": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\maven\\bin\\mvn.cmd",
+  "args": [
+    "-o",
+    "-B",
+    "-f",
+    "admin-server/pom.xml",
+    "-Pwith-frontend",
+    "clean",
+    "package"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-Command",
+      "& 'C:\\maven\\bin\\mvn.cmd' '-o' '-B' '-f' 'admin-server/pom.xml' '-Pwith-frontend' 'clean' 'package'; exit $LASTEXITCODE"
+    ]
+  },
+  "startedAt": "2026-11-01T13:55:17.065Z",
+  "endedAt": "2026-11-01T13:56:10.380Z",
+  "startedAtBangkok": "2026-11-01 20:55:17 +07:00",
+  "endedAtBangkok": "2026-11-01 20:56:10 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "a472303d040cd31bb232519ed9118f5bca364ae6b4168eb45805d3f1fe39435a",
+  "screenshots": [],
+  "junit": [
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.agentapi.AgentEventContractTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "ae0d36e7ee420b5d0b735632d84c0ba1eca4a075e49116dfedd8e70c4e18b86c"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.agentapi.AgentHttpIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "768e2547029248561e77ff1b24ec3533cc7bb65634f3e4a2adf41fd9bcb321fb"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.EventSearchIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "2c22a50e7a85c7edd217f1807dcfeccdc4549902edbefe5569d2822bfd13f5a6"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.PolicyConsumerContractTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "802ccaf34f68b9fc486d4cc07a72ab56fe35967ed7edc36db2975052064a67e3"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.UsbShieldServerApplicationTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "e6f6f7e8e1bc6096ab02d944b4dbad84f69b553c748404c21976a8ab8a7861c1"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week2ExistingH2Test",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "625dee3c5e8d51f16d1c89f2faad34f6e97e244d409f1a725caacc6569ef48a1"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week2ServerIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "184566f675409096a2e53f9cfd39ebf483b2c8ce90e5d36a149a2d41aab4d3ab"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week3ProductionProfileTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "7a34241ac4f2c590febc923a335b7ef1d9c5439f46f7c2c69d5f1e98961cffc1"
+    },
+    {
+      "module": "admin-server",
+      "name": "com.group.usbshield.server.Week3SecurityAndStatusTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSHA256": "b3d63aefa8296820c4824f3762c874413db29bb68d5afbc7e80cfc798412090f"
+    }
+  ],
+  "buildArtifacts": [
+    {
+      "path": "admin-server/target/usbshield-admin-server.jar",
+      "sha256": "0772ae2af64d855bc6f4c6c6ba08e311df6fa1792ecb6d0eb7944ee5a71d8ba5",
+      "bytes": 57314805,
+      "modifiedAt": "2026-11-01T13:56:10.086Z"
+    }
+  ],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression",
+  "postCaptureRedaction": {
+    "performedAt": "2026-11-01T14:10:52.184912+00:00",
+    "policy": "Additional key=value fixture credential values; original execution status/source/commands unchanged",
+    "originalOutputSHA256": "f69b98eef19ca2195179d15600dbcb076f07ae612ee1b785d5ee4a1687226c85",
+    "redactedOutputSHA256": "a472303d040cd31bb232519ed9118f5bca364ae6b4168eb45805d3f1fe39435a",
+    "replacementCount": 26,
+    "tool": {
+      "path": "docs/qa/scripts/redact-week4-capture.py",
+      "sha256": "63a15f6c41d9524335f251a9b2c03b6173d1a0ca2ba53ba67c7ba1968b780a86"
+    },
+    "unredactedCopyBackedUp": false
+  }
+}

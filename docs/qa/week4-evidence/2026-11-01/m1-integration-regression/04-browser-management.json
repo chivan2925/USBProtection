@@ -1,0 +1,92 @@
+{
+  "id": "04-browser-management",
+  "scope": "Chromium management integration with updated Spring/H2: auth session, endpoint A/B Allow/Revoke, desired/applied and controlled restart; synthetic data",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceTreeSHA256After": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "tests/browser.mjs",
+    "--live"
+  ],
+  "launch": {
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "tests/browser.mjs",
+      "--live"
+    ]
+  },
+  "startedAt": "2026-11-01T13:57:55.546Z",
+  "endedAt": "2026-11-01T13:58:32.239Z",
+  "startedAtBangkok": "2026-11-01 20:57:55 +07:00",
+  "endedAtBangkok": "2026-11-01 20:58:32 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "730489fcacab9200760268ff036cdce852bde1339fa87a76ae694494fdbb071a",
+  "screenshots": [
+    {
+      "path": "screenshots/04-browser-management/m4-live-allow-a.png",
+      "sha256": "20cb301ddbcbd3c1a95ced376686a49e9fe8d84df24a789313c1e0be6ef7b780",
+      "bytes": 119152,
+      "modifiedAt": "2026-11-01T13:58:14.379Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-dashboard.png",
+      "sha256": "e1b0e0bdab5fdbbe698dc36e4538f0bd2bedcd71e6d8b4a985056c48fccbfa9c",
+      "bytes": 171295,
+      "modifiedAt": "2026-11-01T13:58:13.204Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-empty.png",
+      "sha256": "26e9109cbfb582c4dfa2b84d7fd5a9152041a88b45b4d1642d02c26bd61aabef",
+      "bytes": 177740,
+      "modifiedAt": "2026-11-01T13:58:12.589Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-events.png",
+      "sha256": "649f3a9a0ac8c21773f6459897de205c22d7ce11b03689131e859694cf7ae73c",
+      "bytes": 73458,
+      "modifiedAt": "2026-11-01T13:58:16.195Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-expired-session.png",
+      "sha256": "2972420a855c38bdfd4faa2bb859675791cde12c0378e3de0c5325b7ae2a25c6",
+      "bytes": 41529,
+      "modifiedAt": "2026-11-01T13:58:30.806Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-http-ack.png",
+      "sha256": "65bc4659ba5785e1aca0ae38a9edbc25f91c19b8fe42dce04a0e7c508b912059",
+      "bytes": 117554,
+      "modifiedAt": "2026-11-01T13:58:15.420Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-login.png",
+      "sha256": "5410d8c3ff94c90ac48b2b4633610796b51f5f350a48d5a35a0ec4f30564936d",
+      "bytes": 291140,
+      "modifiedAt": "2026-11-01T13:58:11.799Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-mobile.png",
+      "sha256": "0ffe1498d80ab855912844d5207cc5bb9b34e52aa20b7993220aaf0ee73ff1b0",
+      "bytes": 44433,
+      "modifiedAt": "2026-11-01T13:58:16.289Z"
+    },
+    {
+      "path": "screenshots/04-browser-management/m4-live-revoke-a.png",
+      "sha256": "0af9754ef2f61043585622558670d546d4b840067eadb83bc84784b8d9e927c1",
+      "bytes": 116330,
+      "modifiedAt": "2026-11-01T13:58:15.964Z"
+    }
+  ],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression"
+}

@@ -1,0 +1,83 @@
+{
+  "referenceRevision": "3efa50b50031dac9cec5738e286ec0a7730529ae",
+  "requiredCaptures": [
+    "01-frontend-build",
+    "02-server-package",
+    "03-policy-http",
+    "04-browser-management",
+    "05-browser-events",
+    "06-browser-packaged",
+    "08-agent-server-http"
+  ],
+  "failedCaptures": ["07-agent-server-http"],
+  "serverCapture": "02-server-package",
+  "expectedServerTests": 28,
+  "requiredSuites": {
+    "Week2ServerIntegrationTest": 7,
+    "Week3ProductionProfileTest": 2,
+    "Week3SecurityAndStatusTest": 6,
+    "EventSearchIntegrationTest": 7
+  },
+  "sameSourceScopes": [
+    "frontend",
+    "client-agent",
+    "packaging",
+    ".github"
+  ],
+  "allowedChangedPaths": [
+    "admin-server/build-release.ps1",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentCredentialService.java",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEnrollmentController.java",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEventController.java",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEventRequest.java",
+    "admin-server/src/main/resources/application-prod.yml",
+    "admin-server/src/main/resources/application.yml",
+    "admin-server/src/test/java/com/group/usbshield/server/Week2ServerIntegrationTest.java",
+    "admin-server/src/test/java/com/group/usbshield/server/Week3ProductionProfileTest.java",
+    "admin-server/src/test/java/com/group/usbshield/server/Week3SecurityAndStatusTest.java",
+    "admin-server/verify-week3.ps1"
+  ],
+  "m1ArtifactRevision": "d78189be42a5fa00a07e46446019c55fc547a592",
+  "agentReferenceManifest": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/build-manifest.json",
+  "integrationSummary": "agent-server-summary-02.json",
+  "packagedProvenance": "recording/provenance.json",
+  "screenshotCounts": {
+    "04-browser-management": 9,
+    "05-browser-events": 8,
+    "06-browser-packaged": 8
+  },
+  "historicalEvidencePaths": [
+    "docs/qa/week1-evidence",
+    "docs/qa/week2-evidence",
+    "docs/qa/week3-evidence",
+    "docs/qa/week4-evidence/2026-10-28",
+    "docs/qa/week4-evidence/2026-10-30",
+    "docs/qa/week4-evidence/2026-10-31",
+    "docs/qa/week4-evidence/2026-11-01/m2-part3-regression",
+    "docs/member1/week4-evidence"
+  ],
+  "documents": [
+    "docs/TEST_PLAN.md",
+    "docs/DEMO_SCRIPT.md",
+    "docs/qa/WEEK4_RELEASE_VALIDATION.md",
+    "docs/qa/WEEK4_TEST_INVENTORY.md",
+    "docs/qa/WEEK4_EVENT_HISTORY_REVIEW.md",
+    "docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md",
+    "docs/qa/week4-evidence/README.md",
+    "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/README.md",
+    "docs/qa/evidence/M5_WEEK4_M1_ACK_20261101.md",
+    "docs/member1/WEEK4_SERVER_HANDOFF.md",
+    "docs/API.md",
+    "docs/AGENT_SERVER_PROTOCOL.md",
+    "docs/ARCHITECTURE.md",
+    "docs/DEVELOPER_GUIDE.md",
+    "README.md"
+  ],
+  "qaTools": [
+    "docs/qa/scripts/capture-week4.mjs",
+    "docs/qa/scripts/rehearse-week4.mjs",
+    "docs/qa/scripts/AgentServerIntegrationSmoke.java",
+    "docs/qa/scripts/run-agent-server-smoke.py",
+    "docs/qa/scripts/redact-week4-capture.py"
+  ]
+}

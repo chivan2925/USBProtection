@@ -1,0 +1,136 @@
+{
+  "baseRevision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "files": [
+    {
+      "path": "docs/TEST_PLAN.md",
+      "bytes": 33197,
+      "sha256": "a56ee9ffc89e0515248ef000316e5e963e4788fb03661f38072ea06c4c29ba51",
+      "lfNormalizedSHA256": "b871275298b6d867124ef06c1f07125a0cb0cec6e5a45a8a94e7d6583a748a58"
+    },
+    {
+      "path": "docs/DEMO_SCRIPT.md",
+      "bytes": 19044,
+      "sha256": "f70431e998b723c84290eef31f05e28a87c84cbf917fced73344f810bf91cfdf",
+      "lfNormalizedSHA256": "f70431e998b723c84290eef31f05e28a87c84cbf917fced73344f810bf91cfdf"
+    },
+    {
+      "path": "docs/qa/WEEK4_RELEASE_VALIDATION.md",
+      "bytes": 28915,
+      "sha256": "58b3f8cc845a9dc5af8b0f762b85f3e92b7b65878127f5883d9fb565358d0728",
+      "lfNormalizedSHA256": "58b3f8cc845a9dc5af8b0f762b85f3e92b7b65878127f5883d9fb565358d0728"
+    },
+    {
+      "path": "docs/qa/WEEK4_TEST_INVENTORY.md",
+      "bytes": 73706,
+      "sha256": "1b54008b5c2d9ed6e4af008b11b35bd2b5e928b76c2a27972104cec0685231c0",
+      "lfNormalizedSHA256": "1b54008b5c2d9ed6e4af008b11b35bd2b5e928b76c2a27972104cec0685231c0"
+    },
+    {
+      "path": "docs/qa/WEEK4_EVENT_HISTORY_REVIEW.md",
+      "bytes": 26248,
+      "sha256": "9799ae2614787ccaf6605338f63e754df04aaae14b768450b4325a24a05ef6a7",
+      "lfNormalizedSHA256": "9799ae2614787ccaf6605338f63e754df04aaae14b768450b4325a24a05ef6a7"
+    },
+    {
+      "path": "docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md",
+      "bytes": 33199,
+      "sha256": "3c698f159b9f98aa8f171c68405c952fa57020ce390695fd7b85703d052b3b15",
+      "lfNormalizedSHA256": "3c698f159b9f98aa8f171c68405c952fa57020ce390695fd7b85703d052b3b15"
+    },
+    {
+      "path": "docs/qa/week4-evidence/README.md",
+      "bytes": 3944,
+      "sha256": "bc027eac50495686b613365d073ea40cf2b0953d5496f373e99fac89b8c5881a",
+      "lfNormalizedSHA256": "bc027eac50495686b613365d073ea40cf2b0953d5496f373e99fac89b8c5881a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/README.md",
+      "bytes": 10702,
+      "sha256": "b4ee1834e3cf4087c5dbdb2fcad7f08bce954fe5e564b2525546926a25fee5ac",
+      "lfNormalizedSHA256": "b4ee1834e3cf4087c5dbdb2fcad7f08bce954fe5e564b2525546926a25fee5ac"
+    },
+    {
+      "path": "docs/qa/evidence/M5_WEEK4_M1_ACK_20261101.md",
+      "bytes": 8829,
+      "sha256": "26664861ce48d9cb3c8f00ff704f6135553d616145d555e04f66b8a742430b79",
+      "lfNormalizedSHA256": "26664861ce48d9cb3c8f00ff704f6135553d616145d555e04f66b8a742430b79"
+    },
+    {
+      "path": "docs/member1/WEEK4_SERVER_HANDOFF.md",
+      "bytes": 8446,
+      "sha256": "66075e9b5dcbae0e2df5b3ffef84ad11ad3b1aec4fd1a3e8cfb8fa2e616e508e",
+      "lfNormalizedSHA256": "75eceb8a5f426de09e3be79e77bacdd250e82d625086a113e9b62719ed468738"
+    },
+    {
+      "path": "docs/API.md",
+      "bytes": 11637,
+      "sha256": "1b394065adca04f7adaf61441d0ea131d716543fb20abd26f074eac6cb6be3fa",
+      "lfNormalizedSHA256": "8bf16084c10c94a3b31edf59412b476b7ecf14f140cf09838ac284e75aad72a2"
+    },
+    {
+      "path": "docs/AGENT_SERVER_PROTOCOL.md",
+      "bytes": 8470,
+      "sha256": "523c4b4faadfdafd73380c6654b7e0b4e07cecd939f2a5dd09f24a82149c74b4",
+      "lfNormalizedSHA256": "8b059d10fa239c1926b53e8b6cc7449b6cdcbc077cc8a79d07682e950ac2de98"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 13318,
+      "sha256": "21048fd978fc444f7a91ba4b238edf005d162b1b81afad459dd5867e9c585891",
+      "lfNormalizedSHA256": "6ccbb3bf8e2b07543d97b7fca5788a06b0c5c32266fc260e43da799774d5ac2c"
+    },
+    {
+      "path": "docs/DEVELOPER_GUIDE.md",
+      "bytes": 9262,
+      "sha256": "6ef8c423d61a72d13512c736b7f5f6c78bac2df2c56e52932602a75687ed87a8",
+      "lfNormalizedSHA256": "4189a528dbe47274ddd26abc7d4ebe138ce52a77bdf2d9733d9c03e41956a7e2"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5574,
+      "sha256": "53aba9be92949343cdcb9f67b9cf9c0d76120eef92de03d79cd87cd496a75e20",
+      "lfNormalizedSHA256": "5398fbea8093b122f6a546ec43d3c2fd9a43d97e70ff1643e43b95136724f369"
+    },
+    {
+      "path": "docs/qa/scripts/capture-week4.mjs",
+      "bytes": 8523,
+      "sha256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+      "lfNormalizedSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8"
+    },
+    {
+      "path": "docs/qa/scripts/rehearse-week4.mjs",
+      "bytes": 21138,
+      "sha256": "a9eca4c142385fb362ce94f558ca29e3dd1e65d33bfbc1649c0113915e5bd4a6",
+      "lfNormalizedSHA256": "a9eca4c142385fb362ce94f558ca29e3dd1e65d33bfbc1649c0113915e5bd4a6"
+    },
+    {
+      "path": "docs/qa/scripts/AgentServerIntegrationSmoke.java",
+      "bytes": 26502,
+      "sha256": "f617df736e6c74145d83583f2482f973d0862b6c36ae2dceb411f5f0da478c85",
+      "lfNormalizedSHA256": "f617df736e6c74145d83583f2482f973d0862b6c36ae2dceb411f5f0da478c85"
+    },
+    {
+      "path": "docs/qa/scripts/run-agent-server-smoke.py",
+      "bytes": 17908,
+      "sha256": "4aaaab148f4c555fac7b192cf2ef8065f80434dad57f9309ad17001c1821d59a",
+      "lfNormalizedSHA256": "4aaaab148f4c555fac7b192cf2ef8065f80434dad57f9309ad17001c1821d59a"
+    },
+    {
+      "path": "docs/qa/scripts/redact-week4-capture.py",
+      "bytes": 2053,
+      "sha256": "63a15f6c41d9524335f251a9b2c03b6173d1a0ca2ba53ba67c7ba1968b780a86",
+      "lfNormalizedSHA256": "63a15f6c41d9524335f251a9b2c03b6173d1a0ca2ba53ba67c7ba1968b780a86"
+    },
+    {
+      "path": "docs/qa/scripts/validate-week4-server-integration.py",
+      "bytes": 15134,
+      "sha256": "6816d708e40b2cef602e02024c6eb2b6885dc9c48ee14905e8b9ecf18a7fb70d",
+      "lfNormalizedSHA256": "6816d708e40b2cef602e02024c6eb2b6885dc9c48ee14905e8b9ecf18a7fb70d"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression/run-spec.json",
+      "bytes": 3141,
+      "sha256": "4f3042508e4c2f1e93a3f155c34976bd54e8c92c21f90766e6477bf05e930117"
+    }
+  ]
+}

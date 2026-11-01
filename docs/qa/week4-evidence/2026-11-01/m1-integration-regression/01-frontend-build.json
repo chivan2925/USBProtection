@@ -1,0 +1,38 @@
+{
+  "id": "01-frontend-build",
+  "scope": "Current React production assets for fresh M1 integrated server JAR; source unchanged from S3",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceTreeSHA256After": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceStable": true,
+  "cwd": "frontend",
+  "executable": "C:\\Program Files\\nodejs\\npm.cmd",
+  "args": [
+    "run",
+    "build"
+  ],
+  "launch": {
+    "exe": "powershell.exe",
+    "args": [
+      "-NoProfile",
+      "-Command",
+      "& 'C:\\Program Files\\nodejs\\npm.cmd' 'run' 'build'; exit $LASTEXITCODE"
+    ]
+  },
+  "startedAt": "2026-11-01T13:54:32.911Z",
+  "endedAt": "2026-11-01T13:54:43.445Z",
+  "startedAtBangkok": "2026-11-01 20:54:32 +07:00",
+  "endedAtBangkok": "2026-11-01 20:54:43 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "5d944276ad51a14a96eaf0f06ea7b6e19df27d87f3f30ee2a116d905a0e87aa3",
+  "screenshots": [],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression"
+}

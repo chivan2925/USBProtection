@@ -1,0 +1,23 @@
+{
+  "terminationConfirmed": true,
+  "runtimeRetained": false,
+  "children": [
+    {
+      "pid": 2572,
+      "killError": {
+        "code": 128,
+        "message": "Command failed: taskkill /PID 2572 /T /F\nERROR: The process with PID 25956 (child process of PID 2572) could not be terminated.\r\nReason: The operation attempted is not supported.\r\r\nERROR: The process with PID 29392 (child process of PID 2572) could not be terminated.\r\nReason: The operation attempted is not supported.\r\r\nERROR: The process with PID 2572 (child process of PID 21540) could not be terminated.\r\nReason: The operation attempted is not supported.\r\r\n"
+      },
+      "exitCode": 0,
+      "signalCode": null,
+      "confirmed": true
+    },
+    {
+      "pid": 10640,
+      "killError": null,
+      "exitCode": 1,
+      "signalCode": null,
+      "confirmed": true
+    }
+  ]
+}

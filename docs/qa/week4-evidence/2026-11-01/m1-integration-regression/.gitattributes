@@ -1,0 +1,2 @@
+# Preserve captured artifact bytes across Windows Git checkouts.
+* -text

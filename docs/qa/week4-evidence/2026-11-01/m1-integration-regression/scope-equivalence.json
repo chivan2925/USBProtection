@@ -1,0 +1,46 @@
+{
+  "referenceRevision": "3efa50b50031dac9cec5738e286ec0a7730529ae",
+  "currentRevision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "comparisons": [
+    {
+      "scope": "frontend",
+      "referenceTree": "85938291c72c25de0fc7716261440cfe136128e7",
+      "currentTree": "85938291c72c25de0fc7716261440cfe136128e7",
+      "status": "UNCHANGED_SOURCE"
+    },
+    {
+      "scope": "client-agent",
+      "referenceTree": "360beee7f8f0a0c9c11107948c3bfe21c55c120f",
+      "currentTree": "360beee7f8f0a0c9c11107948c3bfe21c55c120f",
+      "status": "UNCHANGED_SOURCE"
+    },
+    {
+      "scope": "packaging",
+      "referenceTree": "5c0128b85b4c69f346baff694fadf2a49d257f35",
+      "currentTree": "5c0128b85b4c69f346baff694fadf2a49d257f35",
+      "status": "UNCHANGED_SOURCE"
+    },
+    {
+      "scope": ".github",
+      "referenceTree": null,
+      "currentTree": null,
+      "status": "NO_TRACKED_ENTRY_AT_EITHER_REVISION"
+    }
+  ],
+  "changedPaths": [
+    "admin-server/build-release.ps1",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentCredentialService.java",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEnrollmentController.java",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/AgentEventController.java",
+    "admin-server/src/main/java/com/group/usbshield/server/agentapi/dto/AgentEventRequest.java",
+    "admin-server/src/main/resources/application-prod.yml",
+    "admin-server/src/main/resources/application.yml",
+    "admin-server/src/test/java/com/group/usbshield/server/Week2ServerIntegrationTest.java",
+    "admin-server/src/test/java/com/group/usbshield/server/Week3ProductionProfileTest.java",
+    "admin-server/src/test/java/com/group/usbshield/server/Week3SecurityAndStatusTest.java",
+    "admin-server/verify-week3.ps1"
+  ],
+  "m1ArtifactSource": "d78189be42a5fa00a07e46446019c55fc547a592",
+  "m1ArtifactSourceMatchesCurrentServerAndFrontend": true,
+  "limits": "Source equality retains historical execution dates. Updated server integration is freshly tested; no Agent unit or Debian/native rerun inferred."
+}

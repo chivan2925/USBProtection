@@ -1,0 +1,94 @@
+{
+  "id": "06-browser-packaged",
+  "scope": "Same-origin Events browser rehearsal served directly by current M1 JAR; all original assertions preserved; recording disabled, synthetic HTTP/H2 data",
+  "revision": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "revisionAfter": "c6cc1df21283588d70a792a37d42870bdea49497",
+  "sourceTreeSHA256": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceTreeSHA256After": "08dca0efb919680e7d5791c9de380dff275bf3d90ea0f2fb39edd08808d1bfe6",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\Program Files\\nodejs\\node.exe",
+  "args": [
+    "docs/qa/scripts/rehearse-week4.mjs",
+    "--run-dir",
+    "docs/qa/week4-evidence/2026-11-01/m1-integration-regression",
+    "--expected-revision",
+    "c6cc1df21283588d70a792a37d42870bdea49497",
+    "--no-recording"
+  ],
+  "launch": {
+    "exe": "C:\\Program Files\\nodejs\\node.exe",
+    "args": [
+      "docs/qa/scripts/rehearse-week4.mjs",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-11-01/m1-integration-regression",
+      "--expected-revision",
+      "c6cc1df21283588d70a792a37d42870bdea49497",
+      "--no-recording"
+    ]
+  },
+  "startedAt": "2026-11-01T13:59:33.129Z",
+  "endedAt": "2026-11-01T13:59:55.974Z",
+  "startedAtBangkok": "2026-11-01 20:59:33 +07:00",
+  "endedAtBangkok": "2026-11-01 20:59:55 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "a8235699c04024ab2310b3eb70b177816846f505a78cd160e000c84e97f7e3a6",
+  "screenshots": [
+    {
+      "path": "screenshots/06-browser-packaged/events-name-search.png",
+      "sha256": "f12406ae64faa4eb1de78f129638f062242deb819e1c365d82b60eb9479beefb",
+      "bytes": 209207,
+      "modifiedAt": "2026-11-01T13:59:51.059Z"
+    },
+    {
+      "path": "screenshots/06-browser-packaged/events-real-http-date-filter.png",
+      "sha256": "da56077b9ad2f7325c5cbc02b46b820bb34192e9375427d3f2b07e67b518b7f1",
+      "bytes": 208911,
+      "modifiedAt": "2026-11-01T13:59:51.914Z"
+    },
+    {
+      "path": "screenshots/06-browser-packaged/events-real-http-desktop.png",
+      "sha256": "a4c945be60178f82e590b5c22374f861d5d326960ea73a22960a109bb3001cc0",
+      "bytes": 209068,
+      "modifiedAt": "2026-11-01T13:59:49.609Z"
+    },
+    {
+      "path": "screenshots/06-browser-packaged/events-real-http-mobile.png",
+      "sha256": "898eb61ddc83be135bb8637d8b014ce069960d88eb90671c7e81bef1ef86c86d",
+      "bytes": 120850,
+      "modifiedAt": "2026-11-01T13:59:52.542Z"
+    },
+    {
+      "path": "screenshots/06-browser-packaged/events-username-substring.png",
+      "sha256": "4609d594a98a1660d8379342b269417c062269922d2360f244170402c43392d9",
+      "bytes": 76678,
+      "modifiedAt": "2026-11-01T13:59:53.910Z"
+    },
+    {
+      "path": "screenshots/06-browser-packaged/events-week3-endpoint-a.png",
+      "sha256": "dbc9cf4231cbc35f3346b63a751eda60012eab58c02f22ff2f605fac6ed39e8b",
+      "bytes": 76138,
+      "modifiedAt": "2026-11-01T13:59:55.091Z"
+    },
+    {
+      "path": "screenshots/06-browser-packaged/events-week3-endpoint-b.png",
+      "sha256": "7f6f71a50972fa55849b21d8b931bcc8c9fbfcddb6c6e8419b0df73a5ba37d50",
+      "bytes": 69590,
+      "modifiedAt": "2026-11-01T13:59:54.543Z"
+    },
+    {
+      "path": "screenshots/06-browser-packaged/events-week3-unknown-no-serial.png",
+      "sha256": "48737cb08bde3afacb8cccda7e171ecc161af00c04bdc57b19c1ecaf24c9a703",
+      "bytes": 68943,
+      "modifiedAt": "2026-11-01T13:59:54.113Z"
+    }
+  ],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-11-01/m1-integration-regression"
+}
