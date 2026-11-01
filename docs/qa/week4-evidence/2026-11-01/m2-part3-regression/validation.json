@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "validatedAtBangkok": "2026-11-01T14:44:42.138111+07:00",
+  "revision": "3efa50b50031dac9cec5738e286ec0a7730529ae",
+  "sourceTreeSHA256": "438fc983ed9e2b656884f5dceb7802f25de227d945a260b3a35c6b29630f8722",
+  "command": {
+    "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/validate-week4-post-pull.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-11-01/m2-part3-regression",
+      "--baseline",
+      "3efa50b50031dac9cec5738e286ec0a7730529ae",
+      "--profile",
+      "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/run-spec.json"
+    ],
+    "cwd": "D:\\USBProtection"
+  },
+  "validatorSHA256": "06fcef9a6432a5cbea47387f9c50f1ba7e03913e606f34e65111461803c3d3d1",
+  "successfulChecks": 5,
+  "retainedFailedCaptures": [],
+  "agentTests": {
+    "tests": 174,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "newWatchTests": 9,
+  "staticJarCheck": "PASS",
+  "requiredSuites": {
+    "UsbGuardWeek4WatchStressTest": 9,
+    "UsbGuardWeek4PolicyIntegrityTest": 12,
+    "Week4ActiveSessionSafetyTest": 8,
+    "UsbGuardWeek4CopilotReviewRegressionTest": 9,
+    "Week4NotificationCorrectnessTest": 7,
+    "Week4DesktopNotifierPeerSafetyTest": 1,
+    "UsbGuardWeek4NotificationEventTargetTest": 1
+  },
+  "stagingFilesByteEqual": 9,
+  "productionHttpAssertions": 255,
+  "unchangedSourceScopes": [
+    "frontend",
+    "admin-server"
+  ],
+  "absentScopesAtBothRevisions": [
+    ".github"
+  ],
+  "m4FrontendSourceEquivalent": true,
+  "historicalEvidenceUnchanged": true,
+  "brokenLinks": [],
+  "newScreenshotsOrRecording": false,
+  "scope": "Affected post-pull Windows regression; final candidate/member acceptance pending; Ubuntu NOT EXECUTED/DEFERRED"
+}

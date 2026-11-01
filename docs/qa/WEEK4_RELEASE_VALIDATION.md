@@ -1,18 +1,34 @@
 # Week 4 — M5 release validation và bàn giao
 
-Ngày cập nhật: **2026-10-31 (Asia/Bangkok)**. Owner: M5. Báo cáo phân biệt evidence Windows ngày 28/10, kiểm tra sau pull ngày 30/10 và lượt tích hợp Agent/packaging ngày 31/10 với quyết định candidate của M1/toàn nhóm.
+Ngày cập nhật: **2026-11-01 (Asia/Bangkok)**. Owner: M5. Báo cáo phân biệt các lượt evidence S0–S3 với quyết định candidate của M1/toàn nhóm; kết quả cũ giữ nguyên ngày, SHA và giới hạn.
 
 ## Phạm vi và mốc nguồn
 
-- **S2 / hiện tại ngày 31/10:** `0b726304a29a78ac36aefbbc71e40fbd7758ae2e`; chưa được M1 chốt là release candidate cuối. **S1 / ngày 30/10:** `751387bf166c528326ae91c6a16a820a6d8fc24a`. **S0 / ngày 28/10:** `2013ce726ef8cc960b30720435be23e8ccef1903`.
-- Bộ QA M5 ngày 28/10 đã commit tại `63ea070`, tích hợp qua `6127766`; cập nhật ngày 30/10 đã commit `7c54f85` và merge qua `ab34693`. Lượt cập nhật ngày 31/10 đang ở working tree; không tự nhận đã commit/PR/tag hoặc ký thay owner.
+- **S3 / hiện tại ngày 01/11:** `3efa50b50031dac9cec5738e286ec0a7730529ae`, chưa được M1 chốt là release candidate cuối. **S2 / ngày 31/10:** `0b726304a29a78ac36aefbbc71e40fbd7758ae2e`. **S1 / ngày 30/10:** `751387bf166c528326ae91c6a16a820a6d8fc24a`. **S0 / ngày 28/10:** `2013ce726ef8cc960b30720435be23e8ccef1903`.
+- QA S0 đã commit `63ea070`, merge `6127766`; S1 commit `7c54f85`, merge `ab34693`; S2 commit **`48a13b3`**, merge **`176e547`**, không còn là thay đổi chưa commit. Cập nhật S3 đang ở working tree; không tự nhận đã commit/PR/tag hoặc ký thay owner.
 - Giữ nguyên quyết định [Week 3 PASS (WINDOWS SCOPE)](WEEK3_FINAL_OWNER_CLOSEOUT_20261028.md); không mở lại H05 hoặc ghi đè evidence cũ.
 - [Test matrix và inventory](WEEK4_TEST_INVENTORY.md), [Event History review](WEEK4_EVENT_HISTORY_REVIEW.md), [Demo Script](../DEMO_SCRIPT.md), [Ubuntu acceptance](WEEK4_UBUNTU_ACCEPTANCE.md), [evidence index](week4-evidence/README.md).
 - Maven/unit/mock, static/build, HTTP/browser synthetic và Ubuntu E2E là các mức bằng chứng riêng. Ubuntu/USB vật lý/USBGuard daemon/native GUI/systemd/reboot/package lifecycle không được thực thi trong đợt này.
 
-## Tích hợp Agent/packaging — 31/10/2026
+## M2 Part 3 — 01/11/2026
 
-[M5 ACK M2/M3](evidence/M5_WEEK4_M2_M3_ACK_20261031.md) ghi nhận **đã nhận và ACK kỹ thuật Windows** M2 Part 2 cùng bộ M3 closeout/guide/checklist/staging. [Evidence độc lập ngày 31/10](week4-evidence/2026-10-31/integrated-agent-packaging/README.md) là nguồn kết quả hiện tại; không chuyển lời báo PASS của owner thành kết quả M5 đã chạy.
+[M2 Part 3](../usbguard/WEEK4_M2_PART3_FINAL_CLOSEOUT.md), [core guide](../usbguard/WEEK4_M2_CORE_OPERATIONS_GUIDE.md), [technical Q&A](../usbguard/WEEK4_M2_TECHNICAL_QA.md) và [9 case Ubuntu/IPC](../usbguard/WEEK4_M2_M3_M5_UBUNTU_HANDOFF.md) đã **ĐƯỢC NHẬN / ACK KỸ THUẬT WINDOWS**, source merge `942527c` trên S3. [M5 ACK S3](evidence/M5_WEEK4_M2_PART3_ACK_20261101.md) và [evidence ngày 01/11](week4-evidence/2026-11-01/m2-part3-regression/README.md) ghi kết quả thực thi/validation PASS; không còn chờ M2 gửi Part 3 hoặc chờ các kiểm tra Windows M5 của lượt này.
+
+| Phạm vi S3 | Trạng thái hiện tại |
+|---|---|
+| M2 policy/notification fixes | Source đã merge; **bốn suite mới 9/7/1/1 PASS** về removal/syntax, notification correctness, peer-name policy và effective watch target. Có regression unit thực tế cho fix candidate; không tự chốt external PR review, native credentials hay ba finding trên USBGuard thật. |
+| Agent clean package S3 | **174/174 PASS**, 0 failure/error/skip; policy **12**, session **8**, watch **9** tiếp tục PASS. [01-agent-package](week4-evidence/2026-11-01/m2-part3-regression/01-agent-package.json), chạy **14:37:58–14:38:37 +07:00**. Source digest `438fc983ed9e2b656884f5dceb7802f25de227d945a260b3a35c6b29630f8722`; JAR **20.186.115 bytes**, SHA-256 `63255be52082dd8883b102633d8ec962b2d3e864a4204861b6b69cd8f532dd24`. |
+| Staging S3 | **02 guarded preparation PASS**, **03 full Week 4 verifier không Skip PASS**, **04 independent byte/hash equality 9/9 PASS**; [staging manifest](week4-evidence/2026-11-01/m2-part3-regression/staging-manifest.json) ràng buộc source/JAR S3, không dùng staged JAR S2 làm proof hiện tại. POSIX mode/`.deb`/Linux chưa được thực thi. |
+| Production HTTP S3 | **05 PASS**, **255 assertions / 15 scenarios / 14 real loopback requests** với production `AdminServerClient` constructor, cùng source/JAR S3; [HTTP summary](week4-evidence/2026-11-01/m2-part3-regression/http-transport-summary.json). Responses do test server kiểm soát; không phải backend auth/scheduler hoặc Ubuntu E2E. |
+| Evidence validator S3 | **PASS**: [validation.json](week4-evidence/2026-11-01/m2-part3-regression/validation.json) xác minh **5 captures PASS**, **174 tests**, **9 staged file byte-equal**, **255 HTTP assertions**, source/log/JAR/staging/link và bảo toàn lịch sử. Không có failed capture trong S3; 05 FAIL của S2 vẫn giữ đúng thư mục ngày 31/10. |
+| Frontend/server/packaging/sync | [Scope equivalence](week4-evidence/2026-11-01/m2-part3-regression/scope-equivalence.json) xác minh phần không đổi; packaging/sync còn đối chiếu trực tiếp S2. Giữ evidence S0/S1/S2 phù hợp, không đổi thành UI/browser/Ubuntu chạy ngày 01/11. JAR S3 đã được stage/kiểm tra mới. |
+| Cross-owner/runtime | M3 phải chốt per-UID socket ACL/ownership/startup design: shared dir 1777 và GUI-owned socket 0660 chưa chứng minh `usbshield` kết nối được, có rủi ro path collision. M2 cần contract/native/cross-owner confirmation; M1 freeze/security/candidate và Ubuntu vẫn còn mở. |
+
+Owner M2 trước đó báo **43 isolated checks** bằng stub/harness không được giao trong repo; [closeout](../usbguard/WEEK4_M2_PART3_FINAL_CLOSEOUT.md) ghi rõ chưa phải Maven/Spring/JUnit và khi chuẩn bị patch còn chờ Windows signoff. M5 không chuyển con số đó thành evidence độc lập: lượt S3 mới đã chạy thật **174/174**, có JUnit/build/staging/HTTP và validator riêng. Unit regression xác minh các fix candidate trong phạm vi đã chạy; việc đóng thảo luận PR bên ngoài, native USBGuard và M3 ACL signoff vẫn là các xác nhận riêng.
+
+## Tích hợp Agent/packaging — lịch sử ngày 31/10/2026
+
+[M5 ACK M2/M3](evidence/M5_WEEK4_M2_M3_ACK_20261031.md) ghi nhận **đã nhận và ACK kỹ thuật Windows** M2 Part 2 cùng bộ M3 closeout/guide/checklist/staging. [Evidence độc lập ngày 31/10](week4-evidence/2026-10-31/integrated-agent-packaging/README.md) là nguồn kết quả S2; không chuyển lời báo PASS của owner thành kết quả M5 đã chạy hoặc thành proof S3.
 
 | Phạm vi hiện tại | Trạng thái |
 |---|---|
@@ -23,7 +39,7 @@ Ngày cập nhật: **2026-10-31 (Asia/Bangkok)**. Owner: M5. Báo cáo phân bi
 | Production HTTP constructor | **PASS tại capture 06**: **15 scenario / 14 request loopback thật / 255 assertion**, dùng production `AdminServerClient` constructor; [summary lần 02](week4-evidence/2026-10-31/integrated-agent-packaging/http-transport-summary-02.json). Đây là HTTP client tới server kiểm thử có response kiểm soát, không phải Spring backend auth/scheduler hay Ubuntu. |
 | Evidence validation S2 | **PASS**: **5 positive captures**, Agent 156 tests, staging byte-equal 9/9, HTTP 255 assertions; [validation](week4-evidence/2026-10-31/integrated-agent-packaging/validation.json) đối chiếu source/log/JUnit/JAR/staging/transport/link và bảo toàn evidence cũ. Capture 05 FAIL được giữ riêng. |
 | Frontend / Admin Server | Source không đổi; giữ evidence S0 ngày 28/10 và ACK M4, không có UI/browser/server regression mới trong lượt này. Packaging có thêm công cụ mới nên kiểm tra staging theo S2. |
-| Phạm vi còn chờ | M1 freeze/security/candidate; M2 Part 3 notification/docs/Q&A/IPC và contract cần giải thích. Handoff M3 đã nhận nhưng raw provenance cũ còn cần owner đối chiếu; evidence M5 mới được tách riêng. |
+| Phạm vi còn chờ tại ngày 31/10 | Khi đó M2 Part 3 còn thiếu; ngày 01/11 đã nhận source/guide/Q&A/checklist như mục S3. M1 freeze/security/candidate, M3 raw-provenance follow-up và runtime vẫn chưa được chốt bằng bảng S2 này. |
 
 **Giới hạn provenance M3:** [closeout](../client-agent/WEEK4_CLIENT_AGENT_CLOSEOUT.md) ghi 156 tests/JAR `A926…` (20.177.520 bytes), nhưng [raw Maven](../client-agent/week4-evidence/01-agent-maven-test.txt) ghi 127 và [raw verifier](../client-agent/week4-evidence/02-packaging-staging-verification.txt) ghi JAR `219D…` (20.173.441 bytes). Raw staging/postinst hash cũng khác [manifest final](../client-agent/WEEK4_PACKAGING_MANIFEST.md). Đây là **mâu thuẫn evidence owner cần truy vết**, không phải failure mới đã tái hiện trên S2. Không sửa/ghi đè log owner; kết quả M5 trên S2 đã có SHA/log/hash riêng làm evidence hiện tại.
 
@@ -72,16 +88,16 @@ Bộ QA ban đầu đã được commit/merge như trên; cập nhật sau pull 
 | Work ID | Đã thực hiện | Phần còn chờ |
 |---|---|---|
 | W4-M5-01 | **DONE — chuẩn bị và cập nhật matrix/inventory**: BP-T01–28, DoD-01–11, owner/môi trường/expected/actual/SHA/status; phân biệt namespace T của Week 1 | Bổ sung kết quả khi candidate thay đổi hoặc Ubuntu chạy; không cần chờ member để dùng matrix hiện tại |
-| W4-M5-02 | **S2 WINDOWS TECHNICAL PASS** và evidence validation **PASS**: Agent **156/156** (policy 12/session 8/watch 9), staging/full verifier/**9/9 byte-integrity**, HTTP production-constructor **15 scenario/255 assertion**. Frontend/server giữ evidence ngày 28/10 qua source equivalence | M1 chọn candidate/API freeze, M2 Part 3/contract. Rerun phần bị ảnh hưởng nếu source/artifacts tiếp tục đổi; đây chưa phải final candidate acceptance |
+| W4-M5-02 | **S3 WINDOWS TECHNICAL + EVIDENCE PASS**: Agent **174/174**, staging/full verifier/**9/9 byte-integrity**, HTTP **255 assertions / 15 scenarios / 14 requests**, validator và source equivalence PASS | M1 candidate/API freeze/security; M2 external-review/contract/native/cross-owner và M3 IPC disposition. Rerun phần bị ảnh hưởng nếu candidate đổi; đây chưa phải final candidate acceptance |
 | W4-M5-03 | **DONE phần technical review và M4 shared-frontend ACK** trên source frontend không đổi ở HEAD hiện tại; production không tự fallback mock | M1 xác nhận candidate cuối; đối chiếu lại nếu frontend/API đổi. Attribution/enforcement thực tế vẫn hoãn Ubuntu; không còn chờ bản handoff M4 đã nhận |
-| W4-M5-04 | **DONE trong phạm vi Windows tự động ngày 28/10**: script/Q&A, các browser rehearsal PASS và recording; đã bổ sung scope sau pull | Chưa có demo mới trên Agent hiện tại; walkthrough thuyết minh chưa thực hiện; live Ubuntu sau Week 4 |
-| W4-M5-05 | **DONE evidence S0/S1/S2**, validation S2 **PASS**; giữ 05 FAIL harness, raw owner và evidence lịch sử; manifest/checksums tách theo ngày/source | Không có video encoded/narrated mới; **39 screenshots / 207 frame** vẫn thuộc ngày 28/10. Bổ sung evidence khi candidate thay đổi |
-| W4-M5-06 | **DONE report/ACK/handoff cập nhật**; M2 Part 2 và M3 được ACK kỹ thuật Windows bằng proof S2, M4 ACK giữ nguyên | M1 freeze/security/candidate và M2 Part 3/contract; M1 ghi quyết định nhóm. Provenance M3 cũ là owner follow-up riêng, không phải failure S2 |
-| W4-M5-07 | **DONE — phiếu Ubuntu và mapping 14 case M3** vào các case M5 hiện hữu, có lệnh/expected/evidence/redaction | Runtime sau Week 4; cần `.deb` thật, M2/M3, Ubuntu/USB/GUI và artifacts tương ứng |
+| W4-M5-04 | **DONE Windows tự động ngày 28/10**; đã nhận/bổ sung Q&A M2 Part 3 (rule ID, limited grammar, peer check, DELIVERED không phải popup) | Không có demo/browser/recording mới trên S3; walkthrough thuyết minh và live Ubuntu chưa thực hiện |
+| W4-M5-05 | **DONE evidence S0–S3**, S3 **5/5 captures + validator PASS**; build/JUnit/scope/staging/HTTP/environment/checksums riêng theo ngày/source, lịch sử giữ nguyên | **39 screenshots / 207 frame** vẫn thuộc ngày 28/10; không có browser/video mới. Bổ sung evidence nếu source/candidate đổi |
+| W4-M5-06 | **DONE report/handoff/ACK kỹ thuật Windows Part 3**, không còn chờ proof M5 S3; M3/M4 và S2 ACK giữ nguyên scope | M1 freeze/security/candidate, M3 IPC design cùng M2 native/cross-owner/PR confirmation; provenance M3 cũ theo dõi riêng |
+| W4-M5-07 | **DONE — mapping 14 case M3 và 9 case M2** vào case M5 hiện hữu, thêm biến thể rule-ID renumber/rollback và peer/ACL/path collision | Tất cả native case vẫn NOT EXECUTED/DEFERRED; cần `.deb` thật, M2/M3 và Ubuntu/USB/GUI |
 
 ## Đề xuất go/no-go
 
-**GO cho bàn giao các đầu ra M5 đã kiểm tra và ACK kỹ thuật Windows của M2 Part 2/M3/M4.** S2 execution/evidence gates đã **PASS**. **NO-GO / BLOCKED cho tuyên bố `WEEK 4 — WINDOWS/RELEASE-CANDIDATE PREPARATION PASS` ở cấp nhóm** còn do **M1 freeze/security/candidate và M2 Part 3/contract**. Mâu thuẫn provenance M3 được theo dõi riêng, không phủ nhận proof S2 độc lập đã hoàn tất. Việc thiếu `.deb` được công khai trong scope Windows; Ubuntu full gate vẫn **NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4**.
+**GO cho bàn giao M5 và ACK kỹ thuật Windows M2 Part 3 trên S3: execution và evidence validation đều PASS.** **NO-GO / BLOCKED cho việc tự tuyên bố `WEEK 4 — WINDOWS/RELEASE-CANDIDATE PREPARATION PASS` ở cấp nhóm** do **M1 chưa chốt freeze/security/candidate và quyết định owner**. M3 socket ACL/startup design là follow-up **P1/cross-owner** được M2 nêu; external PR review, contract/native confirmation và phạm vi deferred cần M1/các owner ghi disposition riêng. Không còn thiếu Part 3 docs/Q&A hoặc kiểm tra Windows M5 S3. Provenance M3 cũ theo dõi riêng; `.deb NOT BUILT` công khai. Ubuntu full gate vẫn **NOT EXECUTED / DEFERRED UNTIL AFTER WEEK 4**.
 
 ## Evidence và provenance — bộ lịch sử ngày 28/10
 
@@ -103,8 +119,8 @@ Trạng thái dưới đây dựa trên source, tài liệu và evidence đã nh
 | ID | Owner | Cần bàn giao/xác nhận | Điều kiện để M5 chốt |
 |---|---|---|---|
 | W4-H01 | M1 | API/DTO freeze; review security/production; backend guides; SHA/manifest candidate, server JAR và cấu hình chạy | Contract khớp implementation, security finding P0 đã có hướng xử lý, candidate SHA rõ ràng để đối chiếu/rerun |
-| W4-H02 | M2 | **Part 1/2 ĐÃ NHẬN**; Part 2 policy/session đã merge. Còn Part 3 notification/docs/Q&A/IPC và giải thích contract | Regression S2 có log/SHA hiện tại; M2 xác nhận phần Part 3/IPC và giới hạn foreign Allow/tty/watch trước demo/triển khai |
-| W4-H03 | M3 | **ĐÃ NHẬN / ACK KỸ THUẬT WINDOWS**, gồm validation **PASS** bằng proof M5 S2: current JAR, full verifier, staging byte-equal 9/9 và production HTTP constructor. Guide/14 case đã nhận; `.deb NOT BUILT` công khai | Owner đối chiếu raw 127/219D với report 156/A926 như follow-up lịch sử riêng. Không yêu cầu gửi lại handoff đã nhận, không tự coi Windows staging là `.deb` |
+| W4-H02 | M2 | **Part 1/2/3 ĐÃ NHẬN; S3 WINDOWS TECHNICAL ACK + VALIDATION PASS**, gồm 174 tests, core guide/Q&A/9 native cases và fix-candidate coverage PR #40 | External PR, contract/native/cross-owner confirmation còn riêng. `SO_PEERCRED` Linux/popup thật không được chốt từ Windows; không còn thiếu Part 3 docs hoặc proof M5 S3 |
+| W4-H03 | M3 | **Guide/14 cases và S2 ACK ĐÃ CÓ; JAR/staging/HTTP S3 kiểm tra PASS**; `.deb NOT BUILT` công khai. M2 Part 3 nêu per-UID socket ACL/startup follow-up | M3 cung cấp thiết kế quyền/socket collision an toàn với M2; native IPC sau Week 4. Owner raw 127/219D vs 156/A926 vẫn là follow-up lịch sử riêng, không phải failure S3 |
 | W4-H04 | M4 → M5 | **ĐÃ NHẬN / ACK KỸ THUẬT** qua [M4 handoff](evidence/M4_WEEK4_HANDOFF.md), Admin Guide final và [M5 ACK](evidence/M5_WEEK4_POST_PULL_ACK_20261030.md); frontend không đổi từ source đã review | Không còn thiếu bản shared-frontend handoff. M1 vẫn phải chọn candidate; đổi frontend/API sau ACK thì đối chiếu/rerun phần bị ảnh hưởng |
 | W4-H05 | M1 + các owner | Chốt source/artifact candidate, nhận bàn giao M5, rà soát issue/P0 và quyết định candidate | Ghi quyết định Week 4 có SHA, scope và các ngoại lệ; không tự đặt tag hoặc tuyên bố FULL RELEASE PASS |
 

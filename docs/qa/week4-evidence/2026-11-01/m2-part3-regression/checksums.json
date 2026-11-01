@@ -1,0 +1,116 @@
+{
+  "algorithm": "SHA-256",
+  "files": [
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/.gitattributes",
+      "bytes": 73,
+      "sha256": "a313af61ba1df9dadb377d8daa6828a444eccf81ffae1dd4834b7f8ddc08cedb"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/01-agent-package.json",
+      "bytes": 11273,
+      "sha256": "f5be58288d41c30b1ddc429afa72c5762228ace85e14f84a9dacdc4e4bbcdb79"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/01-agent-package.txt",
+      "bytes": 98975,
+      "sha256": "89baa0e926b49557a957d6a3fa44df13a31999d2b5dfe6ad7c51745e6deb4227"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/02-staging-prepare.json",
+      "bytes": 1491,
+      "sha256": "ccc3f534fbbaecd26acd07680268ebff07fc67ef68ff65cd1330b915736c4681"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/02-staging-prepare.txt",
+      "bytes": 419,
+      "sha256": "cf4ce366ba827d328ab9a7cd4573df0ee5b3efd3bfef1db87290339c3b0fd796"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/03-packaging-week4.json",
+      "bytes": 1507,
+      "sha256": "571546372d4be682b062a5255b2ca65a892d36aba8cfc5d52bc699cebff917ba"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/03-packaging-week4.txt",
+      "bytes": 6776,
+      "sha256": "9bf1d0c514c3ba401e061e50d334287efba82c3903c6c191e76d3dd7825db9d7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/04-staging-integrity.json",
+      "bytes": 1943,
+      "sha256": "6146996f4fc106e4b6bf6427722a616abda4e027384fa5a6aae9fd469671609e"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/04-staging-integrity.txt",
+      "bytes": 48,
+      "sha256": "c7bfaf36c6e5d5bea0cf7ae772a0816914ec4f0fa516e13cca0d8e391c0ff742"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/05-http-transport.json",
+      "bytes": 1595,
+      "sha256": "b4908295023638c349e350000c06ee897bd4d4912802bf0e6802905d0e2deafa"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/05-http-transport.txt",
+      "bytes": 154,
+      "sha256": "2ad15badaac3fcdf6b4c0e6a1a01d023f5d1d54d035d2b2de6c244ebebb946d7"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/build-manifest.json",
+      "bytes": 1041,
+      "sha256": "767b0d985ae23205bd2650d9cb9ae582fd6b739ef5c55818c8f521ab18c34fe0"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/environment.json",
+      "bytes": 825,
+      "sha256": "5389056af9137f28951017ad6dba0213ed742d5b07851588e91912463758efcf"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/http-transport-summary.json",
+      "bytes": 6222,
+      "sha256": "02f3d18c011121985cf71e08c9ca92a41d79caef6a7e42d23224ae2a3dafe1d9"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/junit-summary.json",
+      "bytes": 10644,
+      "sha256": "4db58417dd42065982e9a04dcb3a77c3bac9450d95ab86170631b1c754804ebc"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/qa-documents.json",
+      "bytes": 4906,
+      "sha256": "28b4c796468068618b10296c1827ab154ab2022e8693a048b16895e84c7d242a"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/README.md",
+      "bytes": 8173,
+      "sha256": "247c236f627f726f6003aac3c88e39cbe3c09650e07a7970862ae7b866b680ec",
+      "lfNormalizedSHA256": "247c236f627f726f6003aac3c88e39cbe3c09650e07a7970862ae7b866b680ec"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/run-spec.json",
+      "bytes": 4758,
+      "sha256": "da270001dce153c2460636787d856f1d4160482ed5afe749b001c832251983da"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/scope-equivalence.json",
+      "bytes": 4986,
+      "sha256": "ee9df08ed10b3cd27f61743597509023676e4b4a4b1006600ba2ebc470711789"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/sources/438fc983ed9e2b656884f5dceb7802f25de227d945a260b3a35c6b29630f8722.json",
+      "bytes": 42696,
+      "sha256": "04b49b1614b39c4d449acbd6b2ea43139aedff423e59604e39948cb76d8354e2"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/staging-manifest.json",
+      "bytes": 4354,
+      "sha256": "2cc04fd34a2dafcdd461f005892e2eb6c312777efb2db5e1636fe2fb742d85a8"
+    },
+    {
+      "path": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/validation.json",
+      "bytes": 1790,
+      "sha256": "63c5cd28a2e1c0ec6ce12042c29b2bd008cfe9b93f167922d74db9ac3fc39543"
+    }
+  ]
+}

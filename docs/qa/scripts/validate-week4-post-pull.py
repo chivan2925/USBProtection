@@ -170,14 +170,28 @@ if http_summary:
         assert digest((ROOT / recorded["path"]).read_bytes()) == recorded["sha256"], key
     assert http_summary["javaResult"]["status"] == "PASS"
     assert http_summary["javaResult"]["assertionCount"] == http_summary["assertionCount"]
+previous_comparison = profile.get("previousSourceComparison")
+previous_scopes = []
+if previous_comparison:
+    previous_revision = previous_comparison["revision"]
+    assert re.fullmatch(r"[0-9a-f]{40}", previous_revision)
+    for scope in previous_comparison["sameSourceScopes"]:
+        old_tree = scope_tree(previous_revision, scope)
+        current_tree = scope_tree(args.baseline, scope)
+        assert old_tree == current_tree and not git("diff", "--name-only", previous_revision, args.baseline, "--", scope)
+        previous_scopes.append({"scope": scope, "referenceTree": old_tree, "currentTree": current_tree,
+                                "status": "UNCHANGED_SOURCE" if old_tree else "NO_TRACKED_ENTRY_AT_EITHER_REVISION"})
 write_json("scope-equivalence.json", {"referenceRevision": reference_sha, "currentRevision": args.baseline,
            "referenceRun": reference.relative_to(ROOT).as_posix(), "scopes": scopes,
            "changedSourceScopes": delta_scopes,
+           "previousSourceComparison": {"revision": previous_comparison["revision"], "scopes": previous_scopes,
+                 "limit": "Source equality does not preserve artifact identity; the Agent JAR/staging are freshly verified in this run"} if previous_comparison else None,
            "agentAndPackaging": {"changedPaths": agent_delta, "action": "Fresh checks listed in reviewed run profile; changed packaging is not source-equivalent"},
            "m4ReviewedRevision": m4_sha, "m4FrontendTreeMatches": True,
            "limits": "Source equivalence does not redate historical execution, audit, artifact hashes or screenshots; changed future delivery/config requires affected checks."})
 
 historical_paths = ["docs/qa/week1-evidence", "docs/qa/week2-evidence", "docs/qa/week3-evidence", "docs/qa/week4-evidence/2026-10-28", "docs/qa/week4-evidence/2026-10-30"]
+historical_paths += profile.get("historicalEvidencePaths", [])
 assert not git("diff", "--name-only", "HEAD", "--", *historical_paths), "Historical evidence changed"
 for name in [*captures, *failed_captures]:
     text = (evidence / f"{name}.txt").read_text(encoding="utf-8")

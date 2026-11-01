@@ -1,0 +1,49 @@
+{
+  "id": "04-staging-integrity",
+  "scope": "Independent exact nine-file staging set and full-byte comparison with current source and freshly built Part3 Agent JAR; no POSIX-mode claim",
+  "revision": "3efa50b50031dac9cec5738e286ec0a7730529ae",
+  "revisionAfter": "3efa50b50031dac9cec5738e286ec0a7730529ae",
+  "sourceTreeSHA256": "438fc983ed9e2b656884f5dceb7802f25de227d945a260b3a35c6b29630f8722",
+  "sourceTreeSHA256After": "438fc983ed9e2b656884f5dceb7802f25de227d945a260b3a35c6b29630f8722",
+  "sourceStable": true,
+  "cwd": ".",
+  "executable": "C:\\msys64\\ucrt64\\bin\\python.exe",
+  "args": [
+    "docs/qa/scripts/validate-week4-post-pull.py",
+    "--run-dir",
+    "docs/qa/week4-evidence/2026-11-01/m2-part3-regression",
+    "--baseline",
+    "3efa50b50031dac9cec5738e286ec0a7730529ae",
+    "--profile",
+    "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/run-spec.json",
+    "--stage-only"
+  ],
+  "launch": {
+    "exe": "C:\\msys64\\ucrt64\\bin\\python.exe",
+    "args": [
+      "docs/qa/scripts/validate-week4-post-pull.py",
+      "--run-dir",
+      "docs/qa/week4-evidence/2026-11-01/m2-part3-regression",
+      "--baseline",
+      "3efa50b50031dac9cec5738e286ec0a7730529ae",
+      "--profile",
+      "docs/qa/week4-evidence/2026-11-01/m2-part3-regression/run-spec.json",
+      "--stage-only"
+    ]
+  },
+  "startedAt": "2026-11-01T07:40:33.049Z",
+  "endedAt": "2026-11-01T07:40:36.133Z",
+  "startedAtBangkok": "2026-11-01 14:40:33 +07:00",
+  "endedAtBangkok": "2026-11-01 14:40:36 +07:00",
+  "exitCode": 0,
+  "signal": null,
+  "timedOut": false,
+  "verdict": "PASS",
+  "runnerSHA256": "92cba1bc39c95988eb192c8e36a2f4216cb82ecc25bed2411da774faf0d290c8",
+  "javaHome": "C:/Program Files/Java/jdk-22",
+  "outputSHA256": "c7bfaf36c6e5d5bea0cf7ae772a0816914ec4f0fa516e13cca0d8e391c0ff742",
+  "screenshots": [],
+  "junit": [],
+  "buildArtifacts": [],
+  "evidenceDirectory": "docs/qa/week4-evidence/2026-11-01/m2-part3-regression"
+}
