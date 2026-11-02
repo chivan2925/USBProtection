@@ -27,7 +27,7 @@ export function getEventQuery(filters: EventFilterValues, page = 0, size = 20): 
   if (!range.valid) throw new Error('Khoảng ngày không hợp lệ. Kiểm tra ngày bắt đầu và kết thúc.')
   if (!Number.isInteger(page) || page < 0 || !Number.isInteger(size) || size < 1 || size > 100) throw new Error('Trang hoặc kích thước trang không hợp lệ.')
   if (filters.decision && !['allowed', 'blocked'].includes(filters.decision)) throw new Error('API chỉ hỗ trợ lọc quyết định ALLOW hoặc BLOCK.')
-  if (filters.eventType && !['connected', 'disconnected', 'policy_applied'].includes(filters.eventType)) throw new Error('API chỉ hỗ trợ sự kiện cắm hoặc tháo USB.')
+  if (filters.eventType && !['connected', 'disconnected', 'policy_applied'].includes(filters.eventType)) throw new Error('API chỉ hỗ trợ sự kiện cắm USB, tháo USB hoặc áp dụng chính sách.')
   return {
     page, size,
     endpoint: filters.endpoint.trim() || undefined,

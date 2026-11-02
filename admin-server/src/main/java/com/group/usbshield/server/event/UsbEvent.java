@@ -31,6 +31,10 @@ public class UsbEvent {
     @Column(length = 36)
     private String eventId;
 
+    /** SHA-256 of the complete canonical Agent event payload (excluding the event ID). */
+    @Column(length = 64)
+    private String payloadDigest;
+
     private Long usbDeviceId;
 
     @Column(length = 150)

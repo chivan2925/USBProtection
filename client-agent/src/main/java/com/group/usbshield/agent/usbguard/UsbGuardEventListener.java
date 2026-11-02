@@ -56,6 +56,7 @@ public class UsbGuardEventListener {
         }
     }
     private record PendingInsert(String identity, String initialTarget, ActiveUserInfo user, long seenAt) {}
+    private record PendingPolicy(UsbDeviceInfo device, String target, ActiveUserInfo user) {}
 
     private final UsbGuardEventParser eventParser;
     private final UsbGuardPresenceParser presenceParser;
@@ -70,6 +71,9 @@ public class UsbGuardEventListener {
     private final AtomicBoolean started = new AtomicBoolean();
     private final Map<String, Long> recent = new ConcurrentHashMap<>();
     private final Map<Integer, PendingInsert> pendingInserts = new ConcurrentHashMap<>();
+    // Retain observed final policy transitions in memory until the durable spool
+    // accepts them. A missing replay must not silently discard an audit event.
+    private final Map<String, java.util.ArrayDeque<PendingPolicy>> pendingPolicies = new ConcurrentHashMap<>();
     private final Map<Integer, DeviceObservation> observed = new ConcurrentHashMap<>();
     private final Map<Integer, String> notifiedRuntime = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -187,6 +191,7 @@ public class UsbGuardEventListener {
     public void recoverStalePendingDecisions() { recoverPending(false); }
 
     synchronized void recoverPending(boolean watchLost) {
+        retryQueuedPolicies();
         if (gateway == null || pendingInserts.isEmpty()) return;
         long now = System.currentTimeMillis();
         if (!watchLost && pendingInserts.values().stream().noneMatch(
@@ -314,29 +319,61 @@ public class UsbGuardEventListener {
     }
 
     private void applyFinalDecision(UsbDeviceInfo device, String target, PendingInsert pending) {
+        DeviceObservation initial = observed.get(device.runtimeId());
+        if (initial == null || !initial.identity().equals(pending.identity())) return;
+        // The first CONNECTED enqueue might have failed (no enrollment, full disk).
+        // Never discard the pending final decision until the original event is durable.
+        if (!initial.insertionQueued()) {
+            if (!sendEvent(device, "CONNECTED", initial.insertionTarget(), initial.user())) return;
+            observed.computeIfPresent(device.runtimeId(), (id, prior) ->
+                    prior.identity().equals(pending.identity()) ? prior.queued() : prior);
+        }
+        if (!target.equals(pending.initialTarget())
+                && !sendEvent(device, "POLICY_APPLIED", target, pending.user())) return;
         if (!pendingInserts.remove(device.runtimeId(), pending)) return;
         observed.computeIfPresent(device.runtimeId(), (id, prior) ->
-                prior.identity().equals(identity(device)) ? prior.withTarget(target) : prior);
+                prior.identity().equals(pending.identity()) ? prior.withTarget(target) : prior);
         if ("allow".equals(target)) notifiedRuntime.remove(device.runtimeId());
-        if (!target.equals(pending.initialTarget())) {
-            sendEvent(device, "POLICY_APPLIED", target, pending.user());
-        }
         if ("block".equals(target) || "reject".equals(target)) notifyBlocked(pending.user(), device);
     }
 
     private void applyLaterPolicy(UsbDeviceInfo device, String target) {
         DeviceObservation prior = observed.get(device.runtimeId());
-        // An orphan PolicyApplied after watch reconnect is not evidence of a new
-        // insertion or a transition attributable to this Agent. Replayed watch
-        // output must not synthesize audit events or desktop notifications.
-        // For a known runtime ID, still require the exact fingerprint match.
+        // Do not invent audit events after an orphan PolicyApplied watch replay.
         if (prior == null || !prior.identity().equals(identity(device))) return;
-        if (target.equals(prior.target())) return; // repeat is not a new decision
-        ActiveUserInfo user = prior.user();
-        observed.put(device.runtimeId(), prior.withTarget(target));
-        if ("allow".equals(target)) notifiedRuntime.remove(device.runtimeId());
-        sendEvent(device, "POLICY_APPLIED", target, user);
-        if ("block".equals(target) || "reject".equals(target)) notifyBlocked(user, device);
+        String key = device.runtimeId() + ":" + identity(device);
+        var transitions = pendingPolicies.computeIfAbsent(key, ignored -> new java.util.ArrayDeque<>());
+        String last = transitions.isEmpty() ? prior.target() : transitions.getLast().target();
+        if (!target.equals(last)) {
+            if (transitions.size() >= 32 || pendingPolicies.size() > MAX_RECENT_EVENTS) {
+                log.error("USBGuard pending policy audit queue bound reached; no event can be acknowledged");
+                return;
+            }
+            transitions.addLast(new PendingPolicy(device, target, prior.user()));
+        }
+        retryQueuedPolicies();
+    }
+
+    private void retryQueuedPolicies() {
+        for (var entry : List.copyOf(pendingPolicies.entrySet())) {
+            var transitions = entry.getValue();
+            while (!transitions.isEmpty()) {
+                PendingPolicy next = transitions.getFirst();
+                UsbDeviceInfo device = next.device();
+                if (!sendEvent(device, "POLICY_APPLIED", next.target(), next.user())) break;
+                transitions.removeFirst();
+                DeviceObservation prior = observed.get(device.runtimeId());
+                boolean stillAttached = prior != null && prior.identity().equals(identity(device));
+                if (stillAttached) {
+                    observed.put(device.runtimeId(), prior.withTarget(next.target()));
+                    if ("allow".equals(next.target())) notifiedRuntime.remove(device.runtimeId());
+                    if ("block".equals(next.target()) || "reject".equals(next.target())) {
+                        notifyBlocked(next.user(), device);
+                    }
+                }
+            }
+            if (transitions.isEmpty()) pendingPolicies.remove(entry.getKey(), transitions);
+        }
     }
 
     private void notifyBlocked(ActiveUserInfo user, UsbDeviceInfo device) {
@@ -378,7 +415,10 @@ public class UsbGuardEventListener {
         String key = id + ":" + device.runtimeId() + ":" + eventType + ":" + target;
         long now = System.currentTimeMillis();
         Long old = recent.get(key);
-        if (old != null && now >= old && now - old < DEDUP_WINDOW_MILLIS) return true;
+        // POLICY_APPLIED transitions have their own FIFO/dedup state. The same
+        // final target can legitimately recur after an intervening transition.
+        if (!"POLICY_APPLIED".equals(eventType)
+                && old != null && now >= old && now - old < DEDUP_WINDOW_MILLIS) return true;
         // Build the payload inside the failure boundary too: enrollment may not
         // be ready yet, and a rejected event must remain retryable.
         try {
