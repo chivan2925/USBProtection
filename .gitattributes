@@ -5,3 +5,9 @@
 *.sh text eol=lf
 packaging/agent-deb/DEBIAN/postinst text eol=lf
 packaging/agent-deb/DEBIAN/prerm text eol=lf
+
+# Preserve Linux package/service configuration when checked out on Windows.
+packaging/systemd/*.service text eol=lf
+packaging/desktop/*.desktop text eol=lf
+packaging/agent-deb/etc/usbshield-agent/*.yml text eol=lf
+packaging/usbguard/*.conf text eol=lf

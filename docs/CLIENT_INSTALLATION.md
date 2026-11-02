@@ -2,7 +2,7 @@
 
 > **Phiên bản:** Week 4 — *Stabilization, Hardening, Staging & Release Candidate*  
 > **Hệ điều hành mục tiêu:** Ubuntu 24.04 LTS (x86_64 / amd64)  
-> **Trạng thái (main `d5e156a`, 01/11/2026):** Agent Windows Maven test + JAR build **BUILD SUCCESS theo báo cáo owner**; M5 S4 backend/browser PASS trên phần source không đổi; **GROUP SIGN-OFF PENDING, UBUNTU E2E DEFERRED**. Không gọi toàn nhóm PASS trước khi owner ký.  
+> **Trạng thái (sau `0fb91df`, 02/11/2026):** Week 4 **WINDOWS/RELEASE-CANDIDATE PREPARATION PASS** đã được M2/coordinator chốt theo ủy quyền nhóm. Ubuntu E2E và credential rotation vẫn **NOT VERIFIED**. Bản sửa IPC/packaging ngày 02/11 là preflight patch mới, **chưa phải Ubuntu test PASS**.  
 > *(Các hướng dẫn Ubuntu bên dưới là kế hoạch chưa được thực thi. Toàn bộ các bước cài đặt thực tế gói `.deb`, cắm USB vật lý, desktop notification popup và service reboot trên máy trạm Ubuntu 24.04 đã có staging/kiểm thử tĩnh cho source lịch sử, nhưng chưa có bằng chứng static/packaging cập nhật sau PR #50; kiểm thử thực địa được thực hiện sau Week 4 theo thống nhất của nhóm).*
 
 ---
@@ -226,3 +226,21 @@ sudo apt purge -y usbshield-agent
 > * **Bằng chứng lịch sử:** M5 S3 đã xác minh JAR/staging và static verifier trên source *trước* PR #50. Owner cho biết hai lệnh Maven `clean test` và `-DskipTests package` trên bản sau PR #50 đều `BUILD SUCCESS` (không có raw log/exit code kèm theo trong repo). **Không được lấy staging cũ làm proof packaging/ACL mới.**
 > * **Chưa có group owner sign-off:** Xem `docs/rc/WEEK4_OWNER_SIGNOFF_TEMPLATE.md` và `docs/rc/WEEK4_POST_MERGE_REVIEW_D5E156A.md`.
 > * **Hoãn kiểm thử thực địa (Ubuntu Scope):** Thao tác cài đặt trực tiếp gói `.deb` trên hệ điều hành Ubuntu 24.04 thật, thử nghiệm cắm rút USB vật lý, kiểm tra pop-up đồ họa GUI thực tế, và reboot máy trạm được bảo lưu thực hiện **sau Week 4** theo kế hoạch của nhóm.
+
+
+## Pre-Ubuntu acceptance: service account USBGuard IPC (2026-11-02)
+
+The fresh `.deb` installer now provisions a root-owned USBGuard IPC ACL file at `/etc/usbguard/IPCAccessControl.d/usbshield` with mode `0600`, limited to `Devices=list,listen`, `Policy=list,modify`, `Parameters=list`, `Exceptions=listen`. This is distinct from the **per-graphical-user notifier socket** ACL; one does not grant the other. If an administrator already configured a different ACL folder, or customized this particular user ACL, the installer refuses to override it and requires review. The default non-storage base allow must already exist when a custom nonempty rules file is present.
+
+On an **isolated Ubuntu test machine**, inspect effective access **after** installation (do not publish credentials):
+
+```bash
+sudo stat -c '%U:%G %a %n' /etc/usbguard/IPCAccessControl.d /etc/usbguard/IPCAccessControl.d/usbshield
+sudo grep -E '^(IPCAccessControlFiles|ImplicitPolicyTarget)=' /etc/usbguard/usbguard-daemon.conf
+sudo -u usbshield usbguard get-parameter ImplicitPolicyTarget
+sudo -u usbshield usbguard list-rules
+sudo -u usbshield usbguard list-devices
+sudo systemctl status usbguard usbshield-agent --no-pager
+```
+
+Expected `ImplicitPolicyTarget` is `block`. Test `usbguard watch`, policy modification and native GUI separately; read-only commands do not prove these privileges or a successful desktop popup. Do **not** work around an authorization failure using world-writable sockets, `IPCAllowedUsers=*`, normal-user group privileges, or global Allow. Reference: `docs/qa/WEEK4_PRE_UBUNTU_CODE_REVIEW_20261102.md`.

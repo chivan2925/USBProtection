@@ -73,8 +73,16 @@ public class EventSenderService {
         String endpointId = registration != null ? registration.getEndpointId() : payload.getEndpointId();
         String agentToken = registration != null ? registration.getAgentToken() : "";
 
-        log.info("[USB-EVENT] Detected USB {} by user '{}' ({}) -> Decision: {}",
-                payload.getEventType(), payload.getLinuxUsername(), payload.getDevice(), payload.getDecision());
+        // A USB event may occur before enrollment finishes. Never send a temporary
+        // endpoint identity once the durable enrollment is available.
+        if (registration != null && registration.getEndpointId() != null
+                && isPreEnrollmentId(payload.getEndpointId())) {
+            payload.setEndpointId(registration.getEndpointId());
+        }
+        // Serial, device hash, active username and token are sensitive. They
+        // belong in the authorized event API, not in the system journal.
+        log.info("[USB-EVENT] type={} decision={}",
+                payload.getEventType(), payload.getDecision());
 
         // Thử gửi trực tiếp lên Admin Server
         boolean sent = false;
@@ -86,5 +94,9 @@ public class EventSenderService {
         if (!sent) {
             outboxSpoolService.spool(payload);
         }
+    }
+
+    private static boolean isPreEnrollmentId(String id) {
+        return "UNENROLLED".equals(id) || (id != null && id.startsWith("POC-UNENROLLED-"));
     }
 }

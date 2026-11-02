@@ -99,6 +99,29 @@ class EventSenderServiceTest {
     }
 
     @Test
+    @DisplayName("queued pre-enrollment event is rebound when durable endpoint identity becomes available")
+    void sendPayloadRebindsPlaceholderAfterEnrollment() {
+        EndpointRegistration registration = EndpointRegistration.builder()
+                .endpointId("EP-NEW")
+                .agentToken("new-token")
+                .build();
+        when(endpointManager.getCurrentRegistration()).thenReturn(registration);
+        when(adminServerClient.sendEvent(eq("EP-NEW"), eq("new-token"), any(UsbEventPayload.class)))
+                .thenReturn(true);
+        UsbEventPayload payload = UsbEventPayload.builder()
+                .endpointId("POC-UNENROLLED-ubuntu-desktop")
+                .eventType("CONNECTED")
+                .decision("BLOCKED")
+                .build();
+
+        eventSenderService.sendPayload(payload);
+
+        assertEquals("EP-NEW", payload.getEndpointId());
+        verify(adminServerClient).sendEvent(eq("EP-NEW"), eq("new-token"), same(payload));
+        verify(outboxSpoolService, never()).spool(any());
+    }
+
+    @Test
     @DisplayName("emitUsbEvent sets UNKNOWN when active user is not detected")
     void emitUsbEventUnknownUser() {
         when(endpointManager.getCurrentRegistration()).thenReturn(null);
