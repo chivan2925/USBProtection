@@ -39,13 +39,18 @@ class UsbGuardWeek3WatchRecoveryTest {
         listener.processWatchLine("event=" + action);
         listener.processWatchLine("target=block");
         listener.processWatchLine("device_rule=block id 0951:1665 hash \"test-hash\" with-interface 08:06:50");
+        if ("Insert".equals(action)) {
+            listener.processWatchLine("[device] PolicyApplied: id=11");
+            listener.processWatchLine("target_new=block");
+            listener.processWatchLine("device_rule=block id 0951:1665 hash \"test-hash\" with-interface 08:06:50");
+        }
     }
 
     @Test
     void duplicateWatchSectionsEmitOnlyOnce() {
         watch("Insert");
         watch("Insert");
-        verify(sender, times(1)).sendPayload(any());
+        verify(sender, times(1)).enqueuePayload(any());
         verify(notifier, times(1)).notifyBlockedUsb(any(), any());
     }
 
@@ -54,7 +59,7 @@ class UsbGuardWeek3WatchRecoveryTest {
         watch("Insert");
         watch("Remove");
         watch("Insert");
-        verify(sender, times(3)).sendPayload(any());
+        verify(sender, times(3)).enqueuePayload(any());
         verify(notifier, times(2)).notifyBlockedUsb(any(), any());
         verify(notifier, times(1)).onUsbRemoved(any(), any());
     }
@@ -68,7 +73,7 @@ class UsbGuardWeek3WatchRecoveryTest {
         listener.processWatchLine("device_rule=block id 0951:1665 hash \"test-hash\" with-interface 08:06:50");
         verifyNoInteractions(sender);
         watch("Insert");
-        verify(sender).sendPayload(any());
+        verify(sender).enqueuePayload(any());
     }
 
     @Test
@@ -76,7 +81,7 @@ class UsbGuardWeek3WatchRecoveryTest {
         when(resolver.resolveCurrentActiveUser()).thenReturn(ActiveUserInfo.unknown("logout"));
         watch("Insert");
         ArgumentCaptor<UsbEventPayload> capture = ArgumentCaptor.forClass(UsbEventPayload.class);
-        verify(sender).sendPayload(capture.capture());
+        verify(sender).enqueuePayload(capture.capture());
         assertEquals("UNKNOWN", capture.getValue().getLinuxUsername());
         assertNull(capture.getValue().getLinuxUid());
         verify(notifier, never()).notifyBlockedUsb(any(), any());
@@ -86,7 +91,17 @@ class UsbGuardWeek3WatchRecoveryTest {
     void notifierFailureCannotPreventEventTransport() {
         doThrow(new IllegalStateException("no GUI")).when(notifier).notifyBlockedUsb(any(), any());
         watch("Insert");
-        verify(sender).sendPayload(any());
+        verify(sender).enqueuePayload(any());
+    }
+
+    @Test
+    void insertWithoutFinalPolicyDoesNotClaimBlockedPopup() {
+        listener.processWatchLine("[device] PresenceChanged: id=99");
+        listener.processWatchLine("event=Insert");
+        listener.processWatchLine("target=block");
+        listener.processWatchLine("device_rule=block id 0951:1665 hash \"test-hash\" with-interface 08:06:50");
+        verify(sender, times(1)).enqueuePayload(any());
+        verify(notifier, never()).notifyBlockedUsb(any(), any());
     }
 
     @Test

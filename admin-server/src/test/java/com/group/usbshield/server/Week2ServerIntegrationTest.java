@@ -95,6 +95,9 @@ class Week2ServerIntegrationTest {
     @Test void perEndpointAllowRevokeVersionAckAndCanonicalPolicy() throws Exception {
         var a=enroll();var b=enroll();
         var device=devices.save(UsbDevice.builder().vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).deviceName("Storage").build());
+        // Real endpoint A must have observed the device before it can whitelist it.
+        events.save(UsbEvent.builder().endpointId(a.id()).usbDeviceId(device.getId())
+            .eventType("CONNECTED").decision("BLOCKED").occurredAt(java.time.Instant.now()).build());
         String url="/api/admin/endpoints/"+a.id()+"/whitelist";
         mvc.perform(policy(a)).andExpect(status().isOk()).andExpect(jsonPath("$.whitelistedDevices").isEmpty()).andExpect(jsonPath("$.allowedDevices").doesNotExist());
         var result=mvc.perform(post(url).session(session).header("X-CSRF-TOKEN",csrf).contentType("application/json").content(mapper.writeValueAsString(Map.of("usbDeviceId",device.getId(),"endpointId",b.id())))).andExpect(status().isOk()).andReturn();
@@ -116,6 +119,50 @@ class Week2ServerIntegrationTest {
         assertThat(endpoints.findByEndpointId(b.id()).orElseThrow().getPolicyVersion()).isEqualTo(1L);
         mvc.perform(agentPost("/api/agent/policy/ack",a,Map.of("appliedPolicyVersion",3))).andExpect(status().isOk());
     }
+    @Test void retryingSameEventKeyReturnsStoredEventInsteadOfDuplicatingAudit() throws Exception {
+        var a = enroll();
+        var b = enroll();
+        String key = UUID.randomUUID().toString();
+        var payload = (com.fasterxml.jackson.databind.node.ObjectNode) sample(a);
+        payload.put("eventId", key);
+        long before = events.count();
+        var first = mvc.perform(agentPost("/api/agent/events", a, payload))
+                .andExpect(status().isOk()).andReturn();
+        var second = mvc.perform(agentPost("/api/agent/events", a, payload))
+                .andExpect(status().isOk()).andReturn();
+        assertThat(mapper.readTree(first.getResponse().getContentAsString()).get("eventId").asLong())
+                .isEqualTo(mapper.readTree(second.getResponse().getContentAsString()).get("eventId").asLong());
+        assertThat(events.count()).isEqualTo(before + 1L);
+        var tampered = payload.deepCopy();
+        tampered.put("decision", "BLOCKED".equals(payload.get("decision").asText()) ? "ALLOWED" : "BLOCKED");
+        mvc.perform(agentPost("/api/agent/events", a, tampered)).andExpect(status().isConflict());
+        assertThat(events.count()).isEqualTo(before + 1L);
+        var otherEndpoint = (com.fasterxml.jackson.databind.node.ObjectNode) sample(b);
+        otherEndpoint.put("eventId", key);
+        mvc.perform(agentPost("/api/agent/events", b, otherEndpoint)).andExpect(status().isOk());
+        assertThat(events.count()).isEqualTo(before + 2L);
+    }
+
+    @Test void policyAppliedIsNotCountedAsAnotherConnectedEvent() throws Exception {
+        var a = enroll();
+        var initial = (com.fasterxml.jackson.databind.node.ObjectNode) sample(a);
+        initial.put("eventId", UUID.randomUUID().toString());
+        initial.put("eventType", "CONNECTED");
+        initial.put("decision", "BLOCKED");
+        mvc.perform(agentPost("/api/agent/events", a, initial)).andExpect(status().isOk());
+        var applied = initial.deepCopy();
+        applied.put("eventId", UUID.randomUUID().toString());
+        applied.put("eventType", "POLICY_APPLIED");
+        applied.put("decision", "ALLOWED");
+        mvc.perform(agentPost("/api/agent/events", a, applied)).andExpect(status().isOk());
+        var history = events.findByEndpointIdOrderByOccurredAtDesc(a.id());
+        assertThat(history.stream().filter(e -> "CONNECTED".equals(e.getEventType())).count()).isEqualTo(1L);
+        assertThat(history.stream().filter(e -> "POLICY_APPLIED".equals(e.getEventType())).count()).isEqualTo(1L);
+        mvc.perform(get("/api/admin/events").session(session).param("endpointId", a.id())
+                .param("eventType", "POLICY_APPLIED"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1));
+    }
+
     @Test void ingestedEventCanBeFilteredPagedAndQueriedWithoutCredentialsLeaking() throws Exception {
         var a=enroll();var payload=sample(a);
         var result=mvc.perform(agentPost("/api/agent/events",a,payload)).andExpect(status().isOk()).andReturn();
@@ -137,6 +184,13 @@ class Week2ServerIntegrationTest {
         var a=enroll();
         var first=devices.save(UsbDevice.builder().vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).build());
         var second=devices.save(UsbDevice.builder().vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).build());
+        // F10: concurrent Allow is only valid after this exact endpoint observed
+        // both device IDs. Do not bypass production's isolation check in tests.
+        for (var device : java.util.List.of(first, second)) {
+            events.save(UsbEvent.builder().endpointId(a.id()).usbDeviceId(device.getId())
+                    .eventType("CONNECTED").decision("BLOCKED")
+                    .occurredAt(java.time.Instant.now()).build());
+        }
         try(var executor=java.util.concurrent.Executors.newFixedThreadPool(2)){
             var x=executor.submit(()->policyService.allow(a.id(),new com.group.usbshield.server.policy.EndpointPolicyService.AllowRequest(first.getId())));
             var y=executor.submit(()->policyService.allow(a.id(),new com.group.usbshield.server.policy.EndpointPolicyService.AllowRequest(second.getId())));

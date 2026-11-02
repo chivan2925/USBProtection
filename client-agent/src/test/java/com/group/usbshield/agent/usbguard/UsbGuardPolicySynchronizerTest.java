@@ -34,7 +34,8 @@ class UsbGuardPolicySynchronizerTest {
  @Test void preservesForeignRules(){
   FakeRunner r=new FakeRunner();r.rules.add("2: allow id 1234:abcd serial \"EXTERNAL\"");
   var sync=new UsbGuardPolicySynchronizer(r,new UsbGuardOutputParser(),new UsbGuardRuleBuilder());
-  sync.reconcile(List.of());assertEquals(2,r.rules.size());assertEquals(0,r.removed);
+  assertThrows(IllegalStateException.class, () -> sync.reconcile(List.of()));
+  assertEquals(2,r.rules.size());assertEquals(0,r.removed);
  }
  @Test void disallowsUnsafeFingerprint(){
   assertThrows(IllegalArgumentException.class,()->new UsbGuardRuleBuilder().allowRule(new DeviceFingerprint("0951","1665","bad\";rm",null)));

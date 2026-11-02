@@ -99,7 +99,8 @@ export async function startAdminFixture() {
     const entries = state.whitelist[endpointId]
     if (req.method === 'GET') { send(200, entries); return }
     if (req.method === 'POST') {
-      const device = state.events.find(event => event.usbDeviceId === payload.usbDeviceId)?.device
+      const device = state.events.find(event => event.endpointId === endpointId &&
+        event.usbDeviceId === payload.usbDeviceId)?.device
       if (!device) { send(404, {}); return }
       const existing = entries.find(entry => entry.fingerprintValue === device.hash)
       if (existing) { send(200, existing); return }

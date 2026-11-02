@@ -62,9 +62,9 @@ class UsbGuardWeek4CopilotReviewRegressionTest {
         runner.definitions.add(builder.allowRule(FIRST));
         runner.definitions.add(builder.allowRule(SECOND));
         runner.definitions.add("allow id 1234:abcd serial \"EXTERNAL\"");
-        sync(runner).reconcile(List.of());
-        assertEquals(List.of(BASE, "allow id 1234:abcd serial \"EXTERNAL\""), runner.definitions);
-        assertEquals(List.of("remove:2", "remove:2"), runner.mutations);
+        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of()));
+        assertEquals(4, runner.definitions.size());
+        assertTrue(runner.mutations.isEmpty());
     }
 
     @Test
@@ -128,9 +128,9 @@ class UsbGuardWeek4CopilotReviewRegressionTest {
                 + "hash \"abc123=\" parent-hash \"parent=\" via-port \"1-2\" "
                 + "with-interface all-of { 08:06:50 } with-connect-type \"hotplug\" label \"external\"";
         runner.definitions.add(foreign);
-        sync(runner).reconcile(List.of(FIRST));
+        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of(FIRST)));
         assertEquals(foreign, runner.definitions.get(1));
-        assertTrue(runner.mutations.stream().noneMatch(cmd -> cmd.startsWith("remove:")));
+        assertTrue(runner.mutations.isEmpty(), "Foreign Allow is not silently removed");
     }
 
     @Test

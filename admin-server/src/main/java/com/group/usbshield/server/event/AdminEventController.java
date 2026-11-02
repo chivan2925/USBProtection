@@ -28,7 +28,7 @@ public class AdminEventController {
         @RequestParam(required=false) Long deviceId,@RequestParam(required=false) Instant from,@RequestParam(required=false) Instant to,
         @RequestParam(required=false) String endpoint,@RequestParam(required=false) String device,
         @RequestParam(required=false) String username){
-        if(page<0 || size<1 || size>100 || (from!=null && to!=null && from.isAfter(to)) || (decision!=null && !Set.of("ALLOWED","BLOCKED").contains(decision)) || (eventType!=null && !Set.of("CONNECTED","DISCONNECTED").contains(eventType)))throw new ResponseStatusException(BAD_REQUEST,"Invalid query range or enum");
+        if(page<0 || size<1 || size>100 || (from!=null && to!=null && from.isAfter(to)) || (decision!=null && !Set.of("ALLOWED","BLOCKED").contains(decision)) || (eventType!=null && !Set.of("CONNECTED","DISCONNECTED","POLICY_APPLIED").contains(eventType)))throw new ResponseStatusException(BAD_REQUEST,"Invalid query range or enum");
         var result=events.findAll((root,query,cb)->{
             List<Predicate> p=new ArrayList<>();
             if(endpointId!=null)p.add(cb.equal(root.get("endpointId"),endpointId));

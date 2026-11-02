@@ -1,4 +1,4 @@
-﻿import type { EventFilterValues, UsbEvent } from '../types/event'
+import type { EventFilterValues, UsbEvent } from '../types/event'
 import { matches } from './format.ts'
 import type { EventQuery } from '../types/event.ts'
 
@@ -27,14 +27,14 @@ export function getEventQuery(filters: EventFilterValues, page = 0, size = 20): 
   if (!range.valid) throw new Error('Khoảng ngày không hợp lệ. Kiểm tra ngày bắt đầu và kết thúc.')
   if (!Number.isInteger(page) || page < 0 || !Number.isInteger(size) || size < 1 || size > 100) throw new Error('Trang hoặc kích thước trang không hợp lệ.')
   if (filters.decision && !['allowed', 'blocked'].includes(filters.decision)) throw new Error('API chỉ hỗ trợ lọc quyết định ALLOW hoặc BLOCK.')
-  if (filters.eventType && !['connected', 'disconnected'].includes(filters.eventType)) throw new Error('API chỉ hỗ trợ sự kiện cắm hoặc tháo USB.')
+  if (filters.eventType && !['connected', 'disconnected', 'policy_applied'].includes(filters.eventType)) throw new Error('API chỉ hỗ trợ sự kiện cắm hoặc tháo USB.')
   return {
     page, size,
     endpoint: filters.endpoint.trim() || undefined,
     username: filters.username.trim() || undefined,
     device: filters.device.trim() || undefined,
     decision: filters.decision ? filters.decision === 'allowed' ? 'ALLOWED' : 'BLOCKED' : undefined,
-    eventType: filters.eventType ? filters.eventType === 'connected' ? 'CONNECTED' : 'DISCONNECTED' : undefined,
+    eventType: filters.eventType ? filters.eventType === 'connected' ? 'CONNECTED' : filters.eventType === 'disconnected' ? 'DISCONNECTED' : 'POLICY_APPLIED' : undefined,
     from: range.fromInclusive,
     to: range.toExclusive ? new Date(Date.parse(range.toExclusive) - 1000).toISOString().replace(/\.\d{3}Z$/, '.999999999Z') : undefined,
   }

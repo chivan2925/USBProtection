@@ -21,10 +21,10 @@ public class AgentEnrollmentController {
         if(bootstrap.isBlank())throw new ResponseStatusException(SERVICE_UNAVAILABLE,"Enrollment not configured");
         String submittedToken=request.getEnrollmentToken();
         if(submittedToken==null || submittedToken.length()>256 || !MessageDigest.isEqual(bootstrap.getBytes(StandardCharsets.UTF_8),submittedToken.getBytes(StandardCharsets.UTF_8)))throw new ResponseStatusException(UNAUTHORIZED,"Invalid enrollment credential");
-        if(request.getMachineId()==null || request.getMachineId().isBlank() || request.getMachineId().length()>100 || request.getHostname()==null || request.getHostname().isBlank() || request.getHostname().length()>150 || (request.getIpAddress()!=null && request.getIpAddress().length()>50))throw new ResponseStatusException(BAD_REQUEST,"Invalid enrollment fields");
+        if(request.getMachineId()==null || request.getMachineId().isBlank() || request.getMachineId().length()>100 || request.getHostname()==null || request.getHostname().isBlank() || request.getHostname().length()>150 || (request.getIpAddress()!=null && request.getIpAddress().length()>50) || (request.getOperatingSystem()!=null && request.getOperatingSystem().length()>100))throw new ResponseStatusException(BAD_REQUEST,"Invalid enrollment fields");
         if(endpoints.findByMachineId(request.getMachineId()).isPresent())throw new ResponseStatusException(CONFLICT,"Machine already enrolled; retain existing credentials or request administrator recovery");
         String token=UUID.randomUUID().toString()+UUID.randomUUID();
-        var e=Endpoint.builder().endpointId("EP-"+UUID.randomUUID()).hostname(request.getHostname()).machineId(request.getMachineId()).ipAddress(request.getIpAddress()).agentTokenHash(encoder.encode(token)).build();
+        var e=Endpoint.builder().endpointId("EP-"+UUID.randomUUID()).hostname(request.getHostname()).machineId(request.getMachineId()).ipAddress(request.getIpAddress()).operatingSystem(request.getOperatingSystem()).agentTokenHash(encoder.encode(token)).build();
         endpoints.save(e);
         return AgentEnrollmentResponse.builder().endpointId(e.getEndpointId()).agentToken(token).currentPolicyVersion(e.getPolicyVersion()).build();
     }

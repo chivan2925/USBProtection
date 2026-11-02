@@ -79,7 +79,7 @@ class UsbGuardWeek3CloseoutAuditTest {
     void specificForeignRuleIsStillPreserved() {
         FakeRunner runner = new FakeRunner();
         runner.rules.add("2: allow id 1234:abcd serial \"EXTERNAL\"");
-        assertDoesNotThrow(() -> synchronizer(runner).reconcile(List.of()));
+        assertThrows(IllegalStateException.class, () -> synchronizer(runner).reconcile(List.of()));
         assertEquals(0, runner.mutations);
         assertEquals(2, runner.rules.size());
     }
@@ -100,8 +100,32 @@ class UsbGuardWeek3CloseoutAuditTest {
         UsbGuardEventListener listener = new UsbGuardEventListener(new UsbGuardEventParser(),
                 resolver, endpoint, system, sender, notification);
         sendInsert(listener, 11);
-        sendInsert(listener, 11);
-        verify(sender, times(1)).sendPayload(any());
+        sendInsert(listener, 11); // must retry the Insert whose first durable enqueue failed
+        sendInsert(listener, 11); // once queued, replay must not create a duplicate
+        verify(sender, times(1)).enqueuePayload(any());
+        verify(notification, times(1)).notifyBlockedUsb(any(), any());
+    }
+
+    @Test
+    void failedDurableEnqueueCanRetryOnceWithoutDuplicatingInsertionOrNotification() {
+        ActiveUserResolver resolver = mock(ActiveUserResolver.class);
+        EndpointManager endpoint = mock(EndpointManager.class);
+        SystemInfoProvider system = mock(SystemInfoProvider.class);
+        EventSenderService sender = mock(EventSenderService.class);
+        DesktopNotificationService notification = mock(DesktopNotificationService.class);
+        when(endpoint.getEndpointId()).thenReturn("EP-1");
+        when(system.getHostname()).thenReturn("ubuntu-lab");
+        when(resolver.resolveCurrentActiveUser())
+                .thenReturn(ActiveUserInfo.resolved("student01", 1001L, "3", "wayland", "seat0"));
+        doThrow(new IllegalStateException("spool temporarily unavailable"))
+                .doNothing().when(sender).enqueuePayload(any());
+
+        UsbGuardEventListener listener = new UsbGuardEventListener(new UsbGuardEventParser(),
+                resolver, endpoint, system, sender, notification);
+        sendInsert(listener, 12); // failed queue
+        sendInsert(listener, 12); // successful retry for the same runtime ID
+        sendInsert(listener, 12); // already queued, no second CONNECTED
+        verify(sender, times(2)).enqueuePayload(any());
         verify(notification, times(1)).notifyBlockedUsb(any(), any());
     }
 
@@ -109,6 +133,9 @@ class UsbGuardWeek3CloseoutAuditTest {
         listener.processWatchLine("[device] PresenceChanged: id=" + id);
         listener.processWatchLine("event=Insert");
         listener.processWatchLine("target=block");
+        listener.processWatchLine("device_rule=block id 0951:1665 hash \"testHash=\" with-interface 08:06:50");
+        listener.processWatchLine("[device] PolicyApplied: id=" + id);
+        listener.processWatchLine("target_new=block");
         listener.processWatchLine("device_rule=block id 0951:1665 hash \"testHash=\" with-interface 08:06:50");
     }
 }

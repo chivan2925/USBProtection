@@ -152,23 +152,15 @@ public class UsbGuardPolicySynchronizer {
 
     private void requireNoForeignConflict(List<UsbGuardRuleInfo> rules, Set<String> desired,
             Set<String> currentManaged) {
+        // Server-managed HASH whitelist must be the only mass-storage grant source.
+        // A scoped foreign Allow for some other USB is still an unauthorized bypass.
+        // Never delete foreign rules silently: surface the unsafe state for review.
         for (UsbGuardRuleInfo rule : rules) {
             if (isManaged(rule) || rule.isBaseNonStorageRule() || !"allow".equalsIgnoreCase(rule.target())) {
                 continue;
             }
-            if ((rule.hash() == null || rule.hash().isBlank())
-                    && (rule.serial() == null || rule.serial().isBlank())) {
-                throw new IllegalStateException("Unscoped foreign USBGuard allow rule prevents fail-closed verification: "
-                        + rule.ruleId());
-            }
-            try {
-                String key = builder.key(new DeviceFingerprint(rule.vendorId(), rule.productId(), rule.serial(), rule.hash()));
-                if (desired.contains(key) || currentManaged.contains(key)) {
-                    throw new IllegalStateException("Unmanaged rule conflicts with USBShield whitelist: " + key);
-                }
-            } catch (IllegalArgumentException invalid) {
-                throw new IllegalStateException("Unverifiable foreign USBGuard allow rule: " + rule.ruleId(), invalid);
-            }
+            throw new IllegalStateException("Foreign USBGuard Allow rule is not centrally authorized: "
+                    + rule.ruleId());
         }
     }
 

@@ -44,6 +44,15 @@ public class PolicySyncService {
 
         PolicyResponse policyResponse = policyOpt.get();
         Long newVersion = policyResponse.getPolicyVersion();
+        if (newVersion == null || newVersion < 0 || policyResponse.getWhitelistedDevices() == null) {
+            log.error("Invalid server policy response; rejecting reconciliation");
+            return false;
+        }
+        if (registration.getCurrentPolicyVersion() != null
+                && newVersion < registration.getCurrentPolicyVersion()) {
+            log.error("Server policy version regressed; refusing stale reconciliation");
+            return false;
+        }
         log.info("Applying new policy version {} with {} whitelisted devices",
                 newVersion, policyResponse.getWhitelistedDevices().size());
 
@@ -64,7 +73,13 @@ public class PolicySyncService {
         }
 
         // Nạp vào USBGuard Engine (qua Adapter của Member 2)
-        boolean applied = usbGuardGateway.applyWhitelist(fingerprints);
+        boolean applied;
+        try {
+            applied = usbGuardGateway.applyWhitelist(fingerprints);
+        } catch (RuntimeException error) {
+            log.error("USBGuard reconciliation failed; withholding policy ACK: {}", error.getMessage());
+            return false;
+        }
         if (!applied) {
             log.error("Failed to apply policy to USBGuard. Aborting version update and acknowledgment.");
             return false;
