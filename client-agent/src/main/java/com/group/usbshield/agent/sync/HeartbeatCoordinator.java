@@ -2,6 +2,10 @@ package com.group.usbshield.agent.sync;
 
 import com.group.usbshield.agent.endpoint.EndpointManager;
 import com.group.usbshield.agent.endpoint.EndpointRegistration;
+import com.group.usbshield.agent.session.ActiveUserResolver;
+import com.group.usbshield.agent.session.ActiveUserInfo;
+import com.group.usbshield.agent.system.SystemInfoProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.group.usbshield.agent.outbox.OutboxSpoolService;
 import com.group.usbshield.agent.sync.dto.HeartbeatRequest;
 import com.group.usbshield.agent.sync.dto.HeartbeatResponse;
@@ -19,15 +23,34 @@ public class HeartbeatCoordinator {
     private final AdminServerClient adminServerClient;
     private final PolicySyncService policySyncService;
     private final OutboxSpoolService outboxSpoolService;
+    private final ActiveUserResolver activeUserResolver;
+    private final SystemInfoProvider systemInfoProvider;
+    private static final long SUCCESS_VERIFY_NANOS = java.util.concurrent.TimeUnit.SECONDS.toNanos(60);
+    private static final long FAILURE_RETRY_NANOS = java.util.concurrent.TimeUnit.SECONDS.toNanos(15);
+    private long lastVerificationAttempt;
+    private long lastVerificationSuccess;
 
+    @Autowired
     public HeartbeatCoordinator(EndpointManager endpointManager,
                                 AdminServerClient adminServerClient,
                                 PolicySyncService policySyncService,
-                                OutboxSpoolService outboxSpoolService) {
+                                OutboxSpoolService outboxSpoolService,
+                                ActiveUserResolver activeUserResolver,
+                                SystemInfoProvider systemInfoProvider) {
         this.endpointManager = endpointManager;
         this.adminServerClient = adminServerClient;
         this.policySyncService = policySyncService;
         this.outboxSpoolService = outboxSpoolService;
+        this.activeUserResolver = activeUserResolver;
+        this.systemInfoProvider = systemInfoProvider;
+    }
+
+    // Preserve existing isolated unit tests and their constructor.
+    public HeartbeatCoordinator(EndpointManager endpointManager,
+                                AdminServerClient adminServerClient,
+                                PolicySyncService policySyncService,
+                                OutboxSpoolService outboxSpoolService) {
+        this(endpointManager, adminServerClient, policySyncService, outboxSpoolService, null, null);
     }
 
     @Scheduled(fixedDelayString = "${usbshield.agent.heartbeat-interval-ms:5000}")
@@ -44,9 +67,23 @@ public class HeartbeatCoordinator {
         Long localVersion = registration.getCurrentPolicyVersion() != null ? registration.getCurrentPolicyVersion() : 0L;
 
         // 2. Gửi nhịp tim lên Admin Server
+        String currentUser = null;
+        if (activeUserResolver != null) {
+            try {
+                ActiveUserInfo user = activeUserResolver.resolveCurrentActiveUser();
+                currentUser = user != null && "RESOLVED".equals(user.status())
+                        ? user.username() : "UNKNOWN";
+            } catch (RuntimeException error) {
+                currentUser = "UNKNOWN";
+            }
+        }
         HeartbeatRequest request = HeartbeatRequest.builder()
                 .endpointId(endpointId)
                 .currentPolicyVersion(localVersion)
+                .ipAddress(systemInfoProvider == null ? null :
+                        systemInfoProvider.getIpAddressForServer(adminServerClient.getServerUrl()))
+                .operatingSystem(systemInfoProvider == null ? null : systemInfoProvider.getOperatingSystem())
+                .currentUser(currentUser)
                 .build();
 
         Optional<HeartbeatResponse> responseOpt = adminServerClient.sendHeartbeat(request, agentToken);
@@ -59,15 +96,33 @@ public class HeartbeatCoordinator {
         log.debug("Heartbeat ACK from server: status={}, serverPolicyVersion={}",
                 response.getStatus(), response.getServerPolicyVersion());
 
-        // 3. Retry pending policy ACK nếu có version đã áp dụng thành công nhưng server chưa ACK
-        retryPendingAckIfAny(registration, endpointId, agentToken);
-
-        // 4. Kiểm tra xem Server có phiên bản Whitelist mới hơn không
-        if (response.getServerPolicyVersion() != null && response.getServerPolicyVersion() > localVersion) {
-            log.info("New policy version detected on server (local: {}, server: {}). Initiating sync...",
-                    localVersion, response.getServerPolicyVersion());
-            policySyncService.syncPolicy(registration);
+        // 3. Never retry an old ACK before verifying that the local daemon still
+        // enforces the desired policy. A previous ACK is not live health evidence.
+        // 4. A version is not evidence that local USBGuard rules still match.
+        // Reconcile on first heartbeat and periodically even if version is unchanged.
+        Long desiredVersion = response.getServerPolicyVersion();
+        boolean verifiedEnforcement = false;
+        if (desiredVersion == null || desiredVersion < localVersion) {
+            log.error("Missing/stale server policy version; local enforcement not verified");
+        } else {
+            long now = System.nanoTime();
+            boolean changed = desiredVersion > localVersion;
+            long retryInterval = lastVerificationSuccess == 0 ? FAILURE_RETRY_NANOS : SUCCESS_VERIFY_NANOS;
+            boolean due = lastVerificationAttempt == 0 || now - lastVerificationAttempt >= retryInterval;
+            if (changed || due) {
+                lastVerificationAttempt = now;
+                if (policySyncService.syncPolicy(registration)) {
+                    lastVerificationSuccess = now;
+                    verifiedEnforcement = true;
+                } else {
+                    lastVerificationSuccess = 0;
+                    log.error("USBGuard reconciliation failed; do not treat policy ACK as verified enforcement");
+                }
+            } else {
+                verifiedEnforcement = lastVerificationSuccess != 0;
+            }
         }
+        if (verifiedEnforcement) retryPendingAckIfAny(registration, endpointId, agentToken);
 
         // 5. Nếu Server đang ONLINE, gửi bù các sự kiện cũ trong hàng đợi spool ngoại tuyến
         outboxSpoolService.drainOutbox(endpointId, agentToken, adminServerClient);

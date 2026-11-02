@@ -31,6 +31,7 @@ class HeartbeatCoordinatorTest {
         adminServerClient = mock(AdminServerClient.class);
         policySyncService = mock(PolicySyncService.class);
         outboxSpoolService = mock(OutboxSpoolService.class);
+        when(policySyncService.syncPolicy(any())).thenReturn(true);
 
         coordinator = new HeartbeatCoordinator(
                 endpointManager,
@@ -78,8 +79,8 @@ class HeartbeatCoordinatorTest {
     }
 
     @Test
-    @DisplayName("performHeartbeatCycle does NOT trigger policy sync if server version is not newer")
-    void noSyncWhenVersionIsEqualOrLower() {
+    @DisplayName("performHeartbeatCycle verifies equal-version rules on first heartbeat")
+    void initialSameVersionStillReconciles() {
         EndpointRegistration reg = EndpointRegistration.builder()
                 .endpointId("EP-01")
                 .agentToken("tok-01")
@@ -98,8 +99,10 @@ class HeartbeatCoordinatorTest {
 
         coordinator.performHeartbeatCycle();
 
-        verify(policySyncService, never()).syncPolicy(any());
-        verify(outboxSpoolService, times(1)).drainOutbox("EP-01", "tok-01", adminServerClient);
+        verify(policySyncService).syncPolicy(reg);
+        coordinator.performHeartbeatCycle();
+        verify(policySyncService, times(1)).syncPolicy(reg);
+        verify(outboxSpoolService, times(2)).drainOutbox("EP-01", "tok-01", adminServerClient);
     }
 
     @Test
@@ -188,6 +191,23 @@ class HeartbeatCoordinatorTest {
         coordinator.performHeartbeatCycle();
 
         verify(adminServerClient).acknowledgePolicy(eq("EP-01"), eq("tok-01"), any(PolicyAckRequest.class));
+        verify(endpointManager, never()).clearPendingAck();
+    }
+
+    @Test
+    void pendingAckIsNotSentWhenFreshUsbGuardVerificationFails() {
+        EndpointRegistration reg = EndpointRegistration.builder()
+                .endpointId("EP-01").agentToken("tok-01")
+                .currentPolicyVersion(4L).pendingAckVersion(4L).build();
+        when(endpointManager.ensureEnrolled()).thenReturn(true);
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+        when(adminServerClient.sendHeartbeat(any(), eq("tok-01"))).thenReturn(Optional.of(
+                HeartbeatResponse.builder().serverPolicyVersion(4L).build()));
+        when(policySyncService.syncPolicy(reg)).thenReturn(false);
+
+        coordinator.performHeartbeatCycle();
+
+        verify(adminServerClient, never()).acknowledgePolicy(any(), any(), any());
         verify(endpointManager, never()).clearPendingAck();
     }
 

@@ -12,4 +12,7 @@ import lombok.NoArgsConstructor;
 public class HeartbeatRequest {
     private String endpointId;
     private Long currentPolicyVersion;
+    private String ipAddress;
+    private String operatingSystem;
+    private String currentUser;
 }

@@ -37,6 +37,30 @@ public class AgentEventController {
         String effectiveEndpointId = principal.getName();
         AgentCredentialService.bind(effectiveEndpointId, request.getEndpointId());
 
+        if (request.getEventId() != null) {
+            var existing = usbEventRepository.findByEndpointIdAndEventId(effectiveEndpointId, request.getEventId());
+            if (existing.isPresent()) {
+                UsbEvent stored = existing.get();
+                String storedHash = stored.getUsbDeviceId() == null ? null
+                        : usbDeviceRepository.findById(stored.getUsbDeviceId())
+                                .map(UsbDevice::getDeviceHash).orElse(null);
+                String submittedHash = request.getDevice() == null ? null : request.getDevice().getHash();
+                boolean sameEvent = stored.getEventType().equals(request.getEventType())
+                        && stored.getDecision().equals(request.getDecision())
+                        && stored.getOccurredAt().equals(request.getOccurredAt())
+                        && java.util.Objects.equals(stored.getHostname(), request.getHostname())
+                        && java.util.Objects.equals(stored.getLinuxUsername(), request.getLinuxUsername())
+                        && java.util.Objects.equals(storedHash, submittedHash);
+                if (!sameEvent) {
+                    throw new org.springframework.web.server.ResponseStatusException(
+                            org.springframework.http.HttpStatus.CONFLICT,
+                            "Event ID was already used for a different event on this endpoint");
+                }
+                return ResponseEntity.ok(Map.of("success", true, "eventId", stored.getId(),
+                        "receivedAt", stored.getReceivedAt()));
+            }
+        }
+
         Long usbDeviceId = null;
         AgentUsbDeviceDto deviceDto = request.getDevice();
         if (deviceDto != null) {
@@ -60,6 +84,7 @@ public class AgentEventController {
 
         UsbEvent usbEvent = UsbEvent.builder()
                 .endpointId(effectiveEndpointId)
+                .eventId(request.getEventId())
                 .hostname(request.getHostname())
                 .usbDeviceId(usbDeviceId)
                 .linuxUsername(request.getLinuxUsername())

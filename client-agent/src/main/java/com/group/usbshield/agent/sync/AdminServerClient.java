@@ -39,6 +39,8 @@ public class AdminServerClient {
         this.restClient = restClient;
     }
 
+    public String getServerUrl() { return properties.getServerUrl(); }
+
     /**
      * Đăng ký Endpoint mới với Admin Server (POST /api/agent/enroll)
      */

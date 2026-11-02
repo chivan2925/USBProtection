@@ -25,6 +25,8 @@ public class OutboxSpoolService {
     private final AgentProperties properties;
     private final ObjectMapper objectMapper;
     private Path spoolPath;
+    // Do not hold the spool write monitor while waiting on Admin Server HTTP.
+    private final Object drainLock = new Object();
 
     public OutboxSpoolService(AgentProperties properties, ObjectMapper objectMapper) {
         this.properties = properties;
@@ -61,6 +63,9 @@ public class OutboxSpoolService {
             return false;
         }
 
+        if (event.getEventId() == null || event.getEventId().isBlank()) {
+            event.setEventId(UUID.randomUUID().toString());
+        }
         String fileName = String.format("event_%d_%s.json", System.currentTimeMillis(), UUID.randomUUID().toString().substring(0, 8));
         Path target = spoolPath.resolve(fileName);
         Path temporary = spoolPath.resolve("." + fileName + ".tmp");
@@ -96,7 +101,8 @@ public class OutboxSpoolService {
     /**
      * Quét và gửi bù các sự kiện cũ trong hàng đợi khi Server đã ONLINE trở lại
      */
-    public synchronized void drainOutbox(String endpointId, String agentToken, AdminServerClient client) {
+    public void drainOutbox(String endpointId, String agentToken, AdminServerClient client) {
+        synchronized (drainLock) {
         if (spoolPath == null || !Files.exists(spoolPath)) {
             return;
         }
@@ -123,6 +129,12 @@ public class OutboxSpoolService {
                 continue;
             }
 
+            // Older spool files predate the eventId protocol. Derive a stable ID from
+            // the persistent filename so retries after restart deduplicate server-side.
+            if (payload.getEventId() == null || payload.getEventId().isBlank()) {
+                payload.setEventId(UUID.nameUUIDFromBytes(
+                        ("usbshield-legacy:" + file.getName()).getBytes(java.nio.charset.StandardCharsets.UTF_8)).toString());
+            }
             // Events captured before enrollment have a temporary local ID.
             // Bind *only* those placeholders to the newly enrolled endpoint;
             // never silently forward an event belonging to a different real
@@ -161,5 +173,6 @@ public class OutboxSpoolService {
                 break;
             }
         }
+        } // drainLock
     }
 }

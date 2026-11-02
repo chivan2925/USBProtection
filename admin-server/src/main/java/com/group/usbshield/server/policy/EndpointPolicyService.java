@@ -1,21 +1,29 @@
 package com.group.usbshield.server.policy;
 import com.group.usbshield.server.endpoint.*;
 import com.group.usbshield.server.device.*;
+import com.group.usbshield.server.event.UsbEventRepository;
 import com.group.usbshield.server.policy.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
+import java.time.Instant;
 import static org.springframework.http.HttpStatus.*;
 @Service @RequiredArgsConstructor
 public class EndpointPolicyService {
     private final EndpointRepository endpoints;
     private final EndpointWhitelistEntryRepository entries;
     private final UsbDeviceRepository devices;
+    private final UsbEventRepository events;
     public record AllowRequest(Long usbDeviceId){}
-    public record EntryResponse(Long id,String endpointId,Long usbDeviceId,String fingerprintType,String fingerprintValue,Boolean enabled){}
-    private EntryResponse view(EndpointWhitelistEntry e){return new EntryResponse(e.getId(),e.getEndpointId(),e.getUsbDeviceId(),e.getFingerprintType(),e.getFingerprintValue(),e.getEnabled());}
+    public record EntryResponse(Long id,String endpointId,Long usbDeviceId,String fingerprintType,String fingerprintValue,Boolean enabled,String name,String vendorId,String productId,String serial,Instant createdAt){}
+    private EntryResponse view(EndpointWhitelistEntry e){
+        var device = e.getUsbDeviceId()==null ? null : devices.findById(e.getUsbDeviceId()).orElse(null);
+        return new EntryResponse(e.getId(),e.getEndpointId(),e.getUsbDeviceId(),e.getFingerprintType(),e.getFingerprintValue(),e.getEnabled(),
+                device == null ? null : device.getDeviceName(),device == null ? null : device.getVendorId(),
+                device == null ? null : device.getProductId(),device == null ? null : device.getSerialNumber(),e.getCreatedAt());
+    }
     private Endpoint endpoint(String id){return endpoints.findByEndpointId(id).orElseThrow(()->new ResponseStatusException(NOT_FOUND,"Endpoint not found"));}
     private Endpoint lock(String id){return endpoints.lockByEndpointId(id).orElseThrow(()->new ResponseStatusException(NOT_FOUND,"Endpoint not found"));}
     @Transactional(readOnly=true) public List<EntryResponse> list(String id){endpoint(id);return entries.findByEndpointIdAndEnabledTrue(id).stream().map(this::view).toList();}
@@ -23,6 +31,12 @@ public class EndpointPolicyService {
         var endpoint=lock(id);
         if(request.usbDeviceId()==null)throw new ResponseStatusException(BAD_REQUEST,"usbDeviceId required");
         var device=devices.findById(request.usbDeviceId()).orElseThrow(()->new ResponseStatusException(NOT_FOUND,"Device not found"));
+        // Explicit contract: this endpoint must have actually reported this USB.
+        // The catalog is global, but its IDs must never authorize an unseen endpoint.
+        if (!events.existsByEndpointIdAndUsbDeviceId(id, device.getId())) {
+            throw new ResponseStatusException(CONFLICT,
+                    "USB has not been observed on this endpoint; pre-authorization is unsupported");
+        }
         // Week 2 uses USBGuard HASH only; never broaden identity to a model/name.
         if(device.getDeviceHash()==null || device.getDeviceHash().isBlank())throw new ResponseStatusException(CONFLICT,"Device has no stable HASH; allow requires identity review");
         var entry=entries.findByEndpointIdAndFingerprintValue(id,device.getDeviceHash()).orElse(null);

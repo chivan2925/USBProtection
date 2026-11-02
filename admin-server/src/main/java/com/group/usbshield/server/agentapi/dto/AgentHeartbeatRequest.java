@@ -10,7 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AgentHeartbeatRequest {
-
     @NotBlank(message = "endpointId must not be blank")
     @jakarta.validation.constraints.Size(max=100)
     private String endpointId;
@@ -19,6 +18,12 @@ public class AgentHeartbeatRequest {
     private String hostname;
 
     private String agentVersion;
-
     private Long currentPolicyVersion;
+
+    @jakarta.validation.constraints.Size(max=50)
+    private String ipAddress;
+    @jakarta.validation.constraints.Size(max=100)
+    private String operatingSystem;
+    @jakarta.validation.constraints.Size(max=100)
+    private String currentUser;
 }

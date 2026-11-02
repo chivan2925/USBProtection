@@ -14,6 +14,10 @@ import java.time.Instant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AgentEventRequest {
 
+    // Optional to retain compatibility with previously enrolled Agent binaries.
+    @jakarta.validation.constraints.Pattern(regexp = "[0-9a-fA-F-]{36}")
+    private String eventId;
+
     @NotBlank(message = "endpointId is required")
     @jakarta.validation.constraints.Size(max=100)
     private String endpointId;
@@ -41,7 +45,7 @@ public class AgentEventRequest {
     private AgentUsbDeviceDto device;
 
     @NotBlank(message = "eventType is required (e.g. CONNECTED, DISCONNECTED)")
-    @jakarta.validation.constraints.Pattern(regexp="CONNECTED|DISCONNECTED")
+    @jakarta.validation.constraints.Pattern(regexp="CONNECTED|DISCONNECTED|POLICY_APPLIED")
     private String eventType;
 
     @NotBlank(message = "decision is required (e.g. ALLOWED, BLOCKED)")

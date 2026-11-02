@@ -147,3 +147,20 @@ test('fixture rejects duplicate Revoke without changing desired version again', 
   await assert.rejects(protectionApi.revokeOnEndpoint('A', entry.id), { status: 404 })
   assert.deepEqual(await protectionApi.getEndpoint('A', signal()), afterFirstRevoke)
 })
+
+test('policy-applied event overrides transient BLOCK without inventing a second CONNECTED', async () => {
+  const original = structuredClone(fixture.state.events)
+  try {
+    fixture.state.events.push({ ...original[0], id: 77, eventType: 'POLICY_APPLIED',
+      decision: 'ALLOWED', occurredAt: new Date(Date.now() + 1500).toISOString() })
+    const data = await protectionApi.getSnapshot(signal())
+    assert.equal(data.events.filter(event => event.type === 'connected' && event.endpointId === 'A').length, 1)
+    assert.equal(data.events.filter(event => event.type === 'policy_applied' && event.endpointId === 'A').length, 1)
+    assert.equal(data.devices.find(device => device.endpointId === 'A').status, 'allowed')
+    assert.equal(data.overview.blockedToday, 0, 'transient BLOCK is not a current blocked device')
+    const filtered = await protectionApi.getEventPage({ page: 0, size: 20, eventType: 'POLICY_APPLIED' }, signal())
+    assert.equal(filtered.totalElements, 1)
+  } finally {
+    fixture.state.events = original
+  }
+})

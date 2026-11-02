@@ -59,7 +59,7 @@ export function mapEvent(value: unknown): UsbEvent {
   const event = record(value, 'event')
   const id = identifier(event.id, 'id')
   // Other demo event categories are not Admin API event types.
-  const type = event.eventType === 'CONNECTED' ? 'connected' : event.eventType === 'DISCONNECTED' ? 'disconnected' : undefined
+  const type = event.eventType === 'CONNECTED' ? 'connected' : event.eventType === 'DISCONNECTED' ? 'disconnected' : event.eventType === 'POLICY_APPLIED' ? 'policy_applied' : undefined
   if (!type) throw new Error('Invalid event payload: unsupported eventType')
   const decision = event.decision === 'ALLOWED' ? 'allowed' : event.decision === 'BLOCKED' ? 'blocked' : event.decision === 'UNKNOWN' ? 'unknown' : undefined
   if (!decision) throw new Error('Invalid event payload: unsupported decision')

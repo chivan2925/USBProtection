@@ -12,6 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Set;
+import java.util.UUID;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -102,7 +109,8 @@ public class EndpointManager {
         EnrollmentRequest request = EnrollmentRequest.builder()
                 .hostname(systemInfoProvider.getHostname())
                 .machineId(systemInfoProvider.getMachineId())
-                .ipAddress(systemInfoProvider.getIpAddress())
+                .ipAddress(systemInfoProvider.getIpAddressForServer(properties.getServerUrl()))
+                .operatingSystem(systemInfoProvider.getOperatingSystem())
                 .enrollmentToken(properties.getEnrollmentToken())
                 .build();
 
@@ -190,7 +198,36 @@ public class EndpointManager {
             if (storageFilePath.getParent() != null && !Files.exists(storageFilePath.getParent())) {
                 Files.createDirectories(storageFilePath.getParent());
             }
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(storageFilePath.toFile(), registration);
+            Path parent = storageFilePath.getParent();
+            Path temporary = parent.resolve(".endpoint-" + UUID.randomUUID() + ".tmp");
+            try {
+                byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(registration);
+                try {
+                    Files.createFile(temporary, PosixFilePermissions.asFileAttribute(
+                            PosixFilePermissions.fromString("rw-------")));
+                } catch (UnsupportedOperationException unsupported) {
+                    Files.createFile(temporary); // Windows ACLs are not POSIX
+                }
+                try (FileOutputStream output = new FileOutputStream(temporary.toFile())) {
+                    output.write(json);
+                    output.getFD().sync();
+                }
+                try {
+                    Files.move(temporary, storageFilePath,
+                            StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                } catch (AtomicMoveNotSupportedException unsupported) {
+                    // A same-directory rename is still safer than writing credentials in place.
+                    Files.move(temporary, storageFilePath, StandardCopyOption.REPLACE_EXISTING);
+                }
+                // Sync the parent directory on Linux to make the rename durable across power loss.
+                try (var directory = java.nio.channels.FileChannel.open(parent, java.nio.file.StandardOpenOption.READ)) {
+                    directory.force(true);
+                } catch (java.io.IOException | UnsupportedOperationException ignored) {
+                    // Some filesystems cannot fsync directories; file contents were fsynced.
+                }
+            } finally {
+                Files.deleteIfExists(temporary);
+            }
             log.debug("Successfully persisted endpoint registration to {}", storageFilePath);
             return true;
         } catch (Exception e) {

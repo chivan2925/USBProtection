@@ -33,11 +33,17 @@ class UsbGuardWeek4NotificationEventTargetTest {
         listener.processWatchLine("target=block");
         listener.processWatchLine("device_rule=allow id 0951:1665 hash \"hash-A\" with-interface 08:06:50");
 
+        // PresenceChanged may be provisional: only definitive PolicyApplied(BLOCK) can notify.
+        verify(notifier, never()).notifyBlockedUsb(any(), any());
+        listener.processWatchLine("[device] PolicyApplied: id=11");
+        listener.processWatchLine("target_new=block");
+        listener.processWatchLine("device_rule=block id 0951:1665 hash \"hash-A\" with-interface 08:06:50");
+
         ArgumentCaptor<UsbDeviceInfo> device = ArgumentCaptor.forClass(UsbDeviceInfo.class);
         verify(notifier).notifyBlockedUsb(any(), device.capture());
         assertEquals("block", device.getValue().state());
         ArgumentCaptor<UsbEventPayload> wire = ArgumentCaptor.forClass(UsbEventPayload.class);
-        verify(sender).sendPayload(wire.capture());
+        verify(sender).enqueuePayload(wire.capture());
         assertEquals("BLOCKED", wire.getValue().getDecision());
     }
 }

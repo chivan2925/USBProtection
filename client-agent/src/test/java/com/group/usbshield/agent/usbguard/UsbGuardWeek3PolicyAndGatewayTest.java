@@ -56,15 +56,10 @@ class UsbGuardWeek3PolicyAndGatewayTest {
         runner.rules.add("2: allow id 1234:abcd serial \"EXTERNAL\"");
         runner.nextId = 3;
         UsbGuardPolicySynchronizer synchronizer = synchronizer(runner);
-        synchronizer.reconcile(List.of(FIRST));
-        synchronizer.reconcile(List.of(FIRST));
-        assertEquals(List.of("append"), runner.mutations);
+        assertThrows(IllegalStateException.class, () -> synchronizer.reconcile(List.of(FIRST)));
         assertEquals(BASE, runner.rules.getFirst());
         assertTrue(runner.rules.stream().anyMatch(rule -> rule.contains("EXTERNAL")));
-        synchronizer.reconcile(List.of());
-        synchronizer.reconcile(List.of());
-        assertEquals(List.of("append", "remove"), runner.mutations);
-        assertEquals(2, runner.rules.size());
+        assertTrue(runner.mutations.isEmpty(), "Foreign grants are never removed silently");
     }
 
     @Test

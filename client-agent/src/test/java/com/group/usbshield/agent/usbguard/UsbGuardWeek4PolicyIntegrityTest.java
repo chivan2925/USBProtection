@@ -122,7 +122,7 @@ class UsbGuardWeek4PolicyIntegrityTest {
         Runner runner = new Runner();
         runner.rules.add("2: allow id 1234:abcd serial \"EXTERNAL\"");
         runner.nextId = 3;
-        sync(runner).reconcile(List.of(FIRST));
+        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of(FIRST)));
         assertEquals("2: allow id 1234:abcd serial \"EXTERNAL\"", runner.rules.get(1));
         runner.mutations.clear();
         runner.rules.add("4: allow id 0951:1665");

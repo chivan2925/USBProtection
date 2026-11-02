@@ -13,6 +13,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Best-effort desktop notification. The live USBGuard listener invokes this method
+ * only after PolicyApplied confirms the effective BLOCK/REJECT decision.
+ * This class does not schedule timers, query a potentially transient state, or alter enforcement.
+ */
 @Service
 public class DesktopNotificationService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DesktopNotificationService.class);
@@ -37,9 +42,7 @@ public class DesktopNotificationService {
     }
 
     public void notifyBlockedUsb(ActiveUserInfo user, UsbDeviceInfo device) {
-        if (!properties.isNotificationEnabled() || device == null) {
-            return;
-        }
+        if (!properties.isNotificationEnabled() || device == null) return;
         policy.classify(new UsbGuardPresenceEvent(UsbGuardPresenceEvent.PresenceType.INSERT,
                         device.state(), device), user, Instant.now())
                 .ifPresent(notice -> queue.execute(() -> {

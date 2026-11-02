@@ -67,11 +67,20 @@ class UsbGuardWeek4WatchStressTest {
         listener.processWatchLine("device_rule=block id 0951:1665 hash \"hash-" + id + "\" with-interface 08:06:50");
     }
 
+    private void applied(int id) {
+        listener.processWatchLine("[device] PolicyApplied: id=" + id);
+        listener.processWatchLine("target_new=block");
+        listener.processWatchLine("device_rule=block id 0951:1665 hash \"hash-" + id + "\" with-interface 08:06:50");
+    }
+
     private static String streamEvent(int id, String action) {
         return "[device] PresenceChanged: id=" + id + "\n"
                 + "event=" + action + "\n"
                 + "target=block\n"
-                + "device_rule=block id 0951:1665 hash \"hash-" + id + "\" with-interface 08:06:50\n";
+                + "device_rule=block id 0951:1665 hash \"hash-" + id + "\" with-interface 08:06:50\n"
+                + ("Insert".equals(action) ? "[device] PolicyApplied: id=" + id + "\n"
+                + "target_new=block\n"
+                + "device_rule=block id 0951:1665 hash \"hash-" + id + "\" with-interface 08:06:50\n" : "");
     }
 
     @Test
@@ -79,18 +88,23 @@ class UsbGuardWeek4WatchStressTest {
         presence(11, "Insert");
         listener.resetWatchState();
         presence(11, "Insert");
-        verify(sender, times(1)).sendPayload(any());
-        verify(notifier, times(1)).notifyBlockedUsb(any(), any());
+        applied(11);
+        verify(sender, times(1)).enqueuePayload(any());
+        // Both Insert records are deduplicated, but the pending state before reconnect is lost;
+        // without a confirmed final PolicyApplied for a fresh insertion do not invent a popup.
+        verify(notifier, never()).notifyBlockedUsb(any(), any());
     }
 
     @Test
     void removeAndReinsertRemainSeparateAfterReconnect() {
         presence(12, "Insert");
+        applied(12);
         listener.resetWatchState();
         presence(12, "Remove");
         listener.resetWatchState();
         presence(12, "Insert");
-        verify(sender, times(3)).sendPayload(any());
+        applied(12);
+        verify(sender, times(3)).enqueuePayload(any());
         verify(notifier, times(2)).notifyBlockedUsb(any(), any());
         verify(notifier).onUsbRemoved(any(), any());
     }
@@ -101,10 +115,9 @@ class UsbGuardWeek4WatchStressTest {
             presence(13, "Insert");
             listener.processWatchLine("[device] PolicyChanged: id=13");
             listener.processWatchLine("device_rule=block id 0951:1665 hash \"hash-13\" with-interface 08:06:50");
-            listener.processWatchLine("[device] PolicyApplied: id=13");
-            listener.processWatchLine("device_rule=block id 0951:1665 hash \"hash-13\" with-interface 08:06:50");
+            applied(13);
         }
-        verify(sender, times(1)).sendPayload(any());
+        verify(sender, times(1)).enqueuePayload(any());
         verify(notifier, times(1)).notifyBlockedUsb(any(), any());
     }
 
@@ -121,7 +134,7 @@ class UsbGuardWeek4WatchStressTest {
         listener.processWatchLine("device_rule=block id 0951:1665 hash \"hash-14\" with-interface 08:06:50");
         verifyNoInteractions(sender);
         presence(14, "Insert");
-        verify(sender).sendPayload(any());
+        verify(sender).enqueuePayload(any());
     }
 
     @Test
@@ -129,7 +142,7 @@ class UsbGuardWeek4WatchStressTest {
         for (int i = 0; i < 1100; i++) {
             presence(1000 + i, "Insert");
         }
-        verify(sender, times(1100)).sendPayload(any());
+        verify(sender, times(1100)).enqueuePayload(any());
         assertTrue(listener.trackedRecentEventCount() <= 1024);
     }
 
@@ -162,7 +175,7 @@ class UsbGuardWeek4WatchStressTest {
         listener.stopListening();
         listener = create(launcher, 10);
         listener.startWatchWorker();
-        verify(sender, timeout(2000).times(1)).sendPayload(any());
+        verify(sender, timeout(2000).times(1)).enqueuePayload(any());
         assertTrue(attempts.get() >= 2);
     }
 
@@ -184,7 +197,7 @@ class UsbGuardWeek4WatchStressTest {
         listener = create(launcher, 10);
         listener.startWatchWorker();
         assertTrue(replayConsumed.await(3, TimeUnit.SECONDS));
-        verify(sender, times(1)).sendPayload(any());
+        verify(sender, times(1)).enqueuePayload(any());
         verify(notifier, times(1)).notifyBlockedUsb(any(), any());
     }
 
