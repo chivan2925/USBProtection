@@ -225,6 +225,75 @@ class OutboxSpoolServiceTest {
     }
 
     @Test
+    @DisplayName("events captured before enrollment are rebound to the newly enrolled endpoint")
+    void drainOutboxRebindsPreEnrollmentIds() throws Exception {
+        UsbEventPayload p1 = UsbEventPayload.builder()
+                .endpointId("POC-UNENROLLED-ubuntu-test")
+                .linuxUsername("student01")
+                .eventType("CONNECTED")
+                .decision("BLOCKED")
+                .occurredAt(Instant.now())
+                .build();
+        UsbEventPayload p2 = UsbEventPayload.builder()
+                .endpointId("UNENROLLED")
+                .linuxUsername("student02")
+                .eventType("DISCONNECTED")
+                .decision("BLOCKED")
+                .occurredAt(Instant.now())
+                .build();
+        assertTrue(outboxSpoolService.spool(p1));
+        assertTrue(outboxSpoolService.spool(p2));
+        when(adminServerClient.sendEvent(eq("EP-NEW"), eq("token-new"), any(UsbEventPayload.class)))
+                .thenReturn(true);
+
+        outboxSpoolService.drainOutbox("EP-NEW", "token-new", adminServerClient);
+
+        ArgumentCaptor<UsbEventPayload> captor = ArgumentCaptor.forClass(UsbEventPayload.class);
+        verify(adminServerClient, times(2))
+                .sendEvent(eq("EP-NEW"), eq("token-new"), captor.capture());
+        assertTrue(captor.getAllValues().stream().allMatch(e -> "EP-NEW".equals(e.getEndpointId())));
+        assertTrue(captor.getAllValues().stream().anyMatch(e -> "student01".equals(e.getLinuxUsername())));
+        try (var listing = Files.list(tempDir.resolve("spool"))) {
+            assertEquals(0, listing.count());
+        }
+    }
+
+    @Test
+    @DisplayName("an event belonging to another enrolled endpoint must not be silently rebound")
+    void drainOutboxRejectsDifferentRealEndpointIdentity() throws Exception {
+        assertTrue(outboxSpoolService.spool(UsbEventPayload.builder()
+                .endpointId("EP-OTHER")
+                .linuxUsername("student01")
+                .occurredAt(Instant.now())
+                .build()));
+
+        outboxSpoolService.drainOutbox("EP-NEW", "token-new", adminServerClient);
+
+        verify(adminServerClient, never()).sendEvent(any(), any(), any());
+        try (var listing = Files.list(tempDir.resolve("spool"))) {
+            assertEquals(1, listing.count(), "Mismatched identity must remain for operator review");
+        }
+    }
+
+    @Test
+    @DisplayName("spooling publishes only complete .json files, without leftover temporary writes")
+    void spoolPublishesAtomicJson() throws Exception {
+        UsbEventPayload payload = UsbEventPayload.builder()
+                .endpointId("EP-01")
+                .eventType("CONNECTED")
+                .decision("BLOCKED")
+                .occurredAt(Instant.now())
+                .build();
+        assertTrue(outboxSpoolService.spool(payload));
+        try (var listing = Files.list(tempDir.resolve("spool"))) {
+            var names = listing.map(p -> p.getFileName().toString()).toList();
+            assertEquals(1, names.size());
+            assertTrue(names.getFirst().endsWith(".json"));
+            assertFalse(names.getFirst().endsWith(".tmp"));
+        }
+    }
+
+    @Test
     @DisplayName("spool returns false gracefully on disk write failure")
     void spoolHandlesDiskWriteFailure() {
         AgentProperties invalidProps = new AgentProperties();

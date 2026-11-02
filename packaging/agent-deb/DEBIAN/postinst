@@ -98,7 +98,7 @@ fi
 # A pre-existing customized policy must be inspected rather than overwritten.
 # Without the canonical base rule, the reconciler refuses all policy updates;
 # non-storage peripherals can also become unavailable under implicit BLOCK.
-if ! grep -Eq '^[[:space:]]*allow[[:space:]]+with-interface[[:space:]]+none-of[[:space:]]*\{[[:space:]]*08:\*:\*[[:space:]]*\}' /etc/usbguard/rules.conf; then
+if ! grep -Eq '^[[:space:]]*allow[[:space:]]+with-interface[[:space:]]+none-of[[:space:]]*\{[[:space:]]*08:\*:\*[[:space:]]*\}[[:space:]]*(#.*)?$' /etc/usbguard/rules.conf; then
     echo 'ERROR: USBGuard rules.conf lacks the canonical non-storage base Allow; inspect existing policy manually.' >&2
     exit 1
 fi

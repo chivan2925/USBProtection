@@ -19,10 +19,19 @@ public class AdminServerClient {
 
     @org.springframework.beans.factory.annotation.Autowired
     public AdminServerClient(AgentProperties properties) {
-        this(properties, RestClient.builder()
-                .requestFactory(new org.springframework.http.client.SimpleClientHttpRequestFactory())
+        this(properties, productionRestClient(properties));
+    }
+
+    private static RestClient productionRestClient(AgentProperties properties) {
+        // Without explicit limits, a stalled TCP peer can block the heartbeat
+        // scheduler or the USB event-listener thread indefinitely.
+        var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(3_000);
+        factory.setReadTimeout(5_000);
+        return RestClient.builder()
+                .requestFactory(factory)
                 .baseUrl(properties.getServerUrl())
-                .build());
+                .build();
     }
 
     public AdminServerClient(AgentProperties properties, RestClient restClient) {
@@ -123,7 +132,7 @@ public class AdminServerClient {
                     .body(payload)
                     .retrieve()
                     .toBodilessEntity();
-            log.info("Successfully sent USB event {} for device {} to Admin Server", payload.getEventType(), payload.getDevice());
+            log.info("Successfully sent USB event type={} to Admin Server", payload.getEventType());
             return true;
         } catch (Exception e) {
             log.warn("Failed to send USB event to server: {}", e.getMessage());

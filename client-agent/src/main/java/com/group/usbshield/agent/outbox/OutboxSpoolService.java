@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.UUID;
@@ -54,20 +57,39 @@ public class OutboxSpoolService {
      */
     public synchronized boolean spool(UsbEventPayload event) {
         if (spoolPath == null) {
-            log.error("Spool directory is not available. Event dropped: {}", event);
+            log.error("Spool directory is unavailable; USB event could not be persisted");
             return false;
         }
 
         String fileName = String.format("event_%d_%s.json", System.currentTimeMillis(), UUID.randomUUID().toString().substring(0, 8));
-        File targetFile = spoolPath.resolve(fileName).toFile();
+        Path target = spoolPath.resolve(fileName);
+        Path temporary = spoolPath.resolve("." + fileName + ".tmp");
 
         try {
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(targetFile, event);
-            log.warn("[OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: {}", targetFile.getName());
+            // Write and sync a temporary file, then publish it atomically.
+            // A process crash must not leave a partial event_*.json which the
+            // recovery loop would misclassify as a corrupted queued event.
+            byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(event);
+            try (FileOutputStream output = new FileOutputStream(temporary.toFile())) {
+                output.write(json);
+                output.getFD().sync();
+            }
+            try {
+                Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, target);
+            }
+            log.warn("[OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: {}", fileName);
             return true;
         } catch (Exception e) {
-            log.error("Failed to spool event to file {}: {}", targetFile.getName(), e.getMessage());
+            log.error("Failed to spool event to file {}: {}", fileName, e.getMessage());
             return false;
+        } finally {
+            try {
+                Files.deleteIfExists(temporary);
+            } catch (Exception cleanupFailure) {
+                log.warn("Failed to clean up partial spool write");
+            }
         }
     }
 
@@ -99,6 +121,22 @@ public class OutboxSpoolService {
                     log.warn("Could not delete corrupted event file: {}", file.getName());
                 }
                 continue;
+            }
+
+            // Events captured before enrollment have a temporary local ID.
+            // Bind *only* those placeholders to the newly enrolled endpoint;
+            // never silently forward an event belonging to a different real
+            // endpoint identity (e.g. credentials changed after reinstall).
+            String storedId = payload.getEndpointId();
+            if (!endpointId.equals(storedId)) {
+                if ("UNENROLLED".equals(storedId)
+                        || (storedId != null && storedId.startsWith("POC-UNENROLLED-"))) {
+                    payload.setEndpointId(endpointId);
+                } else {
+                    log.error("Outbox event {} belongs to a different endpoint identity; "
+                            + "manual review required before delivery", file.getName());
+                    break;
+                }
             }
 
             boolean success = false;
