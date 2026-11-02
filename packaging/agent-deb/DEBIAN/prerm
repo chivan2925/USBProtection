@@ -8,10 +8,21 @@ if systemctl is-active --quiet usbshield-agent.service 2>/dev/null; then
     systemctl stop usbshield-agent.service || true
 fi
 
-# Only disable service on complete removal, NOT on upgrade
+# Only disable service and remove package-owned IPC grant on complete removal.
+# Preserve an administrator-customized ACL instead of deleting arbitrary content.
 if [ "$ACTION" = "remove" ]; then
     systemctl disable usbshield-agent.service || true
     rm -f /etc/sudoers.d/usbshield
+    ipc_acl=/etc/usbguard/IPCAccessControl.d/usbshield
+    expected_acl="$(printf 'Devices=list,listen\nPolicy=list,modify\nParameters=list\nExceptions=listen\n')"
+    if [ -f "$ipc_acl" ] && [ ! -L "$ipc_acl" ] && \
+            [ "$(stat -c '%u' "$ipc_acl")" = '0' ] && \
+            [ "$(cat "$ipc_acl")" = "$expected_acl" ]; then
+        rm -f -- "$ipc_acl"
+        echo 'Removed USBShield-owned USBGuard IPC ACL; restart usbguard after removal to revoke the cached permission.'
+    elif [ -e "$ipc_acl" ] || [ -L "$ipc_acl" ]; then
+        echo 'WARNING: Customized USBGuard IPC ACL retained for administrator review.' >&2
+    fi
     echo "USBShield Agent service stopped and disabled for removal."
 else
     echo "USBShield Agent service stopped for package upgrade (service remains enabled)."

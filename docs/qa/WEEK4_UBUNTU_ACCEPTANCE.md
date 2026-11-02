@@ -291,3 +291,8 @@ Reviewer sign-off / date:
 ```
 
 The full Ubuntu release gate stays open until required runtime cases run, failures are resolved/dispositioned and owners accept the exact candidate. A finished checklist or Windows PASS does not authorize `FULL RELEASE PASS`.
+
+
+## Candidate preflight — USBGuard IPC user ACL (2026-11-02)
+
+Before running destructive rule tests on a disposable Ubuntu 24.04 snapshot, verify the new packaging candidate does **not** assume that adding `usbshield` to a group automatically gives it sufficient daemon IPC privileges. See `WEEK4_PRE_UBUNTU_CODE_REVIEW_20261102.md` and the updated Client Installation Guide. Capture sanitized outputs for `stat` on `/etc/usbguard/IPCAccessControl.d/usbshield`, `IPCAccessControlFiles` / `ImplicitPolicyTarget`, and all three `sudo -u usbshield usbguard {get-parameter,list-rules,list-devices}` checks. Expected: user ACL `0600` owned by root; `ImplicitPolicyTarget=block`; reads/listing succeed. Native event watching, policy append/remove and device enforcement must be tested separately. Mark every result **NOT EXECUTED** until actually run; do not reuse Windows assertions as Linux outcomes.

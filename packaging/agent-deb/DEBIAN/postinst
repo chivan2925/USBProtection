@@ -23,9 +23,8 @@ chmod 750 /etc/usbshield-agent
 chown -R usbshield:usbshield /var/lib/usbshield-agent
 chmod 700 /var/lib/usbshield-agent
 
-if getent group usbguard >/dev/null; then
-    usermod -aG usbguard usbshield
-fi
+# USBGuard IPC permission is configured below using a per-user ACL. A group
+# membership alone is neither sufficient nor suitably scoped on Ubuntu.
 
 # Week 4 IPC correction: retire the shared root-owned 1777 socket namespace.
 # The notifier helper now owns a private path under /run/user/<GUI-uid>.
@@ -96,9 +95,97 @@ if [ ! -s /etc/usbguard/rules.conf ] && [ -f /etc/usbshield-agent/rules-v0.1.con
     echo "Initialized default fail-closed USBGuard rules at /etc/usbguard/rules.conf"
 fi
 
+# A pre-existing customized policy must be inspected rather than overwritten.
+# Without the canonical base rule, the reconciler refuses all policy updates;
+# non-storage peripherals can also become unavailable under implicit BLOCK.
+if ! grep -Eq '^[[:space:]]*allow[[:space:]]+with-interface[[:space:]]+none-of[[:space:]]*\{[[:space:]]*08:\*:\*[[:space:]]*\}' /etc/usbguard/rules.conf; then
+    echo 'ERROR: USBGuard rules.conf lacks the canonical non-storage base Allow; inspect existing policy manually.' >&2
+    exit 1
+fi
+
+# The Agent needs Devices=list/listen, Policy=list/modify, and Parameters=list.
+# USBGuard authorizes IPC using a user/group ACL; merely belonging to the
+# optional "usbguard" group is not proof of effective privileges.
+# Preserve operator-owned custom ACL configuration; never broaden it silently.
+ipc_acl_dir=/etc/usbguard/IPCAccessControl.d
+ipc_acl_file="$ipc_acl_dir/usbshield"
+ipc_count="$(awk '
+    /^[[:space:]]*#/ { next }
+    /^[[:space:]]*IPCAccessControlFiles[[:space:]]*=/ { count++ }
+    END { print count+0 }
+' "$USBGUARD_CONF")"
+if [ "$ipc_count" -eq 0 ]; then
+    printf '\nIPCAccessControlFiles=%s/\n' "$ipc_acl_dir" >> "$USBGUARD_CONF"
+    usbguard_conf_updated=1
+elif [ "$ipc_count" -ne 1 ]; then
+    echo 'ERROR: Multiple active USBGuard IPCAccessControlFiles declarations; inspect manually.' >&2
+    exit 1
+else
+    active_ipc="$(awk '
+        /^[[:space:]]*#/ { next }
+        /^[[:space:]]*IPCAccessControlFiles[[:space:]]*=/ {
+            sub(/#.*/, "")
+            sub(/^[^=]*=/, "")
+            gsub(/[[:space:]]/, "")
+            print
+        }
+    ' "$USBGUARD_CONF")"
+    if [ "$active_ipc" != "$ipc_acl_dir" ] && [ "$active_ipc" != "$ipc_acl_dir/" ]; then
+        echo "ERROR: USBGuard uses a nonstandard IPC ACL path: '$active_ipc'; refusing to overwrite administrator configuration." >&2
+        exit 1
+    fi
+fi
+
+if [ -L "$ipc_acl_dir" ] || { [ -e "$ipc_acl_dir" ] && [ ! -d "$ipc_acl_dir" ]; }; then
+    echo 'ERROR: Unsafe USBGuard IPC ACL directory.' >&2
+    exit 1
+fi
+if [ ! -d "$ipc_acl_dir" ]; then
+    install -d -o root -g root -m 0700 "$ipc_acl_dir"
+fi
+if [ "$(stat -c '%u' "$ipc_acl_dir")" != '0' ]; then
+    echo 'ERROR: USBGuard IPC ACL directory is not root-owned.' >&2
+    exit 1
+fi
+# No file in this directory should be modifiable by an unprivileged user.
+# Portable shell bit check using GNU stat's hexadecimal mode (Ubuntu coreutils).
+acl_dir_mode="$(stat -c '%f' "$ipc_acl_dir")"
+if (( (16#$acl_dir_mode & 8#0022) != 0 )); then
+    echo 'ERROR: USBGuard IPC ACL directory is writable by group/other.' >&2
+    exit 1
+fi
+
+expected_acl="$(printf 'Devices=list,listen\nPolicy=list,modify\nParameters=list\nExceptions=listen\n')"
+usbguard_acl_updated=0
+if [ -L "$ipc_acl_file" ]; then
+    echo 'ERROR: Refusing symlink at USBGuard service-user ACL.' >&2
+    exit 1
+elif [ -e "$ipc_acl_file" ]; then
+    if [ ! -f "$ipc_acl_file" ] || [ "$(cat "$ipc_acl_file")" != "$expected_acl" ] || [ "$(stat -c '%u' "$ipc_acl_file")" != '0' ]; then
+        echo 'ERROR: Existing USBGuard service-user ACL is customized or unsafe; review without overwriting.' >&2
+        exit 1
+    fi
+    if [ "$(stat -c '%a' "$ipc_acl_file")" != '600' ]; then
+        chmod 0600 "$ipc_acl_file"
+        usbguard_acl_updated=1
+    fi
+else
+    temp_acl="$(mktemp "$ipc_acl_dir/.usbshield.XXXXXX")"
+    printf '%s\n' "$expected_acl" > "$temp_acl"
+    chmod 0600 "$temp_acl"
+    mv -T -- "$temp_acl" "$ipc_acl_file"
+    usbguard_acl_updated=1
+fi
+
+# Remove the old, potentially broader group-based grant left by earlier
+# USBShield installers. This does not remove group permissions for other users.
+if getent group usbguard >/dev/null && id -nG usbshield | tr ' ' '\n' | grep -qx usbguard; then
+    gpasswd -d usbshield usbguard >/dev/null
+fi
+
 systemctl daemon-reload
 if systemctl is-enabled usbguard.service >/dev/null 2>&1 || systemctl enable usbguard.service; then
-    if [ "$usbguard_conf_updated" -eq 1 ]; then
+    if [ "$usbguard_conf_updated" -eq 1 ] || [ "$usbguard_acl_updated" -eq 1 ]; then
         if ! systemctl restart usbguard.service; then
             echo "ERROR: USBGuard could not restart after fail-closed configuration change." >&2
             exit 1
@@ -111,6 +198,16 @@ if systemctl is-enabled usbguard.service >/dev/null 2>&1 || systemctl enable usb
     fi
 else
     echo "ERROR: Unable to enable USBGuard service." >&2
+    exit 1
+fi
+
+# Installation cannot claim success if the real service principal has no
+# USBGuard IPC read access. Policy mutation/listen are tested on Ubuntu E2E.
+if ! runuser -u usbshield -- usbguard get-parameter ImplicitPolicyTarget >/dev/null 2>&1 || \
+        ! runuser -u usbshield -- usbguard list-rules >/dev/null 2>&1 || \
+        ! runuser -u usbshield -- usbguard list-devices >/dev/null 2>&1; then
+    echo 'ERROR: usbshield service user cannot access USBGuard IPC (parameter/rule/device list); refusing successful installation.' >&2
+    echo 'Check USBGuard daemon ACL config, IPCAccessControl.d/usbshield and journalctl -u usbguard.' >&2
     exit 1
 fi
 
