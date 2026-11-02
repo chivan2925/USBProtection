@@ -185,7 +185,7 @@ export const protectionApi = {
         totalDevices: devices.length, blockedDevices: devices.filter(device => device.status === 'blocked').length,
         allowedDevices: devices.filter(device => device.status === 'allowed').length,
         recentEvents: events.length,
-        blockedToday: devices.filter(device => device.status === 'blocked' &&
+        blockedToday: devices.filter(device => device.status === 'blocked' && device.detectedAt != null &&
           Date.parse(device.detectedAt) >= startOfToday.getTime() && Date.parse(device.detectedAt) < endOfToday.getTime()).length,
         onlineEndpoints: endpoints.filter(endpoint => endpoint.status === 'online').length,
         offlineEndpoints: endpoints.filter(endpoint => endpoint.status === 'offline').length,

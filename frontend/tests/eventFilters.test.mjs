@@ -1,7 +1,7 @@
 ﻿import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { execFileSync } from 'node:child_process'
-import { getEventDateRange, matchesEventFilters } from '../src/utils/eventFilters.ts'
+import { getEventDateRange, getEventQuery, matchesEventFilters } from '../src/utils/eventFilters.ts'
 import { emptyEventFilters } from '../src/types/event.ts'
 const event = { id: '1', type: 'connected', timestamp: '2026-10-05T03:30:00Z', endpointName: 'LAB-PC-01', username: 'student01', deviceName: 'Kingston', decision: 'blocked', message: '' }
 test('event field filters combine and reset', () => {
@@ -55,4 +55,9 @@ test('one-sided dates work in UTC and DST days use calendar boundaries', () => {
     const { range } = inTimezone('America/New_York', day, day, [])
     assert.equal((Date.parse(range.toExclusive) - Date.parse(range.fromInclusive)) / 3600000, hours)
   }
+})
+
+
+test('invalid event type validation describes policy application', () => {
+  assert.throws(() => getEventQuery({ ...emptyEventFilters, eventType: 'invalid' }), /áp dụng chính sách/)
 })

@@ -143,6 +143,69 @@ class Week2ServerIntegrationTest {
         assertThat(events.count()).isEqualTo(before + 2L);
     }
 
+    @Test void reusedEventIdRejectsChangesToEveryAuditRelevantField() throws Exception {
+        var a = enroll();
+        var original = (com.fasterxml.jackson.databind.node.ObjectNode) sample(a);
+        original.put("eventId", UUID.randomUUID().toString());
+        mvc.perform(agentPost("/api/agent/events", a, original)).andExpect(status().isOk());
+        long before = events.count();
+        for (String field : List.of("linuxUid", "sessionId", "sessionType", "seat", "hostname")) {
+            var modified = original.deepCopy();
+            if ("linuxUid".equals(field)) modified.put(field, 999L);
+            else modified.put(field, "different-" + field);
+            mvc.perform(agentPost("/api/agent/events", a, modified)).andExpect(status().isConflict());
+        }
+        for (String field : List.of("vendorId", "productId", "serial", "name", "hash", "interface")) {
+            var modified = original.deepCopy();
+            var device = (com.fasterxml.jackson.databind.node.ObjectNode) modified.get("device");
+            if ("vendorId".equals(field) || "productId".equals(field)) device.put(field, "1234");
+            else device.put(field, "other-" + field);
+            mvc.perform(agentPost("/api/agent/events", a, modified)).andExpect(status().isConflict());
+        }
+        mvc.perform(agentPost("/api/agent/events", a, original)).andExpect(status().isOk());
+        assertThat(events.count()).isEqualTo(before);
+    }
+
+    @Test void preDigestEventsStillRequireAllPersistedFieldsToMatch() throws Exception {
+        var a = enroll();
+        var original = (com.fasterxml.jackson.databind.node.ObjectNode) sample(a);
+        original.put("eventId", UUID.randomUUID().toString());
+        var created = mvc.perform(agentPost("/api/agent/events", a, original))
+                .andExpect(status().isOk()).andReturn();
+        long databaseId = mapper.readTree(created.getResponse().getContentAsString()).get("eventId").asLong();
+        var stored = events.findById(databaseId).orElseThrow();
+        stored.setPayloadDigest(null); // emulate the database before the new nullable column existed
+        events.saveAndFlush(stored);
+        mvc.perform(agentPost("/api/agent/events", a, original)).andExpect(status().isOk());
+        var changed = original.deepCopy();
+        changed.put("sessionId", "different-session");
+        mvc.perform(agentPost("/api/agent/events", a, changed)).andExpect(status().isConflict());
+    }
+
+    @Test void concurrentDuplicateDeliveriesShareOneDatabaseEvent() throws Exception {
+        var a = enroll();
+        var original = (com.fasterxml.jackson.databind.node.ObjectNode) sample(a);
+        original.put("eventId", UUID.randomUUID().toString());
+        long before = events.count();
+        var start = new java.util.concurrent.CountDownLatch(1);
+        try (var workers = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+            var send = (java.util.concurrent.Callable<org.springframework.test.web.servlet.MvcResult>) () -> {
+                start.await();
+                return mvc.perform(agentPost("/api/agent/events", a, original))
+                        .andExpect(status().isOk()).andReturn();
+            };
+            var one = workers.submit(send);
+            var two = workers.submit(send);
+            start.countDown();
+            var first = mapper.readTree(one.get(15, java.util.concurrent.TimeUnit.SECONDS)
+                    .getResponse().getContentAsString());
+            var second = mapper.readTree(two.get(15, java.util.concurrent.TimeUnit.SECONDS)
+                    .getResponse().getContentAsString());
+            assertThat(first.get("eventId").asLong()).isEqualTo(second.get("eventId").asLong());
+        }
+        assertThat(events.count()).isEqualTo(before + 1);
+    }
+
     @Test void policyAppliedIsNotCountedAsAnotherConnectedEvent() throws Exception {
         var a = enroll();
         var initial = (com.fasterxml.jackson.databind.node.ObjectNode) sample(a);
