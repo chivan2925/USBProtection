@@ -8,6 +8,9 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.List;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -45,13 +48,37 @@ public class UsbCatalogUpgrade {
             }
             boolean autoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
-            try (Statement statement = connection.createStatement()) {
-                // Do not merge/drop nonblank duplicates: existing event FKs may
-                // refer to different rows. Stop with a deterministic repair hint.
-                try (ResultSet duplicates = statement.executeQuery(
-                        "SELECT COUNT(*) FROM (SELECT device_hash FROM usb_devices "
-                        + "WHERE device_hash IS NOT NULL AND TRIM(device_hash) <> '' "
-                        + "GROUP BY device_hash HAVING COUNT(*) > 1) duplicate_hashes")) {
+            try {
+                // SQL TRIM removes only a subset of Java whitespace. Match the
+                // entity's String.isBlank() semantics exactly, including tabs,
+                // newlines and Java-defined Unicode whitespace. Select IDs
+                // first so the ResultSet is closed before updating the rows.
+                List<Long> blankIds = new ArrayList<>();
+                try (PreparedStatement select = connection.prepareStatement(
+                        "SELECT id, device_hash FROM usb_devices WHERE device_hash IS NOT NULL");
+                     ResultSet rows = select.executeQuery()) {
+                    while (rows.next()) {
+                        String hash = rows.getString(2);
+                        if (hash != null && hash.isBlank()) blankIds.add(rows.getLong(1));
+                    }
+                }
+                try (PreparedStatement update = connection.prepareStatement(
+                        "UPDATE usb_devices SET device_hash = NULL WHERE id = ?")) {
+                    for (Long id : blankIds) {
+                        update.setLong(1, id);
+                        update.addBatch();
+                    }
+                    if (!blankIds.isEmpty()) update.executeBatch();
+                }
+                // Do not merge/drop remaining (nonblank) duplicates: existing
+                // event/whitelist foreign keys can reference different rows.
+                // Validate after the cleanup in the SAME transaction; any
+                // duplicate rejection rolls back the normalization as well.
+                try (Statement statement = connection.createStatement();
+                     ResultSet duplicates = statement.executeQuery(
+                             "SELECT COUNT(*) FROM (SELECT device_hash FROM usb_devices "
+                             + "WHERE device_hash IS NOT NULL "
+                             + "GROUP BY device_hash HAVING COUNT(*) > 1) duplicate_hashes")) {
                     duplicates.next();
                     long count = duplicates.getLong(1);
                     if (count > 0) {
@@ -60,8 +87,6 @@ public class UsbCatalogUpgrade {
                                 + "the corresponding usb_devices and usb_events references before restarting.");
                     }
                 }
-                statement.executeUpdate("UPDATE usb_devices SET device_hash = NULL "
-                        + "WHERE device_hash IS NOT NULL AND TRIM(device_hash) = ''");
                 connection.commit();
             } catch (SQLException | RuntimeException failure) {
                 connection.rollback();

@@ -35,6 +35,10 @@ public class OutboxSpoolService {
     private Path spoolPath;
     // Do not hold the spool write monitor while waiting on Admin Server HTTP.
     private final Object drainLock = new Object();
+    // A failed directory sync after a quarantine rename makes its durability
+    // uncertain. Do not drain later events until both directory entries have
+    // been verified or the move has been durably rolled back.
+    private volatile boolean quarantineSyncUncertain;
     private static final Pattern EVENT_FILENAME = Pattern.compile("event_(\\d{13,19})_.*\\.json");
     private long lastLogicalTimestamp;
 
@@ -61,6 +65,23 @@ public class OutboxSpoolService {
             }
         }
         if (spoolPath != null) {
+            // Re-synchronize recovered evidence directories before serving new
+            // events on Linux. If a past quarantine move was not durable,
+            // startup must fail closed rather than silently drain later audit.
+            try {
+                syncDirectory(spoolPath);
+                Path quarantine = spoolPath.resolve("quarantine");
+                if (Files.exists(quarantine, LinkOption.NOFOLLOW_LINKS)) {
+                    if (!Files.isDirectory(quarantine, LinkOption.NOFOLLOW_LINKS)) {
+                        throw new IOException("Quarantine path is not a directory");
+                    }
+                    syncDirectory(quarantine);
+                }
+            } catch (IOException error) {
+                log.error("Cannot verify outbox directory durability during startup: {}", error.getMessage());
+                spoolPath = null;
+                return;
+            }
             // Preserve the FIFO key across restarts while there are old events.
             // Within one process this logical clock also resolves same-ms writes.
             try (Stream<Path> entries = Files.list(spoolPath)) {
@@ -161,7 +182,7 @@ public class OutboxSpoolService {
         catch (AtomicMoveNotSupportedException notSupported) { Files.move(source, target); }
     }
 
-    private static void syncDirectory(Path directory) throws IOException {
+    protected void syncDirectory(Path directory) throws IOException {
         // Linux deployment guarantee: directory fsync required after publish.
         // Windows cannot reliably open a directory with FileChannel; its native
         // crash semantics require separate validation and are not claimed here.
@@ -184,14 +205,36 @@ public class OutboxSpoolService {
             Files.createDirectories(directory);
             try { Files.setPosixFilePermissions(directory, PosixFilePermissions.fromString("rwx------")); }
             catch (UnsupportedOperationException windows) { /* Windows ACLs are tested separately. */ }
+            // The quarantine directory itself must survive a crash before any
+            // event can be moved into it (important when first created).
+            syncDirectory(spoolPath);
             String name = file.getName();
             Path destination = directory.resolve(name);
             if (Files.exists(destination)) {
                 destination = directory.resolve(UUID.randomUUID() + "_" + name);
             }
             movePublished(source, destination);
-            syncDirectory(spoolPath);
-            syncDirectory(directory);
+            try {
+                syncDirectory(spoolPath);
+                syncDirectory(directory);
+            } catch (IOException | SecurityException syncFailure) {
+                // The rename happened, but durability was NOT confirmed.
+                // Return the file to the active FIFO where possible, and do
+                // not advance to newer events in this drain pass.
+                try {
+                    movePublished(destination, source);
+                    syncDirectory(spoolPath);
+                    syncDirectory(directory);
+                    log.error("[OUTBOX-QUARANTINE] Directory sync failed for {}; "
+                            + "restored original audit to active FIFO", name);
+                } catch (IOException | SecurityException rollbackFailure) {
+                    quarantineSyncUncertain = true;
+                    syncFailure.addSuppressed(rollbackFailure);
+                    log.error("[OUTBOX-QUARANTINE] Failed to durably restore {}; "
+                            + "blocking further drain until both directories can be synced", name);
+                }
+                throw syncFailure;
+            }
             try { Files.setPosixFilePermissions(destination, PosixFilePermissions.fromString("rw-------")); }
             catch (UnsupportedOperationException windows) { /* Unsupported on Windows. */ }
             catch (IOException permissions) {
@@ -213,6 +256,17 @@ public class OutboxSpoolService {
         synchronized (drainLock) {
         if (spoolPath == null || !Files.exists(spoolPath)) {
             return;
+        }
+        if (quarantineSyncUncertain) {
+            try {
+                syncDirectory(spoolPath);
+                syncDirectory(spoolPath.resolve("quarantine"));
+                quarantineSyncUncertain = false;
+            } catch (IOException | SecurityException failure) {
+                log.error("[OUTBOX-QUARANTINE] Directory durability still uncertain; "
+                        + "refusing to drain newer audit: {}", failure.getMessage());
+                return;
+            }
         }
 
         File[] files = spoolPath.toFile().listFiles((dir, name) -> name.startsWith("event_") && name.endsWith(".json"));

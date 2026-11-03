@@ -62,3 +62,13 @@ frontend redundant/duplicate reads, and strengthened browser production-path
 coverage. These are separate performance/test improvements, not part of the
 three open blockers fixed by this package. HTTPS (S01) and native Ubuntu E2E
 (S03) remain intentionally deferred.
+
+## PR #58 Copilot follow-up (main `8d263257439620601fc3889a44db5d0862b6ee9e`)
+
+The original preflight/verification `TRIM(device_hash)` check was not equivalent
+to Java `String.isBlank()`. The follow-up migration reads each legacy hash
+through JDBC, normalizes Java-blank values before adding uniqueness, then
+checks nonblank duplicates in the same transaction. It also handles a failed
+quarantine directory fsync by trying to restore the original source file and
+pausing the drain; uncertain durability blocks subsequent drain until re-sync.
+See `PATCH_APPLY_WINDOWS.md` for the corrected verification procedure.
