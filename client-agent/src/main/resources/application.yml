@@ -15,6 +15,10 @@ usbshield:
     heartbeat-interval-ms: 5000
     # Local data directory for credentials and offline spool
     data-dir: ${USBSHIELD_DATA_DIR:./data}
+    # Outbox capacity includes quarantined evidence. Exhaustion rejects new
+    # telemetry writes without disabling USBGuard enforcement.
+    outbox-max-bytes: ${USBSHIELD_OUTBOX_MAX_BYTES:67108864}
+    outbox-max-events: ${USBSHIELD_OUTBOX_MAX_EVENTS:10000}
     # Local config directory
     config-dir: ${USBSHIELD_CONFIG_DIR:./config}
     # Simulation mode (disabled by default in live/hardware)

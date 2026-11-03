@@ -40,6 +40,14 @@ public class AgentEventController {
         String effectiveEndpointId = principal.getName();
         AgentCredentialService.bind(effectiveEndpointId, request.getEndpointId());
 
+        // A per-endpoint lock alone does NOT serialize a new shared USB hash
+        // reported by two different endpoints. Lock one stable row across all
+        // instances/transactions before catalog find-or-create. A UNIQUE DB
+        // constraint provides the secondary invariant if another writer bypasses
+        // this API; deleting duplicate data must precede schema migration.
+        endpointRepository.lockDeviceCatalogCoordinator().orElseThrow(
+                () -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.UNAUTHORIZED, "No endpoint available"));
         // Lock the authenticated endpoint row BEFORE the duplicate lookup and
         // insert. This serializes concurrent deliveries across server instances
         // using the database lock, without a check-then-insert uniqueness race.
@@ -76,7 +84,8 @@ public class AgentEventController {
                         .vendorId(deviceDto.getVendorId() != null ? deviceDto.getVendorId() : "UNKNOWN")
                         .productId(deviceDto.getProductId() != null ? deviceDto.getProductId() : "UNKNOWN")
                         .serialNumber(deviceDto.getSerial())
-                        .deviceHash(deviceDto.getHash())
+                        .deviceHash(deviceDto.getHash() == null || deviceDto.getHash().isBlank()
+                                ? null : deviceDto.getHash())
                         .deviceName(deviceDto.getName())
                         .interfaces(deviceDto.getInterfaceClass())
                         .build();

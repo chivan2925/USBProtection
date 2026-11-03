@@ -7,7 +7,6 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "usb_devices", indexes = {
-    @Index(name = "idx_usb_hash", columnList = "deviceHash"),
     @Index(name = "idx_usb_vid_pid", columnList = "vendorId, productId")
 })
 @Getter
@@ -30,7 +29,9 @@ public class UsbDevice {
     @Column(length = 150)
     private String serialNumber;
 
-    @Column(length = 255)
+    // H2 allows several NULL values: devices without a trustworthy hash remain
+    // independent; nonblank device hashes have exactly one catalog identity.
+    @Column(length = 255, unique = true)
     private String deviceHash;
 
     @Column(length = 255)

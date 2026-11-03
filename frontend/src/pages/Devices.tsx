@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Badge, PageHeading, Panel, ResourceNotice } from '../components/Common'
 import { DataTable } from '../components/DataTable'
 import { Filters } from '../components/Filters'
 import { Icon } from '../components/Icon'
+import { useResource } from '../hooks/useResource'
+import { protectionApi } from '../services/api'
 import { deviceLabels, formatDate, matches, newestFirst } from '../utils/format'
 import type { PageProps } from './types'
 
@@ -13,36 +15,64 @@ const pageCopy = {
   blocked: { title: 'Thiết bị bị chặn', description: 'USB có quyết định BLOCKED trong sự kiện gần nhất.', table: 'Danh sách chặn' },
 }
 
-export function Devices({ state, refresh, refreshButton, mode }: PageProps & { mode: Mode }) {
+export function Devices({ state, refresh, refreshButton, mode, demo = false }: PageProps & { mode: Mode }) {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
+  const [page, setPage] = useState(0)
   const copy = pageCopy[mode]
-  const devices = state.data?.devices ?? []
   const entries = state.data?.whitelist ?? []
   const endpoints = state.data?.endpoints ?? []
   const options = mode === 'devices'
     ? [{ value: 'all', label: 'Tất cả trạng thái' }, ...Object.entries(deviceLabels).map(([value, label]) => ({ value, label }))]
     : [{ value: 'all', label: 'Tất cả endpoints' }, ...endpoints.map(endpoint => ({ value: endpoint.id, label: endpoint.name }))]
 
-  const deviceRows = newestFirst(devices.filter(device =>
+  // Do not derive inventory from a truncated audit preview. Each filter/page is
+  // sent to the backend and only the returned page is rendered.
+  const loadDevices = useCallback((signal: AbortSignal) => {
+    if (demo || mode === 'whitelist') return Promise.resolve({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 })
+    return protectionApi.getDevicePage({
+      page, size: 20, q: query.trim() || undefined,
+      ...(mode === 'devices' ? { status: filter === 'all' ? undefined : filter as 'allowed' | 'blocked' | 'detected' | 'disconnected' }
+        : { status: 'blocked' as const, endpointId: filter === 'all' ? undefined : filter }),
+    }, signal)
+  }, [demo, mode, page, filter, query])
+  const deviceRead = useResource(loadDevices)
+  const { refresh: refreshDevices } = deviceRead
+  // Refresh from the shared toolbar must also reload the independent device page.
+  useEffect(() => {
+    if (!demo && mode !== 'whitelist' && state.status === 'ready') void refreshDevices()
+    // refreshDevices is stable until loadDevices changes; parent snapshot identity
+    // changes after user explicitly refreshes the parent view.
+  }, [demo, mode, state.data, state.status, refreshDevices])
+
+  const demoDeviceRows = newestFirst((state.data?.devices ?? []).filter(device =>
     (mode !== 'blocked' || device.status === 'blocked') &&
     (filter === 'all' || (mode === 'devices' ? device.status : device.endpointId) === filter) &&
     matches(query, device.name, device.vendorId, device.productId, device.serialNumber, device.endpointId, device.endpointName)),
     device => device.detectedAt)
+  const devicePage = deviceRead.state.status === 'ready' ? deviceRead.state.data : undefined
+  const deviceRows = demo ? demoDeviceRows : devicePage?.content ?? []
   const whitelistRows = entries.filter(entry =>
     (filter === 'all' || entry.endpointId === filter) &&
     matches(query, entry.name, entry.endpointId, entry.fingerprintValue, entry.vendorId, entry.productId, entry.serial))
-  const tableState = { loading: state.status === 'loading', unavailable: state.status === 'unavailable', failed: state.status === 'error', filtered: !!query || filter !== 'all' }
+  const tableState = mode === 'whitelist' || demo
+    ? { loading: state.status === 'loading', unavailable: state.status === 'unavailable', failed: state.status === 'error', filtered: !!query || filter !== 'all' }
+    : { loading: deviceRead.state.status === 'loading', unavailable: deviceRead.state.status === 'unavailable',
+      failed: deviceRead.state.status === 'error', filtered: !!query || filter !== 'all' }
 
   function endpointLink(endpointId?: string) {
     return endpointId ? <a href={`#/endpoints/${encodeURIComponent(endpointId)}`}>Quản lý trên endpoint</a> : 'Chưa rõ endpoint'
   }
+  function changeQuery(value: string) { setPage(0); setQuery(value) }
+  function changeFilter(value: string) { setPage(0); setFilter(value) }
 
   return <>
     <PageHeading eyebrow="DEVICE MANAGEMENT" title={copy.title} description={copy.description}>{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
-    <Panel title={copy.table} subtitle={mode === 'whitelist' ? 'Danh sách quyền từ API whitelist; Agent áp dụng theo policy version' : 'Trạng thái quan sát từ event; không suy ra quyền whitelist'} action={<Badge>{mode === 'whitelist' ? 'Per-endpoint rules' : 'USB history'}</Badge>}>
-      <Filters query={query} onQuery={setQuery} value={filter} onValue={setFilter} options={options} placeholder="Tìm USB, fingerprint hoặc endpoint…" filterLabel={mode === 'devices' ? 'Lọc theo trạng thái' : 'Lọc theo endpoint'} />
+    {!demo && mode !== 'whitelist' && deviceRead.state.status === 'error' &&
+      <p role="alert" className="field-error">Không tải được trang thiết bị: {deviceRead.state.error}</p>}
+    <Panel title={copy.table} subtitle={mode === 'whitelist' ? 'Danh sách quyền từ API whitelist; Agent áp dụng theo policy version' : 'Trạng thái mới nhất theo từng USB và endpoint, phân trang tại Server'} action={<Badge>{mode === 'whitelist' ? 'Per-endpoint rules' : 'USB history'}</Badge>}>
+      <Filters query={query} onQuery={changeQuery} value={filter} onValue={changeFilter} options={options} placeholder="Tìm USB, fingerprint hoặc endpoint…" filterLabel={mode === 'devices' ? 'Lọc theo trạng thái' : 'Lọc theo endpoint'} />
       {mode === 'whitelist'
         ? <DataTable key={`${query}:${filter}`} {...tableState} rows={whitelistRows} label={copy.table} columns={[
           { key: 'name', label: 'Thiết bị', render: entry => entry.name ?? 'USB' },
@@ -51,7 +81,9 @@ export function Devices({ state, refresh, refreshButton, mode }: PageProps & { m
           { key: 'time', label: 'Thêm lúc', render: entry => formatDate(entry.addedAt) },
           { key: 'actions', label: 'Thao tác', render: entry => endpointLink(entry.endpointId) },
         ]} />
-        : <DataTable key={`${query}:${filter}`} {...tableState} rows={deviceRows} label={copy.table} columns={[
+        : <DataTable key={demo ? `${query}:${filter}` : 'server-devices'} {...tableState} rows={deviceRows} label={copy.table}
+          pagination={!demo && devicePage ? { page: devicePage.page, size: devicePage.size, totalPages: devicePage.totalPages, totalElements: devicePage.totalElements, onPageChange: setPage } : undefined}
+          columns={[
           { key: 'name', label: 'Thiết bị', render: device => <div className="table-device"><span className="table-icon"><Icon name="usb" size={18} /></span><div><strong>{device.name}</strong><small>{device.endpointName ?? device.endpointId ?? 'Chưa rõ endpoint'}</small></div></div> },
           { key: 'ids', label: 'Vendor / Product ID', render: device => <span className="mono">{device.vendorId ?? '—'} / {device.productId ?? '—'}</span> },
           { key: 'serial', label: 'Serial Number', render: device => <span className="mono">{device.serialNumber ?? '—'}</span> },

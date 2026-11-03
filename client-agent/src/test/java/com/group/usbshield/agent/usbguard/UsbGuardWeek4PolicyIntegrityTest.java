@@ -109,25 +109,28 @@ class UsbGuardWeek4PolicyIntegrityTest {
     }
 
     @Test
-    void malformedForeignAllowFailsClosedWithoutDeletingForeignRule() {
+    void foreignInvalidHashIsRemovedBeforeAManagedGrant() {
         Runner runner = new Runner();
         runner.rules.add("2: allow id 0951:1665 hash \"!!!\"");
-        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of(FIRST)));
+        sync(runner).reconcile(List.of(FIRST));
         assertEquals(2, runner.rules.size());
-        assertTrue(runner.mutations.isEmpty());
+        assertTrue(runner.rules.stream().noneMatch(it -> it.contains("!!!")));
+        assertEquals(List.of("remove", "append"), runner.mutations);
     }
 
     @Test
-    void foreignSpecificRuleIsPreservedAndBroadRuleFails() {
+    void foreignSpecificAndBroadAllowsAreRemovedBeforePolicyAck() {
         Runner runner = new Runner();
         runner.rules.add("2: allow id 1234:abcd serial \"EXTERNAL\"");
         runner.nextId = 3;
-        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of(FIRST)));
-        assertEquals("2: allow id 1234:abcd serial \"EXTERNAL\"", runner.rules.get(1));
+        sync(runner).reconcile(List.of(FIRST));
+        assertEquals(1, runner.rules.stream().filter(rule -> rule.contains("usbshield-managed")).count());
+        assertFalse(runner.rules.stream().anyMatch(rule -> rule.contains("EXTERNAL")));
         runner.mutations.clear();
         runner.rules.add("4: allow id 0951:1665");
-        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of(FIRST)));
-        assertTrue(runner.mutations.isEmpty());
+        sync(runner).reconcile(List.of(FIRST));
+        assertEquals(List.of("remove"), runner.mutations);
+        assertTrue(runner.rules.stream().noneMatch(rule -> rule.startsWith("4:")));
     }
 
     @Test

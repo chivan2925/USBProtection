@@ -90,9 +90,9 @@ class UsbGuardWeek4WatchStressTest {
         presence(11, "Insert");
         applied(11);
         verify(sender, times(1)).enqueuePayload(any());
-        // Both Insert records are deduplicated, but the pending state before reconnect is lost;
-        // without a confirmed final PolicyApplied for a fresh insertion do not invent a popup.
-        verify(notifier, never()).notifyBlockedUsb(any(), any());
+        // Legacy mock constructor has no native gateway. The retained pending
+        // insertion is now finalized by PolicyApplied instead of silently lost.
+        verify(notifier, times(1)).notifyBlockedUsb(any(), any());
     }
 
     @Test

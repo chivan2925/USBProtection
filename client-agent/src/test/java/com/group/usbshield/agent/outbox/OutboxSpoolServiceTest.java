@@ -161,7 +161,7 @@ class OutboxSpoolServiceTest {
     }
 
     @Test
-    @DisplayName("drainOutbox removes unparseable corrupted file and delivers remaining valid events")
+    @DisplayName("drainOutbox quarantines unparseable JSON and delivers remaining valid events")
     void drainOutboxHandlesCorruptedJsonFile() throws Exception {
         Path spoolDir = tempDir.resolve("spool");
         // Create an unparseable malformed JSON file
@@ -182,12 +182,16 @@ class OutboxSpoolServiceTest {
 
         outboxSpoolService.drainOutbox("EP-01", "token-1", adminServerClient);
 
-        // Corrupted file deleted, valid file sent and deleted
-        assertFalse(Files.exists(corruptFile), "Corrupted file must be cleaned up");
+        // File leaves the active FIFO but remains intact for investigation.
+        assertFalse(Files.exists(corruptFile), "Corrupted file must leave active queue");
+        Path evidence = spoolDir.resolve("quarantine").resolve(corruptFile.getFileName());
+        assertTrue(Files.exists(evidence), "Do not discard corrupted audit evidence");
+        assertEquals("{ invalid json content !!!", Files.readString(evidence));
         verify(adminServerClient, times(1)).sendEvent(eq("EP-01"), eq("token-1"), any(UsbEventPayload.class));
 
         try (var stream = Files.list(spoolDir)) {
-            assertEquals(0, stream.count(), "All files should be processed and cleared");
+            assertEquals(List.of(spoolDir.resolve("quarantine")), stream.toList(),
+                    "Only the quarantine directory should remain");
         }
     }
 
@@ -259,7 +263,7 @@ class OutboxSpoolServiceTest {
     }
 
     @Test
-    @DisplayName("an event belonging to another enrolled endpoint must not be silently rebound")
+    @DisplayName("foreign endpoint evidence is quarantined without sending under new credentials")
     void drainOutboxRejectsDifferentRealEndpointIdentity() throws Exception {
         assertTrue(outboxSpoolService.spool(UsbEventPayload.builder()
                 .endpointId("EP-OTHER")
@@ -270,8 +274,12 @@ class OutboxSpoolServiceTest {
         outboxSpoolService.drainOutbox("EP-NEW", "token-new", adminServerClient);
 
         verify(adminServerClient, never()).sendEvent(any(), any(), any());
+        try (var quarantine = Files.list(tempDir.resolve("spool/quarantine"))) {
+            assertEquals(1, quarantine.count(), "Foreign endpoint event bytes must be retained");
+        }
         try (var listing = Files.list(tempDir.resolve("spool"))) {
-            assertEquals(1, listing.count(), "Mismatched identity must remain for operator review");
+            assertEquals(List.of(tempDir.resolve("spool/quarantine")), listing.toList(),
+                    "Mismatched evidence must remain in quarantine for operator review");
         }
     }
 

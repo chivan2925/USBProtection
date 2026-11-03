@@ -9,14 +9,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.AtomicMoveNotSupportedException;
-import java.io.FileOutputStream;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -27,6 +33,8 @@ public class OutboxSpoolService {
     private Path spoolPath;
     // Do not hold the spool write monitor while waiting on Admin Server HTTP.
     private final Object drainLock = new Object();
+    private static final Pattern EVENT_FILENAME = Pattern.compile("event_(\\d{13,19})_.*\\.json");
+    private long lastLogicalTimestamp;
 
     public OutboxSpoolService(AgentProperties properties, ObjectMapper objectMapper) {
         this.properties = properties;
@@ -50,6 +58,22 @@ public class OutboxSpoolService {
                 log.error("Could not initialize outbox spool directory: {}", ex.getMessage());
             }
         }
+        if (spoolPath != null) {
+            // Preserve the FIFO key across restarts while there are old events.
+            // Within one process this logical clock also resolves same-ms writes.
+            try (Stream<Path> entries = Files.list(spoolPath)) {
+                lastLogicalTimestamp = entries
+                        .map(p -> EVENT_FILENAME.matcher(p.getFileName().toString()))
+                        .filter(Matcher::matches)
+                        .mapToLong(m -> {
+                            try { return Long.parseLong(m.group(1)); }
+                            catch (NumberFormatException invalid) { return 0L; }
+                        }).max().orElse(0L);
+            } catch (IOException error) {
+                log.warn("Cannot inspect existing spool order; rejecting new writes until repaired: {}", error.getMessage());
+                spoolPath = null;
+            }
+        }
         log.info("Outbox Spool directory initialized at: {}", spoolPath);
     }
 
@@ -58,43 +82,108 @@ public class OutboxSpoolService {
      * @return true nếu ghi file thành công, false nếu thất bại
      */
     public synchronized boolean spool(UsbEventPayload event) {
-        if (spoolPath == null) {
-            log.error("Spool directory is unavailable; USB event could not be persisted");
+        if (spoolPath == null || event == null) {
+            log.error("Spool directory or payload is unavailable; USB event could not be persisted");
             return false;
         }
-
         if (event.getEventId() == null || event.getEventId().isBlank()) {
             event.setEventId(UUID.randomUUID().toString());
         }
-        String fileName = String.format("event_%d_%s.json", System.currentTimeMillis(), UUID.randomUUID().toString().substring(0, 8));
-        Path target = spoolPath.resolve(fileName);
-        Path temporary = spoolPath.resolve("." + fileName + ".tmp");
-
+        Path temporary = null;
         try {
-            // Write and sync a temporary file, then publish it atomically.
-            // A process crash must not leave a partial event_*.json which the
-            // recovery loop would misclassify as a corrupted queued event.
             byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(event);
+            // Include quarantined evidence in the storage budget; operator review
+            // is required before deleting anything. Never silently evict audit.
+            SpoolUsage usage = inspectUsage();
+            long maxBytes = properties.getOutboxMaxBytes();
+            int maxEvents = properties.getOutboxMaxEvents();
+            if (maxBytes <= 0 || maxEvents <= 0 || json.length > maxBytes
+                    || usage.bytes() > maxBytes - json.length || usage.eventFiles() >= maxEvents) {
+                log.error("[OUTBOX-CAPACITY] Queue/evidence capacity reached (events={}, bytes={}); "
+                                + "audit enqueue rejected, USBGuard enforcement remains independent. "
+                                + "Operator must restore disk capacity or increase configured limits.",
+                        usage.eventFiles(), usage.bytes());
+                return false;
+            }
+            // A logical millisecond key, strictly greater than the prior write,
+            // is sortable with legacy event_<epochMs>_<uuid>.json files. It avoids
+            // same-millisecond UUID ordering and handles clock rollback.
+            long nextTimestamp = Math.max(System.currentTimeMillis(), Math.addExact(lastLogicalTimestamp, 1L));
+            String fileName = String.format("event_%013d_%s.json", nextTimestamp, UUID.randomUUID());
+            Path target = spoolPath.resolve(fileName);
+            temporary = spoolPath.resolve("." + fileName + ".tmp");
             try (FileOutputStream output = new FileOutputStream(temporary.toFile())) {
                 output.write(json);
                 output.getFD().sync();
             }
-            try {
-                Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException unsupported) {
-                Files.move(temporary, target);
-            }
+            movePublished(temporary, target);
+            lastLogicalTimestamp = nextTimestamp;
             log.warn("[OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: {}", fileName);
             return true;
-        } catch (Exception e) {
-            log.error("Failed to spool event to file {}: {}", fileName, e.getMessage());
+        } catch (Exception error) {
+            log.error("Failed to persist USB event: {}", error.getMessage());
             return false;
         } finally {
-            try {
-                Files.deleteIfExists(temporary);
-            } catch (Exception cleanupFailure) {
-                log.warn("Failed to clean up partial spool write");
+            if (temporary != null) {
+                try { Files.deleteIfExists(temporary); }
+                catch (IOException failed) { log.warn("Failed to clean up partial spool write"); }
             }
+        }
+    }
+
+    private record SpoolUsage(long bytes, long eventFiles) {}
+
+    private SpoolUsage inspectUsage() throws IOException {
+        long bytes = 0;
+        long eventFiles = 0;
+        // Bounded depth: direct event_*.json plus the quarantine directory.
+        try (Stream<Path> paths = Files.walk(spoolPath, 2)) {
+            for (Path path : paths.toList()) {
+                if (Files.isSymbolicLink(path)) throw new IOException("Symlink found in protected spool");
+                if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) continue;
+                bytes = Math.addExact(bytes, Files.size(path));
+                String name = path.getFileName().toString();
+                if (name.endsWith(".json") || name.endsWith(".tmp")) eventFiles++;
+            }
+        }
+        return new SpoolUsage(bytes, eventFiles);
+    }
+
+    private static void movePublished(Path source, Path target) throws IOException {
+        try { Files.move(source, target, StandardCopyOption.ATOMIC_MOVE); }
+        catch (AtomicMoveNotSupportedException notSupported) { Files.move(source, target); }
+    }
+
+    /**
+     * Preserve rejected/corrupted source bytes for an operator instead of
+     * losing evidence or letting one foreign identity block all current events.
+     * A failed move leaves the source in the active spool and stops draining.
+     */
+    private boolean quarantine(File file, String reason) {
+        Path source = file.toPath();
+        Path directory = spoolPath.resolve("quarantine");
+        try {
+            if (Files.isSymbolicLink(directory)) throw new IOException("Quarantine directory is a symlink");
+            Files.createDirectories(directory);
+            try { Files.setPosixFilePermissions(directory, PosixFilePermissions.fromString("rwx------")); }
+            catch (UnsupportedOperationException windows) { /* Windows ACLs are tested separately. */ }
+            String name = file.getName();
+            Path destination = directory.resolve(name);
+            if (Files.exists(destination)) {
+                destination = directory.resolve(UUID.randomUUID() + "_" + name);
+            }
+            movePublished(source, destination);
+            try { Files.setPosixFilePermissions(destination, PosixFilePermissions.fromString("rw-------")); }
+            catch (UnsupportedOperationException windows) { /* Unsupported on Windows. */ }
+            catch (IOException permissions) {
+                log.warn("Quarantined evidence file mode could not be hardened; verify private directory ACL");
+            }
+            log.error("[OUTBOX-QUARANTINE] Preserved {} for operator review ({})", name, reason);
+            return true;
+        } catch (IOException | SecurityException error) {
+            log.error("[OUTBOX-QUARANTINE] Cannot isolate {} ({}); pausing drain: {}",
+                    file.getName(), reason, error.getMessage());
+            return false;
         }
     }
 
@@ -117,15 +206,18 @@ public class OutboxSpoolService {
         log.info("[OUTBOX-DRAIN] Found {} spooled event(s). Attempting to deliver in FIFO order...", files.length);
 
         for (File file : files) {
+            if (!Files.isRegularFile(file.toPath(), LinkOption.NOFOLLOW_LINKS)) {
+                // Do not read or move a symlink using privileged service rights.
+                log.error("[OUTBOX-SPOOL] Non-regular event entry; operator inspection required: {}", file.getName());
+                break;
+            }
             UsbEventPayload payload;
             try {
                 payload = objectMapper.readValue(file, UsbEventPayload.class);
             } catch (Exception e) {
-                // File hỏng cú pháp JSON thật sự, không thể parse -> xóa bỏ để tránh tắc nghẽn hàng đợi
-                log.error("Corrupted event file {}: {}. Removing unparseable file.", file.getName(), e.getMessage());
-                if (!file.delete()) {
-                    log.warn("Could not delete corrupted event file: {}", file.getName());
-                }
+                // Never delete malformed evidence. Isolate it and continue with
+                // valid events; stop instead if the quarantine move fails.
+                if (!quarantine(file, "unparseable JSON")) break;
                 continue;
             }
 
@@ -145,9 +237,8 @@ public class OutboxSpoolService {
                         || (storedId != null && storedId.startsWith("POC-UNENROLLED-"))) {
                     payload.setEndpointId(endpointId);
                 } else {
-                    log.error("Outbox event {} belongs to a different endpoint identity; "
-                            + "manual review required before delivery", file.getName());
-                    break;
+                    if (!quarantine(file, "foreign endpoint identity")) break;
+                    continue;
                 }
             }
 

@@ -73,13 +73,13 @@ test('endpoint list has links to detail pages', () => {
 
 // --- EndpointDetailPage ---
 
-test('endpoint detail does not show devices from other endpoints', () => {
-  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-02' }))
+test('demo endpoint detail does not show devices from other endpoints', () => {
+  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-02', demo: true }))
   assert.ok(!html.includes('Kingston DataTraveler 2.0'), 'LAB-PC-02 should not show LAB-PC-01 devices')
 })
 
-test('endpoint detail shows devices that belong to the endpoint', () => {
-  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-01' }))
+test('demo endpoint detail shows devices that belong to the endpoint', () => {
+  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-01', demo: true }))
   assert.ok(html.includes('Kingston DataTraveler 2.0'), 'LAB-PC-01 should show its own device')
 })
 

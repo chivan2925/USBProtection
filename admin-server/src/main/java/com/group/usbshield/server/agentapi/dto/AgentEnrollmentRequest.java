@@ -14,4 +14,5 @@ public class AgentEnrollmentRequest {
     private String ipAddress;
     private String operatingSystem;
     private String enrollmentToken;
+    private String agentToken;
 }

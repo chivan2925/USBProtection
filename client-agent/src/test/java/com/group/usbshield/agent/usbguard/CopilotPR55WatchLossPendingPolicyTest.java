@@ -148,4 +148,40 @@ class CopilotPR55WatchLossPendingPolicyTest {
         assertEquals(1, listener.trackedPendingPolicyQueueCount());
         verify(sender, times(1)).enqueuePayload(argThat(CopilotPR55WatchLossPendingPolicyTest::policy));
     }
+
+    @Test
+    void missedRemoveResetsEventDedupAndDesktopNotificationForRapidReinsert() {
+        queueFailedAllow(); // initial BLOCK was durably queued and notified
+        verify(sender, times(1)).enqueuePayload(argThat(payload ->
+                payload != null && "CONNECTED".equals(payload.getEventType())));
+        verify(notifier, times(1)).notifyBlockedUsb(any(), any());
+
+        when(gateway.listDevices()).thenReturn(List.of()); // USB detached while watch was unavailable
+        listener.recoverPending(true);
+        assertEquals(0, listener.trackedPendingPolicyQueueCount());
+        verify(notifier, times(1)).onUsbRemoved(any(), argThat(device ->
+                device.runtimeId() == 11 && HASH.equals(device.hash())));
+
+        // Same runtime ID, same fingerprint, immediate reinsert inside 1.5 s.
+        // Neither CONNECTED nor BLOCK notification may be suppressed.
+        presence(11, "block", HASH);
+        applied(11, "block", HASH);
+        verify(sender, times(2)).enqueuePayload(argThat(payload ->
+                payload != null && "CONNECTED".equals(payload.getEventType())));
+        verify(notifier, times(2)).notifyBlockedUsb(any(), any());
+        verify(sender, times(1)).enqueuePayload(argThat(CopilotPR55WatchLossPendingPolicyTest::policy));
+    }
+
+    @Test
+    void stillAttachedWatchRecoveryDoesNotResetNotificationCooldown() {
+        queueFailedAllow();
+        when(gateway.listDevices()).thenReturn(List.of(live(11, HASH)));
+        listener.recoverPending(true);
+        verify(notifier, never()).onUsbRemoved(any(), any());
+        listener.resetWatchState();
+        presence(11, "block", HASH); // replay, not a new physical insert
+        applied(11, "allow", HASH); // already applied
+        verify(sender, times(1)).enqueuePayload(argThat(payload ->
+                payload != null && "CONNECTED".equals(payload.getEventType())));
+    }
 }

@@ -51,6 +51,11 @@ class UbuntuFinalDecisionIntegrationRegressionTest {
                 "device_rule=" + target + " " + DEVICE)) listener.processWatchLine(line);
     }
 
+    private static UsbDeviceInfo live(int id, String target) {
+        return new UsbDeviceInfo(id, target, "0951", "1665", "S1", "DataTraveler",
+                "KingstonHash=", List.of("08:06:50"), true, target + " " + DEVICE);
+    }
+
     @Test void orphanPolicyAppliedWithoutObservedInsertionIsNotAnInventedEvent() {
         // Watch can replay PolicyApplied without the corresponding presence event.
         // A runtime ID alone is not sufficient to attribute a USB or generate a popup.
@@ -64,6 +69,8 @@ class UbuntuFinalDecisionIntegrationRegressionTest {
         listener.resetWatchState();
         insert(96, "allow"); // replay of attached device after a policy change
         applied(96, "allow");
+        when(gateway.listDevices()).thenReturn(List.of(live(96, "allow")));
+        listener.recoverStalePendingDecisions();
         ArgumentCaptor<UsbEventPayload> payloads = ArgumentCaptor.forClass(UsbEventPayload.class);
         verify(sender, times(2)).enqueuePayload(payloads.capture());
         assertEquals(List.of("CONNECTED", "POLICY_APPLIED"),
@@ -77,6 +84,8 @@ class UbuntuFinalDecisionIntegrationRegressionTest {
         applied(97, "block");
         listener.resetWatchState(); // USB remains attached across watch restart
         applied(97, "allow");
+        when(gateway.listDevices()).thenReturn(List.of(live(97, "allow")));
+        listener.recoverStalePendingDecisions();
         ArgumentCaptor<UsbEventPayload> payloads = ArgumentCaptor.forClass(UsbEventPayload.class);
         verify(sender, times(2)).enqueuePayload(payloads.capture());
         assertEquals(List.of("CONNECTED", "POLICY_APPLIED"),

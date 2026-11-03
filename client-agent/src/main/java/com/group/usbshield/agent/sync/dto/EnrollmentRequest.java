@@ -15,4 +15,6 @@ public class EnrollmentRequest {
     private String ipAddress;
     private String operatingSystem;
     private String enrollmentToken;
+    /** Client-generated credential, durably staged before enrollment begins. */
+    private String agentToken;
 }

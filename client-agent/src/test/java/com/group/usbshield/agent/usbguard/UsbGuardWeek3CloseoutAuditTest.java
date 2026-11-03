@@ -63,7 +63,7 @@ class UsbGuardWeek3CloseoutAuditTest {
         FakeRunner runner = new FakeRunner();
         runner.rules.add("2: allow id 0951:1665");
         assertThrows(IllegalStateException.class, () -> synchronizer(runner).reconcile(List.of()));
-        assertEquals(0, runner.mutations);
+        assertEquals(1, runner.mutations); // failed remove-rule; cannot report successful reconcile
         assertEquals(2, runner.rules.size());
     }
 
@@ -72,7 +72,7 @@ class UsbGuardWeek3CloseoutAuditTest {
         FakeRunner runner = new FakeRunner();
         runner.rules.add("2: allow with-interface all-of { 08:06:50 }");
         assertThrows(IllegalStateException.class, () -> synchronizer(runner).reconcile(List.of()));
-        assertEquals(0, runner.mutations);
+        assertEquals(1, runner.mutations); // explicit attempted removal refused by IPC
     }
 
     @Test
@@ -80,7 +80,7 @@ class UsbGuardWeek3CloseoutAuditTest {
         FakeRunner runner = new FakeRunner();
         runner.rules.add("2: allow id 1234:abcd serial \"EXTERNAL\"");
         assertThrows(IllegalStateException.class, () -> synchronizer(runner).reconcile(List.of()));
-        assertEquals(0, runner.mutations);
+        assertEquals(1, runner.mutations);
         assertEquals(2, runner.rules.size());
     }
 

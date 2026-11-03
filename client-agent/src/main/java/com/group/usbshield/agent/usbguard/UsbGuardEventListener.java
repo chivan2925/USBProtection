@@ -22,6 +22,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
+import java.util.ArrayDeque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,17 +48,26 @@ public class UsbGuardEventListener {
     // Keep the original Insert target and durable-queue outcome separately from the
     // latest applied target. A failed enqueue must be retryable without inventing
     // a second physical insertion when USBGuard replays an Insert section.
+    /** Immutable capture: retries must never create a new event ID or occur time. */
+    private record PendingAudit(UsbDeviceInfo device, String eventType, String target,
+                                ActiveUserInfo user, Instant occurredAt, String eventId) {
+        static PendingAudit capture(UsbDeviceInfo device, String type, String target, ActiveUserInfo user) {
+            return new PendingAudit(device, type, target, user, Instant.now(), UUID.randomUUID().toString());
+        }
+    }
     private record DeviceObservation(String identity, String target, ActiveUserInfo user,
-                                     String insertionTarget, boolean insertionQueued) {
+                                     String insertionTarget, boolean insertionQueued, UsbDeviceInfo device,
+                                     PendingAudit insertionAudit) {
         DeviceObservation withTarget(String effectiveTarget) {
-            return new DeviceObservation(identity, effectiveTarget, user, insertionTarget, insertionQueued);
+            return new DeviceObservation(identity, effectiveTarget, user, insertionTarget, insertionQueued,
+                    device, insertionAudit);
         }
         DeviceObservation queued() {
-            return new DeviceObservation(identity, target, user, insertionTarget, true);
+            return new DeviceObservation(identity, target, user, insertionTarget, true, device, insertionAudit);
         }
     }
     private record PendingInsert(String identity, String initialTarget, ActiveUserInfo user, long seenAt) {}
-    private record PendingPolicy(UsbDeviceInfo device, String target, ActiveUserInfo user) {}
+    private record PendingPolicy(UsbDeviceInfo device, String target, ActiveUserInfo user, PendingAudit audit) {}
 
     private final UsbGuardEventParser eventParser;
     private final UsbGuardPresenceParser presenceParser;
@@ -71,6 +82,11 @@ public class UsbGuardEventListener {
     private final AtomicBoolean started = new AtomicBoolean();
     private final Map<String, Long> recent = new ConcurrentHashMap<>();
     private final Map<Integer, PendingInsert> pendingInserts = new ConcurrentHashMap<>();
+    // Stable captured audit for final PolicyApplied when its durable write fails.
+    private final Map<Integer, PendingAudit> pendingFinalAudits = new ConcurrentHashMap<>();
+    // A DISCONNECTED audit write can fail even though the physical removal is final.
+    // Keep its original identity/time in bounded memory and retry independently.
+    private final ArrayDeque<PendingAudit> pendingRemovals = new ArrayDeque<>();
     // Retain observed final policy transitions in memory until the durable spool
     // accepts them. A missing replay must not silently discard an audit event.
     private final Map<String, java.util.ArrayDeque<PendingPolicy>> pendingPolicies = new ConcurrentHashMap<>();
@@ -78,6 +94,24 @@ public class UsbGuardEventListener {
     // transitions until usbguard confirms that their devices are still present.
     // All queue mutations and recoveries run under this listener's monitor.
     private boolean pendingPoliciesRequireLiveVerification;
+    // Even without a pending policy, watch loss can hide a Remove and leave the
+    // previous insertion/cooldown suppressing a genuine rapid reinsertion.
+    private boolean observedRequireLiveVerification;
+    // Serialize daemon queries independently of the watch parser monitor. A slow
+    // usbguard IPC request must never stop the watch reader from consuming Remove.
+    private final AtomicBoolean recoveryQueryInFlight = new AtomicBoolean();
+    // A watch failure must not run slow USBGuard IPC on the watch worker.
+    // Coalesce reconnect recovery attempts so repeated watch failures do not
+    // create an unbounded backlog while the daemon is unavailable.
+    private final AtomicBoolean reconnectRecoveryQueued = new AtomicBoolean();
+    private final ExecutorService recoveryExecutor = Executors.newSingleThreadExecutor(task -> {
+        Thread thread = new Thread(task, "usbshield-usbguard-recovery");
+        thread.setDaemon(true);
+        return thread;
+    });
+    private boolean pendingInsertsRequireLiveVerification;
+    // Any watch input/reset invalidates a device-list snapshot taken before it.
+    private long watchStateVersion;
     private final Map<Integer, DeviceObservation> observed = new ConcurrentHashMap<>();
     private final Map<Integer, String> notifiedRuntime = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -153,17 +187,38 @@ public class UsbGuardEventListener {
             } catch (IOException | RuntimeException error) {
                 if (running) log.warn("USBGuard watch IPC failed: {}", error.getMessage());
             } finally {
-                // Pending decisions might be lost on a broken watch connection. Query
-                // the actual daemon state once before invalidating runtime IDs.
-                recoverPending(true);
+                // Invalidate any in-flight daemon snapshot and mark all old
+                // observations unverified BEFORE reconnect. IPC runs on a
+                // separate worker; it must never delay restarting `usbguard watch`.
+                markWatchLost();
                 Process old = process;
                 process = null;
                 if (old != null && old.isAlive()) old.destroyForcibly();
                 resetWatchState();
+                requestReconnectRecovery();
             }
             if (!running) break;
             try { TimeUnit.MILLISECONDS.sleep(reconnectDelayMillis); }
             catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); break; }
+        }
+    }
+
+    private synchronized void markWatchLost() {
+        watchStateVersion++;
+        if (!pendingPolicies.isEmpty()) pendingPoliciesRequireLiveVerification = true;
+        if (!observed.isEmpty()) observedRequireLiveVerification = true;
+        if (!pendingInserts.isEmpty()) pendingInsertsRequireLiveVerification = true;
+    }
+
+    private void requestReconnectRecovery() {
+        if (!running || !reconnectRecoveryQueued.compareAndSet(false, true)) return;
+        try {
+            recoveryExecutor.execute(() -> {
+                try { recoverPending(false); }
+                finally { reconnectRecoveryQueued.set(false); }
+            });
+        } catch (java.util.concurrent.RejectedExecutionException stopped) {
+            reconnectRecoveryQueued.set(false);
         }
     }
 
@@ -179,77 +234,126 @@ public class UsbGuardEventListener {
     }
 
     synchronized void resetWatchState() {
+        watchStateVersion++;
         section = WatchSection.NONE;
         sectionLines.setLength(0);
+        // A watch restart may hide Remove; all existing observations must be
+        // verified against a new daemon snapshot before emitting policy or popup.
+        if (gateway != null) {
+            if (!observed.isEmpty()) observedRequireLiveVerification = true;
+            if (!pendingPolicies.isEmpty()) pendingPoliciesRequireLiveVerification = true;
+        }
         // A watch subprocess can reconnect while a USB remains inserted.
         // Preserve last confirmed observations and notification deduplication
         // across reconnects so a later Allow/Revoke is still recognized.
-        // Unconfirmed pending insertions must not be treated as final decisions.
-        pendingInserts.clear();
+        // A failed IPC query cannot prove a pending insertion was detached.
+        // Keep it and revalidate after reconnect before final BLOCK notification.
     }
 
     int trackedRecentEventCount() { return recent.size(); }
     int trackedPendingPolicyQueueCount() { return pendingPolicies.size(); }
 
-    /** Recovery only for missing PolicyApplied; normal event delivery has no settle timer. */
+    /** Verify lost final decisions, pending audit transitions and missed Remove events. */
     @Scheduled(fixedDelayString = "${usbshield.agent.pending-event-recheck-ms:3000}")
     public void recoverStalePendingDecisions() { recoverPending(false); }
 
-    synchronized void recoverPending(boolean watchLost) {
-        // A Remove can be missed while `usbguard watch` is down. Observed state
-        // alone is not evidence of attachment, even when pendingInserts is empty.
-        if (watchLost && !pendingPolicies.isEmpty()) {
-            pendingPoliciesRequireLiveVerification = true;
-        }
-
-        List<UsbDeviceInfo> live = null;
-        boolean verifyingQueuedPolicies = pendingPoliciesRequireLiveVerification;
-        if (verifyingQueuedPolicies) {
-            if (gateway == null) {
-                log.warn("Cannot verify queued USBGuard policy events without a live gateway; deferring retry");
+    void recoverPending(boolean watchLost) {
+        final long snapshotVersion;
+        final boolean needsQueuedVerification;
+        final boolean needsInsertionVerification;
+        final long now = System.currentTimeMillis();
+        synchronized (this) {
+            if (!running) return;
+            retryPendingRemovals();
+            // A lost watch can hide Remove. Mark all queued transitions unverified
+            // before starting an IPC query, and preserve that condition on errors.
+            if (watchLost) {
+                watchStateVersion++;
+                if (!pendingPolicies.isEmpty()) pendingPoliciesRequireLiveVerification = true;
+                if (!observed.isEmpty()) observedRequireLiveVerification = true;
+                if (!pendingInserts.isEmpty()) pendingInsertsRequireLiveVerification = true;
+            }
+            needsQueuedVerification = pendingPoliciesRequireLiveVerification || observedRequireLiveVerification;
+            // A pending Insert survives watch loss but must not be finalized
+            // from an unverified PolicyApplied replay. Once the daemon snapshot
+            // is available, finish it immediately, even when the normal stale
+            // pending-insert age threshold has not elapsed. Otherwise an IPC
+            // failure followed by a fast successful retry leaves a legitimate
+            // BLOCK notification pending until an unrelated later poll.
+            needsInsertionVerification = gateway != null && !pendingInserts.isEmpty()
+                    && (watchLost || observedRequireLiveVerification || pendingInsertsRequireLiveVerification
+                            || pendingInserts.values().stream().anyMatch(
+                                    pending -> now - pending.seenAt() >= RECOVERY_AGE_MILLIS));
+            if (!needsQueuedVerification && !needsInsertionVerification) {
+                retryQueuedPolicies();
                 return;
             }
+            if (gateway == null) {
+                if (needsQueuedVerification) {
+                    log.warn("Cannot verify queued USBGuard policy events without a live gateway; deferring retry");
+                }
+                return;
+            }
+            // Do not overlap two IPC queries or allow the older result to win.
+            // tryLock semantics also ensure a watch reconnect never queues behind
+            // another blocked recovery query.
+            if (!recoveryQueryInFlight.compareAndSet(false, true)) return;
+            snapshotVersion = watchStateVersion;
+        }
+        try {
+            // IMPORTANT: daemon IPC can block; no synchronized listener monitor
+            // is held here. Watch events (especially Remove) keep flowing.
+            final List<UsbDeviceInfo> live;
             try { live = gateway.listDevices(); }
             catch (RuntimeException failure) {
-                // Retain the queue but prevent scheduled or watch-triggered retries
-                // from bypassing validation on subsequent attempts.
-                log.warn("Cannot verify queued USBGuard policy events; deferring retry: {}", failure.getMessage());
+                log.warn("Cannot verify USBGuard device state; deferring recovery: {}", failure.getMessage());
                 return;
             }
             if (live == null) {
-                log.warn("USBGuard device-list query returned no result; deferring queued policy retry");
+                log.warn("USBGuard device-list query returned no result; deferring recovery");
                 return;
             }
-            discardDetachedQueuedPolicies(live);
-            pendingPoliciesRequireLiveVerification = false;
-        }
-        retryQueuedPolicies();
-        // If the durable queue is still blocked, the device may be unplugged
-        // before the next retry while the watch is down. Revalidate again then.
-        if (verifyingQueuedPolicies && !pendingPolicies.isEmpty()) {
-            pendingPoliciesRequireLiveVerification = true;
-        }
-        if (gateway == null || pendingInserts.isEmpty()) return;
-        long now = System.currentTimeMillis();
-        if (!watchLost && pendingInserts.values().stream().noneMatch(
-                p -> now - p.seenAt() >= RECOVERY_AGE_MILLIS)) return;
-        if (live == null) {
-            try { live = gateway.listDevices(); }
-            catch (RuntimeException failure) {
-                log.warn("Cannot verify pending USBGuard device state; leaving notification unconfirmed");
-                return;
-            }
-        }
-        for (var entry : List.copyOf(pendingInserts.entrySet())) {
-            PendingInsert pending = entry.getValue();
-            if (!watchLost && now - pending.seenAt() < RECOVERY_AGE_MILLIS) continue;
-            for (UsbDeviceInfo device : live) {
-                if (device.runtimeId() == entry.getKey() && identity(device).equals(pending.identity())
-                        && isTarget(device.state())) {
-                    applyFinalDecision(device, device.state(), pending);
-                    break;
+            synchronized (this) {
+                // An Insert/Remove, PolicyApplied, watch reset or another watch-loss
+                // changed our observations during IPC. Never apply an old snapshot.
+                if (!running || snapshotVersion != watchStateVersion) return;
+                if (needsQueuedVerification) {
+                    if (pendingPoliciesRequireLiveVerification) discardDetachedQueuedPolicies(live);
+                    if (observedRequireLiveVerification) discardDetachedObservedDevices(live);
+                    pendingPoliciesRequireLiveVerification = false;
+                    observedRequireLiveVerification = false;
+                }
+                retryQueuedPolicies();
+                // A still-blocked spool write needs another fresh live query on
+                // the next recovery attempt; it may be unplugged in the meantime.
+                if (needsQueuedVerification && !pendingPolicies.isEmpty()) {
+                    pendingPoliciesRequireLiveVerification = true;
+                }
+                if (!needsInsertionVerification) return;
+                for (var entry : List.copyOf(pendingInserts.entrySet())) {
+                    PendingInsert pending = entry.getValue();
+                    // A fresh IPC snapshot also resolves pending inserts left unverified
+                    // by an earlier watch loss. Do not reapply the normal age delay
+                    // after that same snapshot has verified the post-reconnect state.
+                    if (!watchLost && !needsQueuedVerification && !pendingInsertsRequireLiveVerification
+                            && now - pending.seenAt() < RECOVERY_AGE_MILLIS) continue;
+                    for (UsbDeviceInfo device : live) {
+                        if (device.runtimeId() == entry.getKey()
+                                && identity(device).equals(pending.identity())
+                                && isTarget(device.state())) {
+                            applyFinalDecision(device, device.state(), pending);
+                            break;
+                        }
+                    }
+                }
+                // Keep retrying a still-unresolved insertion after reconnect;
+                // a snapshot with no final decision cannot establish ALLOW/BLOCK.
+                if (pendingInsertsRequireLiveVerification) {
+                    pendingInsertsRequireLiveVerification = !pendingInserts.isEmpty();
                 }
             }
+        } finally {
+            recoveryQueryInFlight.set(false);
         }
     }
 
@@ -272,11 +376,39 @@ public class UsbGuardEventListener {
                 // a later physical insertion with the same runtime identity.
                 DeviceObservation prior = observed.get(queued.runtimeId());
                 if (prior != null && prior.identity().equals(identity(queued))) {
-                    observed.remove(queued.runtimeId(), prior);
-                    pendingInserts.remove(queued.runtimeId());
-                    notifiedRuntime.remove(queued.runtimeId());
+                    forgetDetachedObservation(queued.runtimeId(), prior);
                 }
             }
+        }
+    }
+
+    private void discardDetachedObservedDevices(List<UsbDeviceInfo> live) {
+        for (var entry : List.copyOf(observed.entrySet())) {
+            int id = entry.getKey();
+            DeviceObservation prior = entry.getValue();
+            boolean attached = live.stream().anyMatch(device ->
+                    device.massStorage() && isTarget(device.state())
+                            && device.runtimeId() == id
+                            && prior.identity().equals(identity(device)));
+            if (!attached) {
+                discardQueuedPolicies(id);
+                forgetDetachedObservation(id, prior);
+            }
+        }
+    }
+
+    private void forgetDetachedObservation(int id, DeviceObservation prior) {
+        if (!observed.remove(id, prior)) return;
+        pendingInserts.remove(id);
+        pendingFinalAudits.remove(id);
+        notifiedRuntime.remove(id);
+        // Match the explicit Remove path: reset short event dedup and the
+        // notification policy's cooldown for the exact previous device.
+        String recentPrefix = prior.identity() + ":" + id + ":";
+        recent.keySet().removeIf(key -> key.startsWith(recentPrefix));
+        try { desktopNotificationService.onUsbRemoved(prior.user(), prior.device()); }
+        catch (RuntimeException failure) {
+            log.warn("Notifier cleanup failed after missed USB removal: {}", failure.getMessage());
         }
     }
 
@@ -284,6 +416,9 @@ public class UsbGuardEventListener {
         if (line == null) return;
         String value = line.trim();
         if (value.isEmpty() || value.startsWith("[IPC]")) return;
+        // Invalidate an IPC snapshot even while a new watch section is only
+        // partially parsed; applying its old result could erase a fresh device.
+        watchStateVersion++;
         if (value.startsWith("[device] ")) {
             section = value.startsWith("[device] PresenceChanged:") ? WatchSection.PRESENCE_CHANGED
                     : value.startsWith("[device] PolicyChanged:") ? WatchSection.POLICY_CHANGED
@@ -346,7 +481,7 @@ public class UsbGuardEventListener {
             // provisional target as a new CONNECTED event.
             if (!alreadyPresent.insertionQueued()
                     && alreadyPresent.insertionTarget().equals(event.target())
-                    && sendEvent(device, type, event.target(), alreadyPresent.user())) {
+                    && sendAudit(alreadyPresent.insertionAudit())) {
                 observed.computeIfPresent(device.runtimeId(), (id, prior) ->
                         prior.identity().equals(identity(device)) ? prior.queued() : prior);
             }
@@ -364,11 +499,13 @@ public class UsbGuardEventListener {
             discardQueuedPolicies(device.runtimeId());
             // Remember attribution at insertion, even if the graphical user changes later.
             if (observed.size() >= MAX_RECENT_EVENTS && !observed.containsKey(device.runtimeId())) {
-                observed.clear(); pendingInserts.clear();
+                observed.clear(); pendingInserts.clear(); pendingFinalAudits.clear();
                 log.warn("USBGuard device tracking bound reached; reset transient states");
             }
             observed.put(device.runtimeId(), new DeviceObservation(
-                    identity(device), event.target(), user, event.target(), false));
+                    identity(device), event.target(), user, event.target(), false, device,
+                    PendingAudit.capture(device, type, event.target(), user)));
+            pendingFinalAudits.remove(device.runtimeId());
             pendingInserts.put(device.runtimeId(), new PendingInsert(identity(device), event.target(), user,
                     System.currentTimeMillis()));
         } else if ("DISCONNECTED".equals(type)) {
@@ -377,31 +514,64 @@ public class UsbGuardEventListener {
             discardQueuedPolicies(device.runtimeId());
             DeviceObservation prior = observed.remove(device.runtimeId());
             pendingInserts.remove(device.runtimeId());
+            pendingFinalAudits.remove(device.runtimeId());
             notifiedRuntime.remove(device.runtimeId());
+            // A physical Remove ends the old connection lifecycle regardless
+            // of whether DISCONNECTED can be spooled. Do not let stale recent
+            // CONNECTED suppress a rapid reinsertion with the reused runtime ID.
+            String oldPrefix = identity(device) + ":" + device.runtimeId() + ":";
+            recent.keySet().removeIf(key -> key.startsWith(oldPrefix));
             if (prior != null && prior.identity().equals(identity(device))) user = prior.user();
             try { desktopNotificationService.onUsbRemoved(user, device); }
             catch (RuntimeException failure) { log.warn("Notifier cleanup failed: {}", failure.getMessage()); }
         }
-        if (sendEvent(device, type, event.target(), user)
-                && "CONNECTED".equals(type) && device.massStorage() && device.runtimeId() >= 0) {
-            observed.computeIfPresent(device.runtimeId(), (id, prior) ->
-                    prior.identity().equals(identity(device)) ? prior.queued() : prior);
+        if ("DISCONNECTED".equals(type)) {
+            PendingAudit removal = PendingAudit.capture(device, type, event.target(), user);
+            if (!sendAudit(removal)) {
+                if (pendingRemovals.size() >= MAX_RECENT_EVENTS) {
+                    log.error("Pending USB removal audit capacity exhausted; durable audit unavailable");
+                } else {
+                    pendingRemovals.addLast(removal);
+                }
+            }
+        } else if ("CONNECTED".equals(type) && device.massStorage() && device.runtimeId() >= 0) {
+            DeviceObservation inserted = observed.get(device.runtimeId());
+            if (inserted != null && inserted.identity().equals(identity(device))
+                    && sendAudit(inserted.insertionAudit())) {
+                observed.computeIfPresent(device.runtimeId(), (id, prior) ->
+                        prior.identity().equals(identity(device)) ? prior.queued() : prior);
+            }
+        } else {
+            sendAudit(PendingAudit.capture(device, type, event.target(), user));
         }
     }
 
     private void applyFinalDecision(UsbDeviceInfo device, String target, PendingInsert pending) {
         DeviceObservation initial = observed.get(device.runtimeId());
         if (initial == null || !initial.identity().equals(pending.identity())) return;
+        // Capture a watch-delivered final transition now, but never emit it
+        // after a watch loss until a fresh IPC snapshot confirms attachment.
+        if (!target.equals(pending.initialTarget())) {
+            pendingFinalAudits.compute(device.runtimeId(), (id, prior) ->
+                    prior != null && prior.target().equals(target) && identity(prior.device()).equals(pending.identity())
+                            ? prior : PendingAudit.capture(device, "POLICY_APPLIED", target, pending.user()));
+        }
+        if (observedRequireLiveVerification) return;
         // The first CONNECTED enqueue might have failed (no enrollment, full disk).
         // Never discard the pending final decision until the original event is durable.
         if (!initial.insertionQueued()) {
-            if (!sendEvent(device, "CONNECTED", initial.insertionTarget(), initial.user())) return;
+            if (!sendAudit(initial.insertionAudit())) return;
             observed.computeIfPresent(device.runtimeId(), (id, prior) ->
                     prior.identity().equals(pending.identity()) ? prior.queued() : prior);
         }
-        if (!target.equals(pending.initialTarget())
-                && !sendEvent(device, "POLICY_APPLIED", target, pending.user())) return;
+        if (!target.equals(pending.initialTarget())) {
+            PendingAudit finalAudit = pendingFinalAudits.compute(device.runtimeId(), (id, prior) ->
+                    prior != null && prior.target().equals(target) && identity(prior.device()).equals(pending.identity())
+                            ? prior : PendingAudit.capture(device, "POLICY_APPLIED", target, pending.user()));
+            if (!sendAudit(finalAudit)) return;
+        }
         if (!pendingInserts.remove(device.runtimeId(), pending)) return;
+        pendingFinalAudits.remove(device.runtimeId());
         observed.computeIfPresent(device.runtimeId(), (id, prior) ->
                 prior.identity().equals(pending.identity()) ? prior.withTarget(target) : prior);
         if ("allow".equals(target)) notifiedRuntime.remove(device.runtimeId());
@@ -417,8 +587,12 @@ public class UsbGuardEventListener {
         String last = transitions == null || transitions.isEmpty()
                 ? prior.target() : transitions.getLast().target();
         if (!target.equals(last)) {
-            // Check capacity before allocating a deque: computeIfAbsent would
-            // otherwise leave an empty entry for every rejected runtime identity.
+            // Free locally proven stale/empty queues before rejecting a new
+            // identity at the global bound. Do not discard an attached device's
+            // pending audit merely to make space.
+            if (transitions == null && pendingPolicies.size() >= MAX_RECENT_EVENTS) {
+                pruneUnobservedPendingPolicies();
+            }
             if ((transitions == null && pendingPolicies.size() >= MAX_RECENT_EVENTS)
                     || (transitions != null && transitions.size() >= 32)) {
                 log.error("USBGuard pending policy audit queue bound reached; no event can be acknowledged");
@@ -428,9 +602,27 @@ public class UsbGuardEventListener {
                 transitions = new java.util.ArrayDeque<>();
                 pendingPolicies.put(key, transitions);
             }
-            transitions.addLast(new PendingPolicy(device, target, prior.user()));
+            transitions.addLast(new PendingPolicy(device, target, prior.user(),
+                    PendingAudit.capture(device, "POLICY_APPLIED", target, prior.user())));
         }
         retryQueuedPolicies();
+    }
+
+    private void pruneUnobservedPendingPolicies() {
+        for (var entry : List.copyOf(pendingPolicies.entrySet())) {
+            var queue = entry.getValue();
+            if (queue.isEmpty()) {
+                pendingPolicies.remove(entry.getKey(), queue);
+                continue;
+            }
+            UsbDeviceInfo queued = queue.getFirst().device();
+            DeviceObservation current = observed.get(queued.runtimeId());
+            if (current == null || !current.identity().equals(identity(queued))) {
+                queue.clear();
+                pendingPolicies.remove(entry.getKey(), queue);
+            }
+        }
+        if (pendingPolicies.isEmpty()) pendingPoliciesRequireLiveVerification = false;
     }
 
     private void discardQueuedPolicies(int runtimeId) {
@@ -443,7 +635,7 @@ public class UsbGuardEventListener {
     private void retryQueuedPolicies() {
         // Even a fresh PolicyApplied watch section must not flush an older
         // unverified FIFO after the watch connection has been interrupted.
-        if (pendingPoliciesRequireLiveVerification) return;
+        if (pendingPoliciesRequireLiveVerification || observedRequireLiveVerification) return;
         for (var entry : List.copyOf(pendingPolicies.entrySet())) {
             var transitions = entry.getValue();
             while (!transitions.isEmpty()) {
@@ -456,7 +648,7 @@ public class UsbGuardEventListener {
                     transitions.clear();
                     break;
                 }
-                if (!sendEvent(device, "POLICY_APPLIED", next.target(), next.user())) break;
+                if (!sendAudit(next.audit())) break;
                 transitions.removeFirst();
                 observed.put(device.runtimeId(), prior.withTarget(next.target()));
                 if ("allow".equals(next.target())) notifiedRuntime.remove(device.runtimeId());
@@ -465,6 +657,13 @@ public class UsbGuardEventListener {
                 }
             }
             if (transitions.isEmpty()) pendingPolicies.remove(entry.getKey(), transitions);
+        }
+    }
+
+    private void retryPendingRemovals() {
+        while (!pendingRemovals.isEmpty()) {
+            if (!sendAudit(pendingRemovals.getFirst())) break;
+            pendingRemovals.removeFirst();
         }
     }
 
@@ -501,7 +700,11 @@ public class UsbGuardEventListener {
     }
 
     /** Returns true only after the event was successfully queued, or already queued. */
-    private boolean sendEvent(UsbDeviceInfo device, String eventType, String target, ActiveUserInfo user) {
+    private boolean sendAudit(PendingAudit audit) {
+        UsbDeviceInfo device = audit.device();
+        String eventType = audit.eventType();
+        String target = audit.target();
+        ActiveUserInfo user = audit.user();
         if (!isTarget(target)) return false;
         String id = identity(device);
         String key = id + ":" + device.runtimeId() + ":" + eventType + ":" + target;
@@ -515,17 +718,22 @@ public class UsbGuardEventListener {
         // be ready yet, and a rejected event must remain retryable.
         try {
             UsbEventPayload payload = UsbEventPayload.builder()
+                    .eventId(audit.eventId())
                     .endpointId(endpointManager.getEndpointId())
                     .hostname(systemInfoProvider.getHostname())
                     .linuxUsername(user.username()).linuxUid(user.uid())
                     .sessionId(user.sessionId()).sessionType(user.sessionType()).seat(user.seat())
                     .device(device.toContractDeviceMap()).eventType(eventType)
                     .decision("allow".equals(target) ? "ALLOWED" : "BLOCKED")
-                    .occurredAt(Instant.now()).build();
+                    .occurredAt(audit.occurredAt()).build();
             eventSenderService.enqueuePayload(payload);
-            recent.keySet().removeIf(k -> k.startsWith(id + ":" + device.runtimeId() + ":")
-                    && ((eventType.equals("CONNECTED") && k.contains(":DISCONNECTED:"))
-                        || (eventType.equals("DISCONNECTED") && k.contains(":CONNECTED:"))));
+            // Removal-side dedup was already reset synchronously at physical
+            // Remove. A delayed DISCONNECTED retry must NOT clear the cooldown
+            // of a newer insertion that reused the same runtime ID.
+            if ("CONNECTED".equals(eventType)) {
+                recent.keySet().removeIf(k -> k.startsWith(id + ":" + device.runtimeId() + ":")
+                        && k.contains(":DISCONNECTED:"));
+            }
             if (recent.size() >= MAX_RECENT_EVENTS && !recent.containsKey(key)) {
                 recent.entrySet().removeIf(entry -> now < entry.getValue() || now - entry.getValue() > DEDUP_WINDOW_MILLIS);
                 if (recent.size() >= MAX_RECENT_EVENTS) recent.entrySet().stream()
@@ -541,7 +749,8 @@ public class UsbGuardEventListener {
     }
 
     /** Legacy integration entrypoint: explicitly supplied rule, not the live watch path. */
-    public void handleDeviceRuleEvent(String raw, String eventType) {
+    public synchronized void handleDeviceRuleEvent(String raw, String eventType) {
+        watchStateVersion++;
         UsbDeviceInfo parsed = eventParser.parseDeviceLine(raw);
         if (parsed == null || !("CONNECTED".equals(eventType) || "DISCONNECTED".equals(eventType))) return;
         UsbGuardPresenceEvent event = new UsbGuardPresenceEvent(
@@ -556,15 +765,22 @@ public class UsbGuardEventListener {
     }
 
     @PreDestroy
-    public void stopListening() {
+    public synchronized void stopListening() {
+        watchStateVersion++;
         running = false;
         Process live = process;
         if (live != null && live.isAlive()) live.destroy();
         executor.shutdownNow();
+        recoveryExecutor.shutdownNow();
         resetWatchState();
         observed.clear();
         pendingPolicies.clear();
+        pendingFinalAudits.clear();
+        pendingRemovals.clear();
+        pendingInserts.clear();
         pendingPoliciesRequireLiveVerification = false;
+        observedRequireLiveVerification = false;
+        pendingInsertsRequireLiveVerification = false;
         notifiedRuntime.clear();
         recent.clear();
     }
