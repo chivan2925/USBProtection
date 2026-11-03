@@ -185,6 +185,7 @@ public class UsbGuardEventListener {
     }
 
     int trackedRecentEventCount() { return recent.size(); }
+    int trackedPendingPolicyQueueCount() { return pendingPolicies.size(); }
 
     /** Recovery only for missing PolicyApplied; normal event delivery has no settle timer. */
     @Scheduled(fixedDelayString = "${usbshield.agent.pending-event-recheck-ms:3000}")
@@ -294,6 +295,9 @@ public class UsbGuardEventListener {
         if (previous != null && at >= previous && at - previous < DEDUP_WINDOW_MILLIS) return;
         ActiveUserInfo user = resolveUser();
         if ("CONNECTED".equals(type) && device.massStorage() && device.runtimeId() >= 0) {
+            // This runtime ID may have belonged to another device before a missed
+            // Remove. Its queued policy transitions must never be sent for this Insert.
+            discardQueuedPolicies(device.runtimeId());
             // Remember attribution at insertion, even if the graphical user changes later.
             if (observed.size() >= MAX_RECENT_EVENTS && !observed.containsKey(device.runtimeId())) {
                 observed.clear(); pendingInserts.clear();
@@ -304,6 +308,9 @@ public class UsbGuardEventListener {
             pendingInserts.put(device.runtimeId(), new PendingInsert(identity(device), event.target(), user,
                     System.currentTimeMillis()));
         } else if ("DISCONNECTED".equals(type)) {
+            // Unsent transitions no longer describe an attached device. Drop them
+            // before recovery can enqueue stale POLICY_APPLIED audit events.
+            discardQueuedPolicies(device.runtimeId());
             DeviceObservation prior = observed.remove(device.runtimeId());
             pendingInserts.remove(device.runtimeId());
             notifiedRuntime.remove(device.runtimeId());
@@ -342,16 +349,30 @@ public class UsbGuardEventListener {
         // Do not invent audit events after an orphan PolicyApplied watch replay.
         if (prior == null || !prior.identity().equals(identity(device))) return;
         String key = device.runtimeId() + ":" + identity(device);
-        var transitions = pendingPolicies.computeIfAbsent(key, ignored -> new java.util.ArrayDeque<>());
-        String last = transitions.isEmpty() ? prior.target() : transitions.getLast().target();
+        var transitions = pendingPolicies.get(key);
+        String last = transitions == null || transitions.isEmpty()
+                ? prior.target() : transitions.getLast().target();
         if (!target.equals(last)) {
-            if (transitions.size() >= 32 || pendingPolicies.size() > MAX_RECENT_EVENTS) {
+            // Check capacity before allocating a deque: computeIfAbsent would
+            // otherwise leave an empty entry for every rejected runtime identity.
+            if ((transitions == null && pendingPolicies.size() >= MAX_RECENT_EVENTS)
+                    || (transitions != null && transitions.size() >= 32)) {
                 log.error("USBGuard pending policy audit queue bound reached; no event can be acknowledged");
                 return;
+            }
+            if (transitions == null) {
+                transitions = new java.util.ArrayDeque<>();
+                pendingPolicies.put(key, transitions);
             }
             transitions.addLast(new PendingPolicy(device, target, prior.user()));
         }
         retryQueuedPolicies();
+    }
+
+    private void discardQueuedPolicies(int runtimeId) {
+        // Runtime IDs are reused by USBGuard. Do not let the old device's audit
+        // queue survive a Remove or be attributed to a replacement device.
+        pendingPolicies.keySet().removeIf(key -> key.startsWith(runtimeId + ":"));
     }
 
     private void retryQueuedPolicies() {
@@ -360,16 +381,19 @@ public class UsbGuardEventListener {
             while (!transitions.isEmpty()) {
                 PendingPolicy next = transitions.getFirst();
                 UsbDeviceInfo device = next.device();
+                DeviceObservation prior = observed.get(device.runtimeId());
+                if (prior == null || !prior.identity().equals(identity(device))) {
+                    // Removal, lost observation, or reused runtime ID: never
+                    // emit a stale transition, even after a failed enqueue.
+                    transitions.clear();
+                    break;
+                }
                 if (!sendEvent(device, "POLICY_APPLIED", next.target(), next.user())) break;
                 transitions.removeFirst();
-                DeviceObservation prior = observed.get(device.runtimeId());
-                boolean stillAttached = prior != null && prior.identity().equals(identity(device));
-                if (stillAttached) {
-                    observed.put(device.runtimeId(), prior.withTarget(next.target()));
-                    if ("allow".equals(next.target())) notifiedRuntime.remove(device.runtimeId());
-                    if ("block".equals(next.target()) || "reject".equals(next.target())) {
-                        notifyBlocked(next.user(), device);
-                    }
+                observed.put(device.runtimeId(), prior.withTarget(next.target()));
+                if ("allow".equals(next.target())) notifiedRuntime.remove(device.runtimeId());
+                if ("block".equals(next.target()) || "reject".equals(next.target())) {
+                    notifyBlocked(next.user(), device);
                 }
             }
             if (transitions.isEmpty()) pendingPolicies.remove(entry.getKey(), transitions);
@@ -471,6 +495,7 @@ public class UsbGuardEventListener {
         executor.shutdownNow();
         resetWatchState();
         observed.clear();
+        pendingPolicies.clear();
         notifiedRuntime.clear();
         recent.clear();
     }
