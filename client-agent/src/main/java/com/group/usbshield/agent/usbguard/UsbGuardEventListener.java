@@ -100,6 +100,16 @@ public class UsbGuardEventListener {
     // Serialize daemon queries independently of the watch parser monitor. A slow
     // usbguard IPC request must never stop the watch reader from consuming Remove.
     private final AtomicBoolean recoveryQueryInFlight = new AtomicBoolean();
+    // A watch failure must not run slow USBGuard IPC on the watch worker.
+    // Coalesce reconnect recovery attempts so repeated watch failures do not
+    // create an unbounded backlog while the daemon is unavailable.
+    private final AtomicBoolean reconnectRecoveryQueued = new AtomicBoolean();
+    private final ExecutorService recoveryExecutor = Executors.newSingleThreadExecutor(task -> {
+        Thread thread = new Thread(task, "usbshield-usbguard-recovery");
+        thread.setDaemon(true);
+        return thread;
+    });
+    private boolean pendingInsertsRequireLiveVerification;
     // Any watch input/reset invalidates a device-list snapshot taken before it.
     private long watchStateVersion;
     private final Map<Integer, DeviceObservation> observed = new ConcurrentHashMap<>();
@@ -177,17 +187,38 @@ public class UsbGuardEventListener {
             } catch (IOException | RuntimeException error) {
                 if (running) log.warn("USBGuard watch IPC failed: {}", error.getMessage());
             } finally {
-                // Pending decisions might be lost on a broken watch connection. Query
-                // the actual daemon state once before invalidating runtime IDs.
-                recoverPending(true);
+                // Invalidate any in-flight daemon snapshot and mark all old
+                // observations unverified BEFORE reconnect. IPC runs on a
+                // separate worker; it must never delay restarting `usbguard watch`.
+                markWatchLost();
                 Process old = process;
                 process = null;
                 if (old != null && old.isAlive()) old.destroyForcibly();
                 resetWatchState();
+                requestReconnectRecovery();
             }
             if (!running) break;
             try { TimeUnit.MILLISECONDS.sleep(reconnectDelayMillis); }
             catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); break; }
+        }
+    }
+
+    private synchronized void markWatchLost() {
+        watchStateVersion++;
+        if (!pendingPolicies.isEmpty()) pendingPoliciesRequireLiveVerification = true;
+        if (!observed.isEmpty()) observedRequireLiveVerification = true;
+        if (!pendingInserts.isEmpty()) pendingInsertsRequireLiveVerification = true;
+    }
+
+    private void requestReconnectRecovery() {
+        if (!running || !reconnectRecoveryQueued.compareAndSet(false, true)) return;
+        try {
+            recoveryExecutor.execute(() -> {
+                try { recoverPending(false); }
+                finally { reconnectRecoveryQueued.set(false); }
+            });
+        } catch (java.util.concurrent.RejectedExecutionException stopped) {
+            reconnectRecoveryQueued.set(false);
         }
     }
 
@@ -240,6 +271,7 @@ public class UsbGuardEventListener {
                 watchStateVersion++;
                 if (!pendingPolicies.isEmpty()) pendingPoliciesRequireLiveVerification = true;
                 if (!observed.isEmpty()) observedRequireLiveVerification = true;
+                if (!pendingInserts.isEmpty()) pendingInsertsRequireLiveVerification = true;
             }
             needsQueuedVerification = pendingPoliciesRequireLiveVerification || observedRequireLiveVerification;
             // A pending Insert survives watch loss but must not be finalized
@@ -249,7 +281,7 @@ public class UsbGuardEventListener {
             // failure followed by a fast successful retry leaves a legitimate
             // BLOCK notification pending until an unrelated later poll.
             needsInsertionVerification = gateway != null && !pendingInserts.isEmpty()
-                    && (watchLost || observedRequireLiveVerification
+                    && (watchLost || observedRequireLiveVerification || pendingInsertsRequireLiveVerification
                             || pendingInserts.values().stream().anyMatch(
                                     pending -> now - pending.seenAt() >= RECOVERY_AGE_MILLIS));
             if (!needsQueuedVerification && !needsInsertionVerification) {
@@ -303,7 +335,7 @@ public class UsbGuardEventListener {
                     // A fresh IPC snapshot also resolves pending inserts left unverified
                     // by an earlier watch loss. Do not reapply the normal age delay
                     // after that same snapshot has verified the post-reconnect state.
-                    if (!watchLost && !needsQueuedVerification
+                    if (!watchLost && !needsQueuedVerification && !pendingInsertsRequireLiveVerification
                             && now - pending.seenAt() < RECOVERY_AGE_MILLIS) continue;
                     for (UsbDeviceInfo device : live) {
                         if (device.runtimeId() == entry.getKey()
@@ -313,6 +345,11 @@ public class UsbGuardEventListener {
                             break;
                         }
                     }
+                }
+                // Keep retrying a still-unresolved insertion after reconnect;
+                // a snapshot with no final decision cannot establish ALLOW/BLOCK.
+                if (pendingInsertsRequireLiveVerification) {
+                    pendingInsertsRequireLiveVerification = !pendingInserts.isEmpty();
                 }
             }
         } finally {
@@ -734,6 +771,7 @@ public class UsbGuardEventListener {
         Process live = process;
         if (live != null && live.isAlive()) live.destroy();
         executor.shutdownNow();
+        recoveryExecutor.shutdownNow();
         resetWatchState();
         observed.clear();
         pendingPolicies.clear();
@@ -742,6 +780,7 @@ public class UsbGuardEventListener {
         pendingInserts.clear();
         pendingPoliciesRequireLiveVerification = false;
         observedRequireLiveVerification = false;
+        pendingInsertsRequireLiveVerification = false;
         notifiedRuntime.clear();
         recent.clear();
     }
