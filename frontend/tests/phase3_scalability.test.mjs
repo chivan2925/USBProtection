@@ -61,3 +61,31 @@ test('R10: device states are server-paged and filtering is applied before pagina
   assert.equal(other.content.length, 1)
   assert.equal(other.content[0].endpointId, 'B')
 })
+
+
+test('Production endpoint detail reads only one scoped device page, never snapshot prefetch', async () => {
+  const start = fixture.state.requests.length
+  const snapshot = await protectionApi.getSnapshot(signal(), 'A', '/endpoints/A')
+  assert.equal(snapshot.devices.length, 0)
+  assert.equal(snapshot.events.every(event => event.endpointId === 'A'), true)
+  const afterSnapshot = fixture.state.requests.slice(start)
+  assert.equal(afterSnapshot.filter(r => r.path === '/api/admin/device-states').length, 0)
+  const page = await protectionApi.getDevicePage({ page: 0, size: 20, endpointId: 'A' }, signal())
+  assert.equal(page.content.length, 1)
+  assert.ok(page.content.every(device => device.endpointId === 'A'))
+  const request = fixture.state.requests.at(-1)
+  assert.equal(request.path, '/api/admin/device-states')
+  assert.equal(new URLSearchParams(request.query).get('endpointId'), 'A')
+})
+
+test('Production device search/filter never leaks another endpoint inventory', async () => {
+  const a = await protectionApi.getDevicePage({ page: 0, size: 20, endpointId: 'A', q: 'Fixture' }, signal())
+  const b = await protectionApi.getDevicePage({ page: 0, size: 20, endpointId: 'B', q: 'Fixture' }, signal())
+  assert.equal(a.content.length, 1)
+  assert.equal(b.content.length, 1)
+  assert.equal(a.content[0].endpointId, 'A')
+  assert.equal(b.content[0].endpointId, 'B')
+  const unmatched = await protectionApi.getDevicePage({ page: 0, size: 20, endpointId: 'B', q: 'not-an-actual-device' }, signal())
+  assert.equal(unmatched.totalElements, 0)
+  assert.deepEqual(unmatched.content, [])
+})

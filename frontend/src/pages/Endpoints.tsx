@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Badge, EmptyState, PageHeading, Panel, ResourceNotice } from '../components/Common'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { DataTable } from '../components/DataTable'
@@ -58,8 +58,14 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
   }, [demo, devicePage, deviceQuery, endpointId])
   const deviceRead = useResource(loadDevicePage)
   const { refresh: refreshDevices } = deviceRead
+  // Initial and search/page requests are managed by useResource itself. Reload
+  // once only when the outer snapshot actually changes after toolbar refresh.
+  const lastReadySnapshot = useRef(state.status === 'ready' ? state.data : undefined)
   useEffect(() => {
-    if (!demo && state.status === 'ready') void refreshDevices()
+    if (state.status !== 'ready') return
+    const previous = lastReadySnapshot.current
+    lastReadySnapshot.current = state.data
+    if (!demo && previous && previous !== state.data) void refreshDevices()
   }, [demo, state.status, state.data, refreshDevices])
   const devices = demo ? newestFirst((state.data?.devices ?? []).filter(device => device.endpointId === endpointId), device => device.detectedAt)
     : deviceRead.state.status === 'ready' ? deviceRead.state.data.content : []
@@ -68,8 +74,11 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
   const entries = state.data?.whitelist ?? []
   const disabled = demo || !auth?.user || state.status !== 'ready'
   const tableState = { loading: state.status === 'loading', unavailable: state.status === 'unavailable', failed: state.status === 'error' }
+  // A successful, empty server-filtered page must say "Không tìm thấy kết quả",
+  // not the unfiltered "Chưa có dữ liệu" placeholder.
   const deviceTableState = demo ? tableState : { loading: deviceRead.state.status === 'loading',
-    unavailable: deviceRead.state.status === 'unavailable', failed: deviceRead.state.status === 'error' }
+    unavailable: deviceRead.state.status === 'unavailable', failed: deviceRead.state.status === 'error',
+    filtered: deviceQuery.trim().length > 0 }
   const devicePagination = !demo && deviceRead.state.status === 'ready'
     ? { page: deviceRead.state.data.page, size: deviceRead.state.data.size,
         totalElements: deviceRead.state.data.totalElements, totalPages: deviceRead.state.data.totalPages,

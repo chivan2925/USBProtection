@@ -19,8 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +43,14 @@ public class OutboxSpoolService {
     private volatile boolean quarantineSyncUncertain;
     private static final Pattern EVENT_FILENAME = Pattern.compile("event_(\\d{13,19})_.*\\.json");
     private long lastLogicalTimestamp;
+    // Single-writer Agent spool: cache accounting after a startup scan. A directory
+    // modification (drain, quarantine or an operator-created entry) triggers a
+    // rescan. A failed publish invalidates the cache so uncertain evidence is
+    // counted before any further write. The root/service account owns this path.
+    private SpoolUsage cachedUsage;
+    private FileTime cachedSpoolMtime;
+    private FileTime cachedQuarantineMtime;
+    private long usageInspections;
 
     public OutboxSpoolService(AgentProperties properties, ObjectMapper objectMapper) {
         this.properties = properties;
@@ -96,6 +106,13 @@ public class OutboxSpoolService {
                 log.warn("Cannot inspect existing spool order; rejecting new writes until repaired: {}", error.getMessage());
                 spoolPath = null;
             }
+            if (spoolPath != null) {
+                try { currentUsage(); }
+                catch (IOException | ArithmeticException error) {
+                    log.error("Cannot account for existing outbox evidence; refusing new writes: {}", error.getMessage());
+                    spoolPath = null;
+                }
+            }
         }
         log.info("Outbox Spool directory initialized at: {}", spoolPath);
     }
@@ -117,7 +134,7 @@ public class OutboxSpoolService {
             byte[] json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(event);
             // Include quarantined evidence in the storage budget; operator review
             // is required before deleting anything. Never silently evict audit.
-            SpoolUsage usage = inspectUsage();
+            SpoolUsage usage = currentUsage();
             long maxBytes = properties.getOutboxMaxBytes();
             int maxEvents = properties.getOutboxMaxEvents();
             if (maxBytes <= 0 || maxEvents <= 0 || json.length > maxBytes
@@ -146,27 +163,71 @@ public class OutboxSpoolService {
             // directory entry is synced too. On failure report non-durability;
             // never delete the published evidence file.
             syncDirectory(spoolPath);
+            // Same file was atomically renamed from .tmp to .json. Exactly one
+            // new event and json.length bytes have been published durably.
+            cachedUsage = new SpoolUsage(Math.addExact(usage.bytes(), json.length),
+                    Math.addExact(usage.eventFiles(), 1L));
+            captureDirectoryMtimes();
             log.warn("[OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: {}", fileName);
             return true;
         } catch (Exception error) {
+            // A failed fsync/rename may still leave evidence on disk; force a
+            // complete accounting scan on the next enqueue, never assume absence.
+            cachedUsage = null;
             log.error("Failed to persist USB event: {}", error.getMessage());
             return false;
         } finally {
             if (temporary != null) {
                 try { Files.deleteIfExists(temporary); }
-                catch (IOException failed) { log.warn("Failed to clean up partial spool write"); }
+                catch (IOException failed) {
+                    cachedUsage = null;
+                    log.warn("Failed to clean up partial spool write");
+                }
             }
         }
     }
 
     private record SpoolUsage(long bytes, long eventFiles) {}
 
+    // Only for regression tests: a normal enqueue should not walk the backlog.
+    long usageInspectionCount() { return usageInspections; }
+
+    private static FileTime directoryMtime(Path directory) throws IOException {
+        if (!Files.exists(directory, LinkOption.NOFOLLOW_LINKS)) return null;
+        if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS))
+            throw new IOException("Invalid outbox evidence directory: " + directory);
+        return Files.getLastModifiedTime(directory, LinkOption.NOFOLLOW_LINKS);
+    }
+
+    private void captureDirectoryMtimes() throws IOException {
+        cachedSpoolMtime = directoryMtime(spoolPath);
+        cachedQuarantineMtime = directoryMtime(spoolPath.resolve("quarantine"));
+    }
+
+    private SpoolUsage currentUsage() throws IOException {
+        // O(1) metadata reads for ordinary appends; a metadata change indicates
+        // external modification, drain deletion or quarantine relocation.
+        FileTime active = directoryMtime(spoolPath);
+        FileTime isolated = directoryMtime(spoolPath.resolve("quarantine"));
+        if (cachedUsage == null || !Objects.equals(active, cachedSpoolMtime)
+                || !Objects.equals(isolated, cachedQuarantineMtime)) {
+            // Invalidate first. A failed scan must not leave a trusted stale total.
+            cachedUsage = null;
+            SpoolUsage actual = inspectUsage();
+            captureDirectoryMtimes();
+            cachedUsage = actual;
+        }
+        return cachedUsage;
+    }
+
     private SpoolUsage inspectUsage() throws IOException {
+        usageInspections++;
         long bytes = 0;
         long eventFiles = 0;
         // Bounded depth: direct event_*.json plus the quarantine directory.
         try (Stream<Path> paths = Files.walk(spoolPath, 2)) {
-            for (Path path : paths.toList()) {
+            for (java.util.Iterator<Path> entries = paths.iterator(); entries.hasNext();) {
+                Path path = entries.next();
                 if (Files.isSymbolicLink(path)) throw new IOException("Symlink found in protected spool");
                 if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) continue;
                 bytes = Math.addExact(bytes, Files.size(path));

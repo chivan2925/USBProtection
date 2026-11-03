@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Badge, PageHeading, Panel, ResourceNotice } from '../components/Common'
 import { DataTable } from '../components/DataTable'
 import { Filters } from '../components/Filters'
@@ -38,11 +38,17 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
   }, [demo, mode, page, filter, query])
   const deviceRead = useResource(loadDevices)
   const { refresh: refreshDevices } = deviceRead
-  // Refresh from the shared toolbar must also reload the independent device page.
+  // useResource already loads the initial page and re-loads on filter/page changes.
+  // The shared toolbar refresh returns a new parent snapshot: only that transition
+  // should cause an additional device-page read, not every loader change.
+  const lastReadySnapshot = useRef(state.status === 'ready' ? state.data : undefined)
   useEffect(() => {
-    if (!demo && mode !== 'whitelist' && state.status === 'ready') void refreshDevices()
-    // refreshDevices is stable until loadDevices changes; parent snapshot identity
-    // changes after user explicitly refreshes the parent view.
+    if (state.status !== 'ready') return
+    const previous = lastReadySnapshot.current
+    lastReadySnapshot.current = state.data
+    if (!demo && mode !== 'whitelist' && previous && previous !== state.data) {
+      void refreshDevices()
+    }
   }, [demo, mode, state.data, state.status, refreshDevices])
 
   const demoDeviceRows = newestFirst((state.data?.devices ?? []).filter(device =>

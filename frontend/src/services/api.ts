@@ -168,9 +168,9 @@ export const protectionApi = {
     const summary = mapSummary(await request(`/api/admin/dashboard/summary?${dates}`, { signal }))
 
     const activeRoute = route ?? (typeof window === 'undefined' ? undefined : window.location.hash.replace(/^#/, '').split('?')[0])
-    const devices: Device[] = selectedEndpointId
-      ? (await protectionApi.getDevicePage({ page: 0, size: 100, endpointId: selectedEndpointId }, signal)).content
-      : []
+    // EndpointDetail independently fetches an endpoint-scoped device page (size=20).
+    // Do not prefetch and discard a second, differently sized 100-row inventory.
+    const devices: Device[] = []
     const whitelist: WhitelistEntry[] = []
     // Only read rules for the active view, not N HTTP calls on every dashboard refresh.
     const whitelistIds = selectedEndpointId ? [selectedEndpointId] : activeRoute === undefined || activeRoute === '/whitelist'

@@ -91,6 +91,20 @@ Mỗi máy Ubuntu cần bảo vệ là một **endpoint/client**. Admin quản l
 ---
 
 
+## 1.4. Chốt phạm vi demo và vận hành (03/11/2026)
+
+- **Mục tiêu là đồ án seminar/demonstration**, không phải một sản phẩm đã được triển khai thật tại trường học, bệnh viện hoặc công ty. Các tổ chức nêu trong đề là **bối cảnh áp dụng minh họa**.
+- Giữ kiến trúc USBGuard + systemd Agent + một Spring Boot Admin Server + React. Không bổ sung microservices, Kafka, Redis, Kubernetes hoặc hệ quản trị nhiều server chỉ vì tính "enterprise". Chấp nhận global USB catalog lock và H2 file mode ở quy mô demo; không đưa ra cam kết throughput nhiều endpoint.
+- **Outbox** giữ giới hạn bộ nhớ đệm/bằng chứng và báo lỗi khi không bền vững; cache quota cho single-writer Agent và quét lại khi thư mục thay đổi/ghi lỗi, không xây dựng queue engine mới. Operator không sửa in-place các file spool khi Agent đang chạy; cần dừng/khởi động lại sau can thiệp.
+- **Frontend** ưu tiên API-backed request tests và loại bỏ request trùng. Dashboard dùng tổng hợp backend; danh sách thiết bị dùng API phân trang; không tải toàn bộ lịch sử USB để dựng UI.
+- **Admin Server không bắt buộc Docker.** Một JAR Spring Boot được build với `-Pwith-frontend` là đủ để chạy React và API cùng origin trong LAN. H2 lưu ngoài repo; dùng HTTPS reverse proxy nếu truy cập Admin Web từ máy khác. Xem [Hướng dẫn Admin Server LAN](docs/ADMIN_SERVER_LAN_SETUP.md).
+- **Client Agent** cài bằng gói `.deb` được build và kiểm chứng, không mặc định GitHub URL chứa artifact sẵn. `server-url` trỏ về Admin Server trong LAN/VPN, không dùng `localhost` từ Client.
+- **Dịch vụ "không tắt được"** giới hạn với người dùng Ubuntu thông thường **không có sudo/root và không có quyền sửa USBGuard IPC/policy**. Root và quản trị viên hệ điều hành vẫn có quyền dừng/sửa dịch vụ.
+- **Chốt Allow/Revoke theo lần cắm kế tiếp:** Admin thay đổi whitelist của đúng endpoint → Agent kéo và áp dụng local USBGuard policy → xác nhận policy version đã áp dụng (ACK) → người dùng **rút USB ra rồi cắm lại** để USBGuard đánh giá theo policy mới. **Không triển khai** `allow-device`/`block-device` tức thời cho USB vẫn đang cắm trong phạm vi demo. ACK xác nhận áp dụng rule, **không chứng minh** trạng thái của thiết bị đang kết nối đã đổi.
+- **Ubuntu hardware E2E tiếp tục DEFERRED** theo quyết định owner; trạng thái này không đồng nghĩa release FULL PASS. HTTPS vẫn là điều kiện triển khai thực tế ngoài demo cô lập.
+
+---
+
 # 2. Tên đề tài nhóm chốt
 
 ## Xây dựng hệ thống ngăn chặn và quản lý USB Flash Disk trên hệ điều hành Ubuntu
@@ -184,11 +198,17 @@ policyVersion của LAB-PC-01 tăng
         ↓
 USBShield Agent LAB-PC-01 đồng bộ policy
         ↓
-Agent cập nhật USBGuard local policy
+Agent cập nhật USBGuard local policy và gửi ACK thành công
+        ↓
+Người dùng rút Kingston khỏi LAB-PC-01, sau đó cắm lại
+        ↓
+USBGuard đánh giá lần cắm mới theo policy đã áp dụng
         ↓
 LAB-PC-01: Kingston → ALLOW
 LAB-PC-02: Kingston → vẫn BLOCK
 ```
+
+**Revoke:** Admin Revoke Kingston trên LAB-PC-01 → Agent đồng bộ rule và gửi ACK → người dùng rút Kingston rồi cắm lại trên LAB-PC-01 → USBGuard `BLOCK` ở lần cắm mới. Không yêu cầu rút/chặn tức thời thiết bị đang được sử dụng. Nếu chưa thấy policy version áp dụng, **không** coi Allow/Revoke đã có hiệu lực trên client.
 
 ## 4.3. Khi Admin Server tạm thời DOWN
 
@@ -302,6 +322,8 @@ Endpoint A allow USB X
 ≠
 Endpoint B allow USB X
 ```
+
+**Quy trình sử dụng của demo:** Admin Allow/Revoke → đợi Agent áp dụng rule (theo `appliedPolicyVersion`/ACK) → rút USB và cắm lại trên endpoint đó → kiểm tra quyết định mới. Không yêu cầu `allow-device`/`block-device` trên USB còn đang kết nối.
 
 ## 5. Per-endpoint whitelist persist sau reboot
 
@@ -431,8 +453,9 @@ Client user plugs USB
 → local BLOCK
 → Admin receives endpoint + username + USB event
 → Admin Allow on Endpoint A
-→ Agent A syncs
-→ Endpoint A ALLOW
+→ Agent A syncs and ACKs the new policy
+→ User removes USB from Endpoint A, then reinserts it
+→ Endpoint A ALLOW on the new insertion
 → Endpoint B unchanged
 ```
 
@@ -476,6 +499,7 @@ Không làm:
 - remote desktop;
 - email notification bắt buộc;
 - cam kết chống lại root;
+- điều khiển `allow-device`/`block-device` tức thời đối với USB đang kết nối;
 - chứng minh danh tính vật lý của người cắm USB ngoài active Ubuntu session.
 
 Bonus nếu core xong sớm:
@@ -529,9 +553,12 @@ Non-Mass-Storage peripheral vẫn hoạt động.
 
 ```text
 Admin → LAB-PC-01 → Allow USB X
-→ Agent LAB-PC-01 sync policy
-→ USB X ALLOWED tại LAB-PC-01
+→ Agent LAB-PC-01 sync policy and ACK applied version
+→ User removes USB X, then reinserts it on LAB-PC-01
+→ USB X ALLOWED on the new insertion at LAB-PC-01
 ```
+
+**Revoke acceptance:** Admin Revoke USB X → Agent sync/ACK → rút và cắm lại USB X → `BLOCKED` trên lần cắm mới. Không yêu cầu chuyển trạng thái tức thời khi USB vẫn đang cắm.
 
 ## DoD-06: Per-endpoint isolation
 
@@ -636,9 +663,13 @@ Agent fetch whitelist for itself
 reconcile USBGuard rules
         ↓
 ack version 5
+        ↓
+User removes and reinserts the USB
+        ↓
+USBGuard applies the new decision on the next insertion
 ```
 
-Mô hình pull giúp client không cần mở public inbound management port.
+**ACK chỉ xác nhận rule/policy đã được áp dụng ở Agent**, không xác nhận thiết bị đang cắm đã chuyển ngay từ BLOCK sang ALLOW hoặc ngược lại. Mô hình pull giúp client không cần mở public inbound management port.
 
 ---
 
@@ -966,7 +997,7 @@ Ví dụ `LAB-PC-01`:
 - active/recent users;
 - recent USB devices;
 - whitelist của **LAB-PC-01**;
-- Allow/Revoke trên máy này.
+- Allow/Revoke trên máy này (hiệu lực được kiểm tra khi rút USB rồi cắm lại sau khi Agent đồng bộ).
 
 ## 16.5. Event History
 
@@ -994,9 +1025,12 @@ Endpoints
 → LAB-PC-01
 → Whitelist
 → Allow SanDisk A
+→ Đợi Agent xác nhận applied policy version
+→ Rút SanDisk A và cắm lại tại endpoint đó
+→ Kiểm tra ALLOWED (Revoke thì kiểm tra BLOCKED)
 ```
 
-Không có nút “Allow on all endpoints” trong MVP.
+Không có nút “Allow on all endpoints” trong MVP; không có điều khiển thay đổi trạng thái tức thời của thiết bị đang kết nối.
 
 ---
 
@@ -1706,8 +1740,10 @@ Real Client USB event
 → Admin Server receives
 → Admin Web sees endpoint + username + device
 → Admin Allow on that endpoint
-→ Agent syncs
-→ local USBGuard policy changes
+→ Agent syncs and ACKs
+→ local USBGuard rules change
+→ user removes and reinserts USB
+→ new insertion is ALLOWED on that endpoint
 ```
 
 ### M1
@@ -1760,7 +1796,8 @@ Real Client USB event
 - [ ] real USB event reaches central server.
 - [ ] Event row shows correct endpoint + active Linux user.
 - [ ] Admin can Allow/Revoke for selected endpoint.
-- [ ] Agent applies server desired policy.
+- [ ] Agent applies and ACKs server desired policy.
+- [ ] Sau khi rút USB và cắm lại, quyết định Allow/Revoke mới có hiệu lực trên endpoint; không yêu cầu tác động tức thời lên USB đang cắm.
 - [ ] event stored centrally.
 - [ ] unknown storage stays fail-closed.
 - [ ] Ubuntu graphical user nhận **một native desktop notification** khi unknown Mass Storage bị BLOCK trên máy đó (không phải notification ở Admin Web).
@@ -1950,11 +1987,11 @@ Không giữ code một tuần trên máy cá nhân mới push.
 | T03 | `student01` cắm unknown Flash A | local BLOCK |
 | T04 | Event T03 | Admin thấy endpoint + `student01` + USB + BLOCKED |
 | T05 | Mouse/keyboard USB | hoạt động |
-| T06 | Admin Allow A trên Endpoint 1 | policy version tăng |
-| T07 | Agent 1 sync policy | A ALLOWED trên Endpoint 1 |
-| T08 | Reconnect A trên Endpoint 1 | ALLOWED |
-| T09 | Cùng A trên Endpoint 2 | vẫn BLOCKED |
-| T10 | Admin Revoke A Endpoint 1 | trở lại BLOCKED |
+| T06 | Admin Allow A trên Endpoint 1 | `desiredPolicyVersion` tăng; không khẳng định trạng thái USB đang cắm đã đổi |
+| T07 | Agent 1 sync policy | local rule cập nhật, `appliedPolicyVersion`/ACK xác nhận; chưa yêu cầu USB đang cắm ALLOWED |
+| T08 | Rút A rồi cắm lại trên Endpoint 1 sau T07 | lần cắm mới ALLOWED |
+| T09 | Cùng A cắm trên Endpoint 2 (không whitelist) | vẫn BLOCKED |
+| T10 | Admin Revoke A trên Endpoint 1 → Agent sync/ACK → rút rồi cắm lại A | lần cắm mới BLOCKED; không kiểm tra block tức thời |
 | T11 | Client reboot | Agent/USBGuard auto-start |
 | T12 | Whitelist sau reboot | vẫn đúng |
 | T13 | User switch sang `student02`, cắm USB | event ghi `student02` |
@@ -2031,7 +2068,9 @@ Admin:
 Endpoints → LAB-PC-01 → Kingston → Allow
 ```
 
-Agent sync; reconnect USB và chứng minh ALLOWED.
+Đợi Agent đồng bộ local rule và Admin Web hiển thị đúng `appliedPolicyVersion`/ACK. **Rút USB Kingston ra, cắm lại** trên LAB-PC-01 rồi chứng minh lần cắm mới `ALLOWED`.
+
+Tiếp tục **Revoke** Kingston trên LAB-PC-01 → đợi Agent đồng bộ và ACK → rút rồi cắm lại → chứng minh `BLOCKED`. Không thực hiện hoặc tuyên bố `allow-device`/`block-device` tức thời trên thiết bị đang cắm.
 
 Nhấn mạnh:
 
@@ -2295,7 +2334,7 @@ Admin dùng **React Web Console** trên Admin Server. Client Ubuntu chỉ chạy
 
 ## “Whitelist áp thế nào?”
 
-Whitelist **theo endpoint**. Cùng một USB được Allow ở PC-A vẫn có thể bị Block ở PC-B.
+Whitelist **theo endpoint**. Cùng một USB được Allow ở PC-A vẫn có thể bị Block ở PC-B. Sau khi Admin Allow/Revoke và Agent đồng bộ/ACK, người dùng **rút USB rồi cắm lại** để USBGuard áp quyết định mới; demo không hỗ trợ đổi trạng thái tức thời trên USB đang cắm.
 
 ## “Spring Boot làm gì?”
 
@@ -2403,8 +2442,10 @@ Normal user không được stop/sửa; root/sudo vẫn kiểm soát hệ thốn
 - [ ] local BLOCK.
 - [ ] Admin sees correct endpoint + user.
 - [ ] Allow Endpoint A only.
-- [ ] Endpoint A ALLOW.
-- [ ] Endpoint B unchanged.
+- [ ] Agent A sync/ACK đúng policy version.
+- [ ] Rút USB, cắm lại trên Endpoint A → ALLOW.
+- [ ] Revoke trên A → Agent sync/ACK → rút và cắm lại → BLOCK.
+- [ ] Endpoint B unchanged (vẫn BLOCK khi không whitelist).
 - [ ] reboot PASS.
 - [ ] server-down fail-safe PASS.
 
@@ -2439,7 +2480,11 @@ Admin Server nhận endpoint + user + USB + decision
 ↓
 Admin Web quan sát và thay whitelist theo từng endpoint
 ↓
-Agent endpoint đó đồng bộ local policy
+Agent endpoint đó đồng bộ local policy và gửi ACK
+↓
+Người dùng rút USB, cắm lại
+↓
+USBGuard áp quyết định mới trên lần cắm kế tiếp
 ```
 
 Điểm quan trọng nhất:
@@ -2448,6 +2493,7 @@ Agent endpoint đó đồng bộ local policy
 - Admin quản lý tập trung;
 - user attribution dựa trên active Ubuntu session;
 - whitelist **không global**, mà gắn với từng endpoint;
+- Allow/Revoke áp qua policy sync, **kiểm chứng sau khi rút và cắm lại**, không đổi trạng thái tức thời USB đang cắm;
 - normal user không bypass protection;
 - client phân phối bằng `.deb`;
 - Admin dùng web browser.
