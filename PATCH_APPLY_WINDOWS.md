@@ -41,22 +41,36 @@ catalog/event/whitelist references instead of deleting rows blindly.
 
 ### Verification SQL (existing H2 file)
 
-```sql
-SELECT COUNT(*) AS blank_hash_rows
-FROM usb_devices
-WHERE device_hash IS NOT NULL AND TRIM(device_hash) = '';
+**Only after a successful startup migration**, H2 can check the remaining
+non-NULL hashes. The migration uses Java `String.isBlank()` as its authoritative
+predicate (tabs, newlines and Java-defined Unicode whitespace included);
+ordinary SQL `TRIM()` is **not equivalent** and must not be used as a pass gate.
 
+```sql
+-- H2 uses Java regex; javaWhitespace mirrors Character.isWhitespace,
+-- the predicate underlying String.isBlank(). Expected: no rows after upgrade.
+SELECT id, device_hash
+FROM usb_devices
+WHERE device_hash IS NOT NULL
+  AND REGEXP_LIKE(device_hash, '^\p{javaWhitespace}*$');
+
+-- All remaining non-NULL hashes should be distinct after a successful start.
 SELECT device_hash, COUNT(*) AS duplicate_count
 FROM usb_devices
-WHERE device_hash IS NOT NULL AND TRIM(device_hash) <> ''
+WHERE device_hash IS NOT NULL
 GROUP BY device_hash
 HAVING COUNT(*) > 1;
 ```
 
-A fresh DB without `usb_devices` does not require preflight data changes. With
-existing blank hashes, the first query should return 0 after successful startup.
-If the second query has results, application startup correctly refuses to
-continue. Investigate references before an intentional migration.
+The migration unit/integration tests (not this query alone) establish the
+`String.isBlank()` contract; the first query is a supplementary H2 check.
+If an H2 version does not support `javaWhitespace` in `REGEXP_LIKE`, instead
+read all remaining `device_hash` values through JDBC and check each value
+with `hash.isBlank()`; **do not replace the check with `TRIM()`**.
+
+A fresh DB without `usb_devices` does not require preflight data changes.
+If the duplicate query has results, application startup must refuse to
+continue. Back up and investigate references before any intentional repair.
 
 ### Manual application and tests
 

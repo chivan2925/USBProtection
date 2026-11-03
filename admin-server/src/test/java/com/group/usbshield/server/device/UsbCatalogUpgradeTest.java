@@ -6,6 +6,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.UUID;
 
@@ -41,6 +42,60 @@ class UsbCatalogUpgradeTest {
                 assertThat(rows.getLong(1)).isEqualTo(3);
                 assertThat(rows.getLong(2)).isEqualTo(1);
             }
+        }
+    }
+
+    @Test
+    void allJavaBlankIncludingTabsNewlinesAndUnicodeBecomeNull() throws Exception {
+        DataSource ds = source();
+        seed(ds);
+        String[] javaBlanks = {"", "   ", "\t", "\n", "\r\n", "\u2003", "\u3000", " \t\n\u2003 "};
+        // NBSP and FIGURE SPACE are NOT Java-blank (Character.isWhitespace
+        // deliberately excludes these); keep them as real nonblank values.
+        String[] nonBlanks = {"stable-hash", "\u00a0", "\u2007", "\tidentity"};
+        try (Connection connection = ds.getConnection();
+             PreparedStatement insert = connection.prepareStatement(
+                     "INSERT INTO usb_devices(device_hash) VALUES (?)")) {
+            for (String hash : javaBlanks) { insert.setString(1, hash); insert.addBatch(); }
+            for (String hash : nonBlanks) { insert.setString(1, hash); insert.addBatch(); }
+            insert.executeBatch();
+        }
+        UsbCatalogUpgrade.normalizeAndValidate(ds);
+        UsbCatalogUpgrade.normalizeAndValidate(ds);
+        try (Connection connection = ds.getConnection(); Statement sql = connection.createStatement();
+             ResultSet rows = sql.executeQuery(
+                     "SELECT device_hash FROM usb_devices ORDER BY id")) {
+            for (String ignored : javaBlanks) {
+                assertThat(rows.next()).isTrue();
+                assertThat(rows.getString(1)).isNull();
+            }
+            for (String unchanged : nonBlanks) {
+                assertThat(rows.next()).isTrue();
+                assertThat(rows.getString(1)).isEqualTo(unchanged);
+            }
+            assertThat(rows.next()).isFalse();
+        }
+    }
+
+    @Test
+    void duplicateNonblankStillRollsBackJavaBlankCleanup() throws Exception {
+        DataSource ds = source();
+        seed(ds);
+        try (Connection connection = ds.getConnection();
+             PreparedStatement insert = connection.prepareStatement(
+                     "INSERT INTO usb_devices(device_hash) VALUES (?)")) {
+            for (String hash : new String[] {"\t", "same", "same"}) {
+                insert.setString(1, hash); insert.addBatch();
+            }
+            insert.executeBatch();
+        }
+        assertThatThrownBy(() -> UsbCatalogUpgrade.normalizeAndValidate(ds))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("duplicate nonblank device hashes");
+        try (Connection connection = ds.getConnection(); Statement sql = connection.createStatement();
+             ResultSet rows = sql.executeQuery("SELECT device_hash FROM usb_devices ORDER BY id")) {
+            assertThat(rows.next()).isTrue();
+            assertThat(rows.getString(1)).isEqualTo("\t");
         }
     }
 

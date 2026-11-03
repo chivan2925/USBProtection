@@ -122,6 +122,57 @@ class OutboxReliabilityRegressionTest {
         verify(client, never()).sendEvent(anyString(), anyString(), any());
     }
 
+    @Test void failedQuarantineDirectoryFsyncRestoresActiveEvidenceAndStopsThatDrain() throws Exception {
+        java.util.concurrent.atomic.AtomicInteger rejectOnce = new java.util.concurrent.atomic.AtomicInteger(1);
+        OutboxSpoolService outbox = new OutboxSpoolService(properties(100, 1_000_000), mapper()) {
+            @Override protected void syncDirectory(Path directory) throws java.io.IOException {
+                if ("quarantine".equals(directory.getFileName().toString())
+                        && rejectOnce.getAndSet(0) == 1) {
+                    throw new java.io.IOException("simulated quarantine fsync failure");
+                }
+                super.syncDirectory(directory);
+            }
+        };
+        outbox.init();
+        assertTrue(outbox.spool(event("EP-OLD", "foreign")));
+        assertTrue(outbox.spool(event("EP-NEW", "current")));
+        AdminServerClient client = mock(AdminServerClient.class);
+        when(client.sendEvent(eq("EP-NEW"), eq("token"), any())).thenReturn(true);
+        outbox.drainOutbox("EP-NEW", "token", client);
+        assertEquals(2, queued(dir).size(), "Failed quarantine sync must not hide the foreign source");
+        verify(client, never()).sendEvent(anyString(), anyString(), any());
+        outbox.drainOutbox("EP-NEW", "token", client);
+        assertTrue(queued(dir).isEmpty());
+        verify(client, times(1)).sendEvent(eq("EP-NEW"), eq("token"), any());
+        try (var evidence = Files.list(dir.resolve("spool/quarantine"))) {
+            assertEquals(1, evidence.count(), "Foreign evidence must survive in quarantine");
+        }
+    }
+
+    @Test void repeatedQuarantineFsyncFailureBlocksSubsequentDrainsUntilRecovery() throws Exception {
+        java.util.concurrent.atomic.AtomicBoolean failing = new java.util.concurrent.atomic.AtomicBoolean(true);
+        OutboxSpoolService outbox = new OutboxSpoolService(properties(100, 1_000_000), mapper()) {
+            @Override protected void syncDirectory(Path directory) throws java.io.IOException {
+                if ("quarantine".equals(directory.getFileName().toString()) && failing.get()) {
+                    throw new java.io.IOException("simulated persistent quarantine fsync failure");
+                }
+                super.syncDirectory(directory);
+            }
+        };
+        outbox.init();
+        assertTrue(outbox.spool(event("EP-OLD", "foreign")));
+        assertTrue(outbox.spool(event("EP-NEW", "current")));
+        AdminServerClient client = mock(AdminServerClient.class);
+        when(client.sendEvent(eq("EP-NEW"), eq("token"), any())).thenReturn(true);
+        outbox.drainOutbox("EP-NEW", "token", client);
+        outbox.drainOutbox("EP-NEW", "token", client);
+        verify(client, never()).sendEvent(anyString(), anyString(), any());
+        failing.set(false);
+        outbox.drainOutbox("EP-NEW", "token", client);
+        assertTrue(queued(dir).isEmpty());
+        verify(client, times(1)).sendEvent(eq("EP-NEW"), eq("token"), any());
+    }
+
     @Test void quarantinedEvidenceConsumesQuotaUntilOperatorIntervention() throws Exception {
         OutboxSpoolService outbox = new OutboxSpoolService(properties(1, 1_000_000), mapper());
         outbox.init();
