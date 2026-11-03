@@ -139,8 +139,11 @@ public class EventSenderService {
         }
 
         // Nếu gửi thất bại hoặc chưa có kết nối, lưu vào hàng đợi đệm ngoại tuyến
-        if (!sent) {
-            outboxSpoolService.spool(payload);
+        if (!sent && !outboxSpoolService.spool(payload)) {
+            // Returning normally would falsely acknowledge an audit event that
+            // neither reached the server nor became durable on disk.
+            // USBGuard enforcement stays independent; callers must see failure.
+            throw new IllegalStateException("CRITICAL: USB event was neither sent nor durably queued");
         }
     }
 
