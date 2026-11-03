@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 @Repository
 public interface EndpointRepository extends JpaRepository<Endpoint, Long> {
@@ -16,5 +18,6 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long> {
     @org.springframework.data.jpa.repository.Query("select e from Endpoint e where e.id = (select min(root.id) from Endpoint root)")
     Optional<Endpoint> lockDeviceCatalogCoordinator();
     Optional<Endpoint> findByMachineId(String machineId);
+    List<Endpoint> findByEndpointIdIn(Collection<String> endpointIds);
     boolean existsByEndpointId(String endpointId);
 }

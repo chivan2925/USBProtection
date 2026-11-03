@@ -28,9 +28,9 @@ const props = {
   state: { status: 'ready', data: { devices, whitelist: [{ id: 'rule-a', endpointId: 'a', name: 'WHITELIST_RULE_DEVICE', vendorId: '0951', productId: '1666', addedAt: '2026-10-14T10:00:00Z' }], endpoints: [{ id: 'a', name: 'TEST_ENDPOINT', status: 'online' }], events: [] } },
   refresh() {}, refreshButton: null,
 }
-test('whitelist uses rules rather than event ALLOWED states; blocked list uses observations', () => {
-  const whitelist = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'whitelist' }))
-  const blocked = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'blocked' }))
+test('demo whitelist uses rules rather than ALLOWED event states; demo blocked list uses observations', () => {
+  const whitelist = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'whitelist', demo: true }))
+  const blocked = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'blocked', demo: true }))
   assert.ok(whitelist.includes('WHITELIST_RULE_DEVICE'))
   assert.ok(!whitelist.includes('ALLOWED_TEST_DEVICE'))
   assert.ok(!whitelist.includes('BLOCKED_TEST_DEVICE'))
@@ -40,11 +40,18 @@ test('whitelist uses rules rather than event ALLOWED states; blocked list uses o
   assert.ok(!blocked.includes('DETECTED_TEST_DEVICE'))
   assert.ok(whitelist.includes('href="#/endpoints/a"'))
 })
-test('endpoint detail does not display devices belonging to another endpoint', () => {
-  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...props, endpointId: 'a' }))
+test('demo endpoint detail does not display devices belonging to another endpoint', () => {
+  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...props, endpointId: 'a', demo: true }))
   assert.ok(html.includes('ALLOWED_TEST_DEVICE'))
   assert.ok(html.includes('DETECTED_TEST_DEVICE'))
   assert.ok(!html.includes('BLOCKED_TEST_DEVICE'))
+})
+test('production pages never treat snapshot audit preview as a complete device inventory', () => {
+  const blocked = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'blocked' }))
+  const endpoint = renderToStaticMarkup(createElement(EndpointDetail, { ...props, endpointId: 'a' }))
+  assert.ok(!blocked.includes('BLOCKED_TEST_DEVICE'))
+  assert.ok(!endpoint.includes('ALLOWED_TEST_DEVICE'))
+  assert.ok(!endpoint.includes('DETECTED_TEST_DEVICE'))
 })
 test('event page shows only the newest ten records on the first page', () => {
   const events = Array.from({ length: 12 }, (_, index) => ({ id: String(index), type: 'connected', timestamp: new Date(Date.UTC(2026, 8, 26, index)).toISOString(), deviceName: `EVENT_TEST_${String(index).padStart(2, '0')}` }))

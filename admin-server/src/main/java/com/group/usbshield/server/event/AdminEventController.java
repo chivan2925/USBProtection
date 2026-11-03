@@ -5,6 +5,7 @@ import com.group.usbshield.server.agentapi.dto.AgentUsbDeviceDto;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
@@ -17,11 +18,40 @@ public class AdminEventController {
     private final EndpointRepository endpoints;
     public record EventResponse(Long id,String endpointId,String hostname,String linuxUsername,Long linuxUid,String sessionId,String sessionType,String seat,Long usbDeviceId,AgentUsbDeviceDto device,String eventType,String decision,Instant occurredAt,Instant receivedAt){}
     public record EventPage(List<EventResponse> content,int page,int size,long totalElements,int totalPages){}
-    private EventResponse view(UsbEvent e){
-        var device=e.getUsbDeviceId()==null?null:devices.findById(e.getUsbDeviceId()).map(d->AgentUsbDeviceDto.builder().vendorId(d.getVendorId()).productId(d.getProductId()).serial(d.getSerialNumber()).name(d.getDeviceName()).hash(d.getDeviceHash()).interfaceClass(d.getInterfaces()).build()).orElse(null);
-        String hostname=e.getHostname()!=null?e.getHostname():endpoints.findByEndpointId(e.getEndpointId()).map(Endpoint::getHostname).orElse(null);
-        return new EventResponse(e.getId(),e.getEndpointId(),hostname,e.getLinuxUsername(),e.getLinuxUid(),e.getSessionId(),e.getSessionType(),e.getSeat(),e.getUsbDeviceId(),device,e.getEventType(),e.getDecision(),e.getOccurredAt(),e.getReceivedAt());
+    private static AgentUsbDeviceDto deviceDto(UsbDevice d) {
+        return AgentUsbDeviceDto.builder().vendorId(d.getVendorId()).productId(d.getProductId())
+            .serial(d.getSerialNumber()).name(d.getDeviceName()).hash(d.getDeviceHash())
+            .interfaceClass(d.getInterfaces()).build();
     }
+
+    private EventResponse view(UsbEvent e, Map<Long, UsbDevice> byDevice,
+                               Map<String, String> fallbackHostnames) {
+        UsbDevice d = e.getUsbDeviceId() == null ? null : byDevice.get(e.getUsbDeviceId());
+        String hostname = e.getHostname() == null ? fallbackHostnames.get(e.getEndpointId()) : e.getHostname();
+        return new EventResponse(e.getId(), e.getEndpointId(), hostname, e.getLinuxUsername(),
+            e.getLinuxUid(), e.getSessionId(), e.getSessionType(), e.getSeat(),
+            e.getUsbDeviceId(), d == null ? null : deviceDto(d), e.getEventType(),
+            e.getDecision(), e.getOccurredAt(), e.getReceivedAt());
+    }
+
+    // Batch metadata on one page: O(1) extra queries, not one lookup per event.
+    private List<EventResponse> views(List<UsbEvent> batch) {
+        if (batch.isEmpty()) return List.of();
+        Set<Long> deviceIds = new HashSet<>();
+        Set<String> fallbackIds = new HashSet<>();
+        for (UsbEvent e : batch) {
+            if (e.getUsbDeviceId() != null) deviceIds.add(e.getUsbDeviceId());
+            if (e.getHostname() == null) fallbackIds.add(e.getEndpointId());
+        }
+        Map<Long, UsbDevice> byDevice = new HashMap<>();
+        if (!deviceIds.isEmpty()) devices.findAllById(deviceIds).forEach(d -> byDevice.put(d.getId(), d));
+        Map<String, String> byHostname = new HashMap<>();
+        if (!fallbackIds.isEmpty()) endpoints.findByEndpointIdIn(fallbackIds)
+            .forEach(e -> byHostname.put(e.getEndpointId(), e.getHostname()));
+        return batch.stream().map(e -> view(e, byDevice, byHostname)).toList();
+    }
+
+    @Transactional(readOnly = true)
     @GetMapping public EventPage list(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size,
         @RequestParam(required=false) String endpointId,@RequestParam(required=false) String linuxUsername,
         @RequestParam(required=false) String decision,@RequestParam(required=false) String eventType,
@@ -67,7 +97,7 @@ public class AdminEventController {
             if(to!=null)p.add(cb.lessThanOrEqualTo(root.get("occurredAt"),to));
             return cb.and(p.toArray(Predicate[]::new));
         },PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"occurredAt","id")));
-        return new EventPage(result.getContent().stream().map(this::view).toList(),page,size,result.getTotalElements(),result.getTotalPages());
+        return new EventPage(views(result.getContent()),page,size,result.getTotalElements(),result.getTotalPages());
     }
     private static String containsPattern(String value) {
         return "%" + value.strip().toLowerCase(Locale.ROOT)
@@ -81,5 +111,9 @@ public class AdminEventController {
             return null;
         }
     }
-    @GetMapping("/{id}") public EventResponse detail(@PathVariable Long id){return view(events.findById(id).orElseThrow(()->new ResponseStatusException(NOT_FOUND,"Event not found")));}
+    @Transactional(readOnly = true)
+    @GetMapping("/{id}") public EventResponse detail(@PathVariable Long id){
+        return views(List.of(events.findById(id).orElseThrow(() ->
+            new ResponseStatusException(NOT_FOUND, "Event not found")))).get(0);
+    }
 }

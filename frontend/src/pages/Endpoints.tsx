@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Badge, EmptyState, PageHeading, Panel, ResourceNotice } from '../components/Common'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { DataTable } from '../components/DataTable'
@@ -8,6 +8,7 @@ import { EndpointWhitelistPanel } from '../components/endpoint/EndpointWhitelist
 import { EndpointStatusBadge } from '../components/endpoint/EndpointStatusBadge'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
+import { useResource } from '../hooks/useResource'
 import { protectionApi } from '../services/api'
 import { deviceLabels, eventLabels, formatDate, matches, newestFirst } from '../utils/format'
 import type { PageProps } from './types'
@@ -46,15 +47,33 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
   const [showForm, setShowForm] = useState(false)
   const [usbDeviceId, setUsbDeviceId] = useState('')
   const [pending, setPending] = useState<PendingAction>()
+  const [deviceQuery, setDeviceQuery] = useState('')
+  const [devicePage, setDevicePage] = useState(0)
   const auth = useAuth()
   const notify = useToast()
   const endpoint = state.data?.endpoints.find(item => item.id === endpointId)
-  const devices = newestFirst((state.data?.devices ?? []).filter(device => device.endpointId === endpointId), device => device.detectedAt)
+  const loadDevicePage = useCallback((signal: AbortSignal) => {
+    if (demo) return Promise.resolve({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 })
+    return protectionApi.getDevicePage({ page: devicePage, size: 20, endpointId, q: deviceQuery.trim() || undefined }, signal)
+  }, [demo, devicePage, deviceQuery, endpointId])
+  const deviceRead = useResource(loadDevicePage)
+  const { refresh: refreshDevices } = deviceRead
+  useEffect(() => {
+    if (!demo && state.status === 'ready') void refreshDevices()
+  }, [demo, state.status, state.data, refreshDevices])
+  const devices = demo ? newestFirst((state.data?.devices ?? []).filter(device => device.endpointId === endpointId), device => device.detectedAt)
+    : deviceRead.state.status === 'ready' ? deviceRead.state.data.content : []
   const allowableDevices = devices.filter(device => device.usbDeviceId && device.hash)
   const events = newestFirst((state.data?.events ?? []).filter(event => event.endpointId === endpointId), event => event.timestamp)
   const entries = state.data?.whitelist ?? []
   const disabled = demo || !auth?.user || state.status !== 'ready'
   const tableState = { loading: state.status === 'loading', unavailable: state.status === 'unavailable', failed: state.status === 'error' }
+  const deviceTableState = demo ? tableState : { loading: deviceRead.state.status === 'loading',
+    unavailable: deviceRead.state.status === 'unavailable', failed: deviceRead.state.status === 'error' }
+  const devicePagination = !demo && deviceRead.state.status === 'ready'
+    ? { page: deviceRead.state.data.page, size: deviceRead.state.data.size,
+        totalElements: deviceRead.state.data.totalElements, totalPages: deviceRead.state.data.totalPages,
+        onPageChange: (next: number) => { setUsbDeviceId(''); setDevicePage(next) } } : undefined
   const latestUser = events.find(event => event.username)?.username
   const versionsKnown = endpoint?.policyVersion !== undefined && endpoint?.appliedPolicyVersion !== undefined
   const synced = versionsKnown && endpoint.policyVersion === endpoint.appliedPolicyVersion
@@ -68,11 +87,8 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
 
   async function confirmPolicy() {
     if (!pending || disabled) throw new Error('Phiên Admin không hợp lệ hoặc dữ liệu đang tải.')
-    if (pending.action === 'allow') {
-      await protectionApi.allowOnEndpoint(endpointId, pending)
-    } else {
-      await protectionApi.revokeOnEndpoint(endpointId, pending.entryId)
-    }
+    if (pending.action === 'allow') await protectionApi.allowOnEndpoint(endpointId, pending)
+    else await protectionApi.revokeOnEndpoint(endpointId, pending.entryId)
     setShowForm(false)
     setUsbDeviceId('')
     notify('Server đã lưu thay đổi whitelist. Đang tải lại phiên bản; Agent cần áp dụng chính sách.', 'success')
@@ -109,30 +125,34 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
             if (device?.usbDeviceId && device.hash) setPending({ action: 'allow', usbDeviceId: device.usbDeviceId, hash: device.hash })
           }}>
             <p>Endpoint: <strong className="mono">{endpointId}</strong></p>
-            <label htmlFor="usb-device-id">USB đã ghi nhận trên endpoint</label>
+            <label htmlFor="usb-device-id">USB đã ghi nhận trên endpoint (trang hiện tại)</label>
             <select id="usb-device-id" required value={usbDeviceId} onChange={event => setUsbDeviceId(event.target.value)}>
               <option value="">Chọn USB</option>
               {allowableDevices.map(device => <option key={device.id} value={device.usbDeviceId}>{device.name} · HASH: {device.hash}</option>)}
             </select>
-            <p>{allowableDevices.length ? 'Server cấp quyền theo HASH của USB đã chọn, chỉ trên endpoint này.' : 'Chưa có USB với HASH và ID từ backend. Cần Agent gửi sự kiện trước khi cấp quyền.'}</p>
+            <p>{allowableDevices.length ? 'Để chọn USB khác, tìm theo tên/HASH hoặc đổi trang ở bảng USB bên dưới. Quyền chỉ áp dụng trên endpoint này.' : 'Chưa có USB phù hợp với HASH và ID trong trang hiện tại. Hãy tìm hoặc đổi trang bên dưới.'}</p>
             <div className="row-actions"><button className="button primary" type="submit">Kiểm tra và xác nhận</button><button className="button" type="button" onClick={() => setShowForm(false)}>Hủy</button></div>
           </form>
         </Panel>}
-        <Panel title="USB & Policy trên endpoint" subtitle="Quyết định trong sự kiện gần nhất; thay đổi whitelist cần Agent áp dụng">
-          <DataTable {...tableState} rows={devices} label="USB trên endpoint" columns={[
+        <Panel title="USB & Policy trên endpoint" subtitle="Quyết định mới nhất trên toàn bộ USB; tìm kiếm và phân trang tại Server">
+          {!demo && <div className="policy-form"><label htmlFor="endpoint-device-search">Tìm USB trong endpoint này</label>
+            <input id="endpoint-device-search" type="search" value={deviceQuery} onChange={event => { setUsbDeviceId(''); setDevicePage(0); setDeviceQuery(event.target.value) }} placeholder="Tên, HASH, Vendor / Product ID…" /></div>}
+          {!demo && deviceRead.state.status === 'error' && <p role="alert" className="field-error">Không tải được thiết bị: {deviceRead.state.error}</p>}
+          <DataTable {...deviceTableState} rows={devices} label="USB trên endpoint" pagination={devicePagination} columns={[
             { key: 'name', label: 'Thiết bị', render: device => device.name },
             { key: 'serial', label: 'Serial Number', render: device => device.serialNumber ?? '—' },
             { key: 'status', label: 'Quyết định gần nhất', render: device => <Badge tone={device.status === 'allowed' ? 'green' : device.status === 'blocked' ? 'red' : 'neutral'}>{deviceLabels[device.status]}</Badge> },
             { key: 'time', label: 'Thời gian event', render: device => formatDate(device.detectedAt) },
           ]} />
         </Panel>
-        <Panel title="Sự kiện trên endpoint" subtitle="Lịch sử cắm, tháo và kiểm soát USB">
-          <DataTable {...tableState} rows={events} label="Sự kiện trên endpoint" columns={[
+        <Panel title="Sự kiện trên endpoint" subtitle="100 sự kiện gần nhất; xem Event History để tìm trên toàn bộ lịch sử">
+          <DataTable {...tableState} rows={events} label="Sự kiện trên endpoint (100 gần nhất)" columns={[
             { key: 'time', label: 'Thời gian', render: event => formatDate(event.timestamp) },
             { key: 'type', label: 'Sự kiện', render: event => eventLabels[event.type] },
             { key: 'message', label: 'USB / Nội dung', render: event => event.message || event.deviceName || '—' },
             { key: 'user', label: 'Người dùng', render: event => event.username ?? '—' },
           ]} />
+          <a className="panel-link" href="#/events">Mở toàn bộ Event History →</a>
           {events.some(event => event.device?.hash) && <details className="policy-form"><summary>Hash USB trong sự kiện</summary>
             {events.filter(event => event.device?.hash).map(event => <p key={event.id}>{event.deviceName ?? 'USB'}: <code>{event.device?.hash}</code></p>)}
           </details>}
