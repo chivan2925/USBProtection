@@ -11,6 +11,10 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long> {
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select e from Endpoint e where e.endpointId = :id")
     Optional<Endpoint> lockByEndpointId(@org.springframework.data.repository.query.Param("id") String id);
+    /** Catalog-wide transaction lock; all Agent event writers use the same row. */
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select e from Endpoint e where e.id = (select min(root.id) from Endpoint root)")
+    Optional<Endpoint> lockDeviceCatalogCoordinator();
     Optional<Endpoint> findByMachineId(String machineId);
     boolean existsByEndpointId(String endpointId);
 }

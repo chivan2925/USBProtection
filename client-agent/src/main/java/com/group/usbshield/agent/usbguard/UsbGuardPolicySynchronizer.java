@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class UsbGuardPolicySynchronizer {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UsbGuardPolicySynchronizer.class);
     private static final String MANAGED_LABEL = "label \"" + UsbGuardRuleBuilder.MARKER + "\"";
 
     private final UsbGuardCommandRunner runner;
@@ -35,6 +36,14 @@ public class UsbGuardPolicySynchronizer {
 
         requireBlockedDefault();
         List<UsbGuardRuleInfo> before = rules();
+        requireBaseRule(before);
+        requireSafeRuleOrder(before, desired);
+        // The local daemon, not a rejected policy ACK, is the enforcement plane.
+        // Remove unauthorized active ALLOW rules before reporting a successful
+        // reconcile. Never remove the canonical non-storage base or managed rules.
+        // Syntax/ordering validation above must pass BEFORE any mutation.
+        removeForeignAllows();
+        before = rules();
         requireBaseRule(before);
         Map<String, UsbGuardRuleInfo> current = managedRules(before);
         requireNoForeignConflict(before, desired.keySet(), current.keySet());
@@ -91,6 +100,25 @@ public class UsbGuardPolicySynchronizer {
             }
             throw failure;
         }
+    }
+
+    /**
+     * Check local rules without requiring contact with Admin Server. A foreign
+     * ALLOW would otherwise remain usable for the entire network outage.
+     * Unlike reconcile(), this never touches managed grants or their desired
+     * versions; only out-of-band ALLOW rules are withdrawn.
+     */
+    public synchronized void enforceLocalAllowOwnership() {
+        requireBlockedDefault();
+        List<UsbGuardRuleInfo> before = rules();
+        requireBaseRule(before);
+        requireSafeRuleOrder(before, Map.of());
+        removeForeignAllows();
+        requireBlockedDefault();
+        List<UsbGuardRuleInfo> after = rules();
+        requireBaseRule(after);
+        requireNoForeignConflict(after, Set.of(), Set.of());
+        requireSafeRuleOrder(after, Map.of());
     }
 
     public void reconcileLegacy(List<String> legacy) {
@@ -150,11 +178,37 @@ public class UsbGuardPolicySynchronizer {
         return managed;
     }
 
+    private void removeForeignAllows() {
+        // USBGuard rule IDs can be renumbered by a mutation. Re-list before
+        // EACH removal instead of reusing numeric IDs from a stale snapshot.
+        for (int attempt = 0; attempt < 1024; attempt++) {
+            List<UsbGuardRuleInfo> live = rules();
+            requireBaseRule(live);
+            UsbGuardRuleInfo foreign = live.stream()
+                    .filter(rule -> !isManaged(rule) && !rule.isBaseNonStorageRule()
+                            && "allow".equalsIgnoreCase(rule.target()))
+                    .findFirst().orElse(null);
+            if (foreign == null) return;
+            // Never log raw serial/identity material. This change intentionally
+            // withdraws out-of-band grants rather than falsely accepting drift.
+            log.warn("Removing unauthorized foreign USBGuard ALLOW rule id={} to restore fail-closed policy", foreign.ruleId());
+            requireSuccess(runner.run("remove-rule", Long.toString(foreign.ruleId())),
+                    "remove foreign Allow rule");
+            List<UsbGuardRuleInfo> after = rules();
+            requireBaseRule(after);
+            if (after.stream().anyMatch(rule -> rule.ruleId() == foreign.ruleId()
+                    && rule.rawRule().equals(foreign.rawRule()))) {
+                throw new IllegalStateException("USBGuard reported successful removal but foreign ALLOW is still active");
+            }
+        }
+        throw new IllegalStateException("Excessive USBGuard foreign Allow rules; refusing policy ACK");
+    }
+
     private void requireNoForeignConflict(List<UsbGuardRuleInfo> rules, Set<String> desired,
             Set<String> currentManaged) {
         // Server-managed HASH whitelist must be the only mass-storage grant source.
         // A scoped foreign Allow for some other USB is still an unauthorized bypass.
-        // Never delete foreign rules silently: surface the unsafe state for review.
+        // A concurrent foreign insertion or unsuccessful removal must block ACK.
         for (UsbGuardRuleInfo rule : rules) {
             if (isManaged(rule) || rule.isBaseNonStorageRule() || !"allow".equalsIgnoreCase(rule.target())) {
                 continue;

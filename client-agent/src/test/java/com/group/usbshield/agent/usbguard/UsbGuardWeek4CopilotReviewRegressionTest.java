@@ -62,9 +62,13 @@ class UsbGuardWeek4CopilotReviewRegressionTest {
         runner.definitions.add(builder.allowRule(FIRST));
         runner.definitions.add(builder.allowRule(SECOND));
         runner.definitions.add("allow id 1234:abcd serial \"EXTERNAL\"");
-        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of()));
-        assertEquals(4, runner.definitions.size());
-        assertTrue(runner.mutations.isEmpty());
+        // S02 requires removing a valid foreign ALLOW instead of failing while
+        // leaving an unauthorized grant active. USBGuard renumbers rule IDs
+        // after each removal, so subsequent stale managed grants must be
+        // resolved against a fresh list-rules snapshot.
+        sync(runner).reconcile(List.of());
+        assertEquals(List.of(BASE), runner.definitions);
+        assertEquals(List.of("remove:4", "remove:2", "remove:2"), runner.mutations);
     }
 
     @Test
@@ -122,15 +126,16 @@ class UsbGuardWeek4CopilotReviewRegressionTest {
     }
 
     @Test
-    void acceptsKnownForeignAttributesWithoutDeletingThem() {
+    void removesWellFormedForeignAllowWithAdditionalAttributes() {
         RenumberingRunner runner = new RenumberingRunner();
         String foreign = "allow id 1234:abcd name \"External USB\" serial \"EXT\" "
                 + "hash \"abc123=\" parent-hash \"parent=\" via-port \"1-2\" "
                 + "with-interface all-of { 08:06:50 } with-connect-type \"hotplug\" label \"external\"";
         runner.definitions.add(foreign);
-        assertThrows(IllegalStateException.class, () -> sync(runner).reconcile(List.of(FIRST)));
-        assertEquals(foreign, runner.definitions.get(1));
-        assertTrue(runner.mutations.isEmpty(), "Foreign Allow is not silently removed");
+        sync(runner).reconcile(List.of(FIRST));
+        assertFalse(runner.definitions.contains(foreign));
+        assertEquals(1, runner.mutations.stream().filter(it -> it.startsWith("remove:")).count());
+        assertTrue(runner.definitions.stream().anyMatch(it -> it.contains("usbshield-managed")));
     }
 
     @Test

@@ -45,6 +45,11 @@ public class UsbGuardCliGateway implements UsbGuardGateway {
         }
     }
 
+    /** Periodic local safety reconciliation, including when Server is offline. */
+    void enforceLocalAllowOwnership() {
+        synchronizer.enforceLocalAllowOwnership();
+    }
+
     public void reconcile(List<DeviceFingerprint> typed) {
         synchronizer.reconcile(typed);
     }

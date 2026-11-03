@@ -8,6 +8,20 @@ import java.util.List;
 @Component("realUsbGuardGateway") @Primary
 public class AdaptiveUsbGuardGateway implements UsbGuardGateway {
     private final UsbGuardCliGateway gateway = new UsbGuardCliGateway();
+    /** Independent local check; an offline Admin Server must not permit foreign ALLOW bypass. */
+    @org.springframework.scheduling.annotation.Scheduled(
+            fixedDelayString = "${usbshield.agent.foreign-allow-check-interval-ms:15000}")
+    public void withdrawForeignAllows() {
+        if (!System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("linux")) return;
+        try {
+            gateway.enforceLocalAllowOwnership();
+        } catch (RuntimeException failure) {
+            // Never pretend this enforcement check succeeded; keep retrying.
+            org.slf4j.LoggerFactory.getLogger(getClass()).error(
+                    "USBGuard local foreign-rule enforcement FAILED (retry scheduled)", failure);
+        }
+    }
+
     @Override public boolean isAvailable() { return gateway.isAvailable(); }
     @Override public List<UsbDeviceInfo> listDevices() { return gateway.listDevices(); }
     @Override public List<UsbGuardRuleInfo> listRules() { return gateway.listRules(); }
