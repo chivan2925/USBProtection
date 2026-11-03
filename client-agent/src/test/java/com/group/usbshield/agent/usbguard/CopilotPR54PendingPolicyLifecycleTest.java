@@ -118,21 +118,51 @@ class CopilotPR54PendingPolicyLifecycleTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    void fullPendingPolicyMapDoesNotAllocateRejectedEmptyEntries() throws Exception {
+    void emptyStaleQueuesArePrunedBeforeAdmittingNewPolicyTransition() throws Exception {
         presence(21, "Insert", "block", "NewHash=");
         applied(21, "block", "NewHash=");
 
-        // Seed the bound directly: creating 1024 failed USBGuard transitions
-        // would trigger an unrelated expensive retry per device.
+        // These seeded empty entries are stale, not active pending audits.
+        // The listener is expected to prune them before enforcing the bound.
         Field field = UsbGuardEventListener.class.getDeclaredField("pendingPolicies");
         field.setAccessible(true);
         Map<String, ArrayDeque<?>> pending = (Map<String, ArrayDeque<?>>) field.get(listener);
-        for (int i = 0; i < 1024; i++) pending.put("seed-" + i, new ArrayDeque<>());
+        for (int i = 0; i < 1024; i++) pending.put("stale-" + i, new ArrayDeque<>());
 
         applied(21, "allow", "NewHash=");
+        assertEquals(0, listener.trackedPendingPolicyQueueCount(),
+                "Empty stale queues must be removed and the accepted transition drained");
+        verify(sender, times(1)).enqueuePayload(argThat(CopilotPR54PendingPolicyLifecycleTest::policyApplied));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void fullValidPendingPolicyMapRejectsNewKeyWithoutCreatingAnEmptyQueue() throws Exception {
+        // Obtain an actual pending audit for an observed device by failing its
+        // first durable enqueue. Copies remain attached to the same observation
+        // so they cannot be pruned as stale merely to make room.
+        doThrow(new IllegalStateException("spool unavailable"))
+                .when(sender).enqueuePayload(argThat(CopilotPR54PendingPolicyLifecycleTest::policyApplied));
+        presence(21, "Insert", "block", "HashA=");
+        applied(21, "block", "HashA=");
+        applied(21, "allow", "HashA=");
+
+        Field field = UsbGuardEventListener.class.getDeclaredField("pendingPolicies");
+        field.setAccessible(true);
+        Map<String, ArrayDeque<?>> pending = (Map<String, ArrayDeque<?>>) field.get(listener);
+        assertEquals(1, pending.size());
+        ArrayDeque<?> actualPending = pending.values().iterator().next();
+        for (int i = 1; i < 1024; i++) {
+            pending.put("synthetic-attached-" + i, new ArrayDeque<>(actualPending));
+        }
+        assertEquals(1024, listener.trackedPendingPolicyQueueCount());
+
+        presence(22, "Insert", "block", "HashB=");
+        applied(22, "block", "HashB=");
+        applied(22, "allow", "HashB="); // a new key must be rejected at capacity
         assertEquals(1024, listener.trackedPendingPolicyQueueCount(),
-                "A rejected key must not leave an empty ArrayDeque in the bounded map");
-        verify(sender, never()).enqueuePayload(argThat(CopilotPR54PendingPolicyLifecycleTest::policyApplied));
+                "A rejected new key must not allocate an empty queue");
+        verify(sender, times(1)).enqueuePayload(argThat(CopilotPR54PendingPolicyLifecycleTest::policyApplied));
     }
 
     @Test
