@@ -17,7 +17,7 @@ after(async () => { restore?.(); await fixture?.close() })
 const signal = () => new AbortController().signal
 
 // R10/R11: snapshot reads only one preview page and server summaries, not all audit pages.
-test('loads scoped preview and device inventory without scanning audit history', async () => {
+test('loads scoped audit preview without redundant inventory reads', async () => {
   const start = fixture.state.requests.length
   const snapshot = await protectionApi.getSnapshot(signal(), 'A')
   assert.equal(snapshot.events.length, 1)
@@ -28,11 +28,12 @@ test('loads scoped preview and device inventory without scanning audit history',
   assert.equal(snapshot.overview.blockedToday, 1)
   assert.equal(snapshot.overview.onlineEndpoints, 1)
   assert.equal(snapshot.overview.offlineEndpoints, 1)
-  assert.equal(snapshot.devices.length, 1, 'selected endpoint has isolated device inventory')
+  assert.equal(snapshot.devices.length, 0, 'endpoint detail owns the paged device fetch')
   assert.ok(fixture.state.requests.some(item => item.path === '/api/admin/endpoints/A'))
   const reads = fixture.state.requests.slice(start)
   assert.equal(reads.filter(item => item.path === '/api/admin/events').length, 1)
-  assert.ok(reads.some(item => item.path === '/api/admin/device-states'))
+  assert.equal(reads.filter(item => item.path === '/api/admin/device-states').length, 0,
+    'snapshot must not duplicate the endpoint detail device-page request')
   assert.ok(reads.some(item => item.path === '/api/admin/dashboard/summary'))
   assert.equal(reads.filter(item => item.path === '/api/admin/events' && item.query.includes('page=1')).length, 0)
   const global = await protectionApi.getSnapshot(signal())

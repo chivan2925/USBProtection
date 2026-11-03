@@ -303,6 +303,54 @@ try {
   await screenshot('events-week3-endpoint-a.png')
   console.log('PASS: Week 3 HTTP synthetic no-serial storage, UNKNOWN/source timestamp, user-switch history and endpoint A/B isolation (28 persisted events).')
   console.log('PASS: Endpoint/USB searches accept visible names and IDs with server-side filtering/global pagination; Linux User accepts a case-insensitive part of the username.')
+  // Production-path device/endpoint coverage against the *real* Spring/H2
+  // backend seeded above (not demo-mode props or server-side rendering).
+  const inventoryRequests = () => requests.filter(url => {
+    try { return new URL(url).pathname === '/api/admin/device-states' }
+    catch { return false }
+  })
+  let requestStart = inventoryRequests().length
+  await evaluate(`location.hash = '/devices'`)
+  await until(() => bodyHas('Quản lý thiết bị USB') && bodyHas('Windows HTTP QA storage'),
+    'real production device inventory loaded')
+  await delay(400)
+  assert.equal(inventoryRequests().length - requestStart, 1,
+    'initial production device page must not fetch twice')
+  assert.ok(await evaluate('document.querySelectorAll("tbody tr").length >= 2'),
+    'global inventory includes devices across endpoints')
+  await screenshot('devices-prod-api.png')
+
+  requestStart = inventoryRequests().length
+  await evaluate(`location.hash = ${JSON.stringify('#/endpoints/' + encodeURIComponent(endpoint.endpointId))}`)
+  await until(() => bodyHas('USB & Policy trên endpoint') && bodyHas('Windows HTTP QA storage'),
+    'real production endpoint A inventory loaded')
+  await delay(400)
+  assert.equal(inventoryRequests().length - requestStart, 1,
+    'endpoint detail must not prefetch 100 rows and then request page 20')
+  assert.equal(await evaluate(`document.body.innerText.includes('Windows-HTTP-QA-B') &&
+    document.querySelector('h1')?.textContent.includes('Windows-HTTP-QA-B')`), false,
+    'endpoint A detail must not display B identity as its own heading')
+  await screenshot('endpoint-a-prod-api.png')
+
+  const beforeSearch = inventoryRequests().length
+  await fill('#endpoint-device-search', 'no-such-usb-model')
+  // Check the *device inventory panel*, not a possibly unrelated empty table.
+  await until(() => evaluate(`(() => {
+    const panel = document.querySelector('#endpoint-device-search')?.closest('.panel')
+    return panel?.querySelector('.empty-state h3')?.textContent === 'Không tìm thấy kết quả'
+      && panel?.querySelectorAll('tbody tr').length === 0
+      && panel?.textContent.includes('0–0 trên 0 bản ghi')
+  })()`), 'production endpoint search empty result')
+  await delay(400)
+  assert.equal(inventoryRequests().length - beforeSearch, 1,
+    'changing endpoint search must request exactly one filtered page')
+  assert.ok(inventoryRequests().some(url =>
+    new URL(url).searchParams.get('endpointId') === endpoint.endpointId &&
+    new URL(url).searchParams.get('q') === 'no-such-usb-model'))
+  assert.equal(await evaluate(`!!document.querySelector('#endpoint-device-search')
+    ?.closest('.panel')?.querySelector('[role="alert"]')`), false,
+    'zero matching devices is a successful empty response, not an API failure')
+  console.log('PASS: production Devices and EndpointDetail use scoped server pages, no redundant fetches; search executes against real Spring/H2.')
   await evaluate(`document.querySelector('[aria-label="Đăng xuất"]').click()`)
   await until(() => evaluate('!!document.querySelector(".login-page")'), 'real logout')
   await evaluate(`location.hash = '/events'`)
