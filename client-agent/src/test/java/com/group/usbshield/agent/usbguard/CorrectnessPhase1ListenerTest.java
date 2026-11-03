@@ -123,4 +123,22 @@ class CorrectnessPhase1ListenerTest {
         assertEquals("student01", policies.get(1).getLinuxUsername());
         listener.stopListening();
     }
+    @Test void lateOldRemoveRetryDoesNotSuppressRemovalOfNewLifecycle() {
+        // The initial removal failed before it became durable. Its retry must
+        // not install a DISCONNECTED dedup key that belongs to a new insertion.
+        doThrow(new IllegalStateException("quota full")).doNothing()
+                .when(sender).enqueuePayload(argThat(payload -> payload != null
+                        && "DISCONNECTED".equals(payload.getEventType())));
+        presence("Insert");
+        applied("block");
+        presence("Remove");  // failed, queued
+        presence("Insert");
+        applied("block");
+        listener.recoverStalePendingDecisions(); // persist old DISCONNECTED now
+        presence("Remove"); // new physical removal, must not be deduped
+        verify(sender, times(3)).enqueuePayload(argThat(payload -> payload != null
+                && "DISCONNECTED".equals(payload.getEventType())));
+        listener.stopListening();
+    }
+
 }

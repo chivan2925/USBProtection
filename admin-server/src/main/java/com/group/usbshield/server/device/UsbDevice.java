@@ -46,8 +46,20 @@ public class UsbDevice {
 
     @PrePersist
     public void prePersist() {
+        normalizeHash();
         if (this.createdAt == null) {
             this.createdAt = Instant.now();
         }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        normalizeHash();
+    }
+
+    private void normalizeHash() {
+        // Reject all whitespace-only identities as absent, not as an alias
+        // shared by unrelated physical USB devices.
+        if (this.deviceHash != null && this.deviceHash.isBlank()) this.deviceHash = null;
     }
 }

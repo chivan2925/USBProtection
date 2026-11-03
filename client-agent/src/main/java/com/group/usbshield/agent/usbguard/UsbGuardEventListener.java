@@ -662,7 +662,9 @@ public class UsbGuardEventListener {
 
     private void retryPendingRemovals() {
         while (!pendingRemovals.isEmpty()) {
-            if (!sendAudit(pendingRemovals.getFirst())) break;
+            // Retrying an old removal must not update dedup state for a new
+            // lifecycle that reused the same runtime ID/hash.
+            if (!sendAudit(pendingRemovals.getFirst(), true)) break;
             pendingRemovals.removeFirst();
         }
     }
@@ -701,6 +703,10 @@ public class UsbGuardEventListener {
 
     /** Returns true only after the event was successfully queued, or already queued. */
     private boolean sendAudit(PendingAudit audit) {
+        return sendAudit(audit, false);
+    }
+
+    private boolean sendAudit(PendingAudit audit, boolean staleRemovalRetry) {
         UsbDeviceInfo device = audit.device();
         String eventType = audit.eventType();
         String target = audit.target();
@@ -712,7 +718,7 @@ public class UsbGuardEventListener {
         Long old = recent.get(key);
         // POLICY_APPLIED transitions have their own FIFO/dedup state. The same
         // final target can legitimately recur after an intervening transition.
-        if (!"POLICY_APPLIED".equals(eventType)
+        if (!staleRemovalRetry && !"POLICY_APPLIED".equals(eventType)
                 && old != null && now >= old && now - old < DEDUP_WINDOW_MILLIS) return true;
         // Build the payload inside the failure boundary too: enrollment may not
         // be ready yet, and a rejected event must remain retryable.
@@ -734,13 +740,15 @@ public class UsbGuardEventListener {
                 recent.keySet().removeIf(k -> k.startsWith(id + ":" + device.runtimeId() + ":")
                         && k.contains(":DISCONNECTED:"));
             }
-            if (recent.size() >= MAX_RECENT_EVENTS && !recent.containsKey(key)) {
-                recent.entrySet().removeIf(entry -> now < entry.getValue() || now - entry.getValue() > DEDUP_WINDOW_MILLIS);
-                if (recent.size() >= MAX_RECENT_EVENTS) recent.entrySet().stream()
-                        .min(Comparator.comparingLong(Map.Entry::getValue))
-                        .ifPresent(entry -> recent.remove(entry.getKey(), entry.getValue()));
+            if (!staleRemovalRetry) {
+                if (recent.size() >= MAX_RECENT_EVENTS && !recent.containsKey(key)) {
+                    recent.entrySet().removeIf(entry -> now < entry.getValue() || now - entry.getValue() > DEDUP_WINDOW_MILLIS);
+                    if (recent.size() >= MAX_RECENT_EVENTS) recent.entrySet().stream()
+                            .min(Comparator.comparingLong(Map.Entry::getValue))
+                            .ifPresent(entry -> recent.remove(entry.getKey(), entry.getValue()));
+                }
+                recent.put(key, now);
             }
-            recent.put(key, now);
             return true;
         } catch (RuntimeException error) {
             log.error("USB event durable queue failed; USBGuard remains independent", error);

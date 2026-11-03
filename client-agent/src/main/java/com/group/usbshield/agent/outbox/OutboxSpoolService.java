@@ -11,11 +11,13 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -118,6 +120,11 @@ public class OutboxSpoolService {
             }
             movePublished(temporary, target);
             lastLogicalTimestamp = nextTimestamp;
+            // FileOutputStream.fd.sync only persists file contents. On Linux,
+            // publishing a new filename is not crash-durable until the parent
+            // directory entry is synced too. On failure report non-durability;
+            // never delete the published evidence file.
+            syncDirectory(spoolPath);
             log.warn("[OUTBOX-SPOOL] Admin Server unreachable. Event saved to disk: {}", fileName);
             return true;
         } catch (Exception error) {
@@ -154,6 +161,16 @@ public class OutboxSpoolService {
         catch (AtomicMoveNotSupportedException notSupported) { Files.move(source, target); }
     }
 
+    private static void syncDirectory(Path directory) throws IOException {
+        // Linux deployment guarantee: directory fsync required after publish.
+        // Windows cannot reliably open a directory with FileChannel; its native
+        // crash semantics require separate validation and are not claimed here.
+        if (!System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("linux")) return;
+        try (FileChannel channel = FileChannel.open(directory, StandardOpenOption.READ)) {
+            channel.force(true);
+        }
+    }
+
     /**
      * Preserve rejected/corrupted source bytes for an operator instead of
      * losing evidence or letting one foreign identity block all current events.
@@ -173,6 +190,8 @@ public class OutboxSpoolService {
                 destination = directory.resolve(UUID.randomUUID() + "_" + name);
             }
             movePublished(source, destination);
+            syncDirectory(spoolPath);
+            syncDirectory(directory);
             try { Files.setPosixFilePermissions(destination, PosixFilePermissions.fromString("rw-------")); }
             catch (UnsupportedOperationException windows) { /* Unsupported on Windows. */ }
             catch (IOException permissions) {
