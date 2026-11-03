@@ -275,6 +275,15 @@ public class UsbGuardEventListener {
                     observed.remove(queued.runtimeId(), prior);
                     pendingInserts.remove(queued.runtimeId());
                     notifiedRuntime.remove(queued.runtimeId());
+                    // Treat a confirmed missed Remove exactly like an observed
+                    // Remove: neither the short event dedup window nor the desktop
+                    // notification cooldown may suppress a physical reinsertion.
+                    String recentPrefix = identity(queued) + ":" + queued.runtimeId() + ":";
+                    recent.keySet().removeIf(key -> key.startsWith(recentPrefix));
+                    try { desktopNotificationService.onUsbRemoved(prior.user(), queued); }
+                    catch (RuntimeException failure) {
+                        log.warn("Notifier cleanup failed after missed USB removal: {}", failure.getMessage());
+                    }
                 }
             }
         }
