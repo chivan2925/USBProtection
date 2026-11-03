@@ -97,7 +97,7 @@ Mỗi máy Ubuntu cần bảo vệ là một **endpoint/client**. Admin quản l
 - Giữ kiến trúc USBGuard + systemd Agent + một Spring Boot Admin Server + React. Không bổ sung microservices, Kafka, Redis, Kubernetes hoặc hệ quản trị nhiều server chỉ vì tính "enterprise". Chấp nhận global USB catalog lock và H2 file mode ở quy mô demo; không đưa ra cam kết throughput nhiều endpoint.
 - **Outbox** giữ giới hạn bộ nhớ đệm/bằng chứng và báo lỗi khi không bền vững; cache quota cho single-writer Agent và quét lại khi thư mục thay đổi/ghi lỗi, không xây dựng queue engine mới. Operator không sửa in-place các file spool khi Agent đang chạy; cần dừng/khởi động lại sau can thiệp.
 - **Frontend** ưu tiên API-backed request tests và loại bỏ request trùng. Dashboard dùng tổng hợp backend; danh sách thiết bị dùng API phân trang; không tải toàn bộ lịch sử USB để dựng UI.
-- **Admin Server không bắt buộc Docker.** Một JAR Spring Boot được build với `-Pwith-frontend` là đủ để chạy React và API cùng origin trong LAN. H2 lưu ngoài repo; dùng HTTPS reverse proxy nếu truy cập Admin Web từ máy khác. Xem [Hướng dẫn Admin Server LAN](docs/ADMIN_SERVER_LAN_SETUP.md).
+- **Admin Server không bắt buộc Docker.** Một JAR Spring Boot được build với `-Pwith-frontend` là đủ để chạy React và API cùng origin trong LAN. H2 lưu ngoài repo; dùng HTTPS reverse proxy nếu truy cập Admin Web từ máy khác. Xem [Hướng dẫn Admin Server LAN](docs/RUN_GUIDE.md).
 - **Client Agent** cài bằng gói `.deb` được build và kiểm chứng, không mặc định GitHub URL chứa artifact sẵn. `server-url` trỏ về Admin Server trong LAN/VPN, không dùng `localhost` từ Client.
 - **Dịch vụ "không tắt được"** giới hạn với người dùng Ubuntu thông thường **không có sudo/root và không có quyền sửa USBGuard IPC/policy**. Root và quản trị viên hệ điều hành vẫn có quyền dừng/sửa dịch vụ.
 - **Chốt Allow/Revoke theo lần cắm kế tiếp:** Admin thay đổi whitelist của đúng endpoint → Agent kéo và áp dụng local USBGuard policy → xác nhận policy version đã áp dụng (ACK) → người dùng **rút USB ra rồi cắm lại** để USBGuard đánh giá theo policy mới. **Không triển khai** `allow-device`/`block-device` tức thời cho USB vẫn đang cắm trong phạm vi demo. ACK xác nhận áp dụng rule, **không chứng minh** trạng thái của thiết bị đang kết nối đã đổi.
@@ -941,7 +941,7 @@ M2 UsbGuardEventListener + active-user resolver
 Admin Console là một SPA nội bộ:
 
 ```text
-http://<admin-server>:8080
+https://<admin-server-lan-dns>
 ```
 
 Không cần SEO/SSR/Server Components/edge deployment.
@@ -1333,18 +1333,18 @@ Config tối thiểu:
 
 ```yaml
 usbshield:
-  server-url: http://<admin-server>:8080
+  server-url: https://<admin-server-lan-dns>
   enrollment-token: ...
 ```
 
 Sau enrollment lưu endpoint credential ở root-owned config/data.
 
-## 20.2. Admin Server
+## 20.2. Admin Server (xem docs/RUN_GUIDE.md)
 
 MVP có thể chạy trên laptop Admin/development machine:
 
 ```bash
-java -jar usbshield-server.jar
+java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
 ```
 
 JAR chứa React production build và H2 central DB.
@@ -1352,7 +1352,7 @@ JAR chứa React production build và H2 central DB.
 Admin mở browser:
 
 ```text
-http://<admin-server>:8080
+https://<admin-server-lan-dns>
 ```
 
 Trong demo một laptop có thể chạy Admin Server trên host, Ubuntu VM làm Client. Khi demo nhiều endpoint, có thể dùng thêm VM/laptop trong cùng LAN.
@@ -1422,7 +1422,7 @@ usbshield/
 │   ├── ARCHITECTURE.md
 │   ├── DEVELOPER_GUIDE.md
 │   ├── ADMIN_GUIDE.md
-│   ├── CLIENT_INSTALLATION.md
+│   ├── RUN_GUIDE.md
 │   ├── USBGUARD_CORE.md
 │   ├── AGENT_SERVER_PROTOCOL.md
 │   ├── TEST_PLAN.md
@@ -1648,7 +1648,7 @@ release validation report
 | Active-user attribution notes | M2 | M3 |
 | AGENT_SERVER_PROTOCOL | M1 | M3, M2 |
 | DEVELOPER_GUIDE | M1 | tất cả |
-| CLIENT_INSTALLATION | M3 | M2 |
+| RUN_GUIDE (Client + Admin) | M1, M3 | M2 |
 | ADMIN_GUIDE | M4 | M5 |
 | TEST_PLAN | M5 | tất cả |
 | DEMO_SCRIPT | M5 | M1–M4 |
@@ -2195,7 +2195,7 @@ High. Week 2 bàn giao nguyên trạng class dưới `client-agent/.../usbguard/
 9. Event filters.
 10. Troubleshooting policy sync.
 
-## `CLIENT_INSTALLATION.md`
+## `RUN_GUIDE.md`
 
 1. Ubuntu requirements.
 2. Install `.deb`.

@@ -59,7 +59,7 @@ Nhấn **Refresh dữ liệu** để kiểm tra tiến độ. Chưa có ACK khô
 2. Nhấn **Allow on this endpoint**.
 3. Chọn USB đã xuất hiện trong sự kiện của endpoint và có ID/HASH từ backend. Thiết bị không có serial vẫn có thể dùng HASH hợp lệ.
 4. Kiểm tra endpoint và HASH trong hộp xác nhận rồi nhấn **Xác nhận thay đổi**.
-5. Server lưu whitelist; kiểm tra desired/applied bằng **Refresh dữ liệu** cho đến khi Agent ACK phiên bản mới.
+5. Server lưu whitelist; kiểm tra desired/applied bằng **Refresh dữ liệu** cho đến khi Agent ACK phiên bản mới. **Người dùng rút USB ra rồi cắm lại** để USBGuard xét trạng thái ALLOW theo policy đã đồng bộ; không mong thiết bị đang cắm tự chuyển trạng thái.
 
 Nếu chưa có USB phù hợp, cần Agent gửi sự kiện trước. Frontend không cho nhập tên/serial để tự tạo danh tính yếu. Cấp quyền cho endpoint A không cấp quyền cho B.
 
@@ -67,7 +67,7 @@ Nếu chưa có USB phù hợp, cần Agent gửi sự kiện trước. Frontend
 
 1. Trong chi tiết endpoint, tìm entry cần thu hồi ở **Whitelist thiết bị**.
 2. Nhấn **Revoke on this endpoint**, kiểm tra endpoint/entry rồi xác nhận.
-3. Theo dõi phiên bản mới và ACK. Lưu Revoke thành công chưa chứng minh máy thật đã chặn lại USB.
+3. Theo dõi phiên bản mới và ACK. **Rút USB ra rồi cắm lại** để xác minh thiết bị bị BLOCK trên đúng endpoint. Lưu Revoke thành công hoặc ACK không chứng minh USB đang cắm bị chặn tức thời.
 
 Nút xác nhận bị khóa khi đang gửi. Nếu có lỗi, đọc thông báo và thử lại; không coi lỗi mạng là bằng chứng thao tác chưa được server lưu. Refresh để kiểm tra trạng thái hiện tại.
 

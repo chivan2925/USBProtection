@@ -4,10 +4,14 @@ import com.group.usbshield.agent.config.AgentProperties;
 import com.group.usbshield.agent.session.ActiveUserInfo;
 import com.group.usbshield.agent.usbguard.UsbDeviceInfo;
 import org.junit.jupiter.api.BeforeEach;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DesktopNotificationServiceTest {
 
@@ -47,5 +51,49 @@ class DesktopNotificationServiceTest {
         UsbDeviceInfo device = new UsbDeviceInfo(-1, "block", "0951", "1666", "", "Kingston Flash",
                 "hash", java.util.List.of("08:06:50"), true, "block id 0951:1666");
         assertDoesNotThrow(() -> notificationService.notifyBlockedUsb(user, device));
+    }
+
+    private static final ActiveUserInfo USER_W4 = ActiveUserInfo.resolved("student01", 1001L, "3", "wayland", "seat0");
+    private static UsbDeviceInfo deviceForPublisher(String hash, String state, boolean storage) {
+        return new UsbDeviceInfo(11, state, "0951", "1665", "", "Flash", hash,
+                List.of(storage ? "08:06:50" : "03:01:02"), storage, "");
+    }
+
+    @Test
+    void failedPublisherIsNonBlockingAndDoesNotThrowToCaller() throws InterruptedException {
+        AgentProperties properties = new AgentProperties();
+        properties.setNotificationEnabled(true);
+        CountDownLatch attempted = new CountDownLatch(1);
+        AtomicInteger calls = new AtomicInteger();
+        ClientNotificationPublisher publisher = notice -> {
+            calls.incrementAndGet();
+            attempted.countDown();
+            throw new IllegalStateException("desktop helper unavailable");
+        };
+        DesktopNotificationService service = new DesktopNotificationService(properties, publisher);
+        try {
+            assertDoesNotThrow(() -> service.notifyBlockedUsb(USER_W4, deviceForPublisher("hash-A", "block", true)));
+            assertTrue(attempted.await(3, TimeUnit.SECONDS));
+            assertEquals(1, calls.get());
+        } finally {
+            service.stop();
+        }
+    }
+
+    @Test
+    void disabledNotificationDoesNotCallPublisher() {
+        AgentProperties properties = new AgentProperties();
+        properties.setNotificationEnabled(false);
+        AtomicInteger calls = new AtomicInteger();
+        DesktopNotificationService service = new DesktopNotificationService(properties, notice -> {
+            calls.incrementAndGet();
+            return ClientNotificationPublisher.Delivery.DELIVERED;
+        });
+        try {
+            service.notifyBlockedUsb(USER_W4, deviceForPublisher("hash-A", "block", true));
+            assertEquals(0, calls.get());
+        } finally {
+            service.stop();
+        }
     }
 }

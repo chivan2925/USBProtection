@@ -168,16 +168,16 @@ erDiagram
 7. Admin Server lưu trữ sự kiện vào bảng `usb_events` và thông báo tới Admin Console.
 
 ### 5.2. Luồng đồng bộ chính sách (Policy Synchronization Flow)
-1. Định kỳ mỗi 15-30 giây, Client Agent gửi `POST /api/agent/heartbeat` chứa `currentPolicyVersion`, kèm cả `X-Endpoint-Id` và `X-Agent-Token`.
+1. Client Agent định kỳ gửi `POST /api/agent/heartbeat` (mặc định 5 giây trong cấu hình Agent, có thể điều chỉnh), với `currentPolicyVersion` và hai header xác thực `X-Endpoint-Id`/`X-Agent-Token`.
 2. Admin Server kiểm tra nếu `desiredPolicyVersion > currentPolicyVersion`, phản hồi desired version để Agent quyết định đồng bộ.
 3. Client Agent gọi `GET /api/agent/policy` kèm cả `X-Endpoint-Id` và `X-Agent-Token`; cặp credential xác thực và giới hạn request vào một endpoint.
 4. Admin Server chỉ trả về danh sách Whitelist được gán riêng cho máy đó.
-5. Client Agent sinh luật tương thích với USBGuard, cập nhật file `/etc/usbguard/rules.conf` và nạp lại daemon.
+5. Client Agent reconcile bằng CLI USBGuard (`append-rule`, `remove-rule`) qua daemon IPC; ứng dụng Java không tự sửa trực tiếp `rules.conf` hoặc restart daemon trong luồng này. USBGuard quản lý lưu quy tắc theo cấu hình RuleFile/RuleFolder; cần xác nhận persistence qua reboot trên Ubuntu thật.
 6. Client Agent gửi `POST /api/agent/policy/ack` với cùng cặp header xác thực, chỉ sau khi đã áp dụng thành công phiên bản mới.
 
 ---
 
-## 6. Kế hoạch hoàn thiện các tuần tiếp theo (Roadmap)
+## 6. Kế hoạch theo tuần (lịch sử dự án; xem `RUN_GUIDE.md` để chạy hiện tại)
 
 - **Week 1 (Hiện tại):** Khởi tạo Server skeleton, H2 file DB, Freeze DTO & Schema hợp đồng, Unit Test Jackson Parser.
 - **Week 2:** Kết nối Agent ↔ Server thực tế, xử lý outbox spool khi mất mạng, triển khai logic Per-endpoint Whitelist Admin CRUD.

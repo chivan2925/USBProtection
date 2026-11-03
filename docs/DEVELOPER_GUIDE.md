@@ -1,5 +1,8 @@
 # USBShield Admin Server Developer Guide
 
+> **Vận hành và cài đặt:** xem [RUN_GUIDE.md](RUN_GUIDE.md). Tài liệu này giữ kiến trúc, API, build workflow và ghi chú developer; không thay thế runbook triển khai chung.
+
+
 Owner: M1. Updated 2026-11-01 (Asia/Saigon). API contract: frozen v0.2.
 
 This guide covers the Spring Boot Admin Server, its same-origin React bundle,
