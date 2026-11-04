@@ -7,7 +7,7 @@
 > **Backend:** Java 21 + Spring Boot — Admin Server + Ubuntu Client Agent  
 > **Hệ điều hành client mục tiêu MVP:** Ubuntu 24.04 LTS amd64  
 > **Cơ chế enforcement trên client:** USBGuard + systemd  
-> **Database Admin Server (04/11/2026):** PostgreSQL — dịch vụ DB riêng, schema demo khởi tạo bằng Spring Data JPA/Hibernate  
+> **Database Admin Server (04/11/2026):** PostgreSQL + Flyway V1/V2, Hibernate `ddl-auto=validate` — database ứng dụng tách database test; schema hiện hữu yêu cầu baseline có điều kiện  
 > **Phân phối client:** `usbshield-agent_1.0.0_amd64.deb`  
 > **Java runtime trên client:** phương án A — `.deb` khai báo `openjdk-21-jre-headless` là runtime dependency, người dùng không phải tự cài Java bằng tay.
 > **Scope update (từ Week 2):** Thêm desktop notification trên chính Ubuntu Client khi USB Mass Storage bị USBGuard `BLOCK`. **Week 1 được giữ nguyên, không hồi tố yêu cầu notification vào Week 1.**
@@ -18,7 +18,24 @@
 
 ## Cập nhật kiến trúc 04/11/2026 — PostgreSQL
 
-Đây là quyết định **đã có code trên `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`**: thay H2 bằng PostgreSQL cho Admin Server; **không migrate dữ liệu H2 test**, giữ executable JAR cho Server và `.deb` cho Agent. Database `usbshield` (app) tách khỏi `usbshield_test` và `usbshield_browser_test` (test); không cấp test role quyền DDL trên app DB. JDBC, role, build, test và backup: [RUN_GUIDE.md](docs/RUN_GUIDE.md). Các mốc kết quả Week 1–4 dùng H2 chỉ có giá trị lịch sử; PostgreSQL migration không đồng nghĩa Ubuntu hardware E2E đã PASS.
+Đây là quyết định **đã có code trên `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`**: thay H2 bằng PostgreSQL cho Admin Server; **không migrate dữ liệu H2 test**, giữ executable JAR cho Server và `.deb` cho Agent. Database `usbshield` (app) tách khỏi `usbshield_test` và `usbshield_browser_test` (test); không cấp test role quyền DDL trên app DB. JDBC, role, build, test và backup: [RUN_GUIDE.md](docs/RUN_GUIDE.md). Các mốc kết quả Week 1–4 dùng H2 chỉ có giá trị lịch sử; PostgreSQL migration không đồng nghĩa Ubuntu hardware E2E đã PASS.
+
+## Cập nhật triển khai 04/11/2026 — F01–F14 và I03 (hiện hành)
+
+Đây là **addendum kỹ thuật cho HEAD `vinhkhang`**; các phần Week 1–4 phía dưới là kế hoạch/contract lịch sử, không được dùng để phủ nhận phần đã triển khai.
+
+| Phạm vi | Thiết kế hiện hành |
+|---|---|
+| F03 | Đổi mật khẩu trong Admin session, CSRF; reset có kiểm soát bằng profile bảo trì tắt HTTP; phiên cũ bị vô hiệu |
+| F04/F06 | Server/Agent dùng quy tắc HASH hợp lệ; toàn bộ whitelist phải được validate trước khi áp dụng; policy sai **không ACK** |
+| F05/F08 | Storage `live` phải dùng đường dẫn an toàn, không fallback sang `./data`; event timestamp tương lai bất thường bị từ chối, offline event cũ hợp lệ được lưu |
+| I03 | Agent kiểm tra daemon/rules/reconciliation USBGuard và gửi heartbeat; Server lưu `usbguard_reported_status`, `usbguard_checked_at`, tính stale, online và version ACK trước khi hiển thị `Healthy/Degraded/Unavailable/Unknown` |
+| F07 | Flyway quản lý schema V1/V2; Hibernate `validate`. Database `usbshield` cũ phải backup và baseline V1 **chỉ khi đủ điều kiện**; database mới tự migrate |
+| F09/F10/F11 | Khôi phục stale notifier socket với bảo vệ UID/inode/active listener; test Java `usbshield_it_*`/browser `usbshield_e2e_*` cô lập và cleanup |
+| F12/F14 | `/api/admin/endpoints/page` và `/api/admin/whitelist/page` phân trang/lọc tại DB, giảm N+1 HTTP; endpoint API legacy chỉ tương thích có giới hạn |
+| F01/F02/I02 | Ubuntu Agent `live` **bắt buộc HTTPS**, xác thực CA/hostname; Nginx/firewall ACL chỉ mở Agent API cho Client, Admin Web/API cho máy Admin. Không có rate limiting |
+
+**Vận hành:** [RUN_GUIDE.md](docs/RUN_GUIDE.md) là runbook chính; [Flyway baseline](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md), [HTTPS/ACL](docs/PHASE3_HTTPS_ACL_AND_PAGING.md) là hướng dẫn chuyên biệt. [Trạng thái và giới hạn nghiệm thu](docs/IMPLEMENTATION_STATUS_20261104.md). Windows synthetic tests không thay thế Ubuntu USB/GUI/TLS/ACL E2E; **Ubuntu E2E vẫn chưa được xác nhận**.
 
 ## 0. Mục đích của tài liệu này
 

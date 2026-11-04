@@ -1,6 +1,6 @@
 # USBShield — Functional Test Catalog (03/11/2026)
 
-> **Updated 04/11/2026 (`vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`):** Admin Server migrated from H2 to PostgreSQL, with new PostgreSQL persistence and isolated test-database coverage. Original refactor snapshot 03/11 counted 303 `@Test` before/after **at that historical commit**; do not treat that count as current execution results. Test verification after database migration must target PostgreSQL.
+> **Updated 04/11/2026 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`):** Admin Server migrated from H2 to PostgreSQL, with new PostgreSQL persistence and isolated test-database coverage. Original refactor snapshot 03/11 counted 303 `@Test` before/after **at that historical commit**; do not treat that count as current execution results. Test verification after database migration must target PostgreSQL.
 
 ## Nguyên tắc
 
@@ -36,9 +36,16 @@
 
 ## PostgreSQL test isolation (sau migration)
 
-- Maven Admin tests dùng PostgreSQL `usbshield_test` với `USBSHIELD_TEST_DB_PASSWORD`; Hibernate có thể tạo/xóa bảng tại đây. **Không bao giờ trỏ Maven integration suite vào `usbshield` của ứng dụng.**
-- `npm run test:live` và `npm run test:browser:live` dùng role `usbshield_test` trên database `usbshield_browser_test`, schema riêng theo lần chạy; browser tests không cấp quyền cho role test trong `usbshield` ứng dụng. Các schema `usbshield_e2e_*` cũ cần được dọn có kiểm soát.
+- Maven Admin tests dùng PostgreSQL `usbshield_test` với `USBSHIELD_TEST_DB_PASSWORD`; **mỗi integration test class** có schema `usbshield_it_*` riêng, cleanup theo class. Flyway migrate trong schema test và Hibernate `validate` kết quả; test không được nhắm database app. **Không bao giờ trỏ Maven integration suite vào `usbshield` của ứng dụng.**
+- `npm run test:live` và `npm run test:browser:live` dùng role `usbshield_test` trên database `usbshield_browser_test`, schema riêng theo lần chạy; browser tests không cấp quyền cho role test trong `usbshield` ứng dụng. Các schema `usbshield_e2e_*` được cleanup sau khi browser JVM dừng; hard-kill có thể để lại orphan cần dọn có kiểm soát.
 - Đây là test integration trên Windows với event HTTP tổng hợp; không chứng minh USBGuard trên Ubuntu. Ghi PASS sau khi chạy thực tế, không suy từ code/harness.
+
+## Kiểm thử bổ sung Phase 1–3 trên HEAD hiện hành
+
+- **Admin:** `AdminPassword*Test`, `AdminSessionVersionFilterTest` (đổi/reset/invalidated sessions); `UsbHashIdentityTest`, `UsbGuardHealthProjectionTest` (HASH, health+stale); `FlywaySchemaIntegrationTest`, `TestPostgresSchemaSafetyTest`; `EndpointAndWhitelistPaginationIntegrationTest` (filter/count/page và API bounded).
+- **Agent:** `AdminServerClientTlsTest` (HTTPS, CA/hostname, no redirect/fallback), `UsbGuardHealthProbeTest`, `PolicySyncServiceTest`; `NotifierStaleSocketRecoveryTest` có các test **Linux-only**, skip trên Windows là đúng thiết kế.
+- **Frontend:** `phase3_endpoint_whitelist_pagination.test.mjs`, `usbguard-health-contract.test.mjs` và browser-live PostgreSQL test. Kiểm tra `npm test`, lint, build và hai browser-live suites riêng biệt.
+- **Chưa được chứng minh bằng Windows tests:** TLS/ACL thực qua Nginx từ hai nguồn IP riêng, `.deb` postinst/service/reboot, stale socket Ubuntu, USBGuard enforcement, USB thật và GUI notification. Cần ghi evidence mới, không nâng số liệu lịch sử lên làm kết quả nghiệm thu.
 
 ## Xác nhận sau refactor
 

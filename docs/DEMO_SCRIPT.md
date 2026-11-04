@@ -1,6 +1,20 @@
-> **Database scope update (04/11/2026):** `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408` now runs the Admin Server against PostgreSQL. The dated Windows H2 evidence and screenshots below are historical. New browser live tests use the isolated `usbshield_browser_test` with synthetic events; this document does not assert a successful new run. For setup/commands use the canonical [RUN_GUIDE.md](RUN_GUIDE.md).
+> **Historical database migration note (04/11/2026):** `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408` introduced the Admin Server against PostgreSQL. The dated Windows H2 evidence and screenshots below are historical. New browser live tests use the isolated `usbshield_browser_test` with synthetic events; this document does not assert a successful new run. For setup/commands use the canonical [RUN_GUIDE.md](RUN_GUIDE.md).
 
 # USBShield Week 4 demo script
+
+## Current deployment gate — 04/11/2026 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`)
+
+This appendix is a **plan, not fresh execution evidence**. The dated Week 4 S0–S4 evidence below must not be relabeled as current PostgreSQL/HTTPS/Ubuntu PASS.
+
+- Build Admin JAR with React, PostgreSQL **Flyway V1/V2 + Hibernate `validate`**. For a previously-used app DB follow the reviewed baseline guide after backup; for a fresh DB do not baseline. Integration/browser test DBs must be separate.
+- During real LAN demonstration, Agent `live` requires HTTPS with trusted certificate matching the DNS name. Nginx ACL exposes Admin Web/Auth/Admin only to Admin workstation IPs and `/api/agent/**` to Client IPs. Do not permit direct backend HTTP bypass.
+- Demonstrate Server-paged endpoint and global whitelist searches, aggregate totals, password change/reset protections (without exposing secrets), and **USBGuard Healthy/Degraded/Unavailable/Unknown** with checkedAt/ACK/stale distinctions.
+- Run actual Ubuntu `.deb`, native USBGuard Allow/Revoke after reinsert, notifier popup and offline/reboot/ACL cases separately; until performed state **NOT EXECUTED**. `rate limit` is excluded by owner choice.
+
+Use [RUN_GUIDE](RUN_GUIDE.md), [Phase 3 HTTPS/ACL](PHASE3_HTTPS_ACL_AND_PAGING.md), and [Ubuntu acceptance](qa/WEEK4_UBUNTU_ACCEPTANCE.md).
+
+---
+
 
 Owner: M5. Prepared and automatically rehearsed: 2026-10-28 (Asia/Bangkok). Work item: **W4-M5-04**. Script/Q&A and fresh automated Windows fixture/management/Events/packaged-JAR rehearsals are **PASS** on the documented baseline; see the [Week 4 run record](qa/week4-evidence/2026-10-28/windows-regression/README.md). An [actual authenticated browser screencast replay](qa/week4-evidence/2026-10-28/windows-regression/recording/replay.html) contains 207 CDP frames with original capture timings. **No encoded video, audio or narrated live walkthrough was produced.** Ubuntu live demonstration remains **NOT EXECUTED / DEFERRED until after Week 4**.
 

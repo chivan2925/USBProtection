@@ -1,6 +1,6 @@
 # USBShield Admin Web — Hướng dẫn quản trị
 
-**Hướng dẫn UI hiện hành, cập nhật 04/11/2026.** Backend hiện dùng Spring Boot/PostgreSQL trên nhánh `vinhkhang`; các con số PASS ghi bên dưới là **bằng chứng Windows/Week 4 lịch sử chạy trên H2**, không phải kết quả chạy lại sau migration. USB thật vẫn cần Agent/USBGuard trên Ubuntu. Cách build/chạy duy nhất: [RUN_GUIDE.md](RUN_GUIDE.md).
+**Hướng dẫn UI hiện hành (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`, 04/11/2026).** Backend sử dụng Spring Boot/PostgreSQL/Flyway. Các con số Week 4 ở cuối tài liệu là **evidence lịch sử dùng H2**, không phải kết quả chạy lại cho commit hiện tại. USB thật vẫn cần Agent/USBGuard trên Ubuntu. Cách build/chạy duy nhất: [RUN_GUIDE.md](RUN_GUIDE.md).
 
 ## Mở giao diện
 
@@ -9,6 +9,7 @@ Với môi trường phát triển mặc định:
 - Admin Web: `http://127.0.0.1:5173/`.
 - Backend API: `http://127.0.0.1:8080`.
 - Demo chỉ đọc: `http://127.0.0.1:5173/?demo=1#/dashboard`.
+- **Vận hành LAN:** truy cập Admin Web bằng `https://<tên-miền-đúng-chứng-chỉ>/` từ **máy Admin thuộc allowlist**. Máy Ubuntu Client không được mở Web/Login; chỉ Agent gọi `/api/agent/**` qua HTTPS. Đây là cấu hình phải được kiểm thử thực tế, không phải kết quả đã nghiệm thu.
 
 Người phụ trách backend cấp tài khoản Admin qua cấu hình ngoài repository. Không có mật khẩu production mặc định. Bootstrap chỉ tạo tài khoản chưa tồn tại; đổi biến môi trường không đổi mật khẩu tài khoản đã có.
 
@@ -34,11 +35,11 @@ Cookie phiên do trình duyệt quản lý. Frontend không lưu mật khẩu ho
 
 ## Đọc Dashboard và danh sách endpoint
 
-- Dashboard hiển thị thống kê từ lịch sử API đã tải. Số 0 nghĩa là không có bản ghi; dấu `—` nghĩa là chưa có dữ liệu xác định.
+- Dashboard và Endpoints sử dụng số tổng hợp **toàn bộ** từ API PostgreSQL; không đếm dựa trên trang đầu. Số 0 nghĩa là không có bản ghi; dấu `—` nghĩa là chưa có dữ liệu xác định.
 - Protection/service **Chưa xác định** nghĩa là API chưa cung cấp bằng chứng trạng thái bảo vệ.
 - Endpoints hiển thị hostname, ID, ONLINE/OFFLINE, người dùng nếu có, phiên bản policy và thời điểm kết nối gần nhất.
 - ONLINE nghĩa là backend còn thấy heartbeat trong ngưỡng cấu hình. Trạng thái này không tự chứng minh USBGuard đã áp dụng policy.
-- Dùng tìm kiếm/bộ lọc, sau đó nhấn **Xem chi tiết** để quản lý đúng máy.
+- Tìm kiếm/lọc endpoint theo text và trạng thái ONLINE/OFFLINE, chuyển trang (backend lọc trước, phân trang sau). Whitelist tổng hợp cũng có tìm kiếm/phân trang; không gọi lần lượt từng endpoint. Sau đó nhấn **Xem chi tiết** để quản lý đúng máy.
 
 ## Hiểu desired, applied và ACK
 
@@ -52,6 +53,21 @@ Cookie phiên do trình duyệt quản lý. Frontend không lưu mật khẩu ho
 | Endpoint offline, đang chờ | Máy không có heartbeat gần đây; policy chưa đồng bộ phải chờ Agent kết nối và áp dụng. |
 
 Nhấn **Refresh dữ liệu** để kiểm tra tiến độ. Chưa có ACK không tự đồng nghĩa apply thất bại. Backend hiện chưa có trường mô tả lỗi apply riêng; UI không đoán lý do.
+
+## Trạng thái USBGuard và độ mới của báo cáo (I03)
+
+| Trạng thái | Diễn giải |
+|---|---|
+| `Healthy` | Agent báo daemon/rules/reconciliation tốt, báo cáo còn mới, endpoint online và desired/applied version phù hợp |
+| `Degraded` | Agent báo chức năng USBGuard chưa đáp ứng đầy đủ điều kiện policy/health |
+| `Unavailable` | Agent báo không thể sử dụng/kiểm tra USBGuard tại thời điểm probe |
+| `Unknown` | Thiếu kết quả probe, Agent cũ không có trường này, báo cáo stale/offline hoặc không đủ dữ liệu để xác nhận |
+
+Xem thời gian `usbGuardCheckedAt`, cờ `usbGuardStale`, `lastSeen`, desired/applied version riêng biệt; **ACK hoặc ONLINE một mình không chứng minh Healthy**. Nếu data đã stale, không giữ nhãn Healthy trước đó. Health vẫn do Agent báo cáo; nghiệm thu thực tế phải kiểm tra USBGuard/USB trên Ubuntu.
+
+## Đổi mật khẩu Admin (F03)
+
+Khi đã đăng nhập, vào **Settings → Đổi mật khẩu Admin**, nhập mật khẩu hiện tại và mật khẩu mới theo yêu cầu hệ thống, gửi với phiên/CSRF hợp lệ. Sau đổi mật khẩu, các phiên cũ bị vô hiệu hóa; đăng nhập lại bằng mật khẩu mới. Đổi `USBSHIELD_ADMIN_PASSWORD` trong môi trường **không** tự sửa mật khẩu đã lưu. Khi quên mật khẩu cần quy trình **reset bảo trì không mở HTTP**, do người vận hành server thực hiện; không có reset công khai cho Client. Xem [Developer Guide](DEVELOPER_GUIDE.md) và [runbook](RUN_GUIDE.md).
 
 ## Allow USB trên một endpoint
 
@@ -77,7 +93,7 @@ Nút xác nhận bị khóa khi đang gửi. Nếu có lỗi, đọc thông báo
 - **Whitelist:** rule server đã lưu; mở endpoint để Allow/Revoke. Không có quyền Allow toàn hệ thống.
 - **Blocked Devices:** quyết định BLOCKED trong sự kiện gần nhất, không phải phép đo USBGuard thời gian thực.
 - **Event Logs:** xem sự kiện và bộ lọc do phần Event History của M5 cung cấp.
-- **Settings:** thông tin phiên và phạm vi hỗ trợ. Cấu hình dịch vụ chưa có API sẽ được giải thích là chưa khả dụng.
+- **Settings:** đổi mật khẩu Admin có xác thực và quản lý phiên; **API cấu hình USBGuard từ Web vẫn chưa được triển khai** (không được nhầm với health telemetry).
 
 ## Khi gặp lỗi
 
@@ -93,7 +109,7 @@ Nút xác nhận bị khóa khi đang gửi. Nếu có lỗi, đọc thông báo
 
 Demo có nhãn **Dữ liệu mock**, chỉ để xem giao diện và luôn khóa thay đổi policy. Dùng **Thoát demo** để trở lại API thật.
 
-## Xác nhận M4 Week 4
+## Xác nhận M4 Week 4 — chỉ là hồ sơ kiểm thử lịch sử
 
 - `npm test`: 96/96 PASS.
 - `npm run lint`: PASS.

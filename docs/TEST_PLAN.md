@@ -1,6 +1,22 @@
-> **Addendum 04/11/2026 (current `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`):** Admin Server persistence has changed from H2 File Mode to PostgreSQL. T13/T28 and old Week 1–4 H2 results below are **historical evidence** and must **not** be renamed to PostgreSQL PASS. Current verification requires separate `usbshield_test`/`usbshield_browser_test` databases, service restart/persistence and new real-execution logs; Ubuntu hardware E2E remains DEFERRED. Operational steps: [RUN_GUIDE.md](RUN_GUIDE.md).
+> **Historical persistence addendum 04/11/2026 (`vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`):** Admin Server persistence has changed from H2 File Mode to PostgreSQL. T13/T28 and old Week 1–4 H2 results below are **historical evidence** and must **not** be renamed to PostgreSQL PASS. Current verification requires separate `usbshield_test`/`usbshield_browser_test` databases, service restart/persistence and new real-execution logs; Ubuntu hardware E2E remains DEFERRED. Operational steps: [RUN_GUIDE.md](RUN_GUIDE.md).
 
 # TEST PLAN v0.1
+
+## Addendum 04/11/2026 — Gate sau Phase 1/2/3 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`)
+
+Mọi hạng mục dưới đây là **gate cần kiểm chứng**; test Windows do owner báo PASS nhưng không phải Ubuntu E2E/HTTPS ACL proof. Các số liệu Week 1–4 và H2 ở phần lịch sử bên dưới giữ nguyên provenance.
+
+| Gate | Nội dung cần kiểm chứng | Hình thức |
+|---|---|---|
+| P1 | Admin password change/reset, invalidation sessions, HASH validation, malformed policy không ACK, storage fail-closed, clock skew/offline events, USBGuard health/stale | Java/Frontend regression, Ubuntu policy/health |
+| P2 | Flyway V1/V2 fresh và existing DB baseline, Hibernate `validate`; Postgres test schema isolation+cleanup; notifier stale/live socket | PostgreSQL tests, restore backup drill, Ubuntu/Linux IPC |
+| P3 | Endpoint/Whitelist API server-side pagination, search and global totals, no N+1; TLS certificate/hostname, no HTTP/redirect; Nginx ACL | Maven/npm/browser tests, `verify-phase3-https-acl.sh` từ Admin và Client riêng |
+| Ubuntu | `.deb` install/upgrade, USB physical Allow/Revoke/reinsert, mouse/keyboard, offline/reboot, notifier, USBGuard IPC | [Ubuntu acceptance](qa/WEEK4_UBUNTU_ACCEPTANCE.md), **chưa có evidence thực thi mới** |
+
+Chạy test Maven/npm bằng role `usbshield_test`, DB riêng `usbshield_test` và `usbshield_browser_test`; `.env` không commit; không baseline trên database test. [RUN_GUIDE.md](RUN_GUIDE.md) là hướng dẫn chạy duy nhất; [implementation status](IMPLEMENTATION_STATUS_20261104.md) theo dõi trạng thái.
+
+---
+
 
 > **Owner:** Member 5  
 > **Project:** USBShield Ubuntu  

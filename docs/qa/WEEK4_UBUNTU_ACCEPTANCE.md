@@ -2,6 +2,21 @@
 
 # Week 4 — Ubuntu acceptance recording sheets
 
+## Supplement 04/11/2026 — Phase 1–3 Ubuntu/LAN acceptance still required
+
+Source candidate: `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`. This **does not claim execution**. Existing Week 4 sheets below remain historical/incomplete until fresh Ubuntu evidence is attached.
+
+1. **TLS + ACL:** Nginx terminates HTTPS with valid CA/SAN, Admin browser can access Web/Auth/Admin; Client receives proxy 403 for `/`, `/api/auth/**`, `/api/admin/**` and can reach `/api/agent/**` only with Agent authentication. Verify invalid hostname/CA causes Agent connection failure, no HTTP fallback/redirect and no direct access to `18080`/`5432`.
+2. **F05/F09:** Agent `live` refuses relative/unwritable storage; notifier stale Unix socket recovers, live listener preserved, no symlink/foreign inode deletion. Run the Linux-only JUnit cases on Ubuntu and confirm `systemd` user/runtime ACL.
+3. **I03/F06:** Validate `Healthy/Degraded/Unavailable/Unknown`, checkedAt and stale conditions against actual USBGuard daemon and rules. Malformed whitelist must not be ACKed; desired/applied versions and reinsert behavior recorded independently.
+4. **F07:** On a *disposable copy* of an existing app database, take/restore backup and verify Flyway V1 baseline + V2/`validate`; fresh DB migrates automatically. **Never baseline test DB**.
+5. **F12/F14:** Verify pagination/search/status across more than one page, global total counts, one bounded whitelist page rather than per-endpoint HTTP calls; record regressions against A/B isolation.
+
+Evidence should record UTC/local timestamps, source SHA, exact OS/Java/USBGuard version, cert SAN/fingerprint or nonsecret CA identity, Admin/Client source IPs, response codes and redacted logs. Keep token/password/private keys out of evidence. Rate limiting intentionally not implemented per owner decision.
+
+---
+
+
 Owner: M5; technical owners: M1/M2/M3/M4. Prepared: 2026-10-28; source-correction draft against `main` **d5e156a (2026-11-01)** (requires M5 review). Work item: **W4-M5-07**; input to W4-M5-01/02/04/06. **Every runtime case below is NOT EXECUTED / DEFERRED until after Week 4.** This document prepares execution; it contains no new Linux, physical USB, daemon, GUI, package or reboot result.
 
 Sources: [Blueprint](../../USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md), [inventory](WEEK4_TEST_INVENTORY.md), [release validation](WEEK4_RELEASE_VALIDATION.md), [Installation Guide](../CLIENT_INSTALLATION.md), [M3 input](../client-agent/WEEK4_ACCEPTANCE_TEST_CHECKLIST.md), [M2 core](../usbguard/WEEK4_M2_CORE_OPERATIONS_GUIDE.md), [native handoff](../usbguard/WEEK4_M2_M3_M5_UBUNTU_HANDOFF.md) and [M1 handoff](../member1/WEEK4_SERVER_HANDOFF.md). Historical **S4 = `c6cc1df21283588d70a792a37d42870bdea49497`** (unchanged server/frontend); current post-merge notifier baseline **`d5e156afdad382dc19d3b0a7198bf681fd36763e`** (Agent/packaging changed). [Windows execution/evidence PASS](week4-evidence/2026-11-01/m1-integration-regression/README.md); M1 proposed its artifact, group acceptance not selected by M5. Preserve S0 `2013ce7`, S1 `751387b`, S2 `0b72630`, S3 `3efa50b` with original dates/SHA. [S3 evidence](week4-evidence/2026-11-01/m2-part3-regression/README.md) was committed `bf067ef`/merged `c07cb2f`. No Windows result closes Ubuntu cases.
