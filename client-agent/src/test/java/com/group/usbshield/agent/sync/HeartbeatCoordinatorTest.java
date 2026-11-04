@@ -229,4 +229,25 @@ class HeartbeatCoordinatorTest {
         verify(policySyncService, never()).syncPolicy(any());
         verify(outboxSpoolService, never()).drainOutbox(any(), any(), any());
     }
+    @Test
+    void heartbeatIncludesLiveHealthEvidenceWithoutConflatingPolicyAck() {
+        var health = mock(UsbGuardHealthProbe.class);
+        when(health.measure(false)).thenReturn("DEGRADED");
+        when(health.measure(true)).thenReturn("HEALTHY");
+        coordinator = new HeartbeatCoordinator(endpointManager, adminServerClient,
+                policySyncService, outboxSpoolService, null, null, health);
+        var reg = EndpointRegistration.builder().endpointId("EP-H").agentToken("tok-H")
+                .currentPolicyVersion(2L).build();
+        when(endpointManager.ensureEnrolled()).thenReturn(true);
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+        when(adminServerClient.sendHeartbeat(any(HeartbeatRequest.class), eq("tok-H")))
+                .thenReturn(Optional.of(HeartbeatResponse.builder().serverPolicyVersion(2L).build()));
+        coordinator.performHeartbeatCycle();
+        coordinator.performHeartbeatCycle();
+        var captor = ArgumentCaptor.forClass(HeartbeatRequest.class);
+        verify(adminServerClient, times(2)).sendHeartbeat(captor.capture(), eq("tok-H"));
+        assertEquals("DEGRADED", captor.getAllValues().get(0).getUsbGuardStatus());
+        assertEquals("HEALTHY", captor.getAllValues().get(1).getUsbGuardStatus());
+    }
+
 }

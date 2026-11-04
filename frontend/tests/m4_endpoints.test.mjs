@@ -182,12 +182,30 @@ test('management pages clear protected rows during loading, empty, unavailable a
   }
 })
 
-test('Settings explains unavailable service API instead of offering fake controls', () => {
+test('Settings keeps service configuration unavailable and demo read-only', () => {
   const html = renderToStaticMarkup(createElement(Settings))
-  assert.ok(html.includes('API cài đặt dịch vụ chưa có'))
-  assert.ok(html.includes('Chưa xác định'))
+  assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
+  assert.ok(html.includes('dữ liệu stale/offline hiển thị Unknown'))
+  assert.ok(html.includes('Demo chỉ đọc'))
+  assert.ok(!html.includes('admin-old-password'))
+  assert.ok(!html.includes('admin-new-password'))
   assert.ok(!html.includes('<input'))
   assert.ok(!html.includes('<button'))
+})
+
+test('Settings offers password change only to authenticated Admin', () => {
+  const html = renderToStaticMarkup(createElement(
+    AuthContext.Provider,
+    { value: { user: { username: 'test-admin' }, loading: false, error: '', sessionExpired: false } },
+    createElement(Settings),
+  ))
+  assert.ok(html.includes('test-admin'))
+  assert.ok(html.includes('Đổi mật khẩu Admin'))
+  assert.ok(html.includes('id="admin-old-password"'))
+  assert.ok(html.includes('id="admin-new-password"'))
+  assert.ok(html.includes('Đổi mật khẩu và đăng xuất'))
+  assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
+  assert.ok(!html.includes('Allow globally'))
 })
 
 test('expired session shows a persistent login message; fresh login and demo do not', () => {

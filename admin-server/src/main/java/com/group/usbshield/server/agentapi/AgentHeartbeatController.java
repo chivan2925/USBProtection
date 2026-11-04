@@ -21,6 +21,11 @@ public class AgentHeartbeatController {
         // A new Agent explicitly reports UNKNOWN when there is no active graphical session.
         // Older Agent payloads omit this field: leave their previously stored value untouched.
         if(request.getCurrentUser()!=null)e.setCurrentUser(request.getCurrentUser());
+        // Older Agents omit the field; do NOT extend the freshness of a prior report.
+        if (request.getUsbGuardStatus() != null) {
+            e.setUsbGuardReportedStatus(request.getUsbGuardStatus());
+            e.setUsbGuardCheckedAt(Instant.now());
+        }
         return AgentHeartbeatResponse.builder().accepted(true).serverTime(Instant.now()).desiredPolicyVersion(e.getPolicyVersion()).serverPolicyVersion(e.getPolicyVersion()).lastAppliedPolicyVersion(e.getAppliedPolicyVersion()).status("OK").build();
     }
 }

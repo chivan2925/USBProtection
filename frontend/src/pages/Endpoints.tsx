@@ -6,6 +6,7 @@ import { Filters } from '../components/Filters'
 import { Icon } from '../components/Icon'
 import { EndpointWhitelistPanel } from '../components/endpoint/EndpointWhitelistPanel'
 import { EndpointStatusBadge } from '../components/endpoint/EndpointStatusBadge'
+import { UsbGuardStatus } from '../components/endpoint/UsbGuardStatus'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import { useResource } from '../hooks/useResource'
@@ -34,6 +35,7 @@ export function Endpoints({ state, refresh, refreshButton }: PageProps) {
         { key: 'user', label: 'Người dùng', render: endpoint => endpoint.currentUser ?? '—' },
         { key: 'policy', label: 'Policy version', render: endpoint => <span className="mono">{endpoint.policyVersion ?? '—'}</span> },
         { key: 'appliedPolicy', label: 'Last Applied Version', render: endpoint => <span className="mono">{endpoint.appliedPolicyVersion ?? '—'}</span> },
+        { key: 'usbguard', label: 'USBGuard', render: endpoint => <UsbGuardStatus endpoint={endpoint} /> },
         { key: 'seen', label: 'Kết nối gần nhất', render: endpoint => formatDate(endpoint.lastSeenAt) },
         { key: 'action', label: 'Chi tiết', render: endpoint => <a href={`#/endpoints/${encodeURIComponent(endpoint.id)}`}>Xem chi tiết →</a> },
       ]} />
@@ -116,9 +118,10 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
             ['Hostname', endpoint?.hostname], ['IP', endpoint?.ipAddress], ['Hệ điều hành', endpoint?.operatingSystem],
             ['Người dùng hiện tại (backend)', endpoint?.currentUser], ['Người dùng gần nhất (event)', latestUser],
             ['Policy version', endpoint?.policyVersion], ['Last Applied Version', endpoint?.appliedPolicyVersion],
-            ['Kết nối gần nhất', formatDate(endpoint?.lastSeenAt)], ['Endpoint ID', endpoint?.id],
+            ['Kết nối gần nhất', formatDate(endpoint?.lastSeenAt)], ['Kiểm tra USBGuard', formatDate(endpoint?.usbGuardCheckedAt)], ['Endpoint ID', endpoint?.id],
           ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>)}</dl>
           {endpoint && <div className="panel-bottom policy-sync" role="status">
+            <p>Trạng thái USBGuard thực tế: <UsbGuardStatus endpoint={endpoint} />. Healthy yêu cầu kiểm tra daemon và policy còn mới; Last Applied Version chỉ là ACK đã ghi nhận.</p>
             <Badge tone={synced ? 'green' : 'amber'}>{syncMessage}</Badge>
             <p>Desired là phiên bản server muốn áp dụng; Last Applied Version là phiên bản Agent đã ACK.
               {!synced && ' Bấm Refresh dữ liệu để kiểm tra tiến độ. Chưa có ACK không đồng nghĩa áp dụng thất bại.'}

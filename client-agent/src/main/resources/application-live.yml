@@ -12,6 +12,7 @@ usbshield:
     enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:default-enrollment-secret}
     # Production directories on Ubuntu Linux
     data-dir: ${USBSHIELD_DATA_DIR:/var/lib/usbshield-agent}
+    require-absolute-storage: true
     config-dir: ${USBSHIELD_CONFIG_DIR:/etc/usbshield-agent}
     heartbeat-interval-ms: 5000
     notification-enabled: true

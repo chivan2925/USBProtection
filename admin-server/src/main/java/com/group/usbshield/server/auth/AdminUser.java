@@ -24,6 +24,11 @@ public class AdminUser {
     @Column(nullable = false, length = 255)
     private String passwordHash;
 
+    /** Incremented on every password change/reset; invalidates all prior sessions. */
+    @Column(name = "credential_version")
+    @Builder.Default
+    private Long credentialVersion = 0L;
+
     @Column(nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();

@@ -84,4 +84,23 @@ class ServerSecurityAndStatusTest {
         mvc.perform(get("/assets/missing.js")).andExpect(status().isNotFound());
         mvc.perform(get("/api/admin/endpoints")).andExpect(status().isUnauthorized());
     }
+    @Test @WithMockUser(roles="ADMIN")
+    void usbGuardStatusIsStaleOfflineOrPolicyMismatchEvenIfAgentClaimedHealthy() throws Exception {
+        var e = endpoint(null);
+        e.setLastSeen(Instant.now());
+        e.setUsbGuardReportedStatus("HEALTHY");
+        e.setUsbGuardCheckedAt(Instant.now());
+        e.setPolicyVersion(2L);e.setAppliedPolicyVersion(2L);endpoints.saveAndFlush(e);
+        String url = "/api/admin/endpoints/" + e.getEndpointId();
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("HEALTHY"));
+        e.setAppliedPolicyVersion(1L);endpoints.saveAndFlush(e);
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("DEGRADED"));
+        e.setAppliedPolicyVersion(2L);
+        e.setUsbGuardCheckedAt(Instant.now().minusSeconds(200));endpoints.saveAndFlush(e);
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"))
+                .andExpect(jsonPath("$.usbGuardStale").value(true));
+        e.setLastSeen(Instant.now().minusSeconds(200));e.setUsbGuardCheckedAt(Instant.now());endpoints.saveAndFlush(e);
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"));
+    }
+
 }

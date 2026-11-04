@@ -20,13 +20,24 @@ public class PolicySyncService {
     private final AdminServerClient adminServerClient;
     private final UsbGuardGateway usbGuardGateway;
     private final EndpointManager endpointManager;
+    private final UsbGuardHealthProbe healthProbe;
 
+    @org.springframework.beans.factory.annotation.Autowired
     public PolicySyncService(AdminServerClient adminServerClient,
                              UsbGuardGateway usbGuardGateway,
-                             EndpointManager endpointManager) {
+                             EndpointManager endpointManager,
+                             UsbGuardHealthProbe healthProbe) {
         this.adminServerClient = adminServerClient;
         this.usbGuardGateway = usbGuardGateway;
         this.endpointManager = endpointManager;
+        this.healthProbe = healthProbe;
+    }
+
+    /** Backward-compatible constructor for isolated unit tests. */
+    public PolicySyncService(AdminServerClient adminServerClient,
+                             UsbGuardGateway usbGuardGateway,
+                             EndpointManager endpointManager) {
+        this(adminServerClient, usbGuardGateway, endpointManager, null);
     }
 
     /**
@@ -56,20 +67,23 @@ public class PolicySyncService {
         log.info("Applying new policy version {} with {} whitelisted devices",
                 newVersion, policyResponse.getWhitelistedDevices().size());
 
-        // Chuyển đổi danh sách whitelist sang dạng fingerprint cho USBGuard
+        // Server contract is strictly HASH-based. Validate the ENTIRE payload before
+        // invoking USBGuard; a skipped/invalid entry could otherwise be falsely ACKed.
         List<String> fingerprints = new ArrayList<>();
+        java.util.Set<String> seen = new java.util.HashSet<>();
         for (WhitelistedDeviceDto device : policyResponse.getWhitelistedDevices()) {
-            if (device.getFingerprintValue() != null && !device.getFingerprintValue().isBlank()) {
-                fingerprints.add(device.getFingerprintValue());
-            } else if (device.getDeviceHash() != null) {
-                fingerprints.add("hash \"" + device.getDeviceHash() + "\"");
-            } else if (device.getVendorId() != null && device.getProductId() != null) {
-                String rule = String.format("id %s:%s", device.getVendorId(), device.getProductId());
-                if (device.getSerialNumber() != null && !device.getSerialNumber().isBlank()) {
-                    rule += " serial \"" + device.getSerialNumber() + "\"";
-                }
-                fingerprints.add(rule);
+            if (device == null) {
+                log.error("Null whitelist item; rejecting full policy and withholding ACK");
+                return false;
             }
+            String raw = device.getFingerprintValue();
+            String mirrored = device.getDeviceHash();
+            String hash = raw == null ? mirrored : raw;
+            if (!validHash(hash) || (mirrored != null && !mirrored.equals(hash)) || !seen.add(hash)) {
+                log.error("Invalid, conflicting or duplicate HASH in policy; rejecting full policy and withholding ACK");
+                return false;
+            }
+            fingerprints.add(hash);
         }
 
         // Nạp vào USBGuard Engine (qua Adapter của Member 2)
@@ -92,6 +106,9 @@ public class PolicySyncService {
             return false;
         }
 
+        // Keep the complete verified managed-rule set for live health inspection.
+        if (healthProbe != null) healthProbe.recordAppliedHashes(fingerprints);
+
         // Gửi ACK lên Server
         PolicyAckRequest ackRequest = PolicyAckRequest.builder()
                 .appliedPolicyVersion(newVersion)
@@ -111,4 +128,11 @@ public class PolicySyncService {
 
         return true;
     }
+    /** Must remain identical to Server UsbHashIdentity / Agent UsbGuardRuleBuilder HASH guard. */
+    static boolean validHash(String value) {
+        return value != null && value.matches("[a-zA-Z0-9+/=_:.\\-]{1,255}")
+                && value.matches(".*[a-zA-Z0-9].*")
+                && !value.matches("[a-fA-F0-9]{4}:[a-fA-F0-9]{4}");
+    }
+
 }

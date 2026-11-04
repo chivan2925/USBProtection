@@ -13,6 +13,8 @@ public class AgentProperties {
     private long heartbeatIntervalMs = 5000;
     private String dataDir = "/var/lib/usbshield-agent";
     private String configDir = "/etc/usbshield-agent";
+    /** Live Ubuntu must never store credentials/audit under a relative working directory. */
+    private boolean requireAbsoluteStorage = false;
     /** Maximum combined active + quarantined outbox footprint; reject, never evict, when full. */
     private long outboxMaxBytes = 64L * 1024 * 1024;
     /** Maximum active + quarantined event evidence files. */

@@ -7,6 +7,14 @@ export function mapEndpoint(value: unknown): Endpoint {
   const lastSeenAt = readText(data.lastSeen)
   const policyVersion = readVersion(data.policyVersion)
   const appliedPolicyVersion = readVersion(data.appliedPolicyVersion)
+  const health = data.usbGuardStatus
+  if (health != null && !['HEALTHY', 'DEGRADED', 'UNAVAILABLE', 'UNKNOWN'].includes(String(health)))
+    throw new Error('API trả trạng thái USBGuard không hợp lệ.')
+  const checkedAt = readText(data.usbGuardCheckedAt)
+  if (checkedAt !== undefined && !Number.isFinite(Date.parse(checkedAt)))
+    throw new Error('API trả thời gian kiểm tra USBGuard không hợp lệ.')
+  if (data.usbGuardStale != null && typeof data.usbGuardStale !== 'boolean')
+    throw new Error('API trả dấu hiệu stale USBGuard không hợp lệ.')
   if (lastSeenAt !== undefined && !Number.isFinite(Date.parse(lastSeenAt))) {
     throw new Error('API trả lastSeen không hợp lệ.')
   }
@@ -22,5 +30,7 @@ export function mapEndpoint(value: unknown): Endpoint {
     hostname, ipAddress: readText(data.ipAddress), operatingSystem: readText(data.operatingSystem),
     status, currentUser: readText(data.currentUser), lastSeenAt,
     policyVersion, appliedPolicyVersion,
+    usbGuardStatus: health == null ? 'UNKNOWN' : health as Endpoint['usbGuardStatus'],
+    usbGuardCheckedAt: checkedAt, usbGuardStale: data.usbGuardStale === true,
   }
 }

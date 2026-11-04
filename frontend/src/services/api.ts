@@ -93,6 +93,14 @@ export const protectionApi = {
     return protectionApi.getCurrentAdmin()
   },
 
+  async changeAdminPassword(currentPassword: string, newPassword: string): Promise<void> {
+    const result = readObject(await request('/api/admin/account/password', {
+      method: 'POST', body: { currentPassword, newPassword },
+    }))
+    if (result.changed !== true) throw new Error('Máy chủ chưa xác nhận đổi mật khẩu.')
+    clearCsrfToken()
+  },
+
   async logout() {
     await request('/api/auth/logout', { method: 'POST' })
     clearCsrfToken()

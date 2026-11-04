@@ -64,6 +64,11 @@ public class EndpointManager {
         }
 
         Path configuredPath = Path.of(properties.getDataDir());
+        if (properties.isRequireAbsoluteStorage() && !configuredPath.isAbsolute()) {
+            this.storageFilePath = null;
+            log.error("Live Agent dataDir must be absolute; refusing credential storage");
+            return;
+        }
         try {
             if (!Files.exists(configuredPath)) {
                 Files.createDirectories(configuredPath);
@@ -71,21 +76,11 @@ public class EndpointManager {
             this.storageFilePath = configuredPath.resolve("endpoint.json");
             log.info("Endpoint credential storage configured at: {}", storageFilePath);
         } catch (Exception e) {
-            // Chỉ fallback sang ./data nếu dataDir là default Linux path (/var/lib/usbshield-agent)
-            if ("/var/lib/usbshield-agent".equals(properties.getDataDir())) {
-                Path fallbackPath = Path.of("./data");
-                try {
-                    Files.createDirectories(fallbackPath);
-                    this.storageFilePath = fallbackPath.resolve("endpoint.json");
-                    log.info("Fallback credential storage configured at: {}", storageFilePath);
-                } catch (Exception ex) {
-                    this.storageFilePath = null;
-                    log.error("Could not initialize local data storage directory: {}", ex.getMessage());
-                }
-            } else {
-                this.storageFilePath = configuredPath.resolve("endpoint.json");
-                log.warn("Could not pre-create configured dataDir {}, will attempt creation during save: {}", configuredPath, e.getMessage());
-            }
+            // Never relocate credentials under the process working directory.
+            // No durable enrollment is attempted until configured storage is repaired.
+            this.storageFilePath = null;
+            log.error("Cannot initialize configured credential directory {}; enrollment disabled: {}",
+                    configuredPath, e.getMessage());
         }
     }
 
