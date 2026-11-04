@@ -103,8 +103,8 @@ test('invalid device IDs are rejected before HTTP and unsafe endpoint IDs are UR
 test('duplicate events/endpoints fail rather than inflating rows and counts', async () => {
   const original = globalThis.fetch
   const json = data => new Response(JSON.stringify(data), { headers: { 'Content-Type': 'application/json' } })
-  globalThis.fetch = async (path, options) => path === '/api/admin/endpoints'
-    ? json([...fixture.state.endpoints, fixture.state.endpoints[0]]) : original(path, options)
+  globalThis.fetch = async (path, options) => String(path).startsWith('/api/admin/endpoints/page?')
+    ? json({ content: [...fixture.state.endpoints, fixture.state.endpoints[0]], page: 0, size: 20, totalElements: 3, totalPages: 1, onlineEndpoints: 2, offlineEndpoints: 1 }) : original(path, options)
   try { await assert.rejects(protectionApi.getSnapshot(signal()), /endpoint ID bị trùng/) }
   finally { globalThis.fetch = original }
   globalThis.fetch = async (path, options) => path.startsWith('/api/admin/events?')

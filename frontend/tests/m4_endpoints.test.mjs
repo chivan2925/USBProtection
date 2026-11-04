@@ -50,7 +50,7 @@ const baseProps = {
 // --- EndpointsPage ---
 
 test('endpoint rows render with hostname, status, and policy version', () => {
-  const html = renderToStaticMarkup(createElement(Endpoints, baseProps))
+  const html = renderToStaticMarkup(createElement(Endpoints, { ...baseProps, demo: true }))
   assert.ok(html.includes('LAB-PC-01'), 'should render LAB-PC-01')
   assert.ok(html.includes('LAB-PC-02'), 'should render LAB-PC-02')
   assert.ok(html.includes('lab-pc-01.local'), 'should show hostname')
@@ -58,7 +58,7 @@ test('endpoint rows render with hostname, status, and policy version', () => {
 })
 
 test('endpoint list shows ID and distinct policy and applied versions, with a fallback when unapplied', () => {
-  const html = renderToStaticMarkup(createElement(Endpoints, baseProps))
+  const html = renderToStaticMarkup(createElement(Endpoints, { ...baseProps, demo: true }))
   assert.match(html, /<th scope="col">Endpoint ID<\/th>/)
   assert.match(html, /<th scope="col">Policy version<\/th><th scope="col">Last Applied Version<\/th>/)
   assert.match(html, /<td><span class="mono">POC-LAB-PC-01<\/span><\/td>/)
@@ -67,7 +67,7 @@ test('endpoint list shows ID and distinct policy and applied versions, with a fa
 })
 
 test('endpoint list has links to detail pages', () => {
-  const html = renderToStaticMarkup(createElement(Endpoints, baseProps))
+  const html = renderToStaticMarkup(createElement(Endpoints, { ...baseProps, demo: true }))
   assert.ok(html.includes('POC-LAB-PC-01'), 'should link to endpoint detail')
 })
 

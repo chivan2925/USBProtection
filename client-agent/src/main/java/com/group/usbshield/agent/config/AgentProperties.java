@@ -10,6 +10,10 @@ import org.springframework.context.annotation.Configuration;
 public class AgentProperties {
     private String serverUrl = "http://localhost:8080";
     private String enrollmentToken = "default-enrollment-secret";
+    /** Enforced by the live profile before any enrollment/token transmission. */
+    private boolean requireHttps = false;
+    /** Optional PEM CA file for a privately signed HTTPS server (normal hostname verification remains enabled). */
+    private String tlsCaCertificate = "";
     private long heartbeatIntervalMs = 5000;
     private String dataDir = "/var/lib/usbshield-agent";
     private String configDir = "/etc/usbshield-agent";

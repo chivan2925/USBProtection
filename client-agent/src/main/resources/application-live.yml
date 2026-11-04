@@ -7,7 +7,9 @@ spring:
 usbshield:
   agent:
     # Central Admin Server URL
-    server-url: ${USBSHIELD_SERVER_URL:http://localhost:8080}
+    server-url: ${USBSHIELD_SERVER_URL:}
+    require-https: true
+    tls-ca-certificate: ${USBSHIELD_TLS_CA_CERTIFICATE:}
     # Secret enrollment bootstrap token
     enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:default-enrollment-secret}
     # Production directories on Ubuntu Linux

@@ -36,11 +36,16 @@ class UsbGuardWatchReconnectReliabilityTest {
                 ActiveUserInfo.resolved("student", 1000L, "2", "wayland", "seat0"));
         CountDownLatch ipcStarted = new CountDownLatch(1);
         CountDownLatch allowIpc = new CountDownLatch(1);
+        CountDownLatch ipcFinished = new CountDownLatch(1);
         CountDownLatch secondWatch = new CountDownLatch(1);
         when(gateway.listDevices()).thenAnswer(call -> {
             ipcStarted.countDown();
-            if (!allowIpc.await(5, TimeUnit.SECONDS)) throw new IllegalStateException("timeout");
-            return List.of();
+            try {
+                if (!allowIpc.await(5, TimeUnit.SECONDS)) throw new IllegalStateException("timeout");
+                return List.of();
+            } finally {
+                ipcFinished.countDown();
+            }
         });
         String insertion = "[device] PresenceChanged: id=11\n"
                 + "event=Insert\ntarget=block\n"
@@ -66,7 +71,14 @@ class UsbGuardWatchReconnectReliabilityTest {
                 assertTrue(watches.get() >= 2);
             } finally {
                 allowIpc.countDown();
-                listener.stopListening();
+                // Let the mocked blocking IPC complete before stopListening interrupts
+                // the recovery executor; otherwise the test prints an uncaught
+                // InterruptedException even though its assertions all passed.
+                try {
+                    ipcFinished.await(2, TimeUnit.SECONDS);
+                } finally {
+                    listener.stopListening();
+                }
             }
         }
     }

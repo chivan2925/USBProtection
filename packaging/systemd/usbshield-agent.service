@@ -10,8 +10,9 @@ Type=simple
 User=usbshield
 Group=usbshield
 WorkingDirectory=/opt/usbshield-agent
-# Production profile disables synthetic USB events. The separately packaged,
-# root-managed external file supplies absolute writable data/config paths.
+# Root-owned 0600 file: systemd reads it before dropping privileges to usbshield.
+# Mandatory on deployed Ubuntu hosts: HTTPS URL and enrollment token.
+EnvironmentFile=-/etc/usbshield-agent/agent.env
 ExecStart=/usr/bin/java -jar /opt/usbshield-agent/usbshield-agent.jar --spring.profiles.active=live --spring.config.additional-location=file:/etc/usbshield-agent/application.yml
 Restart=on-failure
 RestartSec=2
@@ -19,7 +20,6 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=usbshield-agent
 
-# Hardening options
 ProtectSystem=full
 ProtectHome=read-only
 NoNewPrivileges=true

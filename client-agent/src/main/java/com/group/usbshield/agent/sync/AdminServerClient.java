@@ -9,6 +9,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import java.util.Optional;
+import java.net.URI;
+import java.net.HttpURLConnection;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.CertificateFactory;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 
 @Slf4j
 @Component
@@ -18,14 +29,84 @@ public class AdminServerClient {
     private final AgentProperties properties;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public AdminServerClient(AgentProperties properties) {
-        this(properties, productionRestClient(properties));
+    public AdminServerClient(AgentProperties properties, org.springframework.core.env.Environment environment) {
+        // The active 'live' profile always enforces HTTPS even if external
+        // property sources attempt to override require-https=false.
+        this(properties, productionRestClient(properties,
+                environment.acceptsProfiles(org.springframework.core.env.Profiles.of("live"))));
     }
 
-    private static RestClient productionRestClient(AgentProperties properties) {
-        // Without explicit limits, a stalled TCP peer can block the heartbeat
-        // scheduler or the USB event-listener thread indefinitely.
-        var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+    /** Standalone construction for non-Spring development/test harnesses. */
+    public AdminServerClient(AgentProperties properties) {
+        this(properties, productionRestClient(properties, false));
+    }
+
+    /** Fail before any HTTP request if the live Agent was misconfigured. */
+    static void validateTransport(AgentProperties properties, boolean live) {
+        String value = properties.getServerUrl();
+        try {
+            if (value == null || value.isBlank()) throw new IllegalArgumentException("missing URL");
+            URI uri = new URI(value).parseServerAuthority();
+            if (uri.getHost() == null || uri.getUserInfo() != null || uri.getFragment() != null ||
+                    uri.getRawQuery() != null ||
+                    (uri.getRawPath() != null && !uri.getRawPath().isEmpty() && !"/".equals(uri.getRawPath())) ||
+                    !("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())))
+                throw new IllegalArgumentException("expected bare HTTP(S) server origin");
+            if ((properties.isRequireHttps() || live) && !"https".equalsIgnoreCase(uri.getScheme()))
+                throw new IllegalArgumentException("live Agent requires HTTPS; HTTP fallback is forbidden");
+            if (properties.getTlsCaCertificate() != null && !properties.getTlsCaCertificate().isBlank() &&
+                    !"https".equalsIgnoreCase(uri.getScheme()))
+                throw new IllegalArgumentException("custom CA requires HTTPS");
+        } catch (Exception invalid) {
+            throw new IllegalStateException("Invalid USBShield Agent transport configuration: " + invalid.getMessage(), invalid);
+        }
+    }
+
+    /** Custom CA is trusted through PKIX; HttpsURLConnection's default hostname verifier stays active. */
+    private static javax.net.ssl.SSLSocketFactory pinnedCaSocketFactory(AgentProperties properties) {
+        String caFile = properties.getTlsCaCertificate();
+        if (caFile == null || caFile.isBlank()) return null; // JVM default trust roots + hostname validation
+        try {
+            Path path = Path.of(caFile);
+            if (!path.isAbsolute() || !Files.isRegularFile(path) || Files.isSymbolicLink(path))
+                throw new IllegalArgumentException("CA path must be an absolute regular PEM file");
+            var certificateFactory = CertificateFactory.getInstance("X.509");
+            java.util.Collection<? extends java.security.cert.Certificate> certificates;
+            try (var input = Files.newInputStream(path)) {
+                certificates = certificateFactory.generateCertificates(input);
+            }
+            if (certificates.isEmpty()) throw new IllegalArgumentException("No X.509 CA certificates in PEM");
+            var store = KeyStore.getInstance("PKCS12");
+            store.load(null, null);
+            int index = 0;
+            for (var cert : certificates) store.setCertificateEntry("usbshield-ca-" + index++, cert);
+            var trust = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trust.init(store);
+            var context = SSLContext.getInstance("TLS");
+            context.init(null, trust.getTrustManagers(), new SecureRandom());
+            return context.getSocketFactory();
+        } catch (Exception invalid) {
+            throw new IllegalStateException("Unable to configure HTTPS CA certificate: " + invalid.getMessage(), invalid);
+        }
+    }
+
+    private static RestClient productionRestClient(AgentProperties properties, boolean live) {
+        validateTransport(properties, live);
+        var sslSocketFactory = pinnedCaSocketFactory(properties);
+        var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+                super.prepareConnection(connection, httpMethod);
+                // Never forward Agent credentials across redirects or a scheme downgrade.
+                connection.setInstanceFollowRedirects(false);
+                if (sslSocketFactory != null) {
+                    if (!(connection instanceof HttpsURLConnection tls))
+                        throw new IOException("CA configured for a non-HTTPS request");
+                    tls.setSSLSocketFactory(sslSocketFactory);
+                    // Intentionally never call setHostnameVerifier or disable certificate checks.
+                }
+            }
+        };
         factory.setConnectTimeout(3_000);
         factory.setReadTimeout(5_000);
         return RestClient.builder()
