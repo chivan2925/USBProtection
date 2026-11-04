@@ -28,6 +28,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class EventSearchIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, EventSearchIntegrationTest.class);
+    }
+
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbDeviceRepository devices;

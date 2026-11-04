@@ -87,6 +87,35 @@ export async function startAdminFixture() {
     if (req.method !== 'GET' && state.failMutation) { send(state.failMutation, {}); return }
 
     if (path === '/api/admin/endpoints') { send(200, state.empty ? [] : state.endpoints); return }
+    if (path === '/api/admin/endpoints/page') {
+      const page = Number(url.searchParams.get('page') ?? 0)
+      const size = Number(url.searchParams.get('size') ?? 20)
+      const full = state.empty ? [] : [...state.endpoints].sort((a,b) => a.endpointId.localeCompare(b.endpointId))
+      let filtered = full
+      const status = url.searchParams.get('status')
+      if (status) filtered = filtered.filter(item => (item.status === 'ONLINE' ? 'online' : 'offline') === status)
+      const q = url.searchParams.get('q')?.toLowerCase().trim()
+      if (q) filtered = filtered.filter(item => [item.endpointId, item.hostname, item.ipAddress, item.currentUser].some(value => value?.toLowerCase().includes(q)))
+      send(200, { content: filtered.slice(page * size, (page + 1) * size), page, size,
+        totalElements: filtered.length, totalPages: Math.ceil(filtered.length / size),
+        onlineEndpoints: full.filter(e => e.status === 'ONLINE').length,
+        offlineEndpoints: full.filter(e => e.status !== 'ONLINE').length })
+      return
+    }
+    if (path === '/api/admin/whitelist/page') {
+      const page = Number(url.searchParams.get('page') ?? 0)
+      const size = Number(url.searchParams.get('size') ?? 20)
+      let entries = state.empty ? [] : Object.values(state.whitelist).flat().filter(e => e.enabled === true)
+      const endpointId = url.searchParams.get('endpointId')
+      if (endpointId) entries = entries.filter(e => e.endpointId === endpointId)
+      const q = url.searchParams.get('q')?.trim().toLowerCase()
+      if (q) entries = entries.filter(e => [e.endpointId, e.fingerprintValue, e.name, e.vendorId, e.productId].some(v => v?.toLowerCase().includes(q)))
+      entries = [...entries].sort((a,b) => b.id - a.id)
+      send(200, { content: entries.slice(page * size, (page + 1) * size), page, size,
+        totalElements: entries.length, totalPages: Math.ceil(entries.length / size) })
+      return
+    }
+
     if (path === '/api/admin/dashboard/summary') {
       const devices = deviceStates()
       const from = Date.parse(url.searchParams.get('from'))

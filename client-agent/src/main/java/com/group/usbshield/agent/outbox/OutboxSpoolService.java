@@ -59,20 +59,27 @@ public class OutboxSpoolService {
 
     @PostConstruct
     public void init() {
+        if (properties.getDataDir() == null || properties.getDataDir().isBlank()) {
+            spoolPath = null;
+            log.error("Outbox dataDir is not configured; refusing audit storage");
+            return;
+        }
         Path configuredPath = Path.of(properties.getDataDir(), "spool");
+        if (properties.isRequireAbsoluteStorage() && !configuredPath.isAbsolute()) {
+            spoolPath = null;
+            log.error("Live Agent outbox dataDir must be absolute; refusing audit storage");
+            return;
+        }
         try {
             if (!Files.exists(configuredPath)) {
                 Files.createDirectories(configuredPath);
             }
             this.spoolPath = configuredPath;
         } catch (Exception e) {
-            Path fallbackPath = Path.of("./data/spool");
-            try {
-                Files.createDirectories(fallbackPath);
-                this.spoolPath = fallbackPath;
-            } catch (Exception ex) {
-                log.error("Could not initialize outbox spool directory: {}", ex.getMessage());
-            }
+            // Fail closed: do not redirect audit evidence to an untrusted relative path.
+            this.spoolPath = null;
+            log.error("Cannot initialize configured outbox directory {}; audit spool disabled: {}",
+                    configuredPath, e.getMessage());
         }
         if (spoolPath != null) {
             // Re-synchronize recovered evidence directories before serving new

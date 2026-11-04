@@ -1,4 +1,4 @@
-> **Current runtime (04/11/2026):** `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408` uses **PostgreSQL** as the Admin Server's central database. The dated Week 1–4 H2 implementation reports below are retained as historical snapshots, not current design decisions. The Java JAR and Ubuntu `.deb` artifact types are unchanged. See [RUN_GUIDE.md](RUN_GUIDE.md).
+> **Current runtime (04/11/2026):** `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` uses **PostgreSQL** as the Admin Server's central database. The dated Week 1–4 H2 implementation reports below are retained as historical snapshots, not current design decisions. The Java JAR and Ubuntu `.deb` artifact types are unchanged. See [RUN_GUIDE.md](RUN_GUIDE.md).
 
 # USBShield Ubuntu — System Architecture Document (v0.1)
 
@@ -8,6 +8,27 @@
 > **Owner:** Member 1 (Admin Server Lead & Architecture/Integration Owner)  
 
 ---
+
+## Implementation update — 04/11/2026 (supersedes historic runtime notes)
+
+```text
+Admin workstation (allowed source IP) -- TLS/443 --> Nginx ACL --> Admin Web, /api/auth/**, /api/admin/**
+Ubuntu Agent (allowed client source IP) -- TLS/443 --> Nginx ACL --> /api/agent/** only
+                                                            |
+                                                     127.0.0.1:18080
+                                                            |
+                                                      Spring Boot JAR
+                                                            |
+                                              PostgreSQL (Flyway V1/V2)
+```
+
+- **Tách ACL và authentication:** Nginx giới hạn IP/route; Spring Security vẫn bắt buộc Admin session/CSRF và endpoint-bound Agent credentials. Client bị chặn tải static SPA; backend HTTP chỉ bind loopback. Tránh bypass proxy, untrusted forwarded headers hoặc gộp source NAT. Rate limiting **không được triển khai** theo quyết định owner.
+- **Chính sách USB:** Agent `live` chỉ chấp nhận HTTPS với CA/hostname validation, không fallback HTTP/redirect hay storage tương đối. Server validate HASH, Agent validate *toàn bộ* whitelist trước USBGuard; malformed policy không ACK. Event offline giữ được nếu timestamp không vượt ngưỡng tương lai.
+- **Trạng thái bảo vệ:** heartbeat có báo cáo USBGuard thật, khác với liveness và `appliedPolicyVersion` (ACK). Admin Web dùng bốn trạng thái `HEALTHY/DEGRADED/UNAVAILABLE/UNKNOWN`, checkedAt/staleness, heartbeat và version match. Đây là *Agent-reported* health, không phải chứng thực vật lý độc lập từ Server.
+- **Schema:** Flyway V1 khởi tạo tables, V2 thêm `admin_users.credential_version`, `endpoints.usbguard_reported_status`, `endpoints.usbguard_checked_at`; Hibernate `validate`. `usbshield_test`/`usbshield_browser_test` dùng test-only schemas ngẫu nhiên. Database hiện hữu cần baseline V1 một lần sau backup/preflight; không tự baseline.
+- **Read models:** `/api/admin/endpoints/page` và `/api/admin/whitelist/page` lọc/phân trang tại PostgreSQL, giảm N+1 HTTP; Endpoint detail và per-endpoint Allow/Revoke vẫn scoped, không có global Allow.
+
+Chi tiết: [RUN_GUIDE.md](RUN_GUIDE.md), [Phase 3 HTTPS/ACL/Paging](PHASE3_HTTPS_ACL_AND_PAGING.md), [Implementation status](IMPLEMENTATION_STATUS_20261104.md).
 
 ## Week 2 implementation update — v0.2 (2026-10-16)
 
@@ -91,7 +112,7 @@ graph TB
 
 ## 4. Mô hình dữ liệu quan hệ (Entity Data Model - PostgreSQL)
 
-Admin Server dùng PostgreSQL qua JDBC/Spring Data JPA. Dữ liệu tồn tại bền vững trên PostgreSQL service/data directory qua restart JAR; không phụ thuộc file H2 cục bộ. Các bảng Admin account, endpoint, device, event và per-endpoint whitelist hiện được Hibernate tạo/cập nhật theo cấu hình `ddl-auto=update` cho demo. Database `usbshield` và role ứng dụng được tách khỏi `usbshield_test`/`usbshield_browser_test` phục vụ kiểm thử:
+Admin Server dùng PostgreSQL qua JDBC/Spring Data JPA. Dữ liệu tồn tại bền vững trên PostgreSQL service/data directory qua restart JAR; không phụ thuộc file H2 cục bộ. Các bảng Admin account, endpoint, device, event và per-endpoint whitelist do **Flyway V1/V2** tạo/nâng cấp; Hibernate chỉ `ddl-auto=validate`, không tự `update` schema. Database `usbshield` và role ứng dụng được tách khỏi `usbshield_test`/`usbshield_browser_test` phục vụ kiểm thử:
 
 ```mermaid
 erDiagram
@@ -99,6 +120,7 @@ erDiagram
         bigint id PK
         varchar username UK
         varchar password_hash
+        bigint credential_version
         timestamp created_at
     }
 
@@ -112,6 +134,8 @@ erDiagram
         timestamp last_seen
         bigint policy_version
         bigint applied_policy_version
+        varchar usbguard_reported_status
+        timestamp usbguard_checked_at
     }
 
     USB_DEVICE {

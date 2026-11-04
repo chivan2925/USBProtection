@@ -48,7 +48,7 @@ class PolicyAckRecoveryTest {
                         WhitelistedDeviceDto.builder()
                                 .vendorId("0951")
                                 .productId("1666")
-                                .fingerprintValue("id 0951:1666")
+                                .fingerprintValue("3vdbQ5w9vF+1AbCdEfGhIjKlMnOpQrstUVwxyz01234=")
                                 .build()
                 ))
                 .build();

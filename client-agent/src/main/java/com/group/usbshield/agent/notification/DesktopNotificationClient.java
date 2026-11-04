@@ -2,6 +2,13 @@ package com.group.usbshield.agent.notification;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.ConnectException;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Objects;
+import java.util.Locale;
 import java.net.StandardProtocolFamily;
 import java.net.UnixDomainSocketAddress;
 import java.nio.channels.Channels;
@@ -54,12 +61,35 @@ public class DesktopNotificationClient implements AutoCloseable {
         // Both directories allow only traversal (not listing) by the Agent.
         grantAgentAcl(runtime, "u:usbshield:--x");
         grantAgentAcl(privateDir, "u:usbshield:--x");
-        if (Files.exists(socketPath, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IOException("Notifier socket already exists; refusing unsafe unlink");
+        // Serialize all compliant helpers, including recovery after a crash.
+        // The lock lives in the UID-owned 0700 directory and is never accessible to the Agent.
+        Path lockPath = privateDir.resolve("notice.lock");
+        if (Files.exists(lockPath, LinkOption.NOFOLLOW_LINKS)
+                && !Files.isRegularFile(lockPath, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Notifier lock path is not a regular file");
         }
+        try (FileChannel lockChannel = FileChannel.open(lockPath,
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS)) {
+            if (Files.isSymbolicLink(lockPath)
+                    || ((Number) Files.getAttribute(lockPath, "unix:uid", LinkOption.NOFOLLOW_LINKS)).longValue() != uid) {
+                throw new IOException("Notifier lock has unexpected owner or type");
+            }
+            Files.setPosixFilePermissions(lockPath, PosixFilePermissions.fromString("rw-------"));
+            try (FileLock held = lockChannel.tryLock()) {
+                if (held == null) throw new IOException("Another notifier helper holds the startup lock");
+                recoverStaleSocket(socketPath, uid);
+                serveBoundSocket(uid);
+            }
+        }
+    }
+
+    private void serveBoundSocket(long uid) throws IOException {
+        Object boundFileKey = null;
         try (ServerSocketChannel live = ServerSocketChannel.open(StandardProtocolFamily.UNIX)) {
             server = live;
             live.bind(UnixDomainSocketAddress.of(socketPath));
+            boundFileKey = Files.readAttributes(socketPath, BasicFileAttributes.class,
+                    LinkOption.NOFOLLOW_LINKS).fileKey();
             Files.setPosixFilePermissions(socketPath,
                     PosixFilePermissions.fromString("rw-------"));
             grantAgentAcl(socketPath, "u:usbshield:rw-");
@@ -90,14 +120,53 @@ public class DesktopNotificationClient implements AutoCloseable {
             }
         } finally {
             server = null;
-            // Never remove a symlink or replacement placed by another process.
-            if (Files.exists(socketPath, LinkOption.NOFOLLOW_LINKS)
-                    && !Files.isSymbolicLink(socketPath)
-                    && ((Number) Files.getAttribute(socketPath, "unix:uid",
-                    LinkOption.NOFOLLOW_LINKS)).longValue() == uid) {
+            // Only remove the inode bound by THIS helper, never a newer replacement.
+            if (boundFileKey != null && Files.exists(socketPath, LinkOption.NOFOLLOW_LINKS)
+                    && sameOwnedSocket(socketPath, uid, boundFileKey)) {
                 Files.deleteIfExists(socketPath);
             }
         }
+    }
+
+    /** Fail-closed stale-socket recovery; requires the caller to hold notice.lock. */
+    static void recoverStaleSocket(Path path, long uid) throws IOException {
+        if (Files.notExists(path, LinkOption.NOFOLLOW_LINKS)) return;
+        Object originalKey = requireOwnedSocket(path, uid);
+        try (SocketChannel probe = SocketChannel.open(StandardProtocolFamily.UNIX)) {
+            probe.connect(UnixDomainSocketAddress.of(path));
+            // A listener accepted our connection: it is alive; NEVER unlink it.
+            throw new IOException("Notifier socket is active; refusing to replace it");
+        } catch (ConnectException refused) {
+            // Only ENOTCONN/ECONNREFUSED represents an abandoned socket inode.
+            // Permission denied, path errors and other failures must remain fatal.
+            if (refused.getMessage() == null
+                    || !refused.getMessage().toLowerCase(Locale.ROOT).contains("refused")) {
+                throw refused;
+            }
+        }
+        if (!sameOwnedSocket(path, uid, originalKey)) {
+            throw new IOException("Notifier socket changed while probing; refusing unlink");
+        }
+        Files.delete(path);
+    }
+
+    private static Object requireOwnedSocket(Path path, long uid) throws IOException {
+        if (Files.isSymbolicLink(path) || !Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Missing or symlink notifier socket; refusing unlink");
+        }
+        int mode = ((Number) Files.getAttribute(path, "unix:mode", LinkOption.NOFOLLOW_LINKS)).intValue();
+        long owner = ((Number) Files.getAttribute(path, "unix:uid", LinkOption.NOFOLLOW_LINKS)).longValue();
+        if ((mode & 0170000) != 0140000 || owner != uid) {
+            throw new IOException("Notifier path is not an owned Unix socket; refusing unlink");
+        }
+        Object key = Files.readAttributes(path, BasicFileAttributes.class,
+                LinkOption.NOFOLLOW_LINKS).fileKey();
+        if (key == null) throw new IOException("Cannot identify notifier socket inode");
+        return key;
+    }
+
+    private static boolean sameOwnedSocket(Path path, long uid, Object key) throws IOException {
+        return Objects.equals(requireOwnedSocket(path, uid), key);
     }
 
     private static long ownUid() throws IOException {

@@ -26,6 +26,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(properties = {"spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.enrollment-token=test-only"})
 @Transactional
 class EndpointMetadataIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, EndpointMetadataIntegrationTest.class);
+    }
+
     @Autowired EndpointRepository endpoints;
     @Autowired UsbEventRepository events;
     @Autowired UsbDeviceRepository devices;

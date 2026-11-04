@@ -25,6 +25,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class AgentHttpIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, AgentHttpIntegrationTest.class);
+    }
+
     @Autowired TestRestTemplate http;
     @Autowired ObjectMapper mapper;
     @Autowired DataSource dataSource;

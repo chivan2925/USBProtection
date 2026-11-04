@@ -8,6 +8,11 @@ import org.springframework.test.annotation.DirtiesContext;
 @IsolatedPostgresDb
 @SpringBootTest
 class UsbShieldServerApplicationTests {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, UsbShieldServerApplicationTests.class);
+    }
+
 
     @Test
     void contextLoads() {

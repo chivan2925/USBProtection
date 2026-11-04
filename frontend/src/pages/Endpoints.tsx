@@ -6,6 +6,7 @@ import { Filters } from '../components/Filters'
 import { Icon } from '../components/Icon'
 import { EndpointWhitelistPanel } from '../components/endpoint/EndpointWhitelistPanel'
 import { EndpointStatusBadge } from '../components/endpoint/EndpointStatusBadge'
+import { UsbGuardStatus } from '../components/endpoint/UsbGuardStatus'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import { useResource } from '../hooks/useResource'
@@ -15,18 +16,50 @@ import type { PageProps } from './types'
 
 const endpointLabels = { online: 'Online', offline: 'Offline', unknown: 'Chưa xác định' }
 
-export function Endpoints({ state, refresh, refreshButton }: PageProps) {
+export function Endpoints({ state, refresh, refreshButton, demo = false }: PageProps) {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
-  const rows = (state.data?.endpoints ?? []).filter(endpoint =>
+  const [page, setPage] = useState(0)
+  const loadPage = useCallback((signal: AbortSignal) => {
+    if (demo || filter === 'unknown') return Promise.resolve({ content: [], page: 0, size: 20,
+      totalElements: 0, totalPages: 0, onlineEndpoints: 0, offlineEndpoints: 0 })
+    return protectionApi.getEndpointPage({ page, size: 20, q: query.trim() || undefined,
+      status: filter === 'all' ? undefined : filter as 'online' | 'offline' }, signal)
+  }, [demo, filter, page, query])
+  const serverPage = useResource(loadPage)
+  const { refresh: refreshPage } = serverPage
+  const lastSnapshot = useRef(state.status === 'ready' ? state.data : undefined)
+  useEffect(() => {
+    if (state.status !== 'ready') return
+    const prior = lastSnapshot.current
+    lastSnapshot.current = state.data
+    if (!demo && prior && prior !== state.data) void refreshPage()
+  }, [demo, state.status, state.data, refreshPage])
+  const demoRows = (state.data?.endpoints ?? []).filter(endpoint =>
     (filter === 'all' || endpoint.status === filter) &&
     matches(query, endpoint.id, endpoint.name, endpoint.hostname, endpoint.ipAddress, endpoint.currentUser))
+  const data = serverPage.state.status === 'ready' ? serverPage.state.data : undefined
+  const rows = demo ? demoRows : data?.content ?? []
+  const stateFlags = demo ? { loading: state.status === 'loading', unavailable: state.status === 'unavailable',
+    failed: state.status === 'error' } : {
+    loading: state.status === 'loading' || serverPage.state.status === 'loading',
+    unavailable: state.status === 'unavailable' || serverPage.state.status === 'unavailable',
+    failed: state.status === 'error' || serverPage.state.status === 'error',
+  }
   return <>
     <PageHeading eyebrow="ENDPOINT SECURITY" title="Quản lý endpoints" description="Theo dõi các máy Ubuntu và trạng thái kết nối với hệ thống.">{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
-    <Panel title="Danh sách máy tính" subtitle="Trạng thái kết nối, người dùng và phiên bản chính sách" action={<Badge>Managed endpoints</Badge>}>
-      <Filters query={query} onQuery={setQuery} value={filter} onValue={setFilter} options={[{ value: 'all', label: 'Tất cả trạng thái' }, ...Object.entries(endpointLabels).map(([value, label]) => ({ value, label }))]} placeholder="Tìm endpoint ID, hostname, IP hoặc người dùng…" />
-      <DataTable key={`${query}:${filter}`} rows={rows} label="Danh sách endpoints" loading={state.status === 'loading'} unavailable={state.status === 'unavailable'} failed={state.status === 'error'} filtered={!!query || filter !== 'all'} columns={[
+    {!demo && serverPage.state.status === 'error' && <p role="alert" className="field-error">Không tải được danh sách Endpoint: {serverPage.state.error}</p>}
+    <Panel title="Danh sách máy tính" subtitle="Lọc, tìm kiếm và phân trang tại Server" action={<Badge>Managed endpoints</Badge>}>
+      <Filters query={query} onQuery={value => { setPage(0); setQuery(value) }} value={filter}
+        onValue={value => { setPage(0); setFilter(value) }}
+        options={[{ value: 'all', label: 'Tất cả trạng thái' }, ...Object.entries(endpointLabels).map(([value, label]) => ({ value, label }))]}
+        placeholder="Tìm endpoint ID, hostname, IP hoặc người dùng…" />
+      <DataTable key={demo ? `${query}:${filter}` : 'server-endpoints'} {...stateFlags}
+        rows={rows} label="Danh sách endpoints" filtered={!!query || filter !== 'all'}
+        pagination={!demo && data ? { page: data.page, size: data.size, totalPages: data.totalPages,
+          totalElements: data.totalElements, onPageChange: setPage } : undefined}
+        columns={[
         { key: 'name', label: 'Máy tính', render: endpoint => <a className="table-device" href={`#/endpoints/${encodeURIComponent(endpoint.id)}`}><span className="table-icon"><Icon name="monitor" size={18} /></span><div><strong>{endpoint.name}</strong><small>{endpoint.hostname ?? '—'}</small></div></a> },
         { key: 'id', label: 'Endpoint ID', render: endpoint => <span className="mono">{endpoint.id}</span> },
         { key: 'os', label: 'Hệ điều hành', render: endpoint => endpoint.operatingSystem ?? '—' },
@@ -34,6 +67,7 @@ export function Endpoints({ state, refresh, refreshButton }: PageProps) {
         { key: 'user', label: 'Người dùng', render: endpoint => endpoint.currentUser ?? '—' },
         { key: 'policy', label: 'Policy version', render: endpoint => <span className="mono">{endpoint.policyVersion ?? '—'}</span> },
         { key: 'appliedPolicy', label: 'Last Applied Version', render: endpoint => <span className="mono">{endpoint.appliedPolicyVersion ?? '—'}</span> },
+        { key: 'usbguard', label: 'USBGuard', render: endpoint => <UsbGuardStatus endpoint={endpoint} /> },
         { key: 'seen', label: 'Kết nối gần nhất', render: endpoint => formatDate(endpoint.lastSeenAt) },
         { key: 'action', label: 'Chi tiết', render: endpoint => <a href={`#/endpoints/${encodeURIComponent(endpoint.id)}`}>Xem chi tiết →</a> },
       ]} />
@@ -116,9 +150,10 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
             ['Hostname', endpoint?.hostname], ['IP', endpoint?.ipAddress], ['Hệ điều hành', endpoint?.operatingSystem],
             ['Người dùng hiện tại (backend)', endpoint?.currentUser], ['Người dùng gần nhất (event)', latestUser],
             ['Policy version', endpoint?.policyVersion], ['Last Applied Version', endpoint?.appliedPolicyVersion],
-            ['Kết nối gần nhất', formatDate(endpoint?.lastSeenAt)], ['Endpoint ID', endpoint?.id],
+            ['Kết nối gần nhất', formatDate(endpoint?.lastSeenAt)], ['Kiểm tra USBGuard', formatDate(endpoint?.usbGuardCheckedAt)], ['Endpoint ID', endpoint?.id],
           ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>)}</dl>
           {endpoint && <div className="panel-bottom policy-sync" role="status">
+            <p>Trạng thái USBGuard thực tế: <UsbGuardStatus endpoint={endpoint} />. Healthy yêu cầu kiểm tra daemon và policy còn mới; Last Applied Version chỉ là ACK đã ghi nhận.</p>
             <Badge tone={synced ? 'green' : 'amber'}>{syncMessage}</Badge>
             <p>Desired là phiên bản server muốn áp dụng; Last Applied Version là phiên bản Agent đã ACK.
               {!synced && ' Bấm Refresh dữ liệu để kiểm tra tiến độ. Chưa có ACK không đồng nghĩa áp dụng thất bại.'}

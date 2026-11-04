@@ -24,6 +24,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop","usbshield.enrollment-token=integration-test-bootstrap"})
 @AutoConfigureMockMvc
 class ServerApiIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, ServerApiIntegrationTest.class);
+    }
+
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper mapper;
     @Autowired AdminUserRepository users;
@@ -278,4 +283,31 @@ class ServerApiIntegrationTest {
         mvc.perform(agentPost("/api/agent/heartbeat",a,Map.of("endpointId",a.id()))).andExpect(status().isOk());
         mvc.perform(get("/api/admin/endpoints/"+a.id()).session(session)).andExpect(jsonPath("$.status").value("ONLINE"));
     }
+    @Test void rejectsFutureTimestampButPreservesOldOfflineAudit() throws Exception {
+        var a = enroll();
+        var payload = (com.fasterxml.jackson.databind.node.ObjectNode) sample(a);
+        payload.put("eventId", UUID.randomUUID().toString());
+        payload.put("occurredAt", java.time.Instant.now().plusSeconds(600).toString());
+        long before = events.count();
+        mvc.perform(agentPost("/api/agent/events", a, payload)).andExpect(status().isBadRequest());
+        assertThat(events.count()).isEqualTo(before);
+        payload.put("occurredAt", java.time.Instant.now().minusSeconds(90L * 24 * 3600).toString());
+        mvc.perform(agentPost("/api/agent/events", a, payload)).andExpect(status().isOk());
+        assertThat(events.count()).isEqualTo(before + 1L);
+    }
+
+    @Test void invalidHashCannotBeAllowedOnAnyEndpoint() throws Exception {
+        var a = enroll();
+        var d = devices.saveAndFlush(UsbDevice.builder().vendorId("0951").productId("1666")
+                .deviceHash("0951:1666").deviceName("unsafe model-only identity").build());
+        events.save(UsbEvent.builder().endpointId(a.id()).usbDeviceId(d.getId())
+                .eventType("CONNECTED").decision("BLOCKED").occurredAt(java.time.Instant.now()).build());
+        long before = endpoints.findByEndpointId(a.id()).orElseThrow().getPolicyVersion();
+        mvc.perform(post("/api/admin/endpoints/" + a.id() + "/whitelist")
+                .session(session).header("X-CSRF-TOKEN", csrf).contentType("application/json")
+                .content(mapper.writeValueAsString(Map.of("usbDeviceId", d.getId()))))
+                .andExpect(status().isConflict());
+        assertThat(endpoints.findByEndpointId(a.id()).orElseThrow().getPolicyVersion()).isEqualTo(before);
+    }
+
 }

@@ -31,6 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @IsolatedPostgresDb
 @Transactional
 class PostgreSqlPersistenceIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, PostgreSqlPersistenceIntegrationTest.class);
+    }
+
     @Autowired DataSource dataSource;
     @Autowired JdbcTemplate jdbc;
     @Autowired EndpointRepository endpoints;

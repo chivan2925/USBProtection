@@ -48,6 +48,14 @@ public class Endpoint {
 
     private Instant lastSeen;
 
+    /** Last Agent-reported daemon/policy evidence; a heartbeat is NOT itself health proof. */
+    @Column(name = "usbguard_reported_status", length = 20)
+    private String usbGuardReportedStatus;
+
+    /** Timestamp assigned by Server upon receiving the health report. */
+    @Column(name = "usbguard_checked_at")
+    private Instant usbGuardCheckedAt;
+
     @Column(nullable = false)
     @Builder.Default
     private Long policyVersion = 1L;

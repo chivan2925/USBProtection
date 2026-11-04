@@ -39,6 +39,12 @@ public class AgentEventController {
 
         String effectiveEndpointId = principal.getName();
         AgentCredentialService.bind(effectiveEndpointId, request.getEndpointId());
+        // Reject implausible future events, but keep arbitrarily old offline events.
+        // Check before acquiring the catalog-wide transaction lock.
+        if (request.getOccurredAt().isAfter(Instant.now().plus(java.time.Duration.ofMinutes(5)))) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "Event timestamp exceeds allowed future clock skew");
+        }
 
         // A per-endpoint lock alone does NOT serialize a new shared USB hash
         // reported by two different endpoints. Lock one stable row across all

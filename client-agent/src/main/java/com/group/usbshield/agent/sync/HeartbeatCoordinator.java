@@ -25,6 +25,7 @@ public class HeartbeatCoordinator {
     private final OutboxSpoolService outboxSpoolService;
     private final ActiveUserResolver activeUserResolver;
     private final SystemInfoProvider systemInfoProvider;
+    private final UsbGuardHealthProbe healthProbe;
     private static final long SUCCESS_VERIFY_NANOS = java.util.concurrent.TimeUnit.SECONDS.toNanos(60);
     private static final long FAILURE_RETRY_NANOS = java.util.concurrent.TimeUnit.SECONDS.toNanos(15);
     private long lastVerificationAttempt;
@@ -36,13 +37,26 @@ public class HeartbeatCoordinator {
                                 PolicySyncService policySyncService,
                                 OutboxSpoolService outboxSpoolService,
                                 ActiveUserResolver activeUserResolver,
-                                SystemInfoProvider systemInfoProvider) {
+                                SystemInfoProvider systemInfoProvider,
+                                UsbGuardHealthProbe healthProbe) {
         this.endpointManager = endpointManager;
         this.adminServerClient = adminServerClient;
         this.policySyncService = policySyncService;
         this.outboxSpoolService = outboxSpoolService;
         this.activeUserResolver = activeUserResolver;
         this.systemInfoProvider = systemInfoProvider;
+        this.healthProbe = healthProbe;
+    }
+
+    // Preserve the existing six-argument construction route used outside Spring.
+    public HeartbeatCoordinator(EndpointManager endpointManager,
+                                AdminServerClient adminServerClient,
+                                PolicySyncService policySyncService,
+                                OutboxSpoolService outboxSpoolService,
+                                ActiveUserResolver activeUserResolver,
+                                SystemInfoProvider systemInfoProvider) {
+        this(endpointManager, adminServerClient, policySyncService, outboxSpoolService,
+                activeUserResolver, systemInfoProvider, null);
     }
 
     // Preserve existing isolated unit tests and their constructor.
@@ -84,6 +98,10 @@ public class HeartbeatCoordinator {
                         systemInfoProvider.getIpAddressForServer(adminServerClient.getServerUrl()))
                 .operatingSystem(systemInfoProvider == null ? null : systemInfoProvider.getOperatingSystem())
                 .currentUser(currentUser)
+                .usbGuardStatus(healthProbe == null ? "UNKNOWN" : healthProbe.measure(
+                        lastVerificationSuccess != 0 &&
+                        System.nanoTime() - lastVerificationSuccess <= SUCCESS_VERIFY_NANOS +
+                                java.util.concurrent.TimeUnit.SECONDS.toNanos(15)))
                 .build();
 
         Optional<HeartbeatResponse> responseOpt = adminServerClient.sendHeartbeat(request, agentToken);

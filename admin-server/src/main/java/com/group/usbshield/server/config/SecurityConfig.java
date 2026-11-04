@@ -12,16 +12,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.core.userdetails.*;
 @Configuration
+@org.springframework.context.annotation.Profile("!admin-reset")
 public class SecurityConfig {
-    @Bean PasswordEncoder passwordEncoder(){return new BCryptPasswordEncoder();}
     @Bean UserDetailsService users(AdminUserRepository users){return name->users.findByUsername(name)
         .map(u->User.withUsername(u.getUsername()).password(u.getPasswordHash()).roles("ADMIN").build())
         .orElseThrow(()->new UsernameNotFoundException("Invalid credentials"));}
-    @Bean SecurityFilterChain security(HttpSecurity http,AgentCredentialService credentials,ObjectMapper mapper) throws Exception {
+    @Bean SecurityFilterChain security(HttpSecurity http,AgentCredentialService credentials,ObjectMapper mapper,AdminUserRepository adminUsers) throws Exception {
         http.csrf(c->c.ignoringRequestMatchers("/api/agent/**")
             .csrfTokenRepository(new HttpSessionCsrfTokenRepository())
             .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
             .addFilterBefore(new AgentAuthenticationFilter(credentials,mapper),UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new AdminSessionVersionFilter(adminUsers), org.springframework.security.web.access.intercept.AuthorizationFilter.class)
             .authorizeHttpRequests(a->a.requestMatchers("/api/agent/enroll","/api/auth/csrf","/api/auth/login").permitAll()
                 .requestMatchers("/api/agent/**").hasRole("AGENT")
                 .requestMatchers("/api/admin/**","/api/auth/me","/api/auth/logout").hasRole("ADMIN")

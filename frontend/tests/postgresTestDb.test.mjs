@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createPostgresBrowserTestRun, postgresBrowserChildEnv } from './postgresTestDb.mjs'
+import { createPostgresBrowserTestRun, postgresBrowserChildEnv, cleanupPostgresBrowserSchema } from './postgresTestDb.mjs'
 
 const env = { USBSHIELD_TEST_DB_PASSWORD: 'test-password-only' }
 
@@ -19,7 +19,10 @@ test('different browser runs get isolated schemas in the disposable database', (
     assert.ok(config.datasourceArgs.includes('--spring.profiles.active=default'))
     assert.ok(config.datasourceArgs.every(arg => !arg.includes('test-password-only')))
     assert.ok(config.hibernateArgs.includes(`--spring.jpa.properties.hibernate.default_schema=${config.schema}`))
-    assert.ok(config.hibernateArgs.includes('--spring.jpa.properties.hibernate.hbm2ddl.create_namespaces=true'))
+    assert.ok(config.hibernateArgs.includes('--spring.jpa.hibernate.ddl-auto=validate'))
+    assert.ok(config.hibernateArgs.includes('--spring.flyway.enabled=true'))
+    assert.ok(config.hibernateArgs.includes(`--spring.flyway.schemas=${config.schema}`))
+    assert.ok(config.hibernateArgs.includes(`--spring.flyway.default-schema=${config.schema}`))
   }
 })
 
@@ -50,6 +53,8 @@ test('inherited application datasource variables cannot redirect browser tests i
     SPRING_APPLICATION_JSON: '{"spring":{"datasource":{"url":"jdbc:postgresql://127.0.0.1:5432/usbshield"}}}',
     SPRING_CONFIG_ADDITIONAL_LOCATION: 'C:/example/production.yml',
     SPRING_DATASOURCE_JNDI_NAME: 'java:comp/env/production',
+    SPRING_FLYWAY_URL: 'jdbc:postgresql://127.0.0.1:5432/usbshield',
+    FLYWAY_URL: 'jdbc:postgresql://127.0.0.1:5432/usbshield',
     SPRING_PROFILES_ACTIVE: 'prod',
     USBSHIELD_TEST_DB_PASSWORD: 'test-password-only',
   }
@@ -63,10 +68,22 @@ test('inherited application datasource variables cannot redirect browser tests i
   assert.equal(child.SPRING_DATASOURCE_JNDI_NAME, undefined)
   assert.equal(child.SPRING_DATASOURCE_HIKARI_USERNAME, undefined)
   assert.equal(child.SPRING_DATASOURCE_HIKARI_PASSWORD, undefined)
+  assert.equal(child.SPRING_FLYWAY_URL, undefined)
+  assert.equal(child.FLYWAY_URL, undefined)
   assert.equal(child.SPRING_APPLICATION_JSON, undefined)
   assert.equal(child.SPRING_CONFIG_ADDITIONAL_LOCATION, undefined)
   assert.ok(config.datasourceArgs.includes(`--spring.datasource.url=${config.jdbcUrl}`))
   assert.ok(config.datasourceArgs.includes(`--spring.datasource.hikari.jdbc-url=${config.jdbcUrl}`))
   assert.ok(config.datasourceArgs.includes('--spring.profiles.active=default'))
   assert.ok(config.datasourceArgs.every(arg => !arg.includes('app-password')))
+})
+
+test('browser cleanup rejects public/app schemas and mismatched URL before launching Java', async () => {
+  const config = createPostgresBrowserTestRun(env)
+  const opts = { java: 'java', jar: '/fake.jar' }
+  for (const name of ['public', 'usbshield', 'usbshield_it_0123456789abcdef0123456789abcdef',
+    'usbshield_e2e_deadbeef;drop schema public']) {
+    await assert.rejects(cleanupPostgresBrowserSchema({ ...config, schema: name }, opts), /Refusing unsafe/)
+  }
+  await assert.rejects(cleanupPostgresBrowserSchema({ ...config, jdbcUrl: 'jdbc:postgresql://localhost/usbshield' }, opts), /Refusing unsafe/)
 })

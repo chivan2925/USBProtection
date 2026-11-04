@@ -22,6 +22,10 @@ export interface AdminUser { username: string }
 export interface AllowRequest { usbDeviceId: number }
 export interface DeviceQuery { page: number; size: number; endpointId?: string; status?: Device['status']; q?: string }
 export interface DevicePage { content: Device[]; page: number; size: number; totalElements: number; totalPages: number }
+export interface EndpointQuery { page: number; size: number; q?: string; status?: 'online' | 'offline' }
+export interface EndpointPage { content: Endpoint[]; page: number; size: number; totalElements: number; totalPages: number; onlineEndpoints: number; offlineEndpoints: number }
+export interface WhitelistQuery { page: number; size: number; q?: string; endpointId?: string }
+export interface WhitelistPage { content: WhitelistEntry[]; page: number; size: number; totalElements: number; totalPages: number }
 
 function endpointPath(endpointId: string) {
   if (!endpointId.trim()) throw new Error('Cần chọn endpoint trước khi thay đổi whitelist.')
@@ -69,6 +73,34 @@ function mapDevicePage(value: unknown): DevicePage {
   return { content, page: pageNumber, size, totalElements, totalPages }
 }
 
+function mapPaged<T>(value: unknown, label: string, map: (raw: unknown) => T & { id: string }) {
+  const result = readObject(value)
+  const page = integer(result.page, `${label}.page`)
+  const size = integer(result.size, `${label}.size`)
+  const totalElements = integer(result.totalElements, `${label}.totalElements`)
+  const totalPages = integer(result.totalPages, `${label}.totalPages`)
+  if (size < 1 || size > 100 || totalPages !== Math.ceil(totalElements / size) ||
+      !Array.isArray(result.content) || page > 100_000) throw new Error(`API trả phân trang ${label} không hợp lệ.`)
+  const content = result.content.map(map)
+  if (new Set(content.map(item => item.id)).size !== content.length)
+    throw new Error(label === 'endpoints' ? 'API trả endpoint ID bị trùng.' : `API trả ${label} ID bị trùng.`)
+  if (content.length > size || content.length > Math.max(0, totalElements - page * size))
+    throw new Error(`API trả ${label} vượt giới hạn trang.`)
+  return { content, page, size, totalElements, totalPages }
+}
+
+function pageParams(query: { page: number; size: number; q?: string; status?: string; endpointId?: string }) {
+  if (!Number.isSafeInteger(query.page) || query.page < 0 || query.page > 100_000 ||
+      !Number.isSafeInteger(query.size) || query.size < 1 || query.size > 100 ||
+      (query.q != null && query.q.length > 200))
+    throw new Error('Tham số phân trang hoặc tìm kiếm không hợp lệ.')
+  const params = new URLSearchParams({ page: String(query.page), size: String(query.size) })
+  if (query.q?.trim()) params.set('q', query.q.trim())
+  if (query.status) params.set('status', query.status)
+  if (query.endpointId) params.set('endpointId', query.endpointId)
+  return params
+}
+
 function mapSummary(value: unknown) {
   const data = readObject(value)
   return {
@@ -93,6 +125,14 @@ export const protectionApi = {
     return protectionApi.getCurrentAdmin()
   },
 
+  async changeAdminPassword(currentPassword: string, newPassword: string): Promise<void> {
+    const result = readObject(await request('/api/admin/account/password', {
+      method: 'POST', body: { currentPassword, newPassword },
+    }))
+    if (result.changed !== true) throw new Error('Máy chủ chưa xác nhận đổi mật khẩu.')
+    clearCsrfToken()
+  },
+
   async logout() {
     await request('/api/auth/logout', { method: 'POST' })
     clearCsrfToken()
@@ -110,6 +150,29 @@ export const protectionApi = {
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(query)) if (value !== undefined && value !== '') params.set(key, String(value))
     return mapDevicePage(await request(`/api/admin/device-states?${params}`, { signal }))
+  },
+
+  async getEndpointPage(query: EndpointQuery, signal: AbortSignal): Promise<EndpointPage> {
+    signal.throwIfAborted()
+    const data = readObject(await request(`/api/admin/endpoints/page?${pageParams(query)}`, { signal }))
+    const result = mapPaged(data, 'endpoints', mapEndpoint)
+    const onlineEndpoints = integer(data.onlineEndpoints, 'onlineEndpoints')
+    const offlineEndpoints = integer(data.offlineEndpoints, 'offlineEndpoints')
+    if (onlineEndpoints + offlineEndpoints < result.totalElements && !query.q && !query.status)
+      throw new Error('API trả tổng số endpoints không hợp lệ.')
+    return { ...result, onlineEndpoints, offlineEndpoints }
+  },
+
+  async getWhitelistPage(query: WhitelistQuery, signal: AbortSignal): Promise<WhitelistPage> {
+    signal.throwIfAborted()
+    const result = mapPaged(await request(`/api/admin/whitelist/page?${pageParams(query)}`, { signal }),
+      'whitelist', item => {
+        const data = readObject(item)
+        const endpointId = readText(data.endpointId, true)!
+        const entry = mapWhitelistEntry(data, endpointId)
+        return entry
+      })
+    return result
   },
 
   async getEndpoint(endpointId: string, signal: AbortSignal): Promise<Endpoint> {
@@ -144,11 +207,10 @@ export const protectionApi = {
   // The device inventory is independently paginated; /devices owns global browsing.
   async getSnapshot(signal: AbortSignal, selectedEndpointId?: string, route?: string): Promise<Snapshot> {
     signal.throwIfAborted()
-    const data = await request('/api/admin/endpoints', { signal })
-    if (!Array.isArray(data)) throw new Error('API endpoints phải trả danh sách.')
-    const endpoints = data.map(mapEndpoint)
-    if (new Set(endpoints.map(endpoint => endpoint.id)).size !== endpoints.length)
-      throw new Error('API trả endpoint ID bị trùng.')
+    // Only the first bounded page is used for dashboard/other overview routes.
+    // The Endpoints screen independently queries the server for filtered pages.
+    const endpointPage = await protectionApi.getEndpointPage({ page: 0, size: 20 }, signal)
+    const endpoints = [...endpointPage.content]
     if (selectedEndpointId) {
       const detail = await protectionApi.getEndpoint(selectedEndpointId, signal)
       const index = endpoints.findIndex(endpoint => endpoint.id === selectedEndpointId)
@@ -172,17 +234,19 @@ export const protectionApi = {
     // Do not prefetch and discard a second, differently sized 100-row inventory.
     const devices: Device[] = []
     const whitelist: WhitelistEntry[] = []
-    // Only read rules for the active view, not N HTTP calls on every dashboard refresh.
-    const whitelistIds = selectedEndpointId ? [selectedEndpointId] : activeRoute === undefined || activeRoute === '/whitelist'
-      ? endpoints.map(endpoint => endpoint.id) : []
-    for (const endpointId of whitelistIds) whitelist.push(...await protectionApi.getWhitelist(endpointId, signal))
+    // One scoped read for details, or one bounded server-side page for the global
+    // whitelist view (never issue N endpoint-specific HTTP requests).
+    if (selectedEndpointId) whitelist.push(...await protectionApi.getWhitelist(selectedEndpointId, signal))
+    else if (activeRoute === undefined) {
+      whitelist.push(...(await protectionApi.getWhitelistPage({ page: 0, size: 20 }, signal)).content)
+    }
     return {
       endpoints, events, devices, whitelist,
       overview: {
         protection: 'unknown', service: 'unknown', ...summary,
-        onlineEndpoints: endpoints.filter(endpoint => endpoint.status === 'online').length,
-        offlineEndpoints: endpoints.filter(endpoint => endpoint.status === 'offline').length,
-        unknownEndpoints: endpoints.filter(endpoint => endpoint.status === 'unknown').length,
+        onlineEndpoints: endpointPage.onlineEndpoints,
+        offlineEndpoints: endpointPage.offlineEndpoints,
+        unknownEndpoints: 0,
       },
     }
   },

@@ -5,7 +5,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-@Component @RequiredArgsConstructor
+@Component @RequiredArgsConstructor @org.springframework.context.annotation.Profile("!admin-reset")
 public class AdminBootstrap implements ApplicationRunner {
     private final AdminUserRepository users;
     private final PasswordEncoder encoder;

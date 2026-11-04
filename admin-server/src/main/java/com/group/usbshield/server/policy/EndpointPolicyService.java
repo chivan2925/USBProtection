@@ -53,7 +53,8 @@ public class EndpointPolicyService {
                     "USB has not been observed on this endpoint; pre-authorization is unsupported");
         }
         // Week 2 uses USBGuard HASH only; never broaden identity to a model/name.
-        if(device.getDeviceHash()==null || device.getDeviceHash().isBlank())throw new ResponseStatusException(CONFLICT,"Device has no stable HASH; allow requires identity review");
+        if (!UsbHashIdentity.valid(device.getDeviceHash()))
+            throw new ResponseStatusException(CONFLICT,"Invalid USBGuard HASH identity; manual review required");
         var entry=entries.findByEndpointIdAndFingerprintValue(id,device.getDeviceHash()).orElse(null);
         if(entry!=null && Boolean.TRUE.equals(entry.getEnabled()))return view(entry);
         if(entry==null)entry=EndpointWhitelistEntry.builder().endpointId(id).usbDeviceId(device.getId()).fingerprintType("HASH").fingerprintValue(device.getDeviceHash()).build();
@@ -71,7 +72,11 @@ public class EndpointPolicyService {
         var byId = loadDevices(whitelist);
         var rules=whitelist.stream().map(e->{
             var b=WhitelistedDeviceDto.builder().fingerprintType(e.getFingerprintType()).fingerprintValue(e.getFingerprintValue());
-            if("HASH".equals(e.getFingerprintType()))b.deviceHash(e.getFingerprintValue());
+            if ("HASH".equals(e.getFingerprintType())) {
+                if (!UsbHashIdentity.valid(e.getFingerprintValue()))
+                    throw new ResponseStatusException(CONFLICT,"Stored whitelist has invalid USBGuard HASH identity");
+                b.deviceHash(e.getFingerprintValue());
+            }
             else throw new ResponseStatusException(CONFLICT,"Legacy whitelist requires HASH identity review");
             var device = e.getUsbDeviceId() == null ? null : byId.get(e.getUsbDeviceId());
             if (device != null) b.vendorId(device.getVendorId()).productId(device.getProductId())

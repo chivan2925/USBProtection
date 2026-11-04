@@ -21,6 +21,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.offline-after-seconds=90"})
 @AutoConfigureMockMvc
 class ServerSecurityAndStatusTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, ServerSecurityAndStatusTest.class);
+    }
+
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired EndpointPolicyService policies;
@@ -84,4 +89,23 @@ class ServerSecurityAndStatusTest {
         mvc.perform(get("/assets/missing.js")).andExpect(status().isNotFound());
         mvc.perform(get("/api/admin/endpoints")).andExpect(status().isUnauthorized());
     }
+    @Test @WithMockUser(roles="ADMIN")
+    void usbGuardStatusIsStaleOfflineOrPolicyMismatchEvenIfAgentClaimedHealthy() throws Exception {
+        var e = endpoint(null);
+        e.setLastSeen(Instant.now());
+        e.setUsbGuardReportedStatus("HEALTHY");
+        e.setUsbGuardCheckedAt(Instant.now());
+        e.setPolicyVersion(2L);e.setAppliedPolicyVersion(2L);endpoints.saveAndFlush(e);
+        String url = "/api/admin/endpoints/" + e.getEndpointId();
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("HEALTHY"));
+        e.setAppliedPolicyVersion(1L);endpoints.saveAndFlush(e);
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("DEGRADED"));
+        e.setAppliedPolicyVersion(2L);
+        e.setUsbGuardCheckedAt(Instant.now().minusSeconds(200));endpoints.saveAndFlush(e);
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"))
+                .andExpect(jsonPath("$.usbGuardStale").value(true));
+        e.setLastSeen(Instant.now().minusSeconds(200));e.setUsbGuardCheckedAt(Instant.now());endpoints.saveAndFlush(e);
+        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"));
+    }
+
 }

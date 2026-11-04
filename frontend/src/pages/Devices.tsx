@@ -37,7 +37,15 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
     }, signal)
   }, [demo, mode, page, filter, query])
   const deviceRead = useResource(loadDevices)
+  const loadWhitelist = useCallback((signal: AbortSignal) => {
+    if (demo || mode !== 'whitelist') return Promise.resolve({ content: [], page: 0, size: 20,
+      totalElements: 0, totalPages: 0 })
+    return protectionApi.getWhitelistPage({ page, size: 20, q: query.trim() || undefined,
+      endpointId: filter === 'all' ? undefined : filter }, signal)
+  }, [demo, mode, page, query, filter])
+  const whitelistRead = useResource(loadWhitelist)
   const { refresh: refreshDevices } = deviceRead
+  const { refresh: refreshWhitelist } = whitelistRead
   // useResource already loads the initial page and re-loads on filter/page changes.
   // The shared toolbar refresh returns a new parent snapshot: only that transition
   // should cause an additional device-page read, not every loader change.
@@ -46,10 +54,11 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
     if (state.status !== 'ready') return
     const previous = lastReadySnapshot.current
     lastReadySnapshot.current = state.data
-    if (!demo && mode !== 'whitelist' && previous && previous !== state.data) {
-      void refreshDevices()
+    if (!demo && previous && previous !== state.data) {
+      if (mode === 'whitelist') void refreshWhitelist()
+      else void refreshDevices()
     }
-  }, [demo, mode, state.data, state.status, refreshDevices])
+  }, [demo, mode, state.data, state.status, refreshDevices, refreshWhitelist])
 
   const demoDeviceRows = newestFirst((state.data?.devices ?? []).filter(device =>
     (mode !== 'blocked' || device.status === 'blocked') &&
@@ -58,13 +67,17 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
     device => device.detectedAt)
   const devicePage = deviceRead.state.status === 'ready' ? deviceRead.state.data : undefined
   const deviceRows = demo ? demoDeviceRows : devicePage?.content ?? []
-  const whitelistRows = entries.filter(entry =>
+  const whitelistPage = whitelistRead.state.status === 'ready' ? whitelistRead.state.data : undefined
+  const whitelistRows = demo ? entries.filter(entry =>
     (filter === 'all' || entry.endpointId === filter) &&
     matches(query, entry.name, entry.endpointId, entry.fingerprintValue, entry.vendorId, entry.productId, entry.serial))
-  const tableState = mode === 'whitelist' || demo
+    : whitelistPage?.content ?? []
+  const selectedRead = mode === 'whitelist' ? whitelistRead.state : deviceRead.state
+  const tableState = demo
     ? { loading: state.status === 'loading', unavailable: state.status === 'unavailable', failed: state.status === 'error', filtered: !!query || filter !== 'all' }
-    : { loading: deviceRead.state.status === 'loading', unavailable: deviceRead.state.status === 'unavailable',
-      failed: deviceRead.state.status === 'error', filtered: !!query || filter !== 'all' }
+    : { loading: state.status === 'loading' || selectedRead.status === 'loading',
+      unavailable: state.status === 'unavailable' || selectedRead.status === 'unavailable',
+      failed: state.status === 'error' || selectedRead.status === 'error', filtered: !!query || filter !== 'all' }
 
   function endpointLink(endpointId?: string) {
     return endpointId ? <a href={`#/endpoints/${encodeURIComponent(endpointId)}`}>Quản lý trên endpoint</a> : 'Chưa rõ endpoint'
@@ -75,12 +88,16 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
   return <>
     <PageHeading eyebrow="DEVICE MANAGEMENT" title={copy.title} description={copy.description}>{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
-    {!demo && mode !== 'whitelist' && deviceRead.state.status === 'error' &&
-      <p role="alert" className="field-error">Không tải được trang thiết bị: {deviceRead.state.error}</p>}
-    <Panel title={copy.table} subtitle={mode === 'whitelist' ? 'Danh sách quyền từ API whitelist; Agent áp dụng theo policy version' : 'Trạng thái mới nhất theo từng USB và endpoint, phân trang tại Server'} action={<Badge>{mode === 'whitelist' ? 'Per-endpoint rules' : 'USB history'}</Badge>}>
+    {!demo && selectedRead.status === 'error' &&
+      <p role="alert" className="field-error">Không tải được trang {mode === 'whitelist' ? 'whitelist' : 'thiết bị'}: {selectedRead.error}</p>}
+    <Panel title={copy.table} subtitle={mode === 'whitelist' ? 'Whitelist có tìm kiếm và phân trang tại Server; Agent áp dụng theo policy version' : 'Trạng thái mới nhất theo từng USB và endpoint, phân trang tại Server'} action={<Badge>{mode === 'whitelist' ? 'Per-endpoint rules' : 'USB history'}</Badge>}>
       <Filters query={query} onQuery={changeQuery} value={filter} onValue={changeFilter} options={options} placeholder="Tìm USB, fingerprint hoặc endpoint…" filterLabel={mode === 'devices' ? 'Lọc theo trạng thái' : 'Lọc theo endpoint'} />
+      {!demo && mode === 'whitelist' && <p className="helper-note">Bộ lọc Endpoint gợi ý các máy trong trang tổng quan; ô tìm kiếm phía trên vẫn tìm trên toàn bộ whitelist, kể cả các Endpoint chưa xuất hiện trong danh sách gợi ý.</p>}
       {mode === 'whitelist'
-        ? <DataTable key={`${query}:${filter}`} {...tableState} rows={whitelistRows} label={copy.table} columns={[
+        ? <DataTable key={demo ? `${query}:${filter}` : 'server-whitelist'} {...tableState} rows={whitelistRows} label={copy.table}
+          pagination={!demo && whitelistPage ? { page: whitelistPage.page, size: whitelistPage.size,
+            totalElements: whitelistPage.totalElements, totalPages: whitelistPage.totalPages, onPageChange: setPage } : undefined}
+          columns={[
           { key: 'name', label: 'Thiết bị', render: entry => entry.name ?? 'USB' },
           { key: 'endpoint', label: 'Endpoint', render: entry => <span className="mono">{entry.endpointId}</span> },
           { key: 'fingerprint', label: 'Fingerprint', render: entry => <span className="fingerprint-cell">{entry.fingerprintType ? `${entry.fingerprintType}: ${entry.fingerprintValue}` : entry.hash ?? `${entry.vendorId}:${entry.productId}`}</span> },

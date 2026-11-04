@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Repository
-public interface EndpointRepository extends JpaRepository<Endpoint, Long> {
+public interface EndpointRepository extends JpaRepository<Endpoint, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Endpoint> {
     Optional<Endpoint> findByEndpointId(String endpointId);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select e from Endpoint e where e.endpointId = :id")
@@ -19,5 +19,6 @@ public interface EndpointRepository extends JpaRepository<Endpoint, Long> {
     Optional<Endpoint> lockDeviceCatalogCoordinator();
     Optional<Endpoint> findByMachineId(String machineId);
     List<Endpoint> findByEndpointIdIn(Collection<String> endpointIds);
+    long countByLastSeenAfter(java.time.Instant cutoff);
     boolean existsByEndpointId(String endpointId);
 }

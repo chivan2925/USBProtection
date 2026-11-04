@@ -29,6 +29,9 @@ export interface Endpoint {
   lastSeenAt?: string
   policyVersion?: string
   appliedPolicyVersion?: string
+  usbGuardStatus?: 'HEALTHY' | 'DEGRADED' | 'UNAVAILABLE' | 'UNKNOWN'
+  usbGuardCheckedAt?: string
+  usbGuardStale?: boolean
 }
 export interface Overview {
   protection: 'enabled' | 'disabled' | 'unknown'

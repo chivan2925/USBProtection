@@ -8,7 +8,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:net'
-import { createPostgresBrowserTestRun, postgresBrowserChildEnv } from './postgresTestDb.mjs'
+import { createPostgresBrowserTestRun, postgresBrowserChildEnv, cleanupPostgresBrowserSchema } from './postgresTestDb.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const artifacts = join(root, '.artifacts')
@@ -31,6 +31,14 @@ const web = 'http://127.0.0.1:4174'
 const password = randomUUID()
 const enrollmentToken = randomUUID()
 const browserDb = createPostgresBrowserTestRun()
+let javaExecutable
+let browserFailure
+// Preserve the original browser-test error when cleanup also fails.
+// A cleanup failure alone must still make this test command fail.
+function recordCleanupFailure(stage, error) {
+  if (browserFailure) console.error(`Secondary browser ${stage} failure:`, error)
+  else browserFailure = error
+}
 const username = 'qa-browser-admin'
 const profile = join(runtime, 'chrome')
 const children = []
@@ -64,6 +72,7 @@ try {
   const java = process.env.JAVA_HOME
     ? join(process.env.JAVA_HOME, 'bin', process.platform === 'win32' ? 'java.exe' : 'java')
     : 'java'
+  javaExecutable = java
   if (process.env.JAVA_HOME && !existsSync(java)) {
     throw new Error(`JAVA_HOME points to a missing Java executable: ${java}`)
   }
@@ -72,7 +81,7 @@ try {
     throw new Error(`Cannot launch Java (${java}): ${javaCheck.error?.message || javaCheck.stderr || `exit ${javaCheck.status}`}`)
   }
   console.log(`Browser-live PostgreSQL target: usbshield_browser_test (role=usbshield_test, schema=${browserDb.schema})`)
-  const backend = start(java, ['-jar', jar, `--server.port=${backendPort}`, '--server.address=127.0.0.1', '--spring.jpa.hibernate.ddl-auto=create-only', ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
+  const backend = start(java, ['-jar', jar, `--server.port=${backendPort}`, '--server.address=127.0.0.1', ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
     env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: username, USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken }, browserDb),
   })
   // Do not suppress a JVM launch error or early exit for two minutes.
@@ -361,21 +370,46 @@ try {
   console.log('LIMIT: Windows HTTP-seeded QA events in disposable PostgreSQL test database; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.')
   await cdp('Browser.close')
 } catch (error) {
-  await writeFile(join(artifacts, 'live-events-server-last.log'), serverOutput, 'utf8')
-  throw error
+  browserFailure = error
+  try {
+    await writeFile(join(artifacts, 'live-events-server-last.log'), serverOutput, 'utf8')
+  } catch (logError) {
+    console.error('Secondary browser diagnostic-log write failure:', logError)
+  }
 } finally {
-  socket?.close()
+  try {
+    socket?.close()
+  } catch (error) {
+    recordCleanupFailure('CDP socket close', error)
+  }
   for (const child of children.reverse()) {
     if (child.exitCode !== null || child.signalCode !== null || !child.pid) continue
-    if (process.platform === 'win32') {
-      // Windows Java/Chrome launchers may spawn additional processes.
-      await new Promise(resolveKill => {
-        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, () => resolveKill())
-      })
-    } else child.kill()
+    try {
+      if (process.platform === 'win32') {
+        // Windows Java/Chrome launchers may spawn additional processes.
+        await new Promise(resolveKill => {
+          execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, () => resolveKill())
+        })
+      } else child.kill()
+    } catch (error) {
+      recordCleanupFailure('child-process termination', error)
+    }
   }
   await delay(1000)
-  const runtimeRelative = relative(artifacts, resolve(runtime))
-  assert.ok(runtimeRelative.startsWith('live-events-') && !runtimeRelative.includes(sep))
-  await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })
+  if (javaExecutable) {
+    try {
+      await cleanupPostgresBrowserSchema(browserDb, { java: javaExecutable, jar, cwd: root })
+    } catch (error) {
+      recordCleanupFailure('database cleanup', error)
+    }
+  }
+  try {
+    const runtimeRelative = relative(artifacts, resolve(runtime))
+    assert.ok(runtimeRelative.startsWith('live-events-') && !runtimeRelative.includes(sep))
+    await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })
+  } catch (error) {
+    recordCleanupFailure('temporary-file cleanup', error)
+  }
 }
+// Never throw from finally: doing so would replace a prior test failure.
+if (browserFailure) throw browserFailure
