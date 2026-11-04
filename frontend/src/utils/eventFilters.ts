@@ -20,8 +20,10 @@ export function getEventDateRange(filters: Pick<EventFilterValues, 'dateFrom' | 
   return { valid: true, fromInclusive: from?.toISOString(), toExclusive: to?.toISOString() }
 }
 
-// Inclusive Java Instant upper bound includes sub-millisecond events on the last
-// selected day, while excluding midnight at the start of the following day.
+// PostgreSQL timestamps have microsecond resolution. The server treats `to` as
+// inclusive, so use the last representable microsecond BEFORE next local midnight.
+// Passing .999999999 rounds UP to midnight in the PostgreSQL JDBC driver and
+// would include an event from the next day.
 export function getEventQuery(filters: EventFilterValues, page = 0, size = 20): EventQuery {
   const range = getEventDateRange(filters)
   if (!range.valid) throw new Error('Khoảng ngày không hợp lệ. Kiểm tra ngày bắt đầu và kết thúc.')
@@ -36,7 +38,7 @@ export function getEventQuery(filters: EventFilterValues, page = 0, size = 20): 
     decision: filters.decision ? filters.decision === 'allowed' ? 'ALLOWED' : 'BLOCKED' : undefined,
     eventType: filters.eventType ? filters.eventType === 'connected' ? 'CONNECTED' : filters.eventType === 'disconnected' ? 'DISCONNECTED' : 'POLICY_APPLIED' : undefined,
     from: range.fromInclusive,
-    to: range.toExclusive ? new Date(Date.parse(range.toExclusive) - 1000).toISOString().replace(/\.\d{3}Z$/, '.999999999Z') : undefined,
+    to: range.toExclusive ? new Date(Date.parse(range.toExclusive) - 1000).toISOString().replace(/\.\d{3}Z$/, '.999999Z') : undefined,
   }
 }
 

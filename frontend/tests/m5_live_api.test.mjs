@@ -84,16 +84,16 @@ test('invalid CSRF response prevents credentials from being submitted', async ()
   })
 })
 
-test('live filters send endpoint/USB/username text and the last nanosecond of local dates', () => {
+test('live filters send endpoint/USB/username text and the last PostgreSQL microsecond of local dates', () => {
   const originalTZ = process.env.TZ
   try {
     process.env.TZ = 'Asia/Bangkok'
     const query = getEventQuery({ ...emptyEventFilters, endpoint: ' endpoint-A ', username: ' student01 ', device: '9007199254740993', decision: 'blocked', eventType: 'disconnected', dateFrom: '2026-10-16', dateTo: '2026-10-16' }, 1, 20)
-    assert.deepEqual(query, { page: 1, size: 20, endpoint: 'endpoint-A', username: 'student01', device: '9007199254740993', decision: 'BLOCKED', eventType: 'DISCONNECTED', from: '2026-10-15T17:00:00.000Z', to: '2026-10-16T16:59:59.999999999Z' })
+    assert.deepEqual(query, { page: 1, size: 20, endpoint: 'endpoint-A', username: 'student01', device: '9007199254740993', decision: 'BLOCKED', eventType: 'DISCONNECTED', from: '2026-10-15T17:00:00.000Z', to: '2026-10-16T16:59:59.999999Z' })
     process.env.TZ = 'America/New_York'
     const dst = getEventQuery({ ...emptyEventFilters, dateFrom: '2026-03-08', dateTo: '2026-03-08' })
     assert.equal(dst.from, '2026-03-08T05:00:00.000Z')
-    assert.equal(dst.to, '2026-03-09T03:59:59.999999999Z')
+    assert.equal(dst.to, '2026-03-09T03:59:59.999999Z')
   } finally { if (originalTZ === undefined) delete process.env.TZ; else process.env.TZ = originalTZ }
 })
 

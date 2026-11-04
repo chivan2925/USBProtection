@@ -29,7 +29,7 @@ public class UsbDevice {
     @Column(length = 150)
     private String serialNumber;
 
-    // H2 allows several NULL values: devices without a trustworthy hash remain
+    // PostgreSQL allows multiple NULLs in a UNIQUE column: devices without a trustworthy hash remain
     // independent; nonblank device hashes have exactly one catalog identity.
     @Column(length = 255, unique = true)
     private String deviceHash;

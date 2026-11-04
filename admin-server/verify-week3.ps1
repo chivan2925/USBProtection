@@ -13,6 +13,16 @@ $java = if ($JavaHome) { Join-Path $JavaHome 'bin/java.exe' } else { (Get-Comman
 $base = "http://127.0.0.1:$Port"
 $server = $null
 $savedDbPassword = $env:USBSHIELD_DB_PASSWORD
+$savedDbUrl = $env:USBSHIELD_DB_URL
+$savedDbUsername = $env:USBSHIELD_DB_USERNAME
+if ($null -eq $env:USBSHIELD_TEST_DB_PASSWORD) {
+    throw 'Set USBSHIELD_TEST_DB_PASSWORD for the dedicated usbshield_browser_test PostgreSQL database.'
+}
+$pgHost = if ($env:USBSHIELD_TEST_DB_HOST) { $env:USBSHIELD_TEST_DB_HOST } else { '127.0.0.1' }
+$pgPort = if ($env:USBSHIELD_TEST_DB_PORT) { $env:USBSHIELD_TEST_DB_PORT } else { '5432' }
+if ($pgHost -notmatch '^[a-zA-Z0-9_.-]+$' -or $pgPort -notmatch '^\d{1,5}$' -or [int]$pgPort -lt 1 -or [int]$pgPort -gt 65535) {
+    throw 'Invalid PostgreSQL test host/port.'
+}
 $savedPassword = $env:USBSHIELD_ADMIN_PASSWORD
 $savedUser = $env:USBSHIELD_ADMIN_USERNAME
 $savedBootstrap = $env:USBSHIELD_ENROLLMENT_TOKEN
@@ -28,14 +38,16 @@ function Assert-Http($Path, $Method, $Body, $Headers, $Expected, $Session = $nul
     if ($response.Content) { return $response.Content | ConvertFrom-Json }
 }
 try {
-    $env:USBSHIELD_DB_PASSWORD = [guid]::NewGuid().ToString('N')
+    # This verifier intentionally recreates tables ONLY in the disposable test database.
+    $env:USBSHIELD_DB_URL = "jdbc:postgresql://${pgHost}:${pgPort}/usbshield_browser_test"
+    $env:USBSHIELD_DB_USERNAME = if ($env:USBSHIELD_TEST_DB_USERNAME) { $env:USBSHIELD_TEST_DB_USERNAME } else { 'usbshield_test' }
+    $env:USBSHIELD_DB_PASSWORD = $env:USBSHIELD_TEST_DB_PASSWORD
     $env:USBSHIELD_ADMIN_PASSWORD = $password
     $env:USBSHIELD_ADMIN_USERNAME = 'week3-verifier'
     $env:USBSHIELD_ENROLLMENT_TOKEN = $bootstrap
-    $db = (Join-Path $runtime 'server-db').Replace('\','/')
     $server = Start-Process -FilePath $java -WindowStyle Hidden -PassThru -WorkingDirectory $PSScriptRoot -ArgumentList @(
         '-jar', 'target/usbshield-admin-server.jar', "--server.port=$Port", '--server.address=127.0.0.1', '--spring.profiles.active=prod', '--server.servlet.session.cookie.secure=false',
-        "--spring.datasource.url=jdbc:h2:file:$db;DB_CLOSE_ON_EXIT=FALSE"
+        "--spring.jpa.hibernate.ddl-auto=create"
     ) -RedirectStandardOutput "$evidence/server-runtime.log" -RedirectStandardError "$evidence/server-runtime-error.log"
     $ready = $false
     for ($i=0; $i -lt 60; $i++) {
@@ -110,10 +122,12 @@ try {
     Assert-Http '/api/auth/logout' POST @{} $adminHeaders 200 $web | Out-Null
     Assert-Http '/api/auth/me' GET $null @{} 401 $web | Out-Null
     'PASS: logout invalidates session; me returns 401.' | Add-Content "$evidence/02-admin-auth-http.txt"
-    'PASS: Week 3 standalone server + file H2 + session/CSRF + authenticated Agent APIs + A/B policy + event queries.'
+    'PASS: Week 3 standalone server + disposable PostgreSQL + session/CSRF + authenticated Agent APIs + A/B policy + event queries.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     $env:USBSHIELD_DB_PASSWORD = $savedDbPassword
+    $env:USBSHIELD_DB_URL = $savedDbUrl
+    $env:USBSHIELD_DB_USERNAME = $savedDbUsername
     $env:USBSHIELD_ADMIN_PASSWORD = $savedPassword
     $env:USBSHIELD_ADMIN_USERNAME = $savedUser
     $env:USBSHIELD_ENROLLMENT_TOKEN = $savedBootstrap

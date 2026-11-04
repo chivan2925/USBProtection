@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -15,8 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:week3;DB_CLOSE_DELAY=-1",
-        "spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.offline-after-seconds=90"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@IsolatedPostgresDb
+@SpringBootTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.offline-after-seconds=90"})
 @AutoConfigureMockMvc
 class ServerSecurityAndStatusTest {
     @Autowired MockMvc mvc;

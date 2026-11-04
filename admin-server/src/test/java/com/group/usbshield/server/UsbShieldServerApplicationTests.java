@@ -2,8 +2,11 @@ package com.group.usbshield.server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:context-test;DB_CLOSE_DELAY=-1")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@IsolatedPostgresDb
+@SpringBootTest
 class UsbShieldServerApplicationTests {
 
     @Test

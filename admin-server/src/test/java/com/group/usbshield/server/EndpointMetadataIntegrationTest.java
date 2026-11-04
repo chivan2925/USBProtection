@@ -13,15 +13,17 @@ import com.group.usbshield.server.policy.EndpointPolicyService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Exercises actual H2 entity persistence and the production endpoint/whitelist response DTOs. */
-@SpringBootTest(properties = {"spring.datasource.url=jdbc:h2:mem:ubuntu_e2e_metadata;DB_CLOSE_DELAY=-1",
-        "spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.enrollment-token=test-only"})
+/** Exercises actual PostgreSQL entity persistence and the production endpoint/whitelist response DTOs. */
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@IsolatedPostgresDb
+@SpringBootTest(properties = {"spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.enrollment-token=test-only"})
 @Transactional
 class EndpointMetadataIntegrationTest {
     @Autowired EndpointRepository endpoints;
