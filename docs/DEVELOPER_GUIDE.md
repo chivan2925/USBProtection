@@ -3,7 +3,7 @@
 > **Vận hành và cài đặt:** xem [RUN_GUIDE.md](RUN_GUIDE.md). Tài liệu này giữ kiến trúc, API, build workflow và ghi chú developer; không thay thế runbook triển khai chung.
 
 
-Owner: M1. Updated 2026-11-01 (Asia/Saigon). API contract: frozen v0.2.
+Owner: M1. Runtime database update: 2026-11-04 (`vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`). Earlier Week 4 evidence remains historical. API contract: frozen v0.2.
 
 This guide covers the Spring Boot Admin Server, its same-origin React bundle,
 local development, production configuration and Windows release checks. It does
@@ -16,10 +16,9 @@ not claim Ubuntu USBGuard, systemd, desktop notification or `.deb` runtime tests
 - `frontend/` is built as static assets and copied into the Spring Boot JAR by
   the `with-frontend` Maven profile. In deployment, the UI and `/api/**` use one
   origin; no CORS wildcard is required.
-- H2 stores endpoints, BCrypt Agent credential hashes, Admin password hashes,
-  USB devices, events, whitelist entries and policy versions. In production, its
-  path and password come from environment configuration and the data file must be
-  outside Git in a private persistent directory.
+- PostgreSQL stores endpoints, BCrypt Agent credential hashes, Admin password hashes,
+  USB devices, events, whitelist entries and policy versions. It is a separate
+  service/database; credentials are injected at runtime and never committed.
 - The Client Agent owns USBGuard enforcement. The server cannot independently
   prove that the local policy was applied: heartbeat reports connectivity, while
   `appliedPolicyVersion` is an authenticated Agent ACK.
@@ -56,9 +55,10 @@ cd admin-server
 mvn spring-boot:run
 ```
 
-The default profile binds to `127.0.0.1:8080`, writes its H2 file under the
-ignored `admin-server/data/` directory, and disables enrollment if its bootstrap
-token is absent. No Admin account is created until an initial password is set.
+The default profile binds to `127.0.0.1:8080` and connects to PostgreSQL
+(default `127.0.0.1:5432/usbshield` with role `usbshield`), and disables enrollment
+if its bootstrap token is absent. Set `USBSHIELD_DB_PASSWORD` in the same shell;
+IntelliJ Database credentials are not inherited by Maven/Java. No Admin account is created until an initial password is set.
 Local Swagger/OpenAPI endpoints are `/swagger-ui.html` and `/api-docs`.
 
 Frontend development runs from `frontend/` with `npm run dev`; use the configured
@@ -90,45 +90,34 @@ for role/endpoint/CSRF failures, 404 for unknown resources and 409 for duplicate
 stale or future state. Do not include secrets or personal event data in test logs,
 screenshots or release evidence.
 
-## Production profile
+## PostgreSQL profiles and security boundary
 
-Set secret values through a secret manager or the service environment, not in source
-files or command history. Server startup requires the DB URL, DB password and
-enrollment token. Set an initial Admin password before the first Admin login; if it
-is absent, the server starts without creating an Admin account.
+See the single canonical [RUN_GUIDE.md](RUN_GUIDE.md) for SQL role/database setup,
+build/run commands, Ubuntu Agent installation, LAN/HTTPS and backup procedure.
+This developer document records the relevant application properties:
 
-| Variable | Purpose |
+| Property / environment | Behavior |
 |---|---|
-| `USBSHIELD_DB_URL` | Persistent H2 file URL, for example `jdbc:h2:file:/var/lib/usbshield/usbshield;DB_CLOSE_ON_EXIT=FALSE` |
-| `USBSHIELD_DB_PASSWORD` | Password for the H2 file; keep it stable when reopening that database |
-| `USBSHIELD_ENROLLMENT_TOKEN` | Bootstrap credential for new Agent enrollment |
-| `USBSHIELD_ADMIN_PASSWORD` | Initial Admin password; needed to create the first account and does not reset an existing account |
-| `USBSHIELD_ADMIN_USERNAME` | Initial Admin username; defaults to `admin` |
+| `spring.datasource.url` / `USBSHIELD_DB_URL` | `prod` needs explicit `jdbc:postgresql://host:5432/usbshield` URL; not a local H2 path |
+| `USBSHIELD_DB_USERNAME` | Role for Admin Server (default `usbshield`) |
+| `USBSHIELD_DB_PASSWORD` | Database login secret; required in `prod`, never commit |
+| `USBSHIELD_DB_HOST`, `USBSHIELD_DB_PORT`, `USBSHIELD_DB_NAME` | Used in default `application.yml` URL; do not replace `USBSHIELD_DB_URL` in `prod` |
+| `USBSHIELD_TEST_DB_USERNAME`, `USBSHIELD_TEST_DB_PASSWORD` | Dedicated `usbshield_test` role for integration/browser tests; not app credentials |
+| `USBSHIELD_TEST_DB_HOST`, `USBSHIELD_TEST_DB_PORT` | Optional test PostgreSQL address; browser harness fixes database to `usbshield_browser_test` |
+| `USBSHIELD_ADMIN_USERNAME`, `USBSHIELD_ADMIN_PASSWORD` | Initial Admin bootstrap only; not a password-reset mechanism |
+| `USBSHIELD_ENROLLMENT_TOKEN` | Agent enrollment secret, distinct from Admin browser credentials |
 
-Optional values: `USBSHIELD_DB_USERNAME` (default `sa`), `USBSHIELD_BIND_ADDRESS`
-(default loopback), `USBSHIELD_COOKIE_SECURE` (default `true`), `PORT` (default
-8080) and `USBSHIELD_OFFLINE_AFTER_SECONDS` (default 90). Production requires
-`USBSHIELD_DB_URL`, DB password and enrollment token to be present.
+`application.yml` and `application-prod.yml` both select the PostgreSQL driver;
+Hibernate is configured for `ddl-auto=update` for this seminar demo. No H2 schema
+upgrade/migration logic is retained and historical test data are intentionally discarded.
+Do not claim application-grade database migration guarantees from automatic schema updates.
 
-Build and run the JAR with the `prod` profile:
-
-```powershell
-./admin-server/build-release.ps1 -JavaHome 'C:\Path\To\JDK'
-java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
-```
-
-Production binds to loopback, sets Secure/HttpOnly/SameSite Strict session
-cookies, disables H2 console and Swagger/OpenAPI, and does not trust forwarded
-headers. For remote Admin access, terminate HTTPS at a trusted reverse proxy and
-proxy to the loopback listener. Direct plain HTTP cannot carry the Secure session
-cookie. Never disable Secure cookies or bind the app to a public interface without
-a reviewed TLS and access-control boundary.
-
-The service account needs read/write access to the H2 parent directory and read
-access to the JAR. Restrict DB and backup files to that account. Stop the service
-before making a file-level H2 backup. Do not copy a live production database into
-the repository or a demo artifact. This deployment is a single server with local
-H2 storage; it is not a clustered or high-availability design.
+`prod` binds to loopback by default, sets Secure/HttpOnly/SameSite Strict session
+cookies, disables Swagger/OpenAPI, and does not trust forwarded headers. Terminate
+HTTPS at a trusted reverse proxy to provide browser access from other machines.
+PostgreSQL TCP port 5432 is separate from the HTTP API and should not be exposed to
+Client endpoints. Protect role secrets, database storage and backups; use PostgreSQL
+backup/restore tooling rather than copying live database files.
 
 ## Build, verify and provenance
 
@@ -146,8 +135,12 @@ After the build, run the isolated production-profile HTTP check:
   -EvidencePath 'docs/member1/week4-evidence/http'
 ```
 
-The check starts only its own server process, uses a new target-local H2 file and
-synthetic credentials/events, then restores the shell environment. It checks the
+The check starts its own server process and uses the disposable PostgreSQL
+`usbshield_browser_test` database (role `usbshield_test`) with synthetic credentials/events;
+it **requires `USBSHIELD_TEST_DB_PASSWORD` and may create/drop tables in that test DB**.
+It restores selected shell variables. Never point this script at the `usbshield` app DB.
+Historical Week 4 pass logs refer to an earlier H2 runtime and are not proof of a
+PostgreSQL run. It checks the
 packaged index/assets, route redirect, 404 behavior, disabled production API docs,
 Admin session/CSRF, Agent authentication, event query, per-endpoint policy changes
 and ACK validation. It is a Windows HTTP check, not a physical USB or Ubuntu E2E
@@ -164,8 +157,12 @@ test. Browser/UI regression remains separately owned by M4/M5.
   USBGuard health or the physical connection.
 - Admin login fails after changing the environment password: bootstrap only creates
   a first account; it does not reset a stored password.
-- H2 will not open after a DB password change: restore the matching secret or use a
-  verified backup. Do not reset the production database as a troubleshooting step.
+- PostgreSQL login failure: check `USBSHIELD_DB_URL`, host/port, role, password,
+  service status, firewall and `pg_hba.conf` authentication. IntelliJ may have a
+  separate saved password from the terminal running Maven/JAR.
+- `permission denied for schema public` or `must be owner of table`: check that
+  the **correct database** and table/schema owner are being used. Never grant
+  browser-test role destructive access to the application database or drop app schema.
 - `/swagger-ui.html` and `/api-docs` return 404 under `prod` by design. Use the
   local profile for interactive API exploration.
 

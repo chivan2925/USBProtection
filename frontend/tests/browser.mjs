@@ -286,7 +286,7 @@ try {
   assert.ok(requests.some(url => url.includes('/api/auth/login')))
   assert.ok(requests.every(url => url.startsWith('http://127.0.0.1:4173/api/')), 'Same-origin API requests')
   console.log('PASS: M4 browser with HTTP fixture; protected routes, invalid/valid login, refresh /me, CSRF, A/B Allow/Revoke, duplicate/error/empty states, M5 events/filter, expired session/logout, demo read-only, network error, responsive routes.')
-  console.log('Scope: HTTP fixture regression. Run npm run test:live for Spring Security/H2 evidence. Physical USB and actual Agent apply/ACK require Ubuntu.')
+  console.log('Scope: HTTP fixture regression. Run npm run test:live for Spring Security/PostgreSQL evidence. Physical USB and actual Agent apply/ACK require Ubuntu.')
   console.log('Screenshots: frontend/.artifacts/m4-*.png; demo regression screenshots.')
   }
   assert.deepEqual(errors, [], 'No browser runtime or application console errors')

@@ -1,6 +1,6 @@
 # USBShield — Functional Test Catalog (03/11/2026)
 
-> Source baseline: `main` `c41f2c73c8f80cc2c2d9ea945094daa47435a93f`. **Tổ chức lại test, không thay đổi logic sản phẩm.** Tổng `@Test` trước/sau trên source: **303/303**. Đây là kiểm tra tĩnh; full Maven phải chạy lại trên Windows sau khi áp dụng.
+> **Updated 04/11/2026 (`vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`):** Admin Server migrated from H2 to PostgreSQL, with new PostgreSQL persistence and isolated test-database coverage. Original refactor snapshot 03/11 counted 303 `@Test` before/after **at that historical commit**; do not treat that count as current execution results. Test verification after database migration must target PostgreSQL.
 
 ## Nguyên tắc
 
@@ -11,12 +11,13 @@
 
 ## Admin Server
 
-- `LegacyH2SchemaCompatibilityTest`: tương thích database H2 cũ.
+- `PostgreSqlPersistenceIntegrationTest`: CRUD/persistence integration against PostgreSQL; legacy H2 compatibility and upgrade test classes were removed because the test data do not need migration.
+- `IsolatedPostgresDb`: shared test configuration for the dedicated `usbshield_test` database; this is a helper, not an executable test class.
 - `ServerApiIntegrationTest`: các luồng Admin/API/endpoints/events/policy end-to-end qua Spring context; giữ một test suite hợp đồng tích hợp, không chia khiến context setup trùng.
-- `ProductionProfileSecurityTest`: profile prod, cookie, H2 console, OpenAPI.
+- `ProductionProfileSecurityTest`: profile prod, cookie, OpenAPI security (không còn H2 console runtime).
 - `ServerSecurityAndStatusTest`: request auth/security + policy status và SPA route.
 - `EndpointMetadataIntegrationTest`: metadata từ Agent → Admin API/whitelist.
-- Các test theo chức năng đã có sẵn giữ nguyên: `EventSearchIntegrationTest`, `AgentHttpIntegrationTest`, `AgentEventContractTest`, `UsbCatalogUpgradeTest`, `UsbCatalogUpgradeStartupIntegrationTest`, `EnrollmentRetryContractTest`, v.v.
+- Các test theo chức năng đã có sẵn giữ nguyên: `EventSearchIntegrationTest`, `AgentHttpIntegrationTest`, `AgentEventContractTest`, `ConcurrentUsbCatalogIntegrationTest`, `EnrollmentRetryContractTest`, v.v. Các test nâng cấp schema H2 (`UsbCatalogUpgrade*`) đã bị xóa cùng H2 preflight.
 
 ## Client Agent — các file được gộp
 
@@ -32,6 +33,12 @@
 - `UsbGuardPolicySafetyValidationTest`, `UsbGuardFingerprintValidationTest`, `UsbGuardPolicyReconciliationTest`, `UsbGuardRuleMutationSafetyTest`, `UsbGuardManagedPolicyIntegrityTest`: USBGuard policy, identity/rule ordering/rollback.
 - `UsbGuardWatchRecoveryTest`, `UsbGuardWatchResilienceTest`, `UsbGuardNotificationDecisionTargetTest`: watch replay/bounds/final target và notification.
 - `NotifierIpcSecurityTest`: gộp kiểm tra peer authorization + hợp đồng IPC/Unix socket.
+
+## PostgreSQL test isolation (sau migration)
+
+- Maven Admin tests dùng PostgreSQL `usbshield_test` với `USBSHIELD_TEST_DB_PASSWORD`; Hibernate có thể tạo/xóa bảng tại đây. **Không bao giờ trỏ Maven integration suite vào `usbshield` của ứng dụng.**
+- `npm run test:live` và `npm run test:browser:live` dùng role `usbshield_test` trên database `usbshield_browser_test`, schema riêng theo lần chạy; browser tests không cấp quyền cho role test trong `usbshield` ứng dụng. Các schema `usbshield_e2e_*` cũ cần được dọn có kiểm soát.
+- Đây là test integration trên Windows với event HTTP tổng hợp; không chứng minh USBGuard trên Ubuntu. Ghi PASS sau khi chạy thực tế, không suy từ code/harness.
 
 ## Xác nhận sau refactor
 

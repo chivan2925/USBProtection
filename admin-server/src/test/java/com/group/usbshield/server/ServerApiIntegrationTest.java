@@ -8,6 +8,7 @@ import com.group.usbshield.server.device.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.*;
 import org.springframework.mock.web.MockHttpSession;
@@ -18,8 +19,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties={"spring.datasource.url=jdbc:h2:mem:week2;DB_CLOSE_DELAY=-1",
-    "spring.jpa.hibernate.ddl-auto=create-drop","usbshield.enrollment-token=integration-test-bootstrap"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@IsolatedPostgresDb
+@SpringBootTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop","usbshield.enrollment-token=integration-test-bootstrap"})
 @AutoConfigureMockMvc
 class ServerApiIntegrationTest {
     @Autowired MockMvc mvc;

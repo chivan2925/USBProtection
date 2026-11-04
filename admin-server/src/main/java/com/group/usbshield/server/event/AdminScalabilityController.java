@@ -14,7 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.Types;
+import java.time.ZoneOffset;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +43,7 @@ public class AdminScalabilityController {
              ELSE CONCAT('event:', CAST(e.id AS VARCHAR)) END
         """;
 
-    // Columns use Hibernate's canonical snake_case naming strategy in the H2 schema.
+    // Columns use Hibernate's canonical snake_case naming strategy in PostgreSQL.
     // ROW_NUMBER chooses the latest event within a device lifecycle identity.
     private static final String LATEST = """
         WITH ranked AS (
@@ -88,7 +89,7 @@ public class AdminScalabilityController {
     }
 
     private static String where(String endpointId, String status, Object searchPattern) {
-        // Do not bind untyped NULL to "? IS NULL": H2 cannot infer its SQL type.
+        // Add only active filters so PostgreSQL never needs to infer types for NULL predicates.
         StringBuilder where = new StringBuilder("WHERE rn = 1");
         if (endpointId != null) where.append(" AND endpoint_id = :endpointId");
         if (status != null) where.append(" AND status = :status");
@@ -145,18 +146,22 @@ public class AdminScalabilityController {
         if (!from.isBefore(to))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid day range");
         MapSqlParameterSource args = new MapSqlParameterSource()
-            .addValue("from", Timestamp.from(from)).addValue("to", Timestamp.from(to));
-        var totals = jdbc.queryForMap(LATEST + """
+            .addValue("from", from.atOffset(ZoneOffset.UTC), Types.TIMESTAMP_WITH_TIMEZONE)
+            .addValue("to", to.atOffset(ZoneOffset.UTC), Types.TIMESTAMP_WITH_TIMEZONE);
+        // PostgreSQL preserves lower-case unquoted aliases; do not depend on
+        // H2's upper-case Map keys. Read via ResultSet column labels instead.
+        long[] totals = jdbc.query(LATEST + """
             SELECT COUNT(*) AS total_devices,
                    COALESCE(SUM(CASE WHEN status = 'blocked' THEN 1 ELSE 0 END), 0) AS blocked_devices,
                    COALESCE(SUM(CASE WHEN status = 'allowed' THEN 1 ELSE 0 END), 0) AS allowed_devices,
                    COALESCE(SUM(CASE WHEN status = 'blocked' AND occurred_at >= :from AND occurred_at < :to
                          THEN 1 ELSE 0 END), 0) AS blocked_today
             FROM current_devices
-            """, args);
-        return new Summary(((Number) totals.get("TOTAL_DEVICES")).longValue(),
-            ((Number) totals.get("BLOCKED_DEVICES")).longValue(),
-            ((Number) totals.get("ALLOWED_DEVICES")).longValue(), events.count(),
-            ((Number) totals.get("BLOCKED_TODAY")).longValue());
+            """, args, rs -> {
+                if (!rs.next()) throw new IllegalStateException("Dashboard aggregate returned no row");
+                return new long[] { rs.getLong("total_devices"), rs.getLong("blocked_devices"),
+                    rs.getLong("allowed_devices"), rs.getLong("blocked_today") };
+            });
+        return new Summary(totals[0], totals[1], totals[2], events.count(), totals[3]);
     }
 }

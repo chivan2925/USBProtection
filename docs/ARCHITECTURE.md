@@ -1,3 +1,5 @@
+> **Current runtime (04/11/2026):** `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408` uses **PostgreSQL** as the Admin Server's central database. The dated Week 1–4 H2 implementation reports below are retained as historical snapshots, not current design decisions. The Java JAR and Ubuntu `.deb` artifact types are unchanged. See [RUN_GUIDE.md](RUN_GUIDE.md).
+
 # USBShield Ubuntu — System Architecture Document (v0.1)
 
 > **Dự án:** USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu  
@@ -17,7 +19,7 @@ Heartbeat is telemetry only; applied version changes through validated ACK.
 Policy wire field is `whitelistedDevices` (v0.2). See [API](API.md) for exact DTOs,
 paging, HASH-only grants, errors, startup and cross-member handoff.
 
-H2 update is additive for credential hash/event hostname and machineId uniqueness;
+Historical Week 2 H2 update was additive for credential hash/event hostname and machineId uniqueness;
 existing DB validation and deployment limits are documented in the
 [server integration report](member1/WEEK2_SERVER_INTEGRATION.md).
 Week 1 remains closed. Backend test results do not establish Ubuntu physical USB,
@@ -41,7 +43,7 @@ graph TB
 
     subgraph Admin_Central ["Admin Central Server"]
         AGENT -->|REST API / HTTP JSON| SERVER[USBShield Admin Server - Spring Boot 3]
-        SERVER -->|JPA / ORM| DB[(H2 File Database)]
+        SERVER -->|JPA / ORM| DB[(PostgreSQL Database)]
     end
 
     subgraph Admin_Console ["Admin Web Console"]
@@ -81,15 +83,15 @@ graph TB
 | Thành phần | Công nghệ | Nhiệm vụ chính |
 | :--- | :--- | :--- |
 | **Client Agent** (`client-agent`) | Java 21, Spring Boot, systemd service | Lắng nghe sự kiện từ USBGuard IPC, tra cứu session active qua logind, gửi heartbeat/event lên Server, đồng bộ whitelist vào USBGuard rules. |
-| **Admin Server** (`admin-server`) | Java 21, Spring Boot 3.3.x, Spring Data JPA, Security, H2 File Mode | Quản lý định danh Endpoint, lưu trữ lịch sử sự kiện, quản trị Per-endpoint Whitelist, cung cấp REST API cho Agent và Web Console. |
+| **Admin Server** (`admin-server`) | Java 21, Spring Boot 3.3.x, Spring Data JPA, Security, PostgreSQL | Quản lý định danh Endpoint, lưu trữ lịch sử sự kiện, quản trị Per-endpoint Whitelist, cung cấp REST API cho Agent và Web Console. |
 | **Admin Web Console** (`frontend`) | React, Vite, TypeScript | Giao diện dashboard cho quản trị viên theo dõi sự kiện thời gian thực, duyệt whitelist, xem trạng thái kết nối các máy trạm. |
 | **Packaging & Enforcement** (`packaging`) | Debian package (`.deb`), USBGuard daemon | Đóng gói cài đặt trọn gói trên Ubuntu 24.04 LTS, cấu hình systemd service tự chạy và bảo vệ chống tắt trái phép. |
 
 ---
 
-## 4. Mô hình dữ liệu quan hệ (Entity Data Model - H2 Database)
+## 4. Mô hình dữ liệu quan hệ (Entity Data Model - PostgreSQL)
 
-Admin Server sử dụng H2 Database ở chế độ File Mode (`./data/usbshield`) đảm bảo dữ liệu tồn tại bền vững qua các lần khởi động lại:
+Admin Server dùng PostgreSQL qua JDBC/Spring Data JPA. Dữ liệu tồn tại bền vững trên PostgreSQL service/data directory qua restart JAR; không phụ thuộc file H2 cục bộ. Các bảng Admin account, endpoint, device, event và per-endpoint whitelist hiện được Hibernate tạo/cập nhật theo cấu hình `ddl-auto=update` cho demo. Database `usbshield` và role ứng dụng được tách khỏi `usbshield_test`/`usbshield_browser_test` phục vụ kiểm thử:
 
 ```mermaid
 erDiagram
@@ -179,7 +181,7 @@ erDiagram
 
 ## 6. Kế hoạch theo tuần (lịch sử dự án; xem `RUN_GUIDE.md` để chạy hiện tại)
 
-- **Week 1 (Hiện tại):** Khởi tạo Server skeleton, H2 file DB, Freeze DTO & Schema hợp đồng, Unit Test Jackson Parser.
+- **Week 1 (lịch sử):** Khởi tạo Server skeleton, H2 file DB ở thời điểm đó, Freeze DTO & Schema hợp đồng, Unit Test Jackson Parser. **Hiện tại dùng PostgreSQL**.
 - **Week 2:** Kết nối Agent ↔ Server thực tế, xử lý outbox spool khi mất mạng, triển khai logic Per-endpoint Whitelist Admin CRUD.
 - **Week 3:** Hoàn thiện giao diện Admin Web Console (React), xác thực Admin Session, hoàn thiện gói `.deb` cài đặt Ubuntu.
 - **Week 4:** Kiểm thử toàn diện trên phần cứng thật (Flash Disk, Chuột, Bàn phím), đóng gói tài liệu báo cáo và chuẩn bị kịch bản Demo.
@@ -205,11 +207,13 @@ Agent-reported applied version. Heartbeat updates liveness only. See the canonic
 The `prod` profile requires externally supplied DB URL/password and enrollment
 bootstrap token, creates an Admin account only when an initial password is
 configured, binds to loopback by default, sets Secure/HttpOnly/SameSite session
-cookies, disables the H2 console and Swagger/OpenAPI, and does not trust forwarded
+cookies, disables Swagger/OpenAPI, and does not trust forwarded
 headers. Remote browser access therefore requires HTTPS termination at a trusted
 reverse proxy. The server JAR serves the React build and `/api` on the same origin.
-H2 file data and other runtime state belong in private persistent storage and are
-excluded from Git. This application has no clustering or HA database layer.
+PostgreSQL data/backup and runtime credentials belong in protected storage outside
+Git; PostgreSQL runs as an independently managed service. There is one Admin Server,
+no implemented clustering, HA or tested failover. Separate QA databases are used
+for destructive integration/browser tests.
 
 Week 4 Windows/JAR evidence and open release dependencies are tracked in
 [M1 Week 4 handoff](member1/WEEK4_SERVER_HANDOFF.md). None of that evidence claims

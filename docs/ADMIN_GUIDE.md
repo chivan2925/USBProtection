@@ -1,6 +1,6 @@
 # USBShield Admin Web — Hướng dẫn quản trị
 
-**FINAL — Week 4, 30/10/2026.** Hướng dẫn đã kiểm tra trên Windows với backend Spring Boot/H2; việc chặn USB thật cần Agent/USBGuard trên Ubuntu.
+**Hướng dẫn UI hiện hành, cập nhật 04/11/2026.** Backend hiện dùng Spring Boot/PostgreSQL trên nhánh `vinhkhang`; các con số PASS ghi bên dưới là **bằng chứng Windows/Week 4 lịch sử chạy trên H2**, không phải kết quả chạy lại sau migration. USB thật vẫn cần Agent/USBGuard trên Ubuntu. Cách build/chạy duy nhất: [RUN_GUIDE.md](RUN_GUIDE.md).
 
 ## Mở giao diện
 
@@ -19,7 +19,7 @@ npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
-Backend chạy riêng theo README và hướng dẫn M1. Frontend chuyển `/api` đến backend qua Vite proxy cùng origin. Đổi đích proxy bằng biến `API_PROXY_TARGET` nếu backend dùng URL khác.
+Backend chạy riêng theo [RUN_GUIDE.md](RUN_GUIDE.md). Frontend chuyển `/api` đến backend qua Vite proxy cùng origin. Đổi đích proxy bằng biến `API_PROXY_TARGET` nếu backend dùng URL khác.
 
 Nếu `npm ci` báo EPERM với native module đang dùng, dừng tiến trình Vite của project rồi thử lại. Không cần xóa source hoặc đổi lockfile.
 
@@ -102,4 +102,4 @@ Demo có nhãn **Dữ liệu mock**, chỉ để xem giao diện và luôn khóa
 - `npm run test:live`: PASS; Spring Boot/Spring Security/H2 thật, session, policy version, A/B isolation, controlled HTTP ACK và mobile.
 - Screenshots và log: [Week 4 evidence](qa/week4-evidence/2026-10-28/windows-regression/README.md).
 
-Giới hạn: test trên Windows dùng HTTP/H2 và dữ liệu tổng hợp. Ubuntu/USB vật lý/USBGuard/systemd/reboot/native GUI notification chưa thực thi; không suy ra hardware PASS từ demo hoặc HTTP test.
+Giới hạn của **evidence Week 4 ngày 30/10**: test trên Windows dùng HTTP/H2 và dữ liệu tổng hợp. Runtime hiện hành đã đổi sang PostgreSQL; bằng chứng mới phải ghi nguồn/test database và kết quả thực chạy. Ubuntu/USB vật lý/USBGuard/systemd/reboot/native GUI notification chưa thực thi; không suy ra hardware PASS từ demo hoặc HTTP test.

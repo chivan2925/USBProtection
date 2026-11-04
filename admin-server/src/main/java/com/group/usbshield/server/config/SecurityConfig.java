@@ -25,7 +25,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(a->a.requestMatchers("/api/agent/enroll","/api/auth/csrf","/api/auth/login").permitAll()
                 .requestMatchers("/api/agent/**").hasRole("AGENT")
                 .requestMatchers("/api/admin/**","/api/auth/me","/api/auth/logout").hasRole("ADMIN")
-                .requestMatchers("/h2-console/**").denyAll()
                 .requestMatchers("/api/**").denyAll().anyRequest().permitAll())
             .exceptionHandling(e->e.authenticationEntryPoint((r,s,x)->{s.setStatus(401);s.setContentType("application/json");mapper.writeValue(s.getOutputStream(),ApiExceptionHandler.body(401,"Authentication required"));})
                 .accessDeniedHandler((r,s,x)->{s.setStatus(403);s.setContentType("application/json");mapper.writeValue(s.getOutputStream(),ApiExceptionHandler.body(403,"Access denied or CSRF token missing"));}))

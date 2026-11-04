@@ -38,7 +38,7 @@ public class Endpoint {
     @Column(length = 100)
     private String operatingSystem;
 
-    // CURRENT_USER is a reserved SQL keyword in H2; keep Java/JSON currentUser unchanged.
+    // Avoid the PostgreSQL CURRENT_USER identifier; keep Java/JSON currentUser unchanged.
     @Column(name = "active_username", length = 100)
     private String currentUser;
 

@@ -1,60 +1,87 @@
 # USBShield — Hướng dẫn chạy và triển khai chung (Admin Server + Ubuntu Client)
 
-> **Phạm vi:** Hướng dẫn triển khai và phân quyền truy cập; **không phải bằng chứng đã chạy Ubuntu E2E**. Source baseline: `main` `c41f2c73c8f80cc2c2d9ea945094daa47435a93f` (03/11/2026). Đây là **hướng dẫn chạy duy nhất đang có hiệu lực** cho cả Admin Server và Ubuntu Agent `.deb`. Ubuntu E2E vẫn **NOT EXECUTED/DEFERRED**.
+> **Phạm vi:** Hướng dẫn triển khai và phân quyền truy cập; **không phải bằng chứng đã chạy Ubuntu E2E**. Source baseline: `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408` (04/11/2026, chưa merge `main`). Đây là **hướng dẫn chạy duy nhất đang có hiệu lực** cho cả Admin Server và Ubuntu Agent `.deb`. Ubuntu E2E vẫn **NOT EXECUTED/DEFERRED**.
 
 ## 1. Chọn mô hình tối giản
 
-- **Một máy Admin Server** (Windows hoặc Ubuntu, JDK 21) chạy **một executable JAR Spring Boot**, H2 file mode trên ổ đĩa riêng. React được đóng gói vào JAR; không cần Vite/NPM ở runtime.
+- **Một máy Admin Server** (Windows hoặc Ubuntu, JDK 21) chạy **một executable JAR Spring Boot**, PostgreSQL chạy như dịch vụ riêng (cùng máy hoặc máy database được bảo vệ). React được đóng gói vào JAR; không cần Vite/NPM ở runtime.
 - **Admin** dùng **trình duyệt + tài khoản Admin** để truy cập React Web và các API quản trị `/api/auth/**`, `/api/admin/**`; **normal Ubuntu users không được cấp tài khoản Admin**.
 - **Các Ubuntu Client** chỉ chạy Agent `.deb` ở chế độ non-web và gửi request **tới `/api/agent/**`**, không cài/khởi chạy Admin Web. `server-url` phải trỏ đến **DNS/IP của Admin Server trên LAN**, không dùng `127.0.0.1`/`localhost` ở máy khác.
 - **Phân biệt authentication và network access:** Spring Security bảo vệ dữ liệu/hành động Admin, nhưng nếu cùng một origin được mở cho cả LAN, máy Client vẫn có thể tải *trang đăng nhập/tài nguyên tĩnh*. Muốn **Client không mở được Web ngay ở tầng mạng**, phải cấu hình reverse proxy/firewall giới hạn route theo IP/VLAN (mục 4); không thể chỉ dựa vào việc máy Client có `.deb`.
 - Với truy cập từ máy khác, dùng một **HTTPS reverse proxy** trên máy Server; Spring Boot giữ bind `127.0.0.1:18080` ở phía sau proxy (trùng `PORT` tại mục 3). Chỉ mở cổng TLS cần thiết cho mạng nội bộ.
-- **Không yêu cầu Docker.** Docker Compose chỉ thuận tiện khi muốn quản lý lifecycle/volume/log tập trung; với một server H2 và bài demo, JAR đơn giản hơn.
+- **Không yêu cầu Docker.** Docker Compose chỉ thuận tiện khi muốn quản lý lifecycle/volume/log tập trung; với một Admin Server và PostgreSQL cho bài demo, JAR đơn giản hơn.
 
-## 2. Build React + Spring Boot (Windows PowerShell, từ root repository)
+## 2. Chuẩn bị PostgreSQL (một lần; database trống theo quyết định owner)
 
-Yêu cầu: Java 21, Maven phù hợp, Node.js/npm theo `docs/DEVELOPER_GUIDE.md`. Không đóng gói `node_modules`, DB, token hoặc password trong artifact.
+PostgreSQL Server cần được **cài và đang chạy**, không được nhúng vào JAR hay `.deb`. **Chỉ chạy SQL tạo role/database trên bản cài đặt mới**; nếu các role/database đã được tạo trong IntelliJ, không chạy lại. Có thể dùng PostgreSQL Query Console của IntelliJ IDEA (kết nối `postgres` bằng tài khoản quản trị) hoặc `psql`. Chạy từng `CREATE DATABASE` **ngoài transaction**. Thay các password placeholder và giữ secrets ngoài Git.
+
+```sql
+CREATE ROLE usbshield LOGIN PASSWORD '<APP_DB_PASSWORD>';
+CREATE DATABASE usbshield OWNER usbshield;
+
+CREATE ROLE usbshield_test LOGIN PASSWORD '<TEST_DB_PASSWORD>';
+CREATE DATABASE usbshield_test OWNER usbshield_test;
+CREATE DATABASE usbshield_browser_test OWNER usbshield_test;
+```
+
+- `usbshield`: dữ liệu **ứng dụng**; chạy bằng role `usbshield`. Không chạy `ddl-auto=create`, `create-drop` hay browser harness vào database này.
+- `usbshield_test`: Maven Admin integration tests; **disposable**; Hibernate có thể xóa/tạo lại các bảng.
+- `usbshield_browser_test`: browser-live và các script HTTP QA; **disposable**. Browser harness tạo schema `usbshield_e2e_<id>` riêng cho mỗi lượt. Role `usbshield_test` phải có quyền `CREATE` trên database test này (để tạo schema riêng); tạo database `OWNER usbshield_test` là cách mặc định. Các script HTTP QA cũ có thể thao tác bảng trong schema `public` của **test database**, vì vậy chỉ dùng database test trống/disposable. Schema test cũ không tự dọn, chỉ xóa sau khi xác nhận đúng database/schema.
+- Tránh dùng role `postgres`/superuser cho ứng dụng hay test. Nếu lỗi `permission denied for schema public`, xác nhận **đúng database và role** trước khi cấp quyền. Nếu lỗi `must be owner of table`, có bảng cũ thuộc role khác; không cấp quyền vào database ứng dụng để chữa lỗi test. Không sao chép cấu hình test vào production.
+- Không migrate dữ liệu H2 vì owner đã quyết định bỏ dữ liệu demo cũ. PostgreSQL được tạo mới, không có dữ liệu cũ.
+
+## 3. Build React + Spring Boot và chạy Admin Server
+
+Yêu cầu: JDK 21, Maven, Node/npm theo [Developer Guide](DEVELOPER_GUIDE.md), PostgreSQL đang chạy. Chạy PowerShell tại root repository. **Các biến môi trường đặt trong cùng terminal chạy Maven/JAR**; IntelliJ Database lưu mật khẩu riêng, Maven không tự đọc được.
 
 ```powershell
+# Nhập mật khẩu thay vì ghi trực tiếp giá trị thực vào source/command history.
+$env:USBSHIELD_TEST_DB_USERNAME = 'usbshield_test'
+$env:USBSHIELD_TEST_DB_PASSWORD = [System.Net.NetworkCredential]::new('', (Read-Host 'Password cua usbshield_test' -AsSecureString)).Password
+# Tùy chọn: USBSHIELD_TEST_DB_HOST=127.0.0.1, USBSHIELD_TEST_DB_PORT=5432
+
+mvn -f admin-server/pom.xml clean test
+mvn -f client-agent/pom.xml clean test
 cd frontend
 npm ci
 npm test
 npm run lint
 npm run build
 cd ..
-
-mvn -f admin-server/pom.xml clean test
 mvn -f admin-server/pom.xml -Pwith-frontend -DskipTests package
+cd frontend
+npm run test:browser:live
+cd ..
 ```
 
-Artifact: `admin-server/target/usbshield-admin-server.jar`. `-Pwith-frontend` copy `frontend/dist` vào `classpath:/static/`; web và API dùng **cùng origin**. Truy cập root URL để mở React; không cần chạy `npm run dev` trên máy Server sau khi build.
+`admin-server/target/usbshield-admin-server.jar` vẫn là **executable JAR** có React static bundle và API cùng origin. `npm run test:live` là bộ browser/Spring khác có thể chạy riêng; `test:browser:live` tự kích hoạt build frontend (`pretest:browser:live`) và dùng `usbshield_browser_test`/schema riêng với event HTTP tổng hợp. Không đánh đồng các test này với thiết bị Ubuntu thật. Không dùng database `usbshield` cho QA.
 
-## 3. Kiểm tra localhost trước khi cho các Client kết nối
-
-Tạo folder H2 bên ngoài repository, cấp quyền ghi chỉ cho tài khoản chạy server. Đặt secrets bên ngoài Git; các dòng dưới dùng **placeholder**, không phải password/token mẫu nên đưa vào môi trường thật.
+**Chạy profile `prod`** từ thư mục root repository trong PowerShell, sau khi đã cấp các secrets cần thiết:
 
 ```powershell
-# Trong PowerShell chỉ dành cho thử nghiệm cô lập; không lưu secrets vào transcript/commit.
-$env:USBSHIELD_DB_URL = 'jdbc:h2:file:C:/USBShield-data/usbshield;DB_CLOSE_ON_EXIT=FALSE'
-$env:USBSHIELD_DB_USERNAME = 'sa'
-$env:USBSHIELD_DB_PASSWORD = '<PRIVATE_H2_PASSWORD>'
+$env:USBSHIELD_DB_URL = 'jdbc:postgresql://127.0.0.1:5432/usbshield'
+$env:USBSHIELD_DB_USERNAME = 'usbshield'
+$env:USBSHIELD_DB_PASSWORD = [System.Net.NetworkCredential]::new('', (Read-Host 'Password cua usbshield' -AsSecureString)).Password
 $env:USBSHIELD_ADMIN_USERNAME = 'admin'
-$env:USBSHIELD_ADMIN_PASSWORD = '<PRIVATE_INITIAL_ADMIN_PASSWORD>'
+$env:USBSHIELD_ADMIN_PASSWORD = [System.Net.NetworkCredential]::new('', (Read-Host 'Initial Admin password' -AsSecureString)).Password
 $bytes = [byte[]]::new(32)
 [System.Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
-$token = [Convert]::ToHexString($bytes).ToLowerInvariant()
-$env:USBSHIELD_ENROLLMENT_TOKEN = $token
+$env:USBSHIELD_ENROLLMENT_TOKEN = [Convert]::ToHexString($bytes).ToLowerInvariant()
 $env:USBSHIELD_BIND_ADDRESS = '127.0.0.1'
 $env:PORT = '18080'
 
 java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
 ```
 
-Bản `prod` mặc định `Secure` session cookie (`USBSHIELD_COOKIE_SECURE=true`), do đó cần **HTTPS** cho browser session. Mở Admin Web từ địa chỉ HTTPS của proxy; không kết luận đăng nhập lỗi chỉ vì thử HTTP với Secure cookie.
+Profile mặc định `application.yml` dùng URL `jdbc:postgresql://${USBSHIELD_DB_HOST:127.0.0.1}:${USBSHIELD_DB_PORT:5432}/${USBSHIELD_DB_NAME:usbshield}`, username `usbshield` và password từ `USBSHIELD_DB_PASSWORD`. **Profile `prod` yêu cầu `USBSHIELD_DB_URL` và `USBSHIELD_DB_PASSWORD`**; không mặc định dùng `USBSHIELD_DB_HOST/NAME` để thay thế URL này. Hibernate đang dùng `ddl-auto=update` để khởi tạo schema cho **demo**. Đây không phải một chiến lược quản lý database migration chặt chẽ cho production doanh nghiệp.
 
-- Admin password môi trường **chỉ bootstrap tài khoản lần đầu**, không reset mật khẩu tài khoản đã có trong H2.
-- DB URL/password phải giữ ổn định giữa các lần restart; sao lưu H2 khi server đã dừng.
-- Chỉ mở cổng proxy (ví dụ 443) cho mạng LAN quản trị; **không expose** H2 console, 8080 nội bộ, Swagger production hoặc các cổng debug.
+Admin Server muốn khởi động cần PostgreSQL sẵn sàng và role ứng dụng có quyền tạo/cập nhật schema ban đầu. Password bootstrap Admin **chỉ tạo tài khoản nếu chưa có**, không đổi mật khẩu của account đã tồn tại. `USBSHIELD_ENROLLMENT_TOKEN` phải được quản lý như bí mật và chuyển an toàn đến IT cấu hình Client; **không đưa vào ZIP/commit/screenshot**.
+
+`prod` bật Secure session cookie nên browser Admin phải truy cập qua **HTTPS reverse proxy** ở LAN. Chỉ dùng HTTP loopback để kiểm thử cô lập; không coi HTTP qua LAN với token thật là bảo mật. PostgreSQL port `5432` chỉ dành cho Admin Server ↔ database, **không mở cho Ubuntu Client**, và phải có backup độc lập.
+
+### Tồn tại dữ liệu, backup và khôi phục
+
+PostgreSQL lưu dữ liệu vào data directory của PostgreSQL service, **không nằm trong JAR hay file H2 `.mv.db`**. Restart JAR không làm mất dữ liệu khi vẫn dùng cùng PostgreSQL database. Dừng JAR không đồng nghĩa dừng PostgreSQL. Dùng cơ chế backup PostgreSQL như `pg_dump`/`pg_restore` (cộng với bảo vệ secrets và kiểm thử restore); **không sao chép file dữ liệu đang mở** và không xóa database `usbshield` khi dọn test. Đảm bảo backup và role DB được giới hạn quyền truy cập.
 
 ## 4. Phân quyền Admin Web và Agent API trên LAN
 
@@ -66,7 +93,7 @@ Máy Ubuntu (Agent .deb, mạng Client) --> HTTPS proxy ---> /api/agent/**
                                                        |
                                                        v
                                                 127.0.0.1:18080
-                                                Spring Boot + H2
+                                                Spring Boot + PostgreSQL
 ```
 
 - **Admin Web không cài trên Client**. Chỉ quản trị viên có tài khoản và phiên đăng nhập hợp lệ mới xem/đổi chính sách. Agent dùng `X-Endpoint-Id`/`X-Agent-Token` và enrollment token theo API contract, **không có tài khoản web**.
@@ -152,7 +179,7 @@ systemctl status usbguard usbshield-agent --no-pager
 
 ## 6. Khi nào mới cần Docker?
 
-Có thể bổ sung Docker Compose trong một đợt riêng nếu mục tiêu là server restart, volume H2, log và TLS proxy reproducible. Với demo 1 Admin Server + vài Client, Java JAR + systemd/Windows service đã đủ. Docker **không tự làm server có thể truy cập từ mạng khác, không thay thế TLS, và không bảo vệ USB** (USBGuard nằm ở từng Ubuntu Client).
+Có thể bổ sung Docker Compose trong một đợt riêng nếu mục tiêu là server restart, PostgreSQL data volume, log và TLS proxy reproducible. Với demo 1 Admin Server + vài Client, Java JAR + systemd/Windows service đã đủ. Docker **không tự làm server có thể truy cập từ mạng khác, không thay thế TLS, và không bảo vệ USB** (USBGuard nằm ở từng Ubuntu Client).
 
 ## 7. Trạng thái nghiệm thu và giới hạn
 

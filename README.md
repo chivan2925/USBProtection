@@ -1,12 +1,12 @@
 # USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu
 
-> Seminar 4 tuần / demo trong LAN. Ubuntu Client: **24.04 LTS amd64**. Backend: **Java 21 + Spring Boot**. Admin Web: **React + Vite + TypeScript**. USB enforcement: **USBGuard + systemd**. Database demo: **H2 file mode**.
+> Seminar 4 tuần / demo trong LAN. Ubuntu Client: **24.04 LTS amd64**. Backend: **Java 21 + Spring Boot**. Admin Web: **React + Vite + TypeScript**. USB enforcement: **USBGuard + systemd**. Database: **PostgreSQL (dịch vụ riêng, lưu bền vững)**.
 
 ## Tổng quan
 
 | Thành phần | Vai trò |
 |---|---|
-| `admin-server/` | Spring Boot: Admin login, Agent enrollment/heartbeat, per-endpoint policy, audit/event API, H2 |
+| `admin-server/` | Spring Boot: Admin login, Agent enrollment/heartbeat, per-endpoint policy, audit/event API, PostgreSQL |
 | `frontend/` | React Admin Web, build thành static assets và phục vụ từ cùng JAR Admin Server |
 | `client-agent/` | Agent không có Web; gửi event/heartbeat, đồng bộ chính sách USBGuard |
 | `packaging/` | Debian `.deb`, `systemd`, USBGuard base rule, notifier helper |
@@ -26,7 +26,7 @@
 
 **[docs/RUN_GUIDE.md](docs/RUN_GUIDE.md)**
 
-Không cần Docker cho bản demo một server. Ubuntu E2E còn **DEFERRED/NOT EXECUTED**; Windows Maven/frontend/browser không phải kết quả phần cứng thật.
+PostgreSQL phải được cài/khởi động và có database cùng role riêng cho ứng dụng. Admin Server vẫn là **một JAR**, Client Agent vẫn là **`.deb`**; không cần Docker cho bản demo một server. Ubuntu E2E còn **DEFERRED/NOT EXECUTED**; Windows Maven/frontend/browser (PostgreSQL test DB, dữ liệu tổng hợp) không phải kết quả phần cứng thật. Chưa có bằng chứng Ubuntu hardware E2E từ lần đổi database.
 
 ## Tài liệu khác
 
