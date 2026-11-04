@@ -25,6 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "spring.jpa.hibernate.ddl-auto=create-drop"})
 class ConcurrentUsbCatalogIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, ConcurrentUsbCatalogIntegrationTest.class);
+    }
+
     @Autowired TestRestTemplate http;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbDeviceRepository devices;

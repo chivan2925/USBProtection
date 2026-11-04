@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs'
 import { mkdtemp, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:net'
 import { join, resolve } from 'node:path'
-import { createPostgresBrowserTestRun, postgresBrowserChildEnv } from './postgresTestDb.mjs'
+import { createPostgresBrowserTestRun, postgresBrowserChildEnv, cleanupPostgresBrowserSchema } from './postgresTestDb.mjs'
 
 export async function startLiveServer(artifacts) {
   const repo = resolve(artifacts, '../..')
@@ -30,7 +30,7 @@ export async function startLiveServer(artifacts) {
   async function start() {
     if (initialStart) console.log(`Browser --live PostgreSQL target: usbshield_browser_test (role=usbshield_test, schema=${browserDb.schema})`)
     child = spawn(java, ['-jar', jar, `--server.port=${port}`, '--server.address=127.0.0.1',
-      `--spring.jpa.hibernate.ddl-auto=${initialStart ? 'create-only' : 'update'}`, ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
+      ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
       cwd: repo, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
       env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: 'm4-live-admin', USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken }, browserDb),
     })
@@ -78,7 +78,17 @@ export async function startLiveServer(artifacts) {
     await http('/api/auth/login', { method: 'POST', admin: true, headers: { [csrf.headerName]: csrf.token }, body: { username: 'm4-live-admin', password } })
     csrf = await http('/api/auth/csrf', { admin: true })
   }
-  const close = async () => { await stop(); await writeFile(join(runtime, 'server.log'), log) }
+  let closed = false
+  const close = async () => {
+    if (closed) return
+    closed = true
+    await stop() // Never drop a schema while its backend JVM may still be running.
+    try {
+      await writeFile(join(runtime, 'server.log'), log)
+    } finally {
+      await cleanupPostgresBrowserSchema(browserDb, { java, jar, cwd: repo })
+    }
+  }
   try {
     await start()
     await http('/api/admin/endpoints', { expected: 401 })

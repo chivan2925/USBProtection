@@ -18,10 +18,16 @@ spring:
     username: ${USBSHIELD_DB_USERNAME:usbshield}
     password: ${USBSHIELD_DB_PASSWORD:}
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: false  # Existing DB requires explicit, reviewed one-time baseline.
+    clean-disabled: true
+    validate-on-migrate: true
+
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:

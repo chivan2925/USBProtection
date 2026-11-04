@@ -21,6 +21,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.offline-after-seconds=90"})
 @AutoConfigureMockMvc
 class ServerSecurityAndStatusTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, ServerSecurityAndStatusTest.class);
+    }
+
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired EndpointPolicyService policies;

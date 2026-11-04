@@ -24,6 +24,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop","usbshield.enrollment-token=integration-test-bootstrap"})
 @AutoConfigureMockMvc
 class ServerApiIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, ServerApiIntegrationTest.class);
+    }
+
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper mapper;
     @Autowired AdminUserRepository users;

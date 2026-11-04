@@ -18,6 +18,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @IsolatedPostgresDb
 @SpringBootTest
 class ProductionProfileSecurityTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, ProductionProfileSecurityTest.class);
+    }
+
     @Autowired Environment environment;
     @Autowired MockMvc mvc;
     @Test void deploymentDefaultsDoNotRelaxCookiesOrExposeConsole() {

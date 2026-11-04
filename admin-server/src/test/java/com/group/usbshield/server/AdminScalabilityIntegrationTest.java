@@ -36,6 +36,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class AdminScalabilityIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, AdminScalabilityIntegrationTest.class);
+    }
+
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbDeviceRepository devices;

@@ -43,3 +43,8 @@ packaging/dist/
 
 ### Private Member Docs ###
 docs_hbao/
+
+### Local environment and secrets (never commit) ###
+.env
+.env.*
+!.env.example
