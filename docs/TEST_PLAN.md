@@ -1,3 +1,5 @@
+> **Addendum 04/11/2026 (current `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`):** Admin Server persistence has changed from H2 File Mode to PostgreSQL. T13/T28 and old Week 1–4 H2 results below are **historical evidence** and must **not** be renamed to PostgreSQL PASS. Current verification requires separate `usbshield_test`/`usbshield_browser_test` databases, service restart/persistence and new real-execution logs; Ubuntu hardware E2E remains DEFERRED. Operational steps: [RUN_GUIDE.md](RUN_GUIDE.md).
+
 # TEST PLAN v0.1
 
 > **Owner:** Member 5  

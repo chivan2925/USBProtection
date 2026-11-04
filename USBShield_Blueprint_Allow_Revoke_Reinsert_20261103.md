@@ -7,7 +7,7 @@
 > **Backend:** Java 21 + Spring Boot — Admin Server + Ubuntu Client Agent  
 > **Hệ điều hành client mục tiêu MVP:** Ubuntu 24.04 LTS amd64  
 > **Cơ chế enforcement trên client:** USBGuard + systemd  
-> **Database Admin Server:** H2 File Mode (embedded) cho MVP  
+> **Database Admin Server (04/11/2026):** PostgreSQL — dịch vụ DB riêng, schema demo khởi tạo bằng Spring Data JPA/Hibernate  
 > **Phân phối client:** `usbshield-agent_1.0.0_amd64.deb`  
 > **Java runtime trên client:** phương án A — `.deb` khai báo `openjdk-21-jre-headless` là runtime dependency, người dùng không phải tự cài Java bằng tay.
 > **Scope update (từ Week 2):** Thêm desktop notification trên chính Ubuntu Client khi USB Mass Storage bị USBGuard `BLOCK`. **Week 1 được giữ nguyên, không hồi tố yêu cầu notification vào Week 1.**
@@ -15,6 +15,10 @@
 
 
 ---
+
+## Cập nhật kiến trúc 04/11/2026 — PostgreSQL
+
+Đây là quyết định **đã có code trên `vinhkhang` `db125d28861acdb6d07aaed96c53cddfcba07408`**: thay H2 bằng PostgreSQL cho Admin Server; **không migrate dữ liệu H2 test**, giữ executable JAR cho Server và `.deb` cho Agent. Database `usbshield` (app) tách khỏi `usbshield_test` và `usbshield_browser_test` (test); không cấp test role quyền DDL trên app DB. JDBC, role, build, test và backup: [RUN_GUIDE.md](docs/RUN_GUIDE.md). Các mốc kết quả Week 1–4 dùng H2 chỉ có giá trị lịch sử; PostgreSQL migration không đồng nghĩa Ubuntu hardware E2E đã PASS.
 
 ## 0. Mục đích của tài liệu này
 
@@ -94,10 +98,10 @@ Mỗi máy Ubuntu cần bảo vệ là một **endpoint/client**. Admin quản l
 ## 1.4. Chốt phạm vi demo và vận hành (03/11/2026)
 
 - **Mục tiêu là đồ án seminar/demonstration**, không phải một sản phẩm đã được triển khai thật tại trường học, bệnh viện hoặc công ty. Các tổ chức nêu trong đề là **bối cảnh áp dụng minh họa**.
-- Giữ kiến trúc USBGuard + systemd Agent + một Spring Boot Admin Server + React. Không bổ sung microservices, Kafka, Redis, Kubernetes hoặc hệ quản trị nhiều server chỉ vì tính "enterprise". Chấp nhận global USB catalog lock và H2 file mode ở quy mô demo; không đưa ra cam kết throughput nhiều endpoint.
+- Giữ kiến trúc USBGuard + systemd Agent + một Spring Boot Admin Server + React. Không bổ sung microservices, Kafka, Redis, Kubernetes hoặc hệ quản trị nhiều server chỉ vì tính "enterprise". Chấp nhận global USB catalog lock và một PostgreSQL database trên một server demo; không đưa ra cam kết throughput nhiều endpoint.
 - **Outbox** giữ giới hạn bộ nhớ đệm/bằng chứng và báo lỗi khi không bền vững; cache quota cho single-writer Agent và quét lại khi thư mục thay đổi/ghi lỗi, không xây dựng queue engine mới. Operator không sửa in-place các file spool khi Agent đang chạy; cần dừng/khởi động lại sau can thiệp.
 - **Frontend** ưu tiên API-backed request tests và loại bỏ request trùng. Dashboard dùng tổng hợp backend; danh sách thiết bị dùng API phân trang; không tải toàn bộ lịch sử USB để dựng UI.
-- **Admin Server không bắt buộc Docker.** Một JAR Spring Boot được build với `-Pwith-frontend` là đủ để chạy React và API cùng origin trong LAN. H2 lưu ngoài repo; dùng HTTPS reverse proxy nếu truy cập Admin Web từ máy khác. Xem [Hướng dẫn Admin Server LAN](docs/RUN_GUIDE.md).
+- **Admin Server không bắt buộc Docker.** Một JAR Spring Boot được build với `-Pwith-frontend` là đủ để chạy React và API cùng origin trong LAN. PostgreSQL quản lý dữ liệu ngoài JAR/repo (không embedded); dùng HTTPS reverse proxy nếu truy cập Admin Web từ máy khác. Xem [Hướng dẫn Admin Server LAN](docs/RUN_GUIDE.md).
 - **Client Agent** cài bằng gói `.deb` được build và kiểm chứng, không mặc định GitHub URL chứa artifact sẵn. `server-url` trỏ về Admin Server trong LAN/VPN, không dùng `localhost` từ Client.
 - **Dịch vụ "không tắt được"** giới hạn với người dùng Ubuntu thông thường **không có sudo/root và không có quyền sửa USBGuard IPC/policy**. Root và quản trị viên hệ điều hành vẫn có quyền dừng/sửa dịch vụ.
 - **Chốt Allow/Revoke theo lần cắm kế tiếp:** Admin thay đổi whitelist của đúng endpoint → Agent kéo và áp dụng local USBGuard policy → xác nhận policy version đã áp dụng (ACK) → người dùng **rút USB ra rồi cắm lại** để USBGuard đánh giá theo policy mới. **Không triển khai** `allow-device`/`block-device` tức thời cho USB vẫn đang cắm trong phạm vi demo. ACK xác nhận áp dụng rule, **không chứng minh** trạng thái của thiết bị đang kết nối đã đổi.
@@ -406,9 +410,9 @@ Normal user không có quyền:
 
 ## 12. Central persistence
 
-MVP dùng H2 File Mode trên Admin Server để giảm deployment complexity. Nếu mở rộng thực tế nhiều endpoint/production mới chuyển PostgreSQL.
+Admin Server dùng **PostgreSQL** từ 04/11/2026 (owner yêu cầu); database service và backup được quản lý riêng, dù vẫn chỉ có một Admin Server. H2 và preflight/schema migration H2 không còn sử dụng; dữ liệu test cũ được phép bỏ. PostgreSQL là **persistence source**, không phải enforcement source. USBGuard local policy vẫn là enforcement source trên client.
 
-USBGuard local policy vẫn là enforcement source trên client.
+Database ứng dụng là `usbshield` (role `usbshield`); các integration/browser tests dùng **database riêng**, không được phép xóa/tạo bảng trên database ứng dụng.
 
 ## 13. Client `.deb` installer + uninstall
 
@@ -521,7 +525,7 @@ Bonus nếu core xong sớm:
 Spring Boot Admin Server start
 → React Web truy cập được
 → Admin login thành công
-→ H2 persistence hoạt động
+→ PostgreSQL persistence hoạt động và dữ liệu vẫn còn sau restart JAR
 ```
 
 ## DoD-02: Client install/register
@@ -622,7 +626,7 @@ Không có GUI hoặc không resolve được user → chỉ ghi log + gửi eve
 │ Auth | Endpoint | Event | Policy | Audit | Agent API     │
 │                         │                                │
 │                         ▼                                │
-│                    H2 File DB                            │
+│                    PostgreSQL DB                            │
 └─────────────────────────┬────────────────────────────────┘
                           │ LAN / HTTP(S)
               events ↑    │    ↓ policy/heartbeat response
@@ -715,9 +719,9 @@ MVP dùng để xác định session local đang active. `loginctl show-session`
 
 Quản lý lifecycle của Agent và USBGuard tại client.
 
-## H2
+## PostgreSQL
 
-Chỉ là central persistence cho MVP. Không phải source of enforcement; USBGuard local policy mới quyết định thiết bị có dùng được hay không.
+Là central persistence cho MVP, chạy bằng một database service riêng; không nằm trong JAR. Không phải source of enforcement; USBGuard local policy mới quyết định thiết bị có dùng được hay không.
 
 ---
 
@@ -919,7 +923,7 @@ M2 UsbGuardEventListener + active-user resolver
 | Admin Auth | Spring Security + session/cookie | Web cùng origin, đơn giản hơn JWT |
 | Agent Auth | Endpoint token / enrollment token | Xác thực client |
 | ORM | Spring Data JPA | Central persistence |
-| DB MVP | H2 File Mode trên Admin Server | Ít deployment dependency |
+| DB MVP | PostgreSQL (Admin Server kết nối qua JDBC) | Theo yêu cầu giảng viên, lưu trữ độc lập khỏi JAR |
 | User attribution | systemd-logind / `loginctl` MVP | Active Linux session |
 | Ubuntu Client notification (Week 2+) | `libnotify-bin` / `notify-send` + user-session D-Bus | Native desktop feedback for BLOCKED Mass Storage |
 | USB enforcement | USBGuard | Linux USB authorization |
@@ -1347,7 +1351,7 @@ MVP có thể chạy trên laptop Admin/development machine:
 java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
 ```
 
-JAR chứa React production build và H2 central DB.
+JAR chứa React production build và API; **PostgreSQL chạy riêng**, JAR không chứa database. Client Agent vẫn là `.deb`.
 
 Admin mở browser:
 
@@ -1442,7 +1446,7 @@ usbshield/
 ### Phải làm
 
 - Spring Boot Admin Server structure.
-- H2 + JPA schema.
+- PostgreSQL + JPA schema (thay cho H2 đã dùng ở thời điểm Week 1–4).
 - Admin auth bằng Spring Security.
 - Endpoint enrollment/registry/heartbeat.
 - Event ingestion API.
@@ -1678,7 +1682,7 @@ Admin Server/Agent event contract đã chốt
 
 - repo structure mới;
 - Admin Server skeleton;
-- H2 schema draft;
+- PostgreSQL schema (thay H2 schema draft lịch sử);
 - Admin auth skeleton;
 - endpoint/event/policy DTO contract;
 - OpenAPI draft;
@@ -2139,8 +2143,8 @@ Medium. USBGuard local vẫn enforce; Agent retry heartbeat/event.
 ## R7 — `.deb` fail trên clean client
 High. Clean VM từ Week 3.
 
-## R8 — H2 không phù hợp quy mô lớn
-Low cho seminar. Ghi rõ MVP; production scale mới PostgreSQL.
+## R8 — PostgreSQL tăng phụ thuộc triển khai so với H2
+Medium cho demo: database service, role/secret, connectivity/permissions, backup và kiểm thử tích hợp. Giảm rủi ro bằng database test riêng; không cho Client kết nối trực tiếp PostgreSQL.
 
 ## R9 — Group merge cuối kỳ
 High. Contract freeze Week 1, integration Week 2.
@@ -2170,7 +2174,7 @@ High. Week 2 bàn giao nguyên trạng class dưới `client-agent/.../usbguard/
 - endpoint enrollment/token;
 - event payload;
 - policy version/sync;
-- H2 schema;
+- PostgreSQL schema;
 - React routes/API;
 - build server JAR;
 - build client `.deb`;
@@ -2344,9 +2348,9 @@ Có hai vai trò: Admin Server quản lý auth/endpoints/events/policy; Client A
 
 Client không cần mở inbound admin port. Agent outbound heartbeat/pull desired policy của chính endpoint rồi reconcile USBGuard local rules.
 
-## “Tại sao H2?”
+## “Tại sao dùng PostgreSQL thay H2?”
 
-MVP seminar có một Admin Server và số endpoint nhỏ. H2 giảm deployment; production scale mới chuyển PostgreSQL.
+Theo yêu cầu giảng viên, nhóm chuyển central persistence sang PostgreSQL. Spring Data JPA giữ phần lớn entity/repository; PostgreSQL quản lý database độc lập với Admin Server JAR, phù hợp kiểm tra SQL/transaction và backup. Đổi lại cần cài dịch vụ DB, cấp role và vận hành an toàn. **Không tuyên bố HA/throughput enterprise hay Ubuntu E2E chỉ vì đổi database.**
 
 ## “Dịch vụ có thật sự không tắt được?”
 
