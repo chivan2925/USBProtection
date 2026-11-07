@@ -58,7 +58,15 @@ public class AdminEventController {
         @RequestParam(required=false) Long deviceId,@RequestParam(required=false) Instant from,@RequestParam(required=false) Instant to,
         @RequestParam(required=false) String endpoint,@RequestParam(required=false) String device,
         @RequestParam(required=false) String username){
-        if(page<0 || size<1 || size>100 || (from!=null && to!=null && from.isAfter(to)) || (decision!=null && !Set.of("ALLOWED","BLOCKED").contains(decision)) || (eventType!=null && !Set.of("CONNECTED","DISCONNECTED","POLICY_APPLIED").contains(eventType)))throw new ResponseStatusException(BAD_REQUEST,"Invalid query range or enum");
+        if (page < 0 || page > 100_000 || size < 1 || size > 100 ||
+                (from != null && to != null && from.isAfter(to)) ||
+                (decision != null && !Set.of("ALLOWED", "BLOCKED").contains(decision)) ||
+                (eventType != null && !Set.of("CONNECTED", "DISCONNECTED", "POLICY_APPLIED").contains(eventType)) ||
+                exceedsFilterLimit(endpointId, 100) || exceedsFilterLimit(linuxUsername, 100) ||
+                exceedsFilterLimit(endpoint, 200) || exceedsFilterLimit(device, 200) ||
+                exceedsFilterLimit(username, 200)) {
+            throw new ResponseStatusException(BAD_REQUEST, "Invalid query range, enum or filter length");
+        }
         var result=events.findAll((root,query,cb)->{
             List<Predicate> p=new ArrayList<>();
             if(endpointId!=null)p.add(cb.equal(root.get("endpointId"),endpointId));
@@ -98,6 +106,9 @@ public class AdminEventController {
             return cb.and(p.toArray(Predicate[]::new));
         },PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"occurredAt","id")));
         return new EventPage(views(result.getContent()),page,size,result.getTotalElements(),result.getTotalPages());
+    }
+    private static boolean exceedsFilterLimit(String value, int limit) {
+        return value != null && value.length() > limit;
     }
     private static String containsPattern(String value) {
         return "%" + value.strip().toLowerCase(Locale.ROOT)

@@ -11,5 +11,11 @@ public class AdminBootstrap implements ApplicationRunner {
     private final PasswordEncoder encoder;
     @Value("${usbshield.admin.username:admin}") private String username;
     @Value("${usbshield.admin.password:}") private String password;
-    public void run(ApplicationArguments args){if(!password.isBlank() && !users.existsByUsername(username)) users.save(AdminUser.builder().username(username).passwordHash(encoder.encode(password)).build());}
+    public void run(ApplicationArguments args) {
+        if (password.isBlank() || users.existsByUsername(username)) return;
+        if (!AdminPasswordPolicy.acceptable(password)) {
+            throw new IllegalStateException("Initial Admin password must satisfy AdminPasswordPolicy (12+ printable characters, <=72 UTF-8 bytes)");
+        }
+        users.save(AdminUser.builder().username(username).passwordHash(encoder.encode(password)).build());
+    }
 }

@@ -14,14 +14,14 @@ import { protectionApi } from '../services/api'
 import { deviceLabels, eventLabels, formatDate, matches, newestFirst } from '../utils/format'
 import type { PageProps } from './types'
 
-const endpointLabels = { online: 'Online', offline: 'Offline', unknown: 'Chưa xác định' }
+const endpointLabels = { online: 'Online', offline: 'Offline' }
 
 export function Endpoints({ state, refresh, refreshButton, demo = false }: PageProps) {
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
   const [page, setPage] = useState(0)
   const loadPage = useCallback((signal: AbortSignal) => {
-    if (demo || filter === 'unknown') return Promise.resolve({ content: [], page: 0, size: 20,
+    if (demo) return Promise.resolve({ content: [], page: 0, size: 20,
       totalElements: 0, totalPages: 0, onlineEndpoints: 0, offlineEndpoints: 0 })
     return protectionApi.getEndpointPage({ page, size: 20, q: query.trim() || undefined,
       status: filter === 'all' ? undefined : filter as 'online' | 'offline' }, signal)

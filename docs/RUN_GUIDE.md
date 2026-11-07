@@ -40,6 +40,8 @@ Yêu cầu: JDK 21, Maven, Node/npm theo [Developer Guide](DEVELOPER_GUIDE.md), 
 
 **Khởi tạo cấu hình test một lần:** `Copy-Item .env.example .env`, điền `USBSHIELD_TEST_DB_USERNAME=usbshield_test` và `USBSHIELD_TEST_DB_PASSWORD` thật vào file `.env` **không được commit**. `scripts/with-env.ps1` đọc `.env` như dữ liệu, không thực thi shell expressions. Các lệnh Maven/npm chạy trực tiếp không tự load `.env`.
 
+**Verifier Windows hiện hành trên `vinhkhang`:** chạy `./packaging/tests/verify-windows.ps1` trong PowerShell 7.4+. Script này thay cho `verify-week2-windows.ps1`, `verify-week3-windows.ps1`, `verify-week4-windows.ps1` và các staging-verifier cũ. Chạy trên source checkout hiện hành; không dùng `git add .` thay cho kiểm thử. Đối với Ubuntu: `packaging/tests/check-usbshield-core.sh` chỉ là kiểm tra read-only và không thay thế E2E vật lý.
+
 ```powershell
 npm --prefix frontend ci
 .\scripts\with-env.ps1 -RequireTestDb -Command { mvn -f admin-server/pom.xml clean test }

@@ -399,9 +399,14 @@ public class OutboxSpoolService {
                 } else {
                     log.warn("[OUTBOX-DRAIN] Successfully delivered but failed to delete file: {}", file.getName());
                 }
+            } else if (client.lastEventWasPermanentlyRejected()) {
+                // Keep exact original bytes for audit. A deterministic HTTP 400/409/413/422
+                // must not indefinitely block later valid FIFO events.
+                if (!quarantine(file, "permanent Admin HTTP 400/409/413/422 event rejection")) break;
+                log.error("[OUTBOX-DRAIN] Permanently rejected event quarantined; advancing to newer audit");
             } else {
-                // Server từ chối hoặc unreachable -> dừng drain để bảo đảm thứ tự FIFO
-                log.warn("[OUTBOX-DRAIN] Server rejected or unreachable for event {}. Pausing drain until next cycle.", file.getName());
+                // Auth, network, rate limit, 5xx: retain head and retry FIFO later.
+                log.warn("[OUTBOX-DRAIN] Transient Server rejection/unreachable for event {}. Pausing drain.", file.getName());
                 break;
             }
         }

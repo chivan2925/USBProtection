@@ -1,6 +1,6 @@
 # USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu
 
-> **Source hiện hành:** `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` (04/11/2026, chưa merge `main`). Ba đợt F03/F04/F05/F06/F08/I03, F07/F09/F10/F11, F01/F02/F12/F14/I02 đã được triển khai; Windows tests được owner báo PASS, **chưa xác minh HTTPS/ACL và USBGuard trên Ubuntu LAN thật**.
+> **Source review baseline:** `vinhkhang` `f446c04a8983315c52c16e377820a99b8fd3297f` (07/11/2026). Các mã finding F01–F14 trong báo cáo lịch sử ở các dòng dưới không phải cùng nhóm ID với static-review correction này. Windows/Ubuntu verification cho các sửa đổi mới **chưa được chạy**; không suy diễn từ các lần PASS trước.
 
 > Seminar 4 tuần / demo trong LAN. Ubuntu Client: **24.04 LTS amd64**. Backend: **Java 21 + Spring Boot**. Admin Web: **React + Vite + TypeScript**. USB enforcement: **USBGuard + systemd**. Database: **PostgreSQL (dịch vụ riêng, lưu bền vững)**.
 
@@ -34,6 +34,8 @@
 **Tất cả bước build, test, chạy Admin Server, HTTPS/LAN, đóng gói `.deb`, cấu hình Ubuntu Client và kịch bản Allow/Revoke nằm ở đúng một tài liệu:**
 
 **[docs/RUN_GUIDE.md](docs/RUN_GUIDE.md)**
+
+Build/test hiện hành trên Windows: `./packaging/tests/verify-windows.ps1` (PowerShell 7.4+). Mỗi build `.deb` sinh `packaging/dist/usbshield-agent.release.json` (Version riêng, SHA256, Git SHA) và gói `.deb` tương ứng. Ubuntu tối giản: `docs/USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md`. **B01–B05 chưa PASS** trên source mới.
 
 PostgreSQL phải được cài/khởi động và có database cùng role riêng cho ứng dụng. Dev/test trên Windows có thể dùng `.env` (không commit) với `scripts/with-env.ps1` để nạp test credentials; xem runbook. **Không chạy baseline Flyway trên database test.** Admin Server vẫn là **một JAR**, Client Agent vẫn là **`.deb`**; không cần Docker cho bản demo một server. Ubuntu E2E còn **DEFERRED/NOT EXECUTED**; Windows Maven/frontend/browser (PostgreSQL test DB, dữ liệu tổng hợp) không phải kết quả phần cứng thật. Chưa có bằng chứng Ubuntu hardware E2E từ lần đổi database.
 

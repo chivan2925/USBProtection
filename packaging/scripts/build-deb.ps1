@@ -28,7 +28,12 @@ $root = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $packaging = Join-Path $root 'packaging'
 $stage = Join-Path $packaging 'staging/windows-deb'
 $outputDir = Join-Path $packaging 'dist'
-$output = Join-Path $outputDir 'usbshield-agent_1.0.0_amd64.deb'
+# F10: unique Debian version per build. This avoids silent apt no-op when
+# replacing a .deb that still advertises Version: 1.0.0.
+$buildStamp = [DateTime]::UtcNow.ToString('yyyyMMddHHmmssfff', [Globalization.CultureInfo]::InvariantCulture)
+$packageVersion = "1.0.0+build$buildStamp"
+$output = Join-Path $outputDir "usbshield-agent_${packageVersion}_amd64.deb"
+$releaseManifest = Join-Path $outputDir 'usbshield-agent.release.json'
 $jar = Join-Path $root 'client-agent/target/usbshield-agent.jar'
 $utf8 = [System.Text.UTF8Encoding]::new($false)
 $ascii = [System.Text.Encoding]::ASCII
@@ -91,6 +96,14 @@ $control = @(
 $controlEntries = @()
 foreach ($item in $control) {
     $dest = Copy-PackageFile -Source $item.Src -Relative $item.Path -Subdir 'control' -NormalizeLF
+    if ($item.Path -eq 'control') {
+        $text = [System.IO.File]::ReadAllText($dest)
+        if (([regex]::Matches($text, '(?m)^Version: 1\.0\.0$')).Count -ne 1) {
+            throw 'Expected exactly one control Version: 1.0.0 line'
+        }
+        $text = $text.Replace('Version: 1.0.0', "Version: $packageVersion")
+        [System.IO.File]::WriteAllText($dest, $text, $utf8)
+    }
     $controlEntries += [pscustomobject]@{ Path=$item.Path; File=$dest; Mode=$item.Mode }
 }
 # md5sums is standard Debian metadata for package-file integrity (not a security hash).
@@ -193,6 +206,21 @@ try {
     $archive.Dispose()
 }
 Copy-Item -LiteralPath $tempOutput -Destination $output -Force
+$sha256 = (Get-FileHash -LiteralPath $output -Algorithm SHA256).Hash.ToLowerInvariant()
+$git = Get-Command git.exe, git -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($null -eq $git) { throw 'Git required to record HEAD SHA in release manifest.' }
+$gitHead = (& $git.Source -C $root rev-parse HEAD).Trim()
+if ($LASTEXITCODE -ne 0 -or $gitHead -notmatch '^[a-f0-9]{40}$') { throw 'Cannot obtain Git HEAD SHA' }
+# Only one manifest points to the most recently built Debian package.
+$release = [ordered]@{
+    version = $packageVersion
+    filename = [IO.Path]::GetFileName($output)
+    sha256 = $sha256
+    gitHead = $gitHead
+    builtAtUtc = [DateTime]::UtcNow.ToString('o')
+}
+[IO.File]::WriteAllText($releaseManifest, ($release | ConvertTo-Json -Depth 3) + "`n", $utf8)
 Write-Host "DEB: $output"
-Write-Host "SHA256: $((Get-FileHash -LiteralPath $output -Algorithm SHA256).Hash)"
+Write-Host "SHA256: $sha256"
+Write-Host "Release manifest: $releaseManifest"
 Write-Host 'Build completed. Before installing, verify the package on Ubuntu with dpkg-deb -I/-c and sha256sum.'

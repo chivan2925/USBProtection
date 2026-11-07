@@ -27,7 +27,9 @@ public class ProcessLoginctlGateway implements LoginctlGateway {
         try {
             process=new ProcessBuilder(cmd).redirectErrorStream(true).start();
             Process live=process;
-            Future<String> output=reader.submit(()->new String(live.getInputStream().readAllBytes(),StandardCharsets.UTF_8));
+            // loginctl usually emits a few lines. A compromised/malformed helper
+            // must not allocate unbounded memory while an Agent is running.
+            Future<String> output=reader.submit(()->readLimited(live, 64 * 1024));
             if (!process.waitFor(5,TimeUnit.SECONDS)) {process.destroyForcibly();throw new IllegalStateException("loginctl timed out");}
             String text=output.get(2,TimeUnit.SECONDS);
             if (process.exitValue()!=0) throw new IllegalStateException("loginctl failed ("+process.exitValue()+")");
@@ -36,5 +38,20 @@ public class ProcessLoginctlGateway implements LoginctlGateway {
         catch (InterruptedException e) {Thread.currentThread().interrupt();throw new IllegalStateException("loginctl interrupted",e);}
         catch (ExecutionException|TimeoutException e) {throw new IllegalStateException("Cannot read loginctl output",e);}
         finally {if(process!=null&&process.isAlive())process.destroyForcibly();reader.shutdownNow();}
+    }
+
+    private static String readLimited(Process process, int maxBytes) throws IOException {
+        try (var input = process.getInputStream(); var buffer = new java.io.ByteArrayOutputStream()) {
+            byte[] chunk = new byte[4096];
+            int read;
+            while ((read = input.read(chunk)) != -1) {
+                if (buffer.size() > maxBytes - read) {
+                    process.destroyForcibly();
+                    throw new IOException("loginctl response exceeds bounded size");
+                }
+                buffer.write(chunk, 0, read);
+            }
+            return buffer.toString(StandardCharsets.UTF_8);
+        }
     }
 }

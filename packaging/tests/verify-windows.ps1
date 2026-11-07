@@ -1,4 +1,4 @@
-#requires -Version 7.4
+#requires -Version 7.6
 <#
 .SYNOPSIS
     One Windows verification entrypoint for USBShield (M1-M5 + Ubuntu Agent packaging).
@@ -10,7 +10,7 @@
     This consolidates the live Week 2-4 Windows packaging checks. It intentionally
     does NOT claim Ubuntu USBGuard, GUI popup, physical USB, or real LAN E2E PASS.
 
-    Prerequisites: Windows, PowerShell 7.4+, JDK 21, Maven, Node/npm, PostgreSQL
+    Prerequisites: Windows, PowerShell 7.6.x (tested target: 7.6.9), JDK 21, Maven, Node/npm, PostgreSQL
     test DBs and an untracked repo-root .env (see .env.example); build-deb.ps1.
 .EXAMPLE
     .\packaging\tests\verify-windows.ps1
@@ -28,10 +28,21 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+# Native command exit codes are checked explicitly by Invoke-Checked and the
+# individual git/jar checks; keep the behaviour consistent across pwsh builds.
+$PSNativeCommandUseErrorActionPreference = $false
 
-if (-not $IsWindows) { throw 'This verifier must run in PowerShell 7.4+ on Windows.' }
+if (-not $IsWindows -or $PSVersionTable.PSEdition -ne 'Core') {
+    throw 'This verifier requires PowerShell 7.6.x (pwsh.exe) on Windows; Windows PowerShell 5.1 is unsupported.'
+}
+if (-not ('System.Formats.Tar.TarReader' -as [type]) -or
+    -not ('System.Formats.Tar.GnuTarEntry' -as [type])) {
+    throw 'This PowerShell runtime does not expose the required System.Formats.Tar APIs.'
+}
 $root = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$packagePath = Join-Path $root 'packaging/dist/usbshield-agent_1.0.0_amd64.deb'
+$releaseManifest = Join-Path $root 'packaging/dist/usbshield-agent.release.json'
+$packagePath = $null
+$script:debVersion = $null
 $builderPath = Join-Path $root 'packaging/scripts/build-deb.ps1'
 $steps = [System.Collections.Generic.List[string]]::new()
 
@@ -57,7 +68,9 @@ function Assert-Text([string]$Relative, [string]$Required, [bool]$Present = $tru
 }
 function Get-RequiredCommand([string[]]$Names) {
     foreach ($name in $Names) {
-        $command = Get-Command $name -ErrorAction SilentlyContinue | Select-Object -First 1
+        # Avoid resolving aliases/functions instead of native .exe/.cmd tools.
+        $command = Get-Command -Name $name -CommandType Application -ErrorAction SilentlyContinue |
+            Select-Object -First 1
         if ($null -ne $command) { return $command.Source }
     }
     throw "Required command is missing: $($Names -join ' / ')"
@@ -68,7 +81,13 @@ function Invoke-Checked([string]$Name, [string]$Executable, [string[]]$Arguments
     try {
         $global:LASTEXITCODE = 0
         & $Executable @Arguments
-        if ($LASTEXITCODE -ne 0) { throw "$Name failed: exit code $LASTEXITCODE" }
+        if ($LASTEXITCODE -ne 0) {
+            if ($Name -like 'Git * whitespace validation') {
+                Write-Host 'Git diff --check failed. Review the diff output above; CRLF conversion warnings alone do not prove a whitespace defect.' -ForegroundColor Yellow
+                Write-Host 'Diagnostic: git -c core.safecrlf=false diff --check (or: git -c core.safecrlf=false diff --cached --check)' -ForegroundColor Yellow
+            }
+            throw "$Name failed: exit code $LASTEXITCODE"
+        }
     } finally { Pop-Location }
 }
 function Get-NormalizedBytes([string]$Relative, [bool]$Text) {
@@ -76,6 +95,10 @@ function Get-NormalizedBytes([string]$Relative, [bool]$Text) {
     if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing package input: $Relative" }
     if ($Text) {
         $value = [System.IO.File]::ReadAllText($file).Replace("`r`n", "`n").Replace("`r", "`n")
+        if ($Relative -eq 'packaging/agent-deb/DEBIAN/control') {
+            if ($null -eq $script:debVersion) { throw 'Missing built Debian version' }
+            $value = $value.Replace('Version: 1.0.0', "Version: $script:debVersion")
+        }
         return ,([System.Text.UTF8Encoding]::new($false).GetBytes($value))
     }
     return ,([System.IO.File]::ReadAllBytes($file))
@@ -154,6 +177,7 @@ function Assert-PackageEntries([hashtable]$Entries, [array]$Manifest, [string]$A
     $actualPaths = @($Entries.Keys | Sort-Object)
     Assert-True (($actualPaths -join '|') -eq ($expectedPaths -join '|')) "$ArchiveName file list exactly matches release manifest"
     foreach ($item in $Manifest) {
+        Assert-True ($Entries.ContainsKey($item.Path)) "$ArchiveName/$($item.Path) exists"
         $entry = $Entries[$item.Path]
         $expectedMode = [Convert]::ToInt32($item.Mode, 8)
         Assert-True ($entry.Mode -eq $expectedMode) "$ArchiveName/$($item.Path) Unix mode $($item.Mode)"
@@ -164,6 +188,7 @@ function Assert-PackageEntries([hashtable]$Entries, [array]$Manifest, [string]$A
 
 try {
     Show-Phase 'Host, source and accidental-secret safeguards'
+    Write-Host "PowerShell: $($PSVersionTable.PSVersion) | .NET: $([Environment]::Version) | PSEdition: $($PSVersionTable.PSEdition)"
     Assert-True (Test-Path -LiteralPath (Join-Path $root 'client-agent/pom.xml')) 'Repository layout'
     Assert-True (Test-Path -LiteralPath $builderPath -PathType Leaf) 'Windows-native DEB builder exists'
     $builder = Get-SourceText 'packaging/scripts/build-deb.ps1'
@@ -171,8 +196,13 @@ try {
         Assert-True ($builder.Contains($fragment)) "Native DEB builder declares $fragment"
     }
     $git = Get-RequiredCommand @('git.exe', 'git')
-    Invoke-Checked -Name 'Git unstaged whitespace validation' -Executable $git -Arguments @('diff','--check')
-    Invoke-Checked -Name 'Git staged whitespace validation' -Executable $git -Arguments @('diff','--cached','--check')
+    # Windows Git may warn that working-tree LF will become CRLF. That message
+    # alone is not a whitespace defect. Suppress only safecrlf conversion warnings
+    # for these read-only checks; preserve Git diff --check failures for actual
+    # trailing whitespace and whitespace errors. Do not change repo/global config.
+    $gitLineEndingOverride = @('-c', 'core.safecrlf=false')
+    Invoke-Checked -Name 'Git unstaged whitespace validation' -Executable $git -Arguments ($gitLineEndingOverride + @('diff','--check'))
+    Invoke-Checked -Name 'Git staged whitespace validation' -Executable $git -Arguments ($gitLineEndingOverride + @('diff','--cached','--check'))
     foreach ($secret in @('.env', '.env.e2e.local')) {
         $global:LASTEXITCODE = 0
         $tracked = @(& $git -C $root ls-files -- $secret)
@@ -261,7 +291,7 @@ try {
         if (-not (Test-Path -LiteralPath $envPath -PathType Leaf)) {
             throw 'Missing test-only .env; copy .env.example and set USBSHIELD_TEST_DB_PASSWORD first.'
         }
-        # Parse only the three intended test-DB variables without evaluating code.
+        # Parse only the four intended test-DB variables without evaluating code.
         $previous = @{}
         foreach ($key in @('USBSHIELD_TEST_DB_HOST','USBSHIELD_TEST_DB_PORT','USBSHIELD_TEST_DB_USERNAME','USBSHIELD_TEST_DB_PASSWORD')) {
             $previous[$key] = [System.Environment]::GetEnvironmentVariable($key, 'Process')
@@ -307,13 +337,30 @@ try {
 
     Show-Phase 'Create or read Windows-built Agent DEB'
     if (-not $SkipDebBuild) {
-        # Child pwsh prevents any accidental exit/scope pollution by the builder.
-        $pwsh = (Get-Process -Id $PID).Path
-        Invoke-Checked 'Native Windows .deb build' $pwsh @('-NoProfile','-File',$builderPath)
+        # Use the actual pwsh executable from this installation; $PID can
+        # point to a hosting process in embedded/integrated terminals.
+        $pwsh = Join-Path $PSHOME 'pwsh.exe'
+        Assert-True (Test-Path -LiteralPath $pwsh -PathType Leaf) 'Current PowerShell installation has pwsh.exe'
+        Invoke-Checked 'Native Windows .deb build' $pwsh @('-NoProfile','-NonInteractive','-File',$builderPath)
     } else {
         Write-Host '[SKIP] .deb build requested; existing artifact must pass all checks.' -ForegroundColor Yellow
     }
+    Assert-True (Test-Path -LiteralPath $releaseManifest -PathType Leaf) 'Release manifest exists'
+    $release = Get-Content -LiteralPath $releaseManifest -Raw | ConvertFrom-Json
+    Assert-True ($release.version -match '^1\.0\.0\+build[0-9]{17}$') 'Debian version uniquely identifies build time'
+    Assert-True ($release.filename -ceq "usbshield-agent_$($release.version)_amd64.deb") 'Release filename/version agree'
+    # A locally edited manifest must not be able to select a file outside dist/.
+    Assert-True ([string]$release.filename -notmatch '[/\\]') 'Release filename has no path separators'
+    $script:debVersion = [string]$release.version
+    $packagePath = Join-Path $root "packaging/dist/$($release.filename)"
     Assert-True (Test-Path -LiteralPath $packagePath -PathType Leaf) 'Built DEB exists'
+    $actualDebHash = (Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash.ToLowerInvariant()
+    Assert-True (([string]$release.sha256).ToLowerInvariant() -ceq $actualDebHash) 'Release SHA256 matches actual DEB'
+    $global:LASTEXITCODE = 0
+    $headLines = @(& $git -C $root rev-parse HEAD)
+    Assert-True ($LASTEXITCODE -eq 0 -and $headLines.Count -eq 1) 'Git HEAD is readable'
+    $gitHead = [string]$headLines[0]
+    Assert-True ($release.gitHead -ceq $gitHead.Trim()) 'Release manifest reflects current Git HEAD'
     $debBytes = (Get-Item -LiteralPath $packagePath).Length
     Assert-True ($debBytes -gt 10000) "Built DEB is nonempty ($debBytes bytes)"
 
@@ -378,6 +425,7 @@ try {
         Write-Host 'SCOPE NOTE: One or more optional checks were skipped; NOT a full Windows regression run.' -ForegroundColor Yellow
     }
 } catch {
-    [Console]::Error.WriteLine("Windows verification FAILED at last phase: $($steps[$steps.Count - 1]) — $($_.Exception.Message)")
+    $phase = if ($steps.Count -gt 0) { $steps[$steps.Count - 1] } else { 'startup' }
+    [Console]::Error.WriteLine("Windows verification FAILED at phase: $phase — $($_.Exception.Message)")
     exit 1
 }
