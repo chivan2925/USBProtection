@@ -1,6 +1,6 @@
 # USBShield — Danh mục tài liệu hiện hành và lịch sử
 
-> Baseline đối chiếu: branch `vinhkhang`, `4d2216c7dd277c7ef4af1962e0b04638e3971d09` (07/11/2026). Cập nhật tài liệu và Windows verifier từ log owner **09/11/2026**. Không coi đây là Ubuntu E2E sign-off.
+> Baseline đối chiếu: `vinhkhang` `6923be001890bee9a303a8cee8e7dcc2cf2db180` (09/11/2026). Windows verifier PASS theo log; HTTPS/ACL và Ubuntu **P0+C1–C5 PASS theo owner**, không phải independent re-run. Extended Ubuntu acceptance **DEFERRED BY OWNER**.
 
 ## Tài liệu hiện hành (sử dụng theo mục đích)
 
@@ -9,6 +9,8 @@
 | **Runbook tổng hợp: build/test, PostgreSQL, Spring JAR, Client DEB** | **[RUN_GUIDE.md](RUN_GUIDE.md)** |
 | **Cấu hình HTTPS `usbprotection.lab` từng bước, Windows Nginx + CA + Ubuntu A/B** | **[USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md)** |
 | **Core E2E USB Kingston trên Ubuntu A/B** | **[USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md](USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md)** (giữ filename lịch sử, nội dung cập nhật) |
+| **Owner sign-off Minimal Core 09/11 (có ranh giới evidence)** | [qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) |
+| **M4/M5: giới hạn sửa UI sau E2E** | [admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md](admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md) |
 | **Trạng thái code / bằng chứng sau review F01–F14 và Windows PASS** | **[IMPLEMENTATION_STATUS_20261109.md](IMPLEMENTATION_STATUS_20261109.md)**; [QA ledger chi tiết](qa/2026-11-09-review-and-packaging-sync.md) |
 | Cấu hình HTTPS/ACL contract và API phân trang (khái quát) | [PHASE3_HTTPS_ACL_AND_PAGING.md](PHASE3_HTTPS_ACL_AND_PAGING.md) |
 | Phạm vi chức năng và hợp đồng | [Blueprint](../USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md), [ARCHITECTURE.md](ARCHITECTURE.md), [API.md](API.md), [API addendum](API_PHASE1_TO_PHASE3_ADDENDUM.md), [AGENT_SERVER_PROTOCOL.md](AGENT_SERVER_PROTOCOL.md) |
@@ -30,4 +32,4 @@
 - Các report `docs/member1/`, `docs/client-agent/WEEK*.md`, `docs/admin-web/WEEK*.md`, `docs/usbguard/WEEK*.md`, `docs/rc/`, `docs/qa/` và thư mục evidence vẫn giữ thời điểm/SHA/test mà chúng ghi nhận. H2 và các tên `.deb` cố định trong evidence cũ không phải runtime hiện tại.
 - `CLIENT_INSTALLATION.md` là redirect lịch sử tới `RUN_GUIDE.md`. Không dùng các bản hướng dẫn staging/patch cũ.
 
-**Gate cuối:** Windows verifier **PASS theo log 09/11** chỉ xác minh Windows build, Java/frontend/browser synthetic, format `.deb`. Cần bằng chứng riêng cho HTTPS/ACL mạng thực, Ubuntu Debian install/remove, USBGuard hardware BLOCK/ALLOW/REVOKE, GUI popup, offline/reboot và Linux-only notifier tests trước khi công bố nghiệm thu Ubuntu.
+**Gate hiện tại:** Windows verifier **PASS theo log**; HTTPS/ACL IP thực **PASS theo owner**; Ubuntu **Minimal Core C1–C5 PASS theo owner** (không có raw log checkpoint độc lập). **Không chạy** Ubuntu extended: Debian remove/upgrade/prerm cleanup, offline/reboot, negative TLS, Linux-only notifier IPC, stress/security. Không đóng B01–B05 hoặc đánh dấu full production acceptance.

@@ -1,6 +1,6 @@
 # USBShield — Current implementation and verification boundary (09/11/2026)
 
-**Source baseline:** `chivan2925/USBProtection`, branch `vinhkhang` HEAD **`4d2216c7dd277c7ef4af1962e0b04638e3971d09`** (`fix(core): harden audit delivery, USBGuard health, admin validation and packaging`, 07/11/2026). Tài liệu đồng bộ sau verifier change ngày 09/11 do owner cung cấp. **Bản sửa verifier có thể chưa được commit lên HEAD này**; không trình bày nó như một phần của SHA gốc.
+**Source baseline sau docs-sync:** `chivan2925/USBProtection`, branch `vinhkhang`, HEAD **`6923be001890bee9a303a8cee8e7dcc2cf2db180`** (`docs(packaging): sync F01-F14 docs, HTTPS/E2E guides and DEB build scripts`, 09/11/2026). Windows verifier sửa đã được commit trong baseline này. Runtime lab/JAR/DEB SHA chính xác vẫn cần ghi riêng nếu tái lập acceptance.
 
 ## Hai hệ mã finding khác nhau
 
@@ -32,15 +32,17 @@
 
 **Artifact SHA256 theo log owner:** `E67C53C75728C4438227C3CD695DEDB4724D9D5C8CA6418D88D620D646EF4406` của bản build cụ thể. Hash này **không áp dụng cho các build tiếp theo**. Git HEAD trong manifest chỉ là SHA commit nền, **không chứng minh working tree sạch**. Không ghi thông tin đăng nhập/secrets trong evidence.
 
-## Native acceptance vẫn mở
+## Native acceptance — Minimal Core đã PASS theo owner; phần mở rộng được hoãn
 
-- Nginx HTTPS TLS/443 → HTTP loopback Windows `127.0.0.1:18080`; không expose database 5432 hoặc Java 18080 ra LAN; ACL phân biệt thực IP Admin, Ubuntu A/B. Trust CA + SAN `usbprotection.lab` từ browser/Agent Java phải qua test thực.
-- Ubuntu 24.04: cài/upgrade/remove `.deb`, `prerm` dọn managed Allow không phá custom policy; USBGuard `ImplicitPolicyTarget=block`, rule order/foreign allow; USB Kingston C1–C5 và replug; notifier GUI session và Linux-only IPC tests; reboot, offline/recovery. **NOT EXECUTED** theo dữ liệu hiện tại.
-- B01–B05: còn cần adjudication theo acceptance criteria; **không đóng** chỉ nhờ Windows verifier PASS.
+- **Windows HTTPS/ACL:** Nginx TLS/443 → Spring loopback 18080, PostgreSQL localhost 5432; Admin login bằng browser thật; Ubuntu A/B nhận `403/403/403/401` cho Web/Auth/Admin/Agent-unauth; TCP/18080 và 5432 không bypass được; Nginx thấy đúng source IP .133/.141. **PASS theo owner**, không phải synthetic Windows verifier.
+- **Ubuntu A/B:** cả hai có `.deb` version `1.0.0+build20261109091706653` (theo logs). **P0 và C1–C5 PASS theo báo cáo owner 09/11** — USB Kingston: A BLOCK → Allow A/ACK → replug A ALLOW → B BLOCK → Revoke A/ACK → replug A BLOCK. Không có raw per-checkpoint output kèm theo, nên gọi `OWNER_REPORTED_PASS`, không gọi independent verified. Chi tiết: [owner closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md).
+- **P0 historical incident:** trước khi fix, hai Agent heartbeat 401, local `endpoint.json` là ID của 02/11 và SELECT đối chiếu DB hiện hành trả 0 hàng; không dùng trạng thái lỗi trước remediation để đánh giá final pass.
+- **DEFERRED BY OWNER / NOT EXECUTED:** `.deb` remove/upgrade, `prerm` cleanup, reboot, offline recovery/outbox, bad-CA/SAN TLS negative, Linux-only notifier IPC, device edge cases, stress/race và security hardening/full Week4 acceptance. Mã B01–B05 và finding owner-waived không tự đóng vì C1–C5 PASS.
+- **M4/M5 UI change-control:** [guardrails](admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md); CSS-only cần frontend/browser smoke, đổi Allow/Revoke/auth/mapping phải re-run Core C1–C5 trên build mới.
 
 ## Canonical next steps
 
 1. [Run Guide](RUN_GUIDE.md): chuẩn bị PostgreSQL 3 DB/role và build/test Windows; script tổng `packaging/tests/verify-windows.ps1`.
 2. [HTTPS `usbprotection.lab`](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md): Windows Nginx, CA, ACL; thử từ Admin và Ubuntu riêng biệt.
-3. [Minimal Core Ubuntu E2E](USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md): C1–C5 thực tế, sau khi HTTPS gate PASS.
-4. [Ubuntu acceptance](qa/WEEK4_UBUNTU_ACCEPTANCE.md): extended native/reboot/cleanup tests; giữ evidence riêng theo SHA/artifact đã chạy.
+3. [Minimal Core Ubuntu E2E](USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md) + [owner closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md): kết quả P0/C1–C5 đã PASS theo owner, cần lưu evidence và artifact SHA nếu audit.
+4. [M4/M5 UI guardrails](admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md): tiếp tục polish UI trong scope có kiểm soát; không tự chuyển PASS cũ sang code mới. [Ubuntu acceptance mở rộng](qa/WEEK4_UBUNTU_ACCEPTANCE.md) **được owner hoãn, chưa thực hiện**.

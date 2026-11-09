@@ -1,6 +1,6 @@
 # USBShield — Hướng dẫn chạy và triển khai chung (Admin Server + Ubuntu Client)
 
-> **Phạm vi:** Hướng dẫn triển khai và phân quyền truy cập; **không phải bằng chứng đã chạy Ubuntu E2E**. Source baseline đã đối chiếu: `vinhkhang` `4d2216c7dd277c7ef4af1962e0b04638e3971d09` (07/11/2026); Windows verifier log PASS ngày 09/11/2026 được owner cung cấp, bản sửa thứ tự JAR chưa thuộc HEAD này. Đây là **hướng dẫn chạy duy nhất đang có hiệu lực** cho cả Admin Server và Ubuntu Agent `.deb`. Ubuntu E2E vẫn **NOT EXECUTED/DEFERRED**.
+> **Phạm vi:** Canonical deployment guide, không thay thế test evidence. Code baseline đối chiếu: `vinhkhang` `6923be001890bee9a303a8cee8e7dcc2cf2db180` (09/11/2026), Windows verifier PASS theo owner. HTTPS/ACL và **Minimal Core Ubuntu P0+C1–C5 PASS theo owner 09/11**; extended Ubuntu acceptance **DEFERRED BY OWNER / NOT EXECUTED**. Xem [closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md).
 
 ## 1. Chọn mô hình tối giản
 
@@ -170,7 +170,7 @@ systemctl status usbguard usbshield-agent --no-pager
 
 **Không chạy lệnh `install /dev/null` ở trên nếu file `agent.env` đã có bí mật cần giữ.** Khi đã tồn tại, chỉ kiểm quyền/sửa bằng `sudoedit`. Installer `postinst` khởi động Agent, nên phải chuẩn bị CA/URL/token **trước khi** gọi `apt install`; xem hướng dẫn HTTPS riêng.
 
-`apt install ./...deb` cài dependency và service, **không tự thiết lập Server URL/token đúng cho từng môi trường**. Đảm bảo DNS, CA trust và `agent.env` đã chuẩn bị **trước** vì `postinst` khởi động service; gói fail-closed nếu chưa cấu hình hợp lệ. Nếu đang triển khai Client bằng file `.deb` mới, phải có quyền sudo/root lúc cài và cấu hình; sau đó normal user không được sửa service. **Ubuntu install/E2E vẫn chưa được thực hiện**, nên đây là quy trình đề xuất, không phải kết quả kiểm thử.
+`apt install ./...deb` cài dependency và service, **không tự thiết lập Server URL/token đúng cho từng môi trường**. Đảm bảo DNS, CA trust và `agent.env` đã chuẩn bị **trước** vì `postinst` khởi động service; gói fail-closed nếu chưa cấu hình hợp lệ. Nếu đang triển khai Client bằng file `.deb` mới, phải có quyền sudo/root lúc cài và cấu hình; sau đó normal user không được sửa service. **Ubuntu đã cài Agent `.deb` trên cả A/B và báo PASS C1–C5 theo owner**; phần hướng dẫn này vẫn là quy trình có thể tái chạy, không được suy ra đã thử remove/upgrade/reboot.
 
 ## 6. Khi nào mới cần Docker?
 
@@ -179,7 +179,7 @@ Có thể bổ sung Docker Compose trong một đợt riêng nếu mục tiêu l
 ## 7. Trạng thái nghiệm thu và giới hạn
 
 - Windows Maven/frontend/API mock tests có thể chứng minh contract/code, **không chứng minh USB vật lý**.
-- Ubuntu E2E (USB flash, chuột/phím, `.deb`, reboot, policy persistence, GUI popup, service/ACL, Allow/Revoke theo endpoint) **DEFERRED/NOT EXECUTED**.
+- Ubuntu Minimal Core E2E USB Kingston A/B, policy Allow/Revoke/replug, Admin event/popup **PASS theo owner 09/11**, không có raw checkpoint evidence độc lập. Ubuntu reboot, offline, DEB remove/upgrade, Linux-only notifier IPC, negative TLS, full HID/security/robustness **DEFERRED BY OWNER / NOT EXECUTED**.
 - `usbguard allow-device <runtime-id>` và `usbguard block-device <runtime-id>` là CLI của USBGuard cho thiết bị đang hiện diện, **nhưng bản hiện tại mới đồng bộ whitelist/rules; chưa kết luận đã điều khiển ngay USB đang cắm**. Triển khai chức năng này cần cơ chế kiểm tra lại runtime ID/hash, quyền IPC (`Devices=modify`), chống race, báo lỗi/ACK và kiểm chứng Ubuntu trước khi bổ sung vào release.
 
 Các tham chiếu: [Developer Guide](DEVELOPER_GUIDE.md), [Admin API](API.md), [Ubuntu Acceptance](qa/WEEK4_UBUNTU_ACCEPTANCE.md).
@@ -204,19 +204,19 @@ sudo -u usbshield usbguard list-devices
 - Admin kiểm tra Client đã enroll/heartbeat, policy version và ACK. Đừng đọc/in `endpoint.json` vì chứa Agent credential.
 - **Luồng đã chốt theo blueprint:** khi Admin Allow/Revoke, Agent đồng bộ local rules, ACK; người dùng **rút USB và cắm lại** để thấy thay đổi ALLOW/BLOCK. Không yêu cầu runtime `allow-device`/`block-device` trên USB đang kết nối.
 - **Service không tắt được** được hiểu là normal Ubuntu user không có root/sudo hoặc quyền USBGuard IPC sửa policy không được tắt/sửa. Quản trị viên root vẫn có thể quản trị hệ thống.
-- Một `.deb` amd64 đã build/kiểm tra có thể phân phối cho nhiều máy Ubuntu cùng nền tảng; **không copy `endpoint.json`** từ Client này sang Client khác. USB E2E/hardware/systemd/popup/reboot chưa được xác nhận bằng test Windows.
+- Một `.deb` amd64 đã build/kiểm tra có thể phân phối cho nhiều máy Ubuntu cùng nền tảng; **không copy `endpoint.json`** từ Client này sang Client khác. USB E2E Core hardware/Agent/systemd/popup đã được owner báo PASS trên Ubuntu; riêng reboot/extended chưa test và không được suy từ Windows.
 
 ## 10. Thứ tự kiểm chứng cho seminar
 
 1. Maven Admin + Agent và frontend tests/lint/build trên Windows.
 2. Đóng gói JAR Admin cùng React, kiểm tra loopback/browser test trên host.
-3. Trên mạng lab cô lập: cài `.deb` Ubuntu, test thiết bị thật, policy A/B, Allow/Revoke sau khi rút/cắm lại, event active-user, popup, server-down, reboot và quyền normal user.
+3. Trên mạng lab cô lập: `.deb` Ubuntu A/B + USB Kingston C1–C5/Allow/Revoke sau replug **đã PASS theo owner ngày 09/11**; server-down, reboot, lifecycle, offline và các kiểm thử mở rộng **không chạy theo owner scope**.
 4. **Trước khi chạy Agent `live` trên LAN**, triển khai HTTPS reverse proxy, CA/hostname verification và Admin/Client IP ACL. Chạy [`verify-phase3-https-acl.sh`](../packaging/tests/verify-phase3-https-acl.sh) từ máy Admin và Client thực; test chứng chỉ sai phải thất bại, không fallback HTTP. HTTP loopback chỉ áp dụng cho harness/dev tách khỏi live deployment.
 
-Các trường hợp Ubuntu trong `docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md` hiện **DEFERRED**; không chấm FULL PASS nếu chưa chạy.
+Bộ Ubuntu **mở rộng** trong `docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md` được owner **DEFERRED/NOT EXECUTED**; Minimal Core kết thúc tại C5, không chấm full acceptance.
 
 ## 11. Đồng bộ review 09/11/2026 và phạm vi cần chứng minh
 
 - Review F01–F14 gần nhất là nhóm **khác** với finding F01–F14 của ba đợt 04/11. Đọc [status hiện tại](IMPLEMENTATION_STATUS_20261109.md) và [ledger đối chiếu](qa/2026-11-09-review-and-packaging-sync.md).
 - `packaging/scripts/build-deb.ps1` và `build-deb.sh` hiện dùng tên .deb/version/manifest đồng bộ; **không dùng lại** tên cố định `usbshield-agent_1.0.0_amd64.deb`. `packaging/tests/verify-windows.ps1` là gate Windows; `check-usbshield-core.sh`, `verify-phase3-https-acl.sh`, `test-notifier-ipc-ubuntu.sh` là kiểm thử Linux/Ubuntu chuyên biệt.
-- Lần chạy Windows verifier owner 09/11 PASS, nhưng **chưa chạy** Linux packaging E2E, `prerm` cleanup, TLS/ACL từ hai nguồn IP và USB thật. B01–B05/các kiểm tra native không được đánh dấu PASS bằng bằng chứng Windows.
+- Windows verifier 09/11 PASS theo log; HTTPS/ACL A/B và USB Kingston C1–C5 đã PASS **theo owner**, độc lập với Windows synthetic tests. **Chưa chạy** Linux packaging lifecycle/remove/upgrade, `prerm` cleanup, offline/reboot, bad TLS, full notifier IPC. Không đóng B01–B05 hoặc chuyển deferred thành PASS. Xem [closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [M4/M5 UI guardrails](admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md).

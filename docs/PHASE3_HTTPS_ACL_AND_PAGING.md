@@ -1,6 +1,6 @@
 # USBShield — Phase 3 HTTPS, network ACL và Admin API pagination
 
-> **Source baseline:** `vinhkhang` `4d2216c7dd277c7ef4af1962e0b04638e3971d09` (07/11/2026); docs synchronized 09/11. Đây là **deployment contract**, **không** phải báo cáo HTTPS/Ubuntu thực tế PASS. Hướng dẫn lệnh đầy đủ: [HTTPS `usbprotection.lab` — Windows + Ubuntu A/B](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md).
+> **Source baseline:** `vinhkhang` `6923be001890bee9a303a8cee8e7dcc2cf2db180` (09/11/2026); đây là **deployment contract**. Owner báo HTTPS/ACL VMnet8 và Ubuntu C1–C5 **PASS**; xem [owner closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md), không suy ra từ contract. Hướng dẫn lệnh đầy đủ: [HTTPS `usbprotection.lab` — Windows + Ubuntu A/B](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md).
 
 ## Network boundary
 
@@ -42,6 +42,6 @@
 
 ## Verification source và giới hạn
 
-Theo **log owner ngày 09/11**, `packaging/tests/verify-windows.ps1` đã PASS (60 Admin tests; 276 Agent tests với 3 Linux-only skips; 116 Frontend tests, browser HTTP live PostgreSQL; `.deb` format/hash). Script **build Admin JAR sau `clean test`, trước browser suites** để tránh mất artifact. Kết quả này **không kiểm Nginx TLS/ACL từ hai nguồn IP thật**, không cài `.deb` và không chứng minh USBGuard/HID/GUI popup trên Ubuntu. Ubuntu Core E2E C1–C5 và extended acceptance vẫn **NOT EXECUTED**.
+Theo **log owner ngày 09/11**, `verify-windows.ps1` PASS (60 Admin tests; 276 Agent tests với 3 Linux-only skips; 116 frontend tests, browser HTTP live PostgreSQL, DEB format/hash). **Riêng thực tế lab:** Owner xác nhận Nginx/CA/Admin browser và ACL `403/403/403/401` từ A/B, backend/DB không bypass được; C1–C5 USB Kingston **PASS theo owner**, không phải independent review. Các tình huống negative TLS, offline/reboot, native DEB remove/upgrade và Linux notifier IPC **DEFERRED BY OWNER / NOT EXECUTED**; Windows verifier không thay thế các gate native này.
 
 Xem [Run Guide](RUN_GUIDE.md), [Implementation status 09/11](IMPLEMENTATION_STATUS_20261109.md) và [Minimal Core E2E](USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md).

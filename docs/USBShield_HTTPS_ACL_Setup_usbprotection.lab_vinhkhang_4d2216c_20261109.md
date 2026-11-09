@@ -1,11 +1,11 @@
 # USBShield — Hướng dẫn cấu hình HTTPS `usbprotection.lab` và IP ACL (Windows 11 + Ubuntu 24.04 A/B)
 
-> **Mục đích:** cấu hình **thực tế** DNS/hosts → CA/chứng chỉ TLS → Nginx HTTPS → ACL Admin/Client → Windows Firewall → CA/HTTPS trên Agent Ubuntu. **Không phải bằng chứng đã triển khai thành công.** Windows verifier PASS theo log owner 09/11, nhưng điều đó không kiểm Nginx HTTPS/ACL trên LAN thật.
-> **Source baseline đã đối chiếu, cập nhật runbook 09/11:** [`chivan2925/USBProtection`](https://github.com/chivan2925/USBProtection/tree/4d2216c7dd277c7ef4af1962e0b04638e3971d09), branch `vinhkhang`, HEAD `4d2216c7dd277c7ef4af1962e0b04638e3971d09` (07/11/2026). Đây là hướng dẫn cấu hình, **không** phải kết quả verify đã chạy.
+> **Mục đích:** runbook cấu hình DNS/hosts → CA/chứng chỉ → Nginx HTTPS → ACL → Firewall → Agent Ubuntu. **Owner đã thực hiện HTTPS/ACL gate thực tế trên Windows và A/B, PASS theo trao đổi 09/11**, độc lập với Windows verifier; xem [owner acceptance](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md). Đây vẫn là hướng dẫn tái thực hiện, không phải raw test log.
+> **Source baseline đối chiếu:** `chivan2925/USBProtection` branch `vinhkhang`, HEAD `6923be001890bee9a303a8cee8e7dcc2cf2db180` (09/11/2026). Filename giữ SHA cũ để tránh gãy liên kết.
 > **Hostname cố định:** `https://usbprotection.lab` — SAN của server cert **bắt buộc** chứa `DNS:usbprotection.lab`.
 > **Tài liệu E2E trên `vinhkhang`:** [`docs/USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md`](https://github.com/chivan2925/USBProtection/blob/4d2216c7dd277c7ef4af1962e0b04638e3971d09/docs/USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md). File E2E giữ tên lịch sử `f446c04` nhưng **nội dung đã đồng bộ** với HEAD và verifier hiện tại trong cùng package. Chạy từ checkout đã giải nén các bản sửa docs/scripts; không sử dụng script apply fix.
 > **Topology giữ nguyên:** Windows 11 host chạy PostgreSQL, Spring Boot JAR `prod` trên `127.0.0.1:18080` và Nginx TLS proxy tại cùng host; Ubuntu A/B chạy Agent `.deb` + USBGuard. **Không đưa proxy sang VM A.**
-> **Trạng thái kiểm chứng:** `verify-windows.ps1` owner 09/11 PASS, nhưng Nginx/CA/SAN/ACL từ IP nguồn thật và Ubuntu USBGuard **NOT VERIFIED**. Tài liệu này dùng mô hình **HTTPS Client → Nginx, HTTP loopback Nginx → Spring Boot**; không yêu cầu HTTPS lần hai cho Spring trên cùng host.
+> **Trạng thái:** Windows verifier PASS; Nginx TLS + Admin browser + A/B ACL + blocked bypass **PASS theo owner**; Minimal Core USB Kingston C1–C5 **PASS theo owner**. Extended tests **NOT EXECUTED**. Luồng vẫn là **HTTPS Client → Nginx, HTTP loopback Nginx → Spring Boot**.
 
 ## 1. Checklist và nguyên tắc bảo mật
 
@@ -37,7 +37,7 @@ hostnamectl --static
 cat /etc/machine-id
 ```
 
-Ghi riêng trong private lab note: `<WINDOWS_PROXY_IP>`, `<ADMIN_SOURCE_IP>` (có thể là Windows host nếu browser chạy cùng máy), `<UBUNTU_A_IP>`, `<UBUNTU_B_IP>`. Dùng NIC Host-only/LAN cho Windows ↔ Ubuntu; NIC NAT chỉ để Ubuntu cài package nếu có. Giữ console VMware để không mất đường cứu hộ khi USBGuard hoạt động.
+Ghi riêng trong private lab note: `<WINDOWS_PROXY_IP>`, `<ADMIN_SOURCE_IP>` (có thể là Windows host nếu browser chạy cùng máy), `<UBUNTU_A_IP>`, `<UBUNTU_B_IP>`. Lab owner **đã chạy thành công với một NIC NAT VMnet8 mỗi Ubuntu** (A `192.168.23.133`, B `.141`, Windows VMnet8 `.1`), IP nguồn riêng đúng trên Nginx và ACL PASS. Không bắt buộc thêm Host-only khi NAT không gộp source IP; giữ console VMware khi USBGuard hoạt động. Giữ console VMware để không mất đường cứu hộ khi USBGuard hoạt động.
 
 **Điểm dừng:** nếu Windows không route được từ A/B, hoặc Nginx sẽ thấy nguồn A/B giống nguồn Admin do NAT, chưa thể thiết lập IP ACL đúng. Không dùng một `CLIENT_CIDR` rộng bao trùm Admin; đặt hai `allow <UBUNTU_*_IP>/32` riêng.
 
@@ -166,7 +166,7 @@ server {
 }
 ```
 
-4. Trong `C:\nginx\conf\nginx.conf`, bảo đảm có `include conf/sites/usbprotection.lab.conf;` **bên trong `http { ... }`**; tạo thư mục `C:\nginx\conf\sites` nếu chưa có. Không thay cả file `nginx.conf` tùy tiện, không include site hai lần. Không để nguyên bất kỳ `<...>` hay `@@...@@` placeholder.
+4. Trong `C:\nginx\conf\nginx.conf`, bảo đảm có `include sites/usbprotection.lab.conf;` **bên trong `http { ... }`** (đường dẫn include tính từ `C:\nginx\conf`; **không** viết `conf/sites` để tránh thành `conf/conf/sites`); tạo thư mục `C:\nginx\conf\sites` nếu chưa có. Không thay cả file `nginx.conf` tùy tiện, không include site hai lần. Không để nguyên bất kỳ `<...>` hay `@@...@@` placeholder.
 5. Trên Windows PowerShell:
 
 ```powershell
@@ -313,12 +313,19 @@ Từ Admin host có Bash có thể dùng cùng script với `admin https://usbpr
 | A/B có cùng source-IP Nginx với Admin | NAT làm ACL không phân biệt được | **STOP** và sửa mạng/VLAN/topology |
 | Client truy cập `18080` hoặc `5432` | Backend/DB bypass proxy | **STOP**, sửa bind/firewall trước E2E |
 
-**Gate hoàn tất** (chỉ ghi PASS sau khi tự chạy): CA+SAN hợp lệ, `https://usbprotection.lab` phân giải đúng trên Windows/A/B, Admin truy cập Web qua TLS, Client bị 403 với Web/Admin path, Agent path chuyển tới Spring auth, backend/DB không expose, và Agent Java dùng TLS hợp lệ. Ghi `PASS/FAIL/BLOCKED`, nguồn IP thật, thời điểm, lệnh, ảnh/log đã redact. **Chưa kết luận Ubuntu E2E PASS** khi chỉ cấu hình HTTPS thành công.
+**Gate hoàn tất** (chỉ ghi PASS sau khi tự chạy): CA+SAN hợp lệ, `https://usbprotection.lab` phân giải đúng trên Windows/A/B, Admin truy cập Web qua TLS, Client bị 403 với Web/Admin path, Agent path chuyển tới Spring auth, backend/DB không expose, và Agent Java dùng TLS hợp lệ. Ghi `PASS/FAIL/BLOCKED`, nguồn IP thật, thời điểm, lệnh, ảnh/log đã redact. **HTTPS riêng không đồng nghĩa USB E2E; tuy nhiên owner sau đó đã báo C1–C5 PASS ở đợt thực tế 09/11 — xem closeout.**
 
-Tiếp tục ở [USBShield Ubuntu 24.04 Minimal Core E2E (`vinhkhang`)](https://github.com/chivan2925/USBProtection/blob/4d2216c7dd277c7ef4af1962e0b04638e3971d09/docs/USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md): mục 1.2–1.4 chuẩn bị PostgreSQL, Admin Server và Agent A/B; sau đó checkpoints **C1–C5** (BLOCK → Allow A → reconnect ALLOW A → B BLOCK → Revoke A/reconnect BLOCK). Lần E2E cũ FAILED ở Phase 6 chưa có root cause được chứng minh. Kiểm thử `.deb` remove/upgrade, bao gồm cleanup managed Allow trong `prerm`, và Linux-only notifier socket vẫn chưa chạy trên Ubuntu.
+Minimal Core đã owner báo PASS; hướng dẫn tái chạy là [USBShield Ubuntu 24.04 Minimal Core E2E](USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md): mục 1.2–1.4 chuẩn bị PostgreSQL, Admin Server và Agent A/B; sau đó checkpoints **C1–C5** (BLOCK → Allow A → reconnect ALLOW A → B BLOCK → Revoke A/reconnect BLOCK). Lần E2E cũ FAILED ở Phase 6 chưa có root cause được chứng minh; C1–C5 ngày 09/11 PASS theo owner không chứng minh mọi failure mode cũ đã được giải quyết. Kiểm thử `.deb` remove/upgrade, bao gồm cleanup managed Allow trong `prerm`, và Linux-only notifier socket vẫn chưa chạy trên Ubuntu.
 
 ## Source đối chiếu
 
 - `packaging/nginx/usbshield-https-acl.conf.example`, `packaging/firewall/README.md`, `packaging/tests/verify-phase3-https-acl.sh` tại HEAD `vinhkhang` đã nêu ở đầu tài liệu.
 - `admin-server/src/main/resources/application.yml`, `application-prod.yml`; `packaging/agent-deb/etc/usbshield-agent/application.yml`, `packaging/agent-deb/DEBIAN/postinst`; `docs/PHASE3_HTTPS_ACL_AND_PAGING.md` tại SHA đó.
 - Chứng chỉ/cert/key mới tạo theo hướng dẫn là **local lab artifacts**, không phải file trong repo hoặc bằng chứng đã tạo thành công trên máy operator.
+
+### Ghi chú lab sau triển khai (09/11)
+
+- Windows `curl.exe` dùng Schannel có thể báo `curl (60) revocation status unknown` với CA lab không công bố CRL/OCSP. Owner đã kiểm `--cacert ... --ssl-revoke-best-effort` và nhận `200/401`; **không dùng `-k`**, tùy chọn này chỉ nới phần thông tin revocation không sẵn có, không tắt chain/hostname verification. Không mở rộng cách này thành quy trình TLS production.
+- Trên Ubuntu, file CA `644 root:root` vẫn có thể gây `curl (77)` cho `usbdev` nếu thư mục `/etc/usbshield-agent` là `750 root:usbshield`. Owner chạy `sudo curl --cacert ...` để kiểm, không mở rộng quyền thư mục chứa secret. Agent service vẫn là `User=usbshield`; kiểm Java Agent riêng.
+- Windows Nginx config site thực nằm `C:\nginx\conf\sites\usbprotection.lab.conf`, có listener IPv4; không thêm IPv6 listener khi chưa allowlist source IPv6.
+- Để demo lại sau reboot chỉ cần PostgreSQL service đang chạy, Admin JAR `prod` khởi động bằng `.env.e2e.local`, Nginx process được start; không tạo lại CA/hosts/firewall. Nếu DHCP đổi IP A/B, cập nhật hai `/32` allowlist và firewall, sau đó retest ACL.

@@ -1,9 +1,9 @@
 # USBShield — Ubuntu 24.04 Minimal Core E2E (Windows build `.deb`)
 
-> **Mục tiêu:** kiểm thử nhanh luồng **BLOCK → Allow A → A ALLOW → B BLOCK → Revoke A → A BLOCK** bằng **một USB Kingston**, hai VM Ubuntu Desktop 24.04 A/B và Admin Server chạy Windows 11. Đây là **hướng dẫn thực thi, không phải kết quả PASS**.
-> **Source baseline đối chiếu:** `vinhkhang` `4d2216c7dd277c7ef4af1962e0b04638e3971d09` (07/11/2026). File giữ tên lịch sử `f446c04` để không làm gãy liên kết hiện hữu; nội dung đã đồng bộ với HEAD này, các sửa packaging/docs trong package 09/11 và verifier Windows được owner chạy PASS. Không dùng script apply fix.
+> **Mục tiêu:** kiểm thử nhanh luồng **BLOCK → Allow A → A ALLOW → B BLOCK → Revoke A → A BLOCK** bằng **một USB Kingston**, hai VM Ubuntu Desktop 24.04 A/B và Admin Server chạy Windows 11. Phần lệnh bên dưới là **hướng dẫn có thể tái chạy**; kết quả thực tế 09/11 được lưu riêng trong [owner closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md).
+> **Source hiện hành đối chiếu:** `vinhkhang` `6923be001890bee9a303a8cee8e7dcc2cf2db180` (09/11/2026). Filename `f446c04` giữ để không gãy liên kết; **đừng hiểu tên file là commit test**. Windows verifier PASS theo log; Ubuntu C1–C5 PASS theo báo cáo owner, không phải independent re-run. Không dùng `apply-fixes.ps1`.
 > **HTTPS cố định:** `https://usbprotection.lab`. Cấu hình CA/SAN, Nginx/ACL, firewall và `agent.env` theo [HTTPS setup (current)](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md), **nằm cùng package**.
-> **Lịch sử:** lần Ubuntu E2E cũ FAIL ở Phase 6, chưa có log đủ để xác định nguyên nhân. **Không mặc định đã sửa.**
+> **Lịch sử:** lần Ubuntu E2E cũ FAIL ở Phase 6, root cause chưa được xác minh đầy đủ. Ngày 09/11 owner báo **đã PASS Minimal Core C1–C5 sau khi khắc phục sự cố P0 stale identity/401**; điều này không tự chứng minh mọi failure path của Phase 6 lịch sử đã được sửa hoặc regression-free.
 
 ## 0. Phạm vi & nguyên tắc
 
@@ -208,7 +208,7 @@ Phải có `0 FAIL`. Trên Admin Web `https://usbprotection.lab`: A/B có `ONLIN
 | C4 — isolation BLOCK | B | | `list-devices`, Web B, popup |
 | C5 — Revoke + reconnect BLOCK | A | | ACK mới, rule, `list-devices` |
 
-**Core E2E chỉ PASS khi tất cả checkpoints PASS.** Script tự kiểm tra service, HTTPS Agent route, USBGuard IPC, base rule và thiết bị mass-storage; **không** tự kiểm Web/ACK, popup hiển thị thực, khả năng truy cập file, hay trạng thái physical USB passthrough. Không tuyên bố đủ nghiệm thu M1–M5 chỉ vì Core E2E PASS.
+**Core E2E chỉ PASS khi tất cả checkpoints PASS.** Owner báo P0+C1–C5 đều PASS ngày 09/11; xem [closeout có mức evidence](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md). Script tự kiểm tra service/HTTPS/USBGuard nhưng **không** tự kiểm Web/ACK, popup thực, mount hoặc physical USB; các điều kiện này thuộc thao tác quan sát của owner. Không tuyên bố full M1–M5 acceptance chỉ vì Core E2E PASS.
 
 ### Nếu bất kỳ bước nào FAIL
 
@@ -224,9 +224,9 @@ Phân loại nhanh: Admin Allow lỗi → **C2 Server**; desired tăng nhưng Ag
 
 ## 3. Nhắc việc SAU khi Core E2E PASS — chưa hướng dẫn ở file này
 
-Đánh dấu **NOT EXECUTED / DEFERRED** cho toàn bộ kiểm thử chuyên sâu, thực hiện vào vòng riêng **sau khi C1–C5 PASS**: recovery, TLS negative, lifecycle remove/reinstall, bảo mật quyền/ACL, restart USBGuard, reboot Agent/VM, offline spool và offline recovery, persistence sau restart, các tình huống lỗi và regression đầy đủ (bao gồm T01–T28, X01–X18 từ guide cũ). **Không có lệnh/hướng dẫn thực thi các test này trong tài liệu Minimal Core E2E.**
+Owner quyết định **không chạy** các kiểm thử chuyên sâu ở đợt này. Đánh dấu **DEFERRED BY OWNER / NOT EXECUTED** (không tự lên lịch hoặc yêu cầu chạy thêm), gồm: recovery, TLS negative, lifecycle remove/reinstall, bảo mật quyền/ACL, restart USBGuard, reboot Agent/VM, offline spool và offline recovery, persistence sau restart, các tình huống lỗi và regression đầy đủ (bao gồm T01–T28, X01–X18 từ guide cũ). **Không có lệnh/hướng dẫn thực thi các test này trong tài liệu Minimal Core E2E.**
 
-**Điểm kết thúc hiện tại:** tạo `.deb` trên Windows → cài lên A/B → **BLOCK → ALLOW A → BLOCK B → REVOKE A**. Những phần hoãn lại không được ghi PASS khi chưa chạy.
+**Điểm kết thúc scope demo (owner PASS 09/11):** tạo `.deb` trên Windows → cài A/B → **A BLOCK → Allow+replug A ALLOW → B BLOCK → Revoke+replug A BLOCK**. Những phần hoãn lại không được ghi PASS khi chưa chạy. M4/M5 UI phải tuân theo [guardrails sau E2E](admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md).
 
 ### Chốt mã finding và fail-closed trong Core E2E
 
@@ -235,3 +235,7 @@ Phân loại nhanh: Admin Allow lỗi → **C2 Server**; desired tăng nhưng Ag
 - **F05 (Debian removal):** `prerm` có cleanup Allow managed; test remove/upgrade thật vẫn **DEFERRED**, không dùng Windows archive inspection để đánh dấu PASS.
 - **F07:** Audit cho phép lịch sử event chứa `usb_device_id` orphan có chủ đích; không tự thêm FK `usb_events -> usb_devices` và xóa dữ liệu cũ.
 - **F01 upgrade Spring Boot, F12 frontend duplicate calls, F13 best-effort notification:** owner chấp nhận giữ scope hiện tại cho demo, không tuyên bố là đã sửa.
+
+### Lưu ý khi tái chạy script preflight trên VM này
+
+Script `check-usbshield-core.sh` HEAD kiểm CA bằng `[[ -r /etc/usbshield-agent/usbshield-ca.pem ]]` dưới user gọi script. Do thư mục `/etc/usbshield-agent` có thể là `root:usbshield 750`, `usbdev` không đọc được CA dù `root`/Agent có quyền. Khi cần kiểm tra read-only có thể chạy `sudo bash ~/check-usbshield-core.sh`; vẫn phải bảo đảm **Java Agent service chạy `User=usbshield`**, không phải root, và kiểm GUl bằng user GNOME thật. Không đổi quyền folder secrets hoặc vô hiệu hóa TLS chỉ để làm script PASS.
