@@ -1,6 +1,6 @@
 # USBShield — Hướng dẫn chạy và triển khai chung (Admin Server + Ubuntu Client)
 
-> **Phạm vi:** Hướng dẫn triển khai và phân quyền truy cập; **không phải bằng chứng đã chạy Ubuntu E2E**. Source baseline: `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` (04/11/2026, chưa merge `main`). Đây là **hướng dẫn chạy duy nhất đang có hiệu lực** cho cả Admin Server và Ubuntu Agent `.deb`. Ubuntu E2E vẫn **NOT EXECUTED/DEFERRED**.
+> **Phạm vi:** Hướng dẫn triển khai và phân quyền truy cập; **không phải bằng chứng đã chạy Ubuntu E2E**. Source baseline đã đối chiếu: `vinhkhang` `4d2216c7dd277c7ef4af1962e0b04638e3971d09` (07/11/2026); Windows verifier log PASS ngày 09/11/2026 được owner cung cấp, bản sửa thứ tự JAR chưa thuộc HEAD này. Đây là **hướng dẫn chạy duy nhất đang có hiệu lực** cho cả Admin Server và Ubuntu Agent `.deb`. Ubuntu E2E vẫn **NOT EXECUTED/DEFERRED**.
 
 ## 1. Chọn mô hình tối giản
 
@@ -30,7 +30,7 @@ CREATE DATABASE usbshield_browser_test OWNER usbshield_test;
 - Tránh dùng role `postgres`/superuser cho ứng dụng hay test. Nếu lỗi `permission denied for schema public`, xác nhận **đúng database và role** trước khi cấp quyền. Nếu lỗi `must be owner of table`, có bảng cũ thuộc role khác; không cấp quyền vào database ứng dụng để chữa lỗi test. Không sao chép cấu hình test vào production.
 - Không migrate dữ liệu H2 vì owner đã quyết định bỏ dữ liệu demo cũ. PostgreSQL được tạo mới, không có dữ liệu cũ.
 
-### Flyway cho PostgreSQL: bắt buộc phân biệt database mới/cũ (F07)
+### Flyway cho PostgreSQL: bắt buộc phân biệt database mới/cũ (F07 thuộc ba đợt 04/11, không phải review F07 mới)
 
 Runtime hiện dùng **Flyway V1/V2** và Hibernate `ddl-auto=validate` (`clean-disabled=true`, `baseline-on-migrate=false`), **không còn `update`**. Nếu `usbshield` mới và trống: chạy bình thường để Flyway tự migrate; **không baseline**. Nếu `usbshield` hiện hữu đã có năm bảng do Hibernate `update` trước đây tạo ra: **dừng server, backup có thể restore, chạy preflight và baseline V1 đúng một lần** theo [POSTGRES_FLYWAY_BASELINE.md](../admin-server/ops/POSTGRES_FLYWAY_BASELINE.md), rồi để Flyway chạy V2. Không baseline schema test hoặc tự bật `baseline-on-migrate=true` thường trực.
 
@@ -40,7 +40,7 @@ Yêu cầu: JDK 21, Maven, Node/npm theo [Developer Guide](DEVELOPER_GUIDE.md), 
 
 **Khởi tạo cấu hình test một lần:** `Copy-Item .env.example .env`, điền `USBSHIELD_TEST_DB_USERNAME=usbshield_test` và `USBSHIELD_TEST_DB_PASSWORD` thật vào file `.env` **không được commit**. `scripts/with-env.ps1` đọc `.env` như dữ liệu, không thực thi shell expressions. Các lệnh Maven/npm chạy trực tiếp không tự load `.env`.
 
-**Verifier Windows hiện hành trên `vinhkhang`:** chạy `./packaging/tests/verify-windows.ps1` trong PowerShell 7.4+. Script này thay cho `verify-week2-windows.ps1`, `verify-week3-windows.ps1`, `verify-week4-windows.ps1` và các staging-verifier cũ. Chạy trên source checkout hiện hành; không dùng `git add .` thay cho kiểm thử. Đối với Ubuntu: `packaging/tests/check-usbshield-core.sh` chỉ là kiểm tra read-only và không thay thế E2E vật lý.
+**Verifier Windows hiện hành sau package đồng bộ:** chạy `./packaging/tests/verify-windows.ps1` trong PowerShell 7.4+ (owner dùng 7.6.9). Script này thay cho `verify-week2-windows.ps1`, `verify-week3-windows.ps1`, `verify-week4-windows.ps1` và các staging-verifier cũ. Chạy trên source checkout hiện hành; không dùng `git add .` thay cho kiểm thử. Đối với Ubuntu: `packaging/tests/check-usbshield-core.sh` chỉ là kiểm tra read-only và không thay thế E2E vật lý.
 
 ```powershell
 npm --prefix frontend ci
@@ -55,9 +55,11 @@ mvn -f admin-server/pom.xml -Pwith-frontend -DskipTests package
 git diff --check
 ```
 
+**Thứ tự bắt buộc:** `mvn ... clean test` xóa `admin-server/target/`; vì vậy build React rồi `mvn -f admin-server/pom.xml -Pwith-frontend -DskipTests package` **sau** bước clean test và **trước** `test:browser:live` / `test:live`. Bản `verify-windows.ps1` trong package thực hiện chính thứ tự này. Không cần build JAR thủ công ngay trước verifier. Trên log owner 09/11: Admin 60 tests PASS, Agent 276 tests (3 Linux-only SKIP), frontend 116 tests PASS, cả hai browser-live suites PASS, DEB structure/hash PASS. Đây là kết quả máy owner, không phải test mới của package này.
+
 Admin test Java dùng `usbshield_test`/schema riêng; browser-live dùng `usbshield_browser_test`/schema riêng. Agent notifier **3 Linux-only tests sẽ skip trên Windows**; cần chạy trên Ubuntu để nghiệm thu F09. Các bộ browser gửi HTTP events/ACK tổng hợp, không xác nhận USBGuard thật.
 
-`admin-server/target/usbshield-admin-server.jar` vẫn là **executable JAR** có React static bundle và API cùng origin. `npm run test:live` là bộ browser/Spring khác có thể chạy riêng; `test:browser:live` tự kích hoạt build frontend (`pretest:browser:live`) và dùng `usbshield_browser_test`/schema riêng với event HTTP tổng hợp. Không đánh đồng các test này với thiết bị Ubuntu thật. Không dùng database `usbshield` cho QA.
+`admin-server/target/usbshield-admin-server.jar` là **executable JAR** có React static bundle và API cùng origin. `npm run test:live` là bộ browser/Spring khác có thể chạy riêng; `test:browser:live` tự kích hoạt build frontend (`pretest:browser:live`) và dùng `usbshield_browser_test`/schema riêng với event HTTP tổng hợp. Không đánh đồng các test này với thiết bị Ubuntu thật. Không dùng database `usbshield` cho QA.
 
 **Chạy profile `prod`** từ thư mục root repository trong PowerShell, sau khi đã cấp các secrets cần thiết:
 
@@ -104,42 +106,12 @@ Máy Ubuntu (Agent .deb, mạng Client) --> HTTPS proxy ---> /api/agent/**
 - **Điều kiện chặn hẳn trang Web từ máy Client:** bảo vệ đường dẫn `/`, static assets, `/api/auth/**`, `/api/admin/**` bằng IP/VLAN allowlist ở proxy; **chỉ mở `/api/agent/**`** cho địa chỉ/subnet Agent được phép. Khi chưa có proxy restriction, Client vẫn có thể nhìn thấy trang đăng nhập, nhưng không được truy cập API quản trị nếu không xác thực.
 - Với demo local trên **chính máy Server**, có thể kiểm thử HTTP loopback trước; chưa cần proxy để chạy unit/browser harness. Trên mạng LAN hoặc vận hành thực tế, **HTTPS** bảo vệ cả Admin session lẫn Agent credentials. `USBSHIELD_COOKIE_SECURE=true` trong `prod` yêu cầu truy cập Web qua HTTPS.
 
-**Ví dụ Nginx khái niệm bên dưới chỉ minh họa. Dùng cấu hình file đã triển khai và thay đủ placeholder tại** [`packaging/nginx/usbshield-https-acl.conf.example`](../packaging/nginx/usbshield-https-acl.conf.example), cùng hướng dẫn [HTTPS/ACL](PHASE3_HTTPS_ACL_AND_PAGING.md). Không sử dụng cấu hình giả định IP này trực tiếp trên LAN:
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name usbshield.lab;
-    ssl_certificate     /etc/nginx/certs/usbshield.crt;
-    ssl_certificate_key /etc/nginx/certs/usbshield.key;
-
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-Proto https;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-
-    # Client subnet: ONLY Agent HTTP API, not static Web or Admin API.
-    location ^~ /api/agent/ {
-        allow 192.168.10.0/24;
-        deny all;
-        proxy_pass http://127.0.0.1:18080;
-    }
-
-    # Admin browser + auth/admin APIs: ONLY authorized Admin workstation.
-    location / {
-        allow 127.0.0.1;
-        allow 192.168.10.5;
-        deny all;
-        proxy_pass http://127.0.0.1:18080;
-    }
-}
-```
-
-Đây là **mẫu cho một máy Admin** (`192.168.10.5`) và mạng Client (`192.168.10.0/24`), không phải cấu hình đã được kiểm thử. Đảm bảo proxy là **đường truy cập LAN duy nhất**: server Java vẫn bind loopback, firewall không công khai port 18080; tránh bỏ qua proxy. Nếu có nhiều máy Admin, thay bằng mạng quản trị/VPN hoặc allowlist phù hợp. IP allowlist **bổ sung**, không thay thế Admin authentication/Agent token. Không đặt Admin credentials trong file `.deb`.
+**Cấu hình Nginx/IP ACL thực thi trong lab:** sử dụng [HTTPS `usbprotection.lab` — Windows + Ubuntu A/B](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md) và template [Nginx](../packaging/nginx/usbshield-https-acl.conf.example). Điền IP Admin và hai IP Ubuntu theo **`/32` riêng**, không dùng allowlist `/24` bao trùm cả Admin và Client. Luồng cố định: Client/Admin → Nginx **HTTPS 443** → Spring Boot **HTTP loopback `127.0.0.1:18080`**. Không đặt proxy trên Ubuntu Client và không mở backend/DB ra LAN. Kiểm tra bằng script `packaging/tests/verify-phase3-https-acl.sh` từ IP nguồn thực tế; Nginx `-t` PASS không đủ để chốt gate.
 
 Ubuntu Agent `live` **không chấp nhận URL HTTP hoặc thiếu URL**, và không tự follow HTTP redirect mang Agent token. `/etc/usbshield-agent/application.yml` dùng biến từ file `/etc/usbshield-agent/agent.env` **root-owned 0600** qua systemd `EnvironmentFile=-...`; cấu hình file này **trước khi cài/upgrade `.deb`**, vì `postinst` có thể restart Agent ngay. Không commit credential vào repository:
 
 ```dotenv
-USBSHIELD_SERVER_URL=https://usbshield.example.internal
+USBSHIELD_SERVER_URL=https://usbprotection.lab
 USBSHIELD_ENROLLMENT_TOKEN=<deployment-secret>
 # Chỉ cần với private CA, là absolute path tới CA public certificate (PEM):
 USBSHIELD_TLS_CA_CERTIFICATE=/etc/usbshield-agent/usbshield-ca.pem
@@ -149,35 +121,54 @@ Chứng chỉ phải có DNS/IP trong SAN trùng URL, và được **trình duy�
 
 ## 5. Cài `.deb` khác với tải một file bất kỳ từ GitHub
 
-**Có thể build `.deb` một lần trên máy Server và phân phối đến nhiều Ubuntu clients**, miễn môi trường build chạy Linux/Ubuntu (hoặc Windows Server có Ubuntu VM/WSL2 với toolchain Linux), gói dành cho cùng kiến trúc `amd64`, và đã xác minh build. **Admin Server JAR và Client Agent `.deb` là hai artifact khác nhau**; máy Server không cần cài Agent/USBGuard để phục vụ API.
+**Gói `.deb` build một lần và chuyển sang cả Ubuntu A/B.** Trên **Windows 11 PowerShell 7.6.9**, dùng đường build đã được owner chạy PASS:
 
-Repository chứa **source và script build**, không được giả định URL GitHub luôn cung cấp `.deb` đã build. Trên **Ubuntu builder** có JDK 21, Maven, `dpkg-deb` và dependency build:
+```powershell
+.\packaging\tests\verify-windows.ps1
+# Verifier tạo .deb và release manifest; không phải build lại JAR trước verifier.
+$release = Get-Content .\packaging\dist\usbshield-agent.release.json -Raw | ConvertFrom-Json
+$deb = Join-Path .\packaging\dist $release.filename
+Get-FileHash $deb -Algorithm SHA256
+```
+
+Trên **Ubuntu/Linux builder** (JDK 21, Maven, `dpkg-deb`, GNU coreutils và Git), lựa chọn thay thế:
 
 ```bash
-# Chạy tại root repository, trước khi phân phối
 mvn -f client-agent/pom.xml clean test
 bash packaging/scripts/build-deb.sh
-sha256sum packaging/dist/usbshield-agent_1.0.0_amd64.deb
-dpkg-deb -I packaging/dist/usbshield-agent_1.0.0_amd64.deb
+python3 - <<'PYCODE'
+import json, pathlib
+m = json.loads(pathlib.Path('packaging/dist/usbshield-agent.release.json').read_text())
+p = pathlib.Path('packaging/dist') / m['filename']
+print(p, m['sha256'])
+PYCODE
+# Sau đó dùng sha256sum và dpkg-deb -I/-c trên đúng filename trong manifest.
 ```
 
-Phân phối artifact đã kiểm chứng qua **SCP/SFTP, file share nội bộ hoặc HTTPS có kiểm soát**. Có thể dùng một bản `.deb` cho tất cả máy Ubuntu 24.04 amd64 tương thích; **không sao chép `endpoint.json`, Agent token hay thư mục spool** từ máy này sang máy khác. Mỗi Client phải tự enroll để có endpoint identity/credential riêng.
+Cả hai builder hiện sinh `Version: 1.0.0+build<UTC 17 chữ số>`, file `usbshield-agent_<version>_amd64.deb` và `packaging/dist/usbshield-agent.release.json` chứa `version`, `filename`, `sha256`, `gitHead`, `builtAtUtc`; cả hai cũng có `control/md5sums` cho data payload. `gitHead` chỉ là commit gốc: **nếu working tree còn sửa chưa commit, SHA này không chứng minh toàn bộ artifact đến từ commit sạch**. Khi nghiệm thu cần ghi thêm `git status --short` và hash `.deb`. Không giả định GitHub đã phát hành file `.deb`.
 
-Trên **từng Ubuntu Client** (do IT/admin cài, không phải user thường):
+Phân phối artifact đã xác minh qua kênh kiểm soát (SCP/SFTP hoặc shared folder lab), không sao chép `endpoint.json`, token Agent hay spool giữa máy. Trên Ubuntu A/B, đặt tên file chuyển đến đơn giản là `usbshield-agent.deb` nếu muốn.
+
+Trên **từng Ubuntu Client** (operator có sudo/root, trước khi cài hoặc nâng cấp):
 
 ```bash
-# Sao chép .deb đã build trước khi chạy các bước sau.
-# Tạo root-managed config dir trước postinst (không phụ thuộc group usbshield).
 sudo install -d -o root -g root -m 0750 /etc/usbshield-agent
+# Tạo secret file trước, rồi sửa riêng trên từng máy.
+if ! sudo test -e /etc/usbshield-agent/agent.env; then
+  sudo install -o root -g root -m 0600 /dev/null /etc/usbshield-agent/agent.env
+fi
 sudoedit /etc/usbshield-agent/agent.env
-# Điền URL HTTPS/cert CA và enrollment token thực; không sao chép secret vào Git.
+# Nhập URL HTTPS, enrollment token và đường dẫn public CA PEM; giữ kín token.
 sudo chown root:root /etc/usbshield-agent/agent.env
 sudo chmod 0600 /etc/usbshield-agent/agent.env
-sudo apt update
-sudo apt install ./usbshield-agent_1.0.0_amd64.deb
-sudo systemctl restart usbshield-agent
+sha256sum ./usbshield-agent.deb
+sudo dpkg-deb -I ./usbshield-agent.deb
+sudo dpkg-deb -c ./usbshield-agent.deb
+sudo apt install -y ./usbshield-agent.deb
 systemctl status usbguard usbshield-agent --no-pager
 ```
+
+**Không chạy lệnh `install /dev/null` ở trên nếu file `agent.env` đã có bí mật cần giữ.** Khi đã tồn tại, chỉ kiểm quyền/sửa bằng `sudoedit`. Installer `postinst` khởi động Agent, nên phải chuẩn bị CA/URL/token **trước khi** gọi `apt install`; xem hướng dẫn HTTPS riêng.
 
 `apt install ./...deb` cài dependency và service, **không tự thiết lập Server URL/token đúng cho từng môi trường**. Đảm bảo DNS, CA trust và `agent.env` đã chuẩn bị **trước** vì `postinst` khởi động service; gói fail-closed nếu chưa cấu hình hợp lệ. Nếu đang triển khai Client bằng file `.deb` mới, phải có quyền sudo/root lúc cài và cấu hình; sau đó normal user không được sửa service. **Ubuntu install/E2E vẫn chưa được thực hiện**, nên đây là quy trình đề xuất, không phải kết quả kiểm thử.
 
@@ -195,7 +186,7 @@ Các tham chiếu: [Developer Guide](DEVELOPER_GUIDE.md), [Admin API](API.md), [
 
 ## 8. Lưu ý vận hành outbox sau tối ưu
 
-Accounting cache giả định **một tiến trình Agent là writer duy nhất**, các thư mục spool và quarantine được bảo vệ khỏi normal user. Khi phát hiện thay đổi metadata thư mục hoặc ghi lỗi, Agent quét lại quota (bao gồm quarantine). **Không sửa nội dung của một file spool đang tồn tại khi Agent còn chạy**: thao tác sửa *in-place* không nhất thiết làm thay đổi mtime của thư mục và có thể làm cache quota tạm thời sai. Nếu operator cần can thiệp thủ công, dừng Agent có kiểm soát, sao lưu bằng chứng, sửa và khởi động lại để ép full scan. Không tự xóa audit/quarantine để né quota.
+Accounting cache giả định **một tiến trình Agent là writer duy nhất**, các thư mục spool và quarantine được bảo vệ khỏi normal user. Khi phát hiện thay đổi metadata thư mục hoặc ghi lỗi, Agent quét lại quota (bao gồm quarantine). Outbox gửi lại các lỗi mạng/5xx tạm thời; phản hồi **400/409/413/422 vĩnh viễn** (trừ 400 future-skew có thể hồi phục) được **cách ly giữ bằng chứng** và không khóa vô hạn FIFO. Không xóa tay quarantine để che lỗi xác thực/payload. **Không sửa nội dung của một file spool đang tồn tại khi Agent còn chạy**: thao tác sửa *in-place* không nhất thiết làm thay đổi mtime của thư mục và có thể làm cache quota tạm thời sai. Nếu operator cần can thiệp thủ công, dừng Agent có kiểm soát, sao lưu bằng chứng, sửa và khởi động lại để ép full scan. Không tự xóa audit/quarantine để né quota.
 
 ## 9. Kiểm tra Ubuntu Client sau cài và xử lý Allow/Revoke
 
@@ -223,3 +214,9 @@ sudo -u usbshield usbguard list-devices
 4. **Trước khi chạy Agent `live` trên LAN**, triển khai HTTPS reverse proxy, CA/hostname verification và Admin/Client IP ACL. Chạy [`verify-phase3-https-acl.sh`](../packaging/tests/verify-phase3-https-acl.sh) từ máy Admin và Client thực; test chứng chỉ sai phải thất bại, không fallback HTTP. HTTP loopback chỉ áp dụng cho harness/dev tách khỏi live deployment.
 
 Các trường hợp Ubuntu trong `docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md` hiện **DEFERRED**; không chấm FULL PASS nếu chưa chạy.
+
+## 11. Đồng bộ review 09/11/2026 và phạm vi cần chứng minh
+
+- Review F01–F14 gần nhất là nhóm **khác** với finding F01–F14 của ba đợt 04/11. Đọc [status hiện tại](IMPLEMENTATION_STATUS_20261109.md) và [ledger đối chiếu](qa/2026-11-09-review-and-packaging-sync.md).
+- `packaging/scripts/build-deb.ps1` và `build-deb.sh` hiện dùng tên .deb/version/manifest đồng bộ; **không dùng lại** tên cố định `usbshield-agent_1.0.0_amd64.deb`. `packaging/tests/verify-windows.ps1` là gate Windows; `check-usbshield-core.sh`, `verify-phase3-https-acl.sh`, `test-notifier-ipc-ubuntu.sh` là kiểm thử Linux/Ubuntu chuyên biệt.
+- Lần chạy Windows verifier owner 09/11 PASS, nhưng **chưa chạy** Linux packaging E2E, `prerm` cleanup, TLS/ACL từ hai nguồn IP và USB thật. B01–B05/các kiểm tra native không được đánh dấu PASS bằng bằng chứng Windows.

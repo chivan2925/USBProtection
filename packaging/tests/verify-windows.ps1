@@ -4,8 +4,8 @@
     One Windows verification entrypoint for USBShield (M1-M5 + Ubuntu Agent packaging).
 .DESCRIPTION
     Default: check source/security contracts, run Admin/Agent Maven tests,
-    frontend tests/lint/build, browser-live suites, build the Admin JAR and
-    native Windows .deb, then verify the actual Debian archive content/modes.
+    frontend tests/lint/build, build the Admin JAR before browser-live suites,
+    then build the native Windows .deb and verify archive content/modes.
 
     This consolidates the live Week 2-4 Windows packaging checks. It intentionally
     does NOT claim Ubuntu USBGuard, GUI popup, physical USB, or real LAN E2E PASS.
@@ -316,6 +316,17 @@ try {
             Invoke-Checked 'Frontend tests' $npm @('--prefix','frontend','test')
             Invoke-Checked 'Frontend lint' $npm @('--prefix','frontend','run','lint')
             Invoke-Checked 'Frontend build' $npm @('--prefix','frontend','run','build')
+            # Admin Maven clean test removes target/, including any JAR built
+            # before this verifier. Repackage only after the frontend build and
+            # verify it exists before either browser/HTTP live suite starts.
+            Invoke-Checked 'Admin production JAR with React' $maven @('-f','admin-server/pom.xml','-Pwith-frontend','-DskipTests','package')
+            $serverJar = Join-Path $root 'admin-server/target/usbshield-admin-server.jar'
+            Assert-True (Test-Path -LiteralPath $serverJar -PathType Leaf) 'Admin production JAR exists'
+            $jarTool = Get-RequiredCommand @('jar.exe','jar')
+            $global:LASTEXITCODE = 0
+            $serverEntries = @(& $jarTool tf $serverJar)
+            if ($LASTEXITCODE -ne 0) { throw 'Admin jar tf failed' }
+            Assert-True ($serverEntries -contains 'BOOT-INF/classes/static/index.html') 'Admin JAR bundles the React Web build'
             if (-not $SkipBrowserLive) {
                 Invoke-Checked 'Browser live suite (isolated PostgreSQL)' $npm @('--prefix','frontend','run','test:browser:live')
                 Invoke-Checked 'HTTP live suite (isolated PostgreSQL)' $npm @('--prefix','frontend','run','test:live')
@@ -325,14 +336,6 @@ try {
                 [System.Environment]::SetEnvironmentVariable($key, $previous[$key], 'Process')
             }
         }
-        Invoke-Checked 'Admin production JAR with React' $maven @('-f','admin-server/pom.xml','-Pwith-frontend','-DskipTests','package')
-        $serverJar = Join-Path $root 'admin-server/target/usbshield-admin-server.jar'
-        Assert-True (Test-Path -LiteralPath $serverJar -PathType Leaf) 'Admin production JAR exists'
-        $jarTool = Get-RequiredCommand @('jar.exe','jar')
-        $global:LASTEXITCODE = 0
-        $serverEntries = @(& $jarTool tf $serverJar)
-        if ($LASTEXITCODE -ne 0) { throw 'Admin jar tf failed' }
-        Assert-True ($serverEntries -contains 'BOOT-INF/classes/static/index.html') 'Admin JAR bundles the React Web build'
     }
 
     Show-Phase 'Create or read Windows-built Agent DEB'
