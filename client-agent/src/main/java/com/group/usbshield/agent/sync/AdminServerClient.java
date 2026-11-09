@@ -27,6 +27,15 @@ public class AdminServerClient {
 
     private final RestClient restClient;
     private final AgentProperties properties;
+    // Same-thread status from the most recent sendEvent() call. Outbox invokes
+    // sendEvent synchronously, so mock/test compatibility is preserved.
+    private final ThreadLocal<Boolean> permanentEventRejection = ThreadLocal.withInitial(() -> false);
+
+    /** Only HTTP 400/409/413/422 are permanently invalid for the same payload.
+     * Auth failures, rate limits, server failures and transport errors remain retryable. */
+    public boolean lastEventWasPermanentlyRejected() {
+        return permanentEventRejection.get();
+    }
 
     @org.springframework.beans.factory.annotation.Autowired
     public AdminServerClient(AgentProperties properties, org.springframework.core.env.Environment environment) {
@@ -206,6 +215,7 @@ public class AdminServerClient {
      * Gửi sự kiện cắm/rút USB (POST /api/agent/events)
      */
     public boolean sendEvent(String endpointId, String agentToken, UsbEventPayload payload) {
+        permanentEventRejection.set(false);
         try {
             restClient.post()
                     .uri("/api/agent/events")
@@ -217,6 +227,13 @@ public class AdminServerClient {
                     .toBodilessEntity();
             log.info("Successfully sent USB event type={} to Admin Server", payload.getEventType());
             return true;
+        } catch (org.springframework.web.client.RestClientResponseException rejected) {
+            int code = rejected.getStatusCode().value();
+            boolean futureSkew = code == 400 && rejected.getResponseBodyAsString()
+                    .contains("future clock skew");
+            permanentEventRejection.set((code == 400 && !futureSkew) || code == 409 || code == 413 || code == 422);
+            log.warn("Admin Server rejected USB event (HTTP {}); audit bytes stay on disk if undelivered", code);
+            return false;
         } catch (Exception e) {
             log.warn("Failed to send USB event to server: {}", e.getMessage());
             return false;

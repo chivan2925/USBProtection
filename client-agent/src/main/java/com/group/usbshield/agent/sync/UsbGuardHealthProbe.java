@@ -4,6 +4,7 @@ import com.group.usbshield.agent.usbguard.UsbGuardGateway;
 import com.group.usbshield.agent.usbguard.UsbGuardHealth;
 import com.group.usbshield.agent.usbguard.UsbGuardRuleBuilder;
 import com.group.usbshield.agent.usbguard.UsbGuardRuleInfo;
+import com.group.usbshield.agent.usbguard.UsbGuardPolicyOrderSafety;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -86,6 +87,9 @@ public class UsbGuardHealthProbe {
                 String current = actual.get(desired.getKey());
                 if (current == null || !current.equals(desired.getValue())) return "DEGRADED";
             }
+            // A matching managed-rule set is insufficient if an earlier DENY
+            // shadows the base non-storage rule or an authorized HASH grant.
+            if (!UsbGuardPolicyOrderSafety.isSafe(rules, expected.keySet())) return "DEGRADED";
             return "HEALTHY";
         } catch (RuntimeException failure) {
             return "UNAVAILABLE";
