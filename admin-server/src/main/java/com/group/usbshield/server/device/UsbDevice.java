@@ -7,7 +7,6 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "usb_devices", indexes = {
-    @Index(name = "idx_usb_hash", columnList = "deviceHash"),
     @Index(name = "idx_usb_vid_pid", columnList = "vendorId, productId")
 })
 @Getter
@@ -30,7 +29,9 @@ public class UsbDevice {
     @Column(length = 150)
     private String serialNumber;
 
-    @Column(length = 255)
+    // PostgreSQL allows multiple NULLs in a UNIQUE column: devices without a trustworthy hash remain
+    // independent; nonblank device hashes have exactly one catalog identity.
+    @Column(length = 255, unique = true)
     private String deviceHash;
 
     @Column(length = 255)
@@ -45,8 +46,20 @@ public class UsbDevice {
 
     @PrePersist
     public void prePersist() {
+        normalizeHash();
         if (this.createdAt == null) {
             this.createdAt = Instant.now();
         }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        normalizeHash();
+    }
+
+    private void normalizeHash() {
+        // Reject all whitespace-only identities as absent, not as an alias
+        // shared by unrelated physical USB devices.
+        if (this.deviceHash != null && this.deviceHash.isBlank()) this.deviceHash = null;
     }
 }

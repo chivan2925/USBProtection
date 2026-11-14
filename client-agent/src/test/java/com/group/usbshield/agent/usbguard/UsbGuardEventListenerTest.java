@@ -71,7 +71,7 @@ class UsbGuardEventListenerTest {
         listener.handleDeviceRuleEvent(rawRuleLine, "CONNECTED");
 
         ArgumentCaptor<UsbEventPayload> captor = ArgumentCaptor.forClass(UsbEventPayload.class);
-        verify(eventSenderService, times(1)).sendPayload(captor.capture());
+        verify(eventSenderService, times(1)).enqueuePayload(captor.capture());
 
         UsbEventPayload captured = captor.getValue();
         assertNotNull(captured);
@@ -120,7 +120,7 @@ class UsbGuardEventListenerTest {
         }
 
         // BẮT BUỘC chỉ được gọi đúng 1 lần duy nhất cho toàn bộ chuỗi cắm USB
-        verify(eventSenderService, times(1)).sendPayload(any());
+        verify(eventSenderService, times(1)).enqueuePayload(any());
         verify(desktopNotificationService, times(1)).notifyBlockedUsb(any(), any());
     }
 }

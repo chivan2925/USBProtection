@@ -1,0 +1,7 @@
+# Explicit maintenance-only profile. Never expose HTTP while resetting credentials.
+spring:
+  config:
+    activate:
+      on-profile: admin-reset
+  main:
+    web-application-type: none

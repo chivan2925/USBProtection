@@ -4,7 +4,7 @@ export const deviceLabels: Record<DeviceStatus, string> = {
   allowed: 'Được phép', blocked: 'Bị chặn', detected: 'Đã phát hiện', disconnected: 'Đã tháo',
 }
 export const eventLabels: Record<EventType, string> = {
-  connected: 'Cắm USB', disconnected: 'Tháo USB', blocked: 'Chặn USB', allowed: 'Cho phép USB', service: 'Service',
+  connected: 'Cắm USB', disconnected: 'Tháo USB', policy_applied: 'Áp dụng policy', blocked: 'Chặn USB', allowed: 'Cho phép USB', service: 'Service',
 }
 export function formatDate(value?: string) {
   if (!value) return '—'

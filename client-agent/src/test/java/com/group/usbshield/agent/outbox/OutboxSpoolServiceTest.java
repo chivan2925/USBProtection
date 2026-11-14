@@ -161,7 +161,7 @@ class OutboxSpoolServiceTest {
     }
 
     @Test
-    @DisplayName("drainOutbox removes unparseable corrupted file and delivers remaining valid events")
+    @DisplayName("drainOutbox quarantines unparseable JSON and delivers remaining valid events")
     void drainOutboxHandlesCorruptedJsonFile() throws Exception {
         Path spoolDir = tempDir.resolve("spool");
         // Create an unparseable malformed JSON file
@@ -182,12 +182,16 @@ class OutboxSpoolServiceTest {
 
         outboxSpoolService.drainOutbox("EP-01", "token-1", adminServerClient);
 
-        // Corrupted file deleted, valid file sent and deleted
-        assertFalse(Files.exists(corruptFile), "Corrupted file must be cleaned up");
+        // File leaves the active FIFO but remains intact for investigation.
+        assertFalse(Files.exists(corruptFile), "Corrupted file must leave active queue");
+        Path evidence = spoolDir.resolve("quarantine").resolve(corruptFile.getFileName());
+        assertTrue(Files.exists(evidence), "Do not discard corrupted audit evidence");
+        assertEquals("{ invalid json content !!!", Files.readString(evidence));
         verify(adminServerClient, times(1)).sendEvent(eq("EP-01"), eq("token-1"), any(UsbEventPayload.class));
 
         try (var stream = Files.list(spoolDir)) {
-            assertEquals(0, stream.count(), "All files should be processed and cleared");
+            assertEquals(List.of(spoolDir.resolve("quarantine")), stream.toList(),
+                    "Only the quarantine directory should remain");
         }
     }
 
@@ -221,6 +225,79 @@ class OutboxSpoolServiceTest {
             assertEquals(0, stream.count(), "Spooled file must be drained after restart");
         } catch (Exception e) {
             fail("Exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    @DisplayName("events captured before enrollment are rebound to the newly enrolled endpoint")
+    void drainOutboxRebindsPreEnrollmentIds() throws Exception {
+        UsbEventPayload p1 = UsbEventPayload.builder()
+                .endpointId("POC-UNENROLLED-ubuntu-test")
+                .linuxUsername("student01")
+                .eventType("CONNECTED")
+                .decision("BLOCKED")
+                .occurredAt(Instant.now())
+                .build();
+        UsbEventPayload p2 = UsbEventPayload.builder()
+                .endpointId("UNENROLLED")
+                .linuxUsername("student02")
+                .eventType("DISCONNECTED")
+                .decision("BLOCKED")
+                .occurredAt(Instant.now())
+                .build();
+        assertTrue(outboxSpoolService.spool(p1));
+        assertTrue(outboxSpoolService.spool(p2));
+        when(adminServerClient.sendEvent(eq("EP-NEW"), eq("token-new"), any(UsbEventPayload.class)))
+                .thenReturn(true);
+
+        outboxSpoolService.drainOutbox("EP-NEW", "token-new", adminServerClient);
+
+        ArgumentCaptor<UsbEventPayload> captor = ArgumentCaptor.forClass(UsbEventPayload.class);
+        verify(adminServerClient, times(2))
+                .sendEvent(eq("EP-NEW"), eq("token-new"), captor.capture());
+        assertTrue(captor.getAllValues().stream().allMatch(e -> "EP-NEW".equals(e.getEndpointId())));
+        assertTrue(captor.getAllValues().stream().anyMatch(e -> "student01".equals(e.getLinuxUsername())));
+        try (var listing = Files.list(tempDir.resolve("spool"))) {
+            assertEquals(0, listing.count());
+        }
+    }
+
+    @Test
+    @DisplayName("foreign endpoint evidence is quarantined without sending under new credentials")
+    void drainOutboxRejectsDifferentRealEndpointIdentity() throws Exception {
+        assertTrue(outboxSpoolService.spool(UsbEventPayload.builder()
+                .endpointId("EP-OTHER")
+                .linuxUsername("student01")
+                .occurredAt(Instant.now())
+                .build()));
+
+        outboxSpoolService.drainOutbox("EP-NEW", "token-new", adminServerClient);
+
+        verify(adminServerClient, never()).sendEvent(any(), any(), any());
+        try (var quarantine = Files.list(tempDir.resolve("spool/quarantine"))) {
+            assertEquals(1, quarantine.count(), "Foreign endpoint event bytes must be retained");
+        }
+        try (var listing = Files.list(tempDir.resolve("spool"))) {
+            assertEquals(List.of(tempDir.resolve("spool/quarantine")), listing.toList(),
+                    "Mismatched evidence must remain in quarantine for operator review");
+        }
+    }
+
+    @Test
+    @DisplayName("spooling publishes only complete .json files, without leftover temporary writes")
+    void spoolPublishesAtomicJson() throws Exception {
+        UsbEventPayload payload = UsbEventPayload.builder()
+                .endpointId("EP-01")
+                .eventType("CONNECTED")
+                .decision("BLOCKED")
+                .occurredAt(Instant.now())
+                .build();
+        assertTrue(outboxSpoolService.spool(payload));
+        try (var listing = Files.list(tempDir.resolve("spool"))) {
+            var names = listing.map(p -> p.getFileName().toString()).toList();
+            assertEquals(1, names.size());
+            assertTrue(names.getFirst().endsWith(".json"));
+            assertFalse(names.getFirst().endsWith(".tmp"));
         }
     }
 

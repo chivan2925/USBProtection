@@ -10,6 +10,8 @@ import java.time.Instant;
     @Index(name = "idx_event_endpoint_time", columnList = "endpointId, occurredAt"),
     @Index(name = "idx_event_decision", columnList = "decision"),
     @Index(name = "idx_event_user", columnList = "linuxUsername")
+}, uniqueConstraints = {
+    @UniqueConstraint(name = "uk_endpoint_event_key", columnNames = {"endpointId", "eventId"})
 })
 @Getter
 @Setter
@@ -24,6 +26,14 @@ public class UsbEvent {
 
     @Column(nullable = false, length = 100)
     private String endpointId;
+
+    /** Null only for legacy clients; unique together with the authenticated endpoint. */
+    @Column(length = 36)
+    private String eventId;
+
+    /** SHA-256 of the complete canonical Agent event payload (excluding the event ID). */
+    @Column(length = 64)
+    private String payloadDigest;
 
     private Long usbDeviceId;
 

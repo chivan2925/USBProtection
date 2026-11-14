@@ -13,6 +13,8 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsbEventPayload {
+    /** Stable client-generated event identity for at-least-once transport deduplication. */
+    private String eventId;
     private String endpointId;
     private String hostname;
     private String linuxUsername;

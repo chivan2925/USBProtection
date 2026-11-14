@@ -1,4 +1,4 @@
-// Real Spring Boot/H2 + Chromium integration on Windows. HTTP-seeded QA events
+// Real Spring Boot/PostgreSQL + Chromium integration on Windows. HTTP-seeded QA events
 // are synthetic; this run does not represent physical Ubuntu/USBGuard evidence.
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
@@ -8,6 +8,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:net'
+import { createPostgresBrowserTestRun, postgresBrowserChildEnv, cleanupPostgresBrowserSchema } from './postgresTestDb.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const artifacts = join(root, '.artifacts')
@@ -17,7 +18,7 @@ const jar = resolve(root, '../admin-server/target/usbshield-admin-server.jar')
 const chrome = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(path => path && existsSync(path))
 assert.ok(chrome && existsSync(jar), 'Requires local Chromium and a built Admin Server JAR.')
 // Bind an OS-selected port: an orphaned JVM from a previous run must not
-// impersonate this run's isolated Spring Boot/H2 server.
+// impersonate this run's isolated Spring Boot/PostgreSQL server.
 const portReservation = createServer()
 await new Promise((resolveListen, rejectListen) => {
   portReservation.once('error', rejectListen)
@@ -29,6 +30,15 @@ const api = `http://127.0.0.1:${backendPort}`
 const web = 'http://127.0.0.1:4174'
 const password = randomUUID()
 const enrollmentToken = randomUUID()
+const browserDb = createPostgresBrowserTestRun()
+let javaExecutable
+let browserFailure
+// Preserve the original browser-test error when cleanup also fails.
+// A cleanup failure alone must still make this test command fail.
+function recordCleanupFailure(stage, error) {
+  if (browserFailure) console.error(`Secondary browser ${stage} failure:`, error)
+  else browserFailure = error
+}
 const username = 'qa-browser-admin'
 const profile = join(runtime, 'chrome')
 const children = []
@@ -62,6 +72,7 @@ try {
   const java = process.env.JAVA_HOME
     ? join(process.env.JAVA_HOME, 'bin', process.platform === 'win32' ? 'java.exe' : 'java')
     : 'java'
+  javaExecutable = java
   if (process.env.JAVA_HOME && !existsSync(java)) {
     throw new Error(`JAVA_HOME points to a missing Java executable: ${java}`)
   }
@@ -69,8 +80,9 @@ try {
   if (javaCheck.error || javaCheck.status !== 0) {
     throw new Error(`Cannot launch Java (${java}): ${javaCheck.error?.message || javaCheck.stderr || `exit ${javaCheck.status}`}`)
   }
-  const backend = start(java, ['-jar', jar, `--server.port=${backendPort}`, '--server.address=127.0.0.1', `--spring.datasource.url=jdbc:h2:file:${join(runtime, 'qa-db').replaceAll('\\', '/')};DB_CLOSE_ON_EXIT=FALSE`], {
-    env: { ...process.env, USBSHIELD_ADMIN_USERNAME: username, USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken },
+  console.log(`Browser-live PostgreSQL target: usbshield_browser_test (role=usbshield_test, schema=${browserDb.schema})`)
+  const backend = start(java, ['-jar', jar, `--server.port=${backendPort}`, '--server.address=127.0.0.1', ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
+    env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: username, USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken }, browserDb),
   })
   // Do not suppress a JVM launch error or early exit for two minutes.
   let ready = false
@@ -97,10 +109,10 @@ try {
     eventType: 'CONNECTED', decision: 'BLOCKED',
   }
   for (let index = 0; index < 23; index++) await post('/api/agent/events', { ...baseEvent, decision: index % 2 ? 'ALLOWED' : 'BLOCKED', occurredAt: new Date(Date.UTC(2026, 9, 16, 10, 0, index)).toISOString() }, headers)
-  // H2's persisted timestamp column has microsecond precision.
+  // PostgreSQL's persisted timestamp column has microsecond precision.
   await post('/api/agent/events', { ...baseEvent, occurredAt: '2026-10-16T16:59:59.999999Z' }, headers)
   await post('/api/agent/events', { ...baseEvent, occurredAt: '2026-10-16T17:00:00Z' }, headers)
-  console.log('PASS: isolated Spring Boot/H2 accepted 25 synthetic QA events through authenticated Agent HTTP.')
+  console.log('PASS: isolated Spring Boot/PostgreSQL accepted 25 synthetic QA events through authenticated Agent HTTP.')
 
   start(process.execPath, [join(root, 'node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', '4174', '--strictPort'], { env: { ...process.env, USBSHIELD_API_TARGET: api } })
   await until(async () => (await fetch(web)).ok, 'preview/proxy readiness')
@@ -147,7 +159,7 @@ try {
     assert.equal(result.exceptionDetails, undefined, 'No exception in browser evaluation')
     return result.result.value
   }
-  const fill = (selector, value) => evaluate(`{ const input = document.querySelector(${JSON.stringify(selector)}); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, ${JSON.stringify(value)}); input.dispatchEvent(new Event('input', { bubbles: true })); }`)
+  const fill = (selector, value) => evaluate(`{ const input = document.querySelector(${JSON.stringify(selector)}); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, ${JSON.stringify(value)}); input.dispatchEvent(new Event('input', { bubbles: true })); if (input.type === 'date') input.dispatchEvent(new Event('change', { bubbles: true })); }`)
   const bodyHas = text => evaluate(`document.body.innerText.includes(${JSON.stringify(text)})`)
   const screenshot = async name => {
     const result = await cdp('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true })
@@ -218,10 +230,16 @@ try {
   await reset()
   await fill('[aria-label="From Date"]', '2026-10-16')
   await fill('[aria-label="To Date"]', '2026-10-16')
-  await until(() => bodyHas('1–20 trên 24 bản ghi'), 'inclusive calendar date query')
+  try {
+    await until(() => bodyHas('1–20 trên 24 bản ghi'), 'inclusive calendar date query')
+  } catch (error) {
+    const dateRequests = requests.filter(url => url.includes('/api/admin/events?')).slice(-4)
+    const pageState = await evaluate('document.body.innerText.slice(-900)').catch(() => '[browser unavailable]')
+    throw new Error(`${error.message}\nRecent event requests: ${JSON.stringify(dateRequests)}\nBrowser: ${pageState}`, { cause: error })
+  }
   assert.equal(await evaluate(`!!document.querySelector('time[datetime="2026-10-16T16:59:59.999999Z"]')`), true)
   assert.equal(await evaluate(`!!document.querySelector('time[datetime="2026-10-16T17:00:00Z"]')`), false)
-  assert.ok(requests.some(url => new URL(url).searchParams.get('to') === '2026-10-16T16:59:59.999999999Z'))
+  assert.ok(requests.some(url => new URL(url).searchParams.get('to') === '2026-10-16T16:59:59.999999Z'))
   await screenshot('events-real-http-date-filter.png')
   await reset()
   await cdp('Page.reload')
@@ -303,31 +321,95 @@ try {
   await screenshot('events-week3-endpoint-a.png')
   console.log('PASS: Week 3 HTTP synthetic no-serial storage, UNKNOWN/source timestamp, user-switch history and endpoint A/B isolation (28 persisted events).')
   console.log('PASS: Endpoint/USB searches accept visible names and IDs with server-side filtering/global pagination; Linux User accepts a case-insensitive part of the username.')
+  // Production-path device/endpoint coverage against the *real* Spring/PostgreSQL
+  // backend seeded above (not demo-mode props or server-side rendering).
+  const inventoryRequests = () => requests.filter(url => {
+    try { return new URL(url).pathname === '/api/admin/device-states' }
+    catch { return false }
+  })
+  let requestStart = inventoryRequests().length
+  await evaluate(`location.hash = '/devices'`)
+  await until(() => bodyHas('Quản lý thiết bị USB') && bodyHas('Windows HTTP QA storage'),
+    'real production device inventory loaded')
+  await delay(400)
+  assert.equal(inventoryRequests().length - requestStart, 1,
+    'initial production device page must not fetch twice')
+  assert.ok(await evaluate('document.querySelectorAll("tbody tr").length >= 2'),
+    'global inventory includes devices across endpoints')
+  await screenshot('devices-prod-api.png')
+
+  requestStart = inventoryRequests().length
+  await evaluate(`location.hash = ${JSON.stringify('#/endpoints/' + encodeURIComponent(endpoint.endpointId))}`)
+  await until(() => bodyHas('USB & Policy trên endpoint') && bodyHas('Windows HTTP QA storage'),
+    'real production endpoint A inventory loaded')
+  await delay(400)
+  assert.equal(inventoryRequests().length - requestStart, 1,
+    'endpoint detail must not prefetch 100 rows and then request page 20')
+  assert.equal(await evaluate(`document.body.innerText.includes('Windows-HTTP-QA-B') &&
+    document.querySelector('h1')?.textContent.includes('Windows-HTTP-QA-B')`), false,
+    'endpoint A detail must not display B identity as its own heading')
+  await screenshot('endpoint-a-prod-api.png')
+
+  const beforeSearch = inventoryRequests().length
+  await fill('#endpoint-device-search', 'no-such-usb-model')
+  await until(() => bodyHas('Không tìm thấy kết quả'), 'production endpoint search empty result')
+  await delay(400)
+  assert.equal(inventoryRequests().length - beforeSearch, 1,
+    'changing endpoint search must request exactly one filtered page')
+  assert.ok(inventoryRequests().some(url =>
+    new URL(url).searchParams.get('endpointId') === endpoint.endpointId &&
+    new URL(url).searchParams.get('q') === 'no-such-usb-model'))
+  console.log('PASS: production Devices and EndpointDetail use scoped server pages, no redundant fetches; search executes against real Spring/PostgreSQL.')
   await evaluate(`document.querySelector('[aria-label="Đăng xuất"]').click()`)
   await until(() => evaluate('!!document.querySelector(".login-page")'), 'real logout')
   await evaluate(`location.hash = '/events'`)
   await until(() => evaluate('location.hash === "#/login" && !!document.querySelector("#password")'), 'logout invalidates browser session')
   assert.deepEqual(errors, [])
-  console.log('PASS: real Admin login/invalid login, CSRF/session, H2-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.')
+  console.log('PASS: real Admin login/invalid login, CSRF/session, PostgreSQL-backed Events, server pagination/filter/empty/date nanoseconds, reload, logout, mobile layout.')
   console.log('PASS: browser-injected 403/500/network failures clear rows; recovery reads real API. Screenshots: frontend/.artifacts/events-real-http-*.png')
-  console.log('LIMIT: Windows HTTP-seeded QA events in isolated H2; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.')
+  console.log('LIMIT: Windows HTTP-seeded QA events in disposable PostgreSQL test database; physical Ubuntu/USB/GUI tests remain NOT EXECUTED.')
   await cdp('Browser.close')
 } catch (error) {
-  await writeFile(join(artifacts, 'live-events-server-last.log'), serverOutput, 'utf8')
-  throw error
+  browserFailure = error
+  try {
+    await writeFile(join(artifacts, 'live-events-server-last.log'), serverOutput, 'utf8')
+  } catch (logError) {
+    console.error('Secondary browser diagnostic-log write failure:', logError)
+  }
 } finally {
-  socket?.close()
+  try {
+    socket?.close()
+  } catch (error) {
+    recordCleanupFailure('CDP socket close', error)
+  }
   for (const child of children.reverse()) {
     if (child.exitCode !== null || child.signalCode !== null || !child.pid) continue
-    if (process.platform === 'win32') {
-      // Windows Java/Chrome launchers may spawn additional processes.
-      await new Promise(resolveKill => {
-        execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, () => resolveKill())
-      })
-    } else child.kill()
+    try {
+      if (process.platform === 'win32') {
+        // Windows Java/Chrome launchers may spawn additional processes.
+        await new Promise(resolveKill => {
+          execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, () => resolveKill())
+        })
+      } else child.kill()
+    } catch (error) {
+      recordCleanupFailure('child-process termination', error)
+    }
   }
   await delay(1000)
-  const runtimeRelative = relative(artifacts, resolve(runtime))
-  assert.ok(runtimeRelative.startsWith('live-events-') && !runtimeRelative.includes(sep))
-  await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })
+  if (javaExecutable) {
+    try {
+      await cleanupPostgresBrowserSchema(browserDb, { java: javaExecutable, jar, cwd: root })
+    } catch (error) {
+      recordCleanupFailure('database cleanup', error)
+    }
+  }
+  try {
+    const runtimeRelative = relative(artifacts, resolve(runtime))
+    assert.ok(runtimeRelative.startsWith('live-events-') && !runtimeRelative.includes(sep))
+    await rm(runtime, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 })
+  } catch (error) {
+    recordCleanupFailure('temporary-file cleanup', error)
+  }
 }
+// Never throw from finally: doing so would replace a prior test failure.
+if (browserFailure) throw browserFailure

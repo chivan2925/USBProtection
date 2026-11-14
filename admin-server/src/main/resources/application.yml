@@ -13,15 +13,21 @@ spring:
     name: usbshield-admin-server
 
   datasource:
-    url: jdbc:h2:file:./data/usbshield;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE
-    driverClassName: org.h2.Driver
-    username: sa
-    password: 
+    url: jdbc:postgresql://${USBSHIELD_DB_HOST:127.0.0.1}:${USBSHIELD_DB_PORT:5432}/${USBSHIELD_DB_NAME:usbshield}
+    driver-class-name: org.postgresql.Driver
+    username: ${USBSHIELD_DB_USERNAME:usbshield}
+    password: ${USBSHIELD_DB_PASSWORD:}
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: false  # Existing DB requires explicit, reviewed one-time baseline.
+    clean-disabled: true
+    validate-on-migrate: true
 
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -29,12 +35,6 @@ spring:
         hbm2ddl:
           halt_on_error: true
 
-  h2:
-    console:
-      enabled: false
-      path: /h2-console
-      settings:
-        web-allow-others: false
 
 springdoc:
   api-docs:

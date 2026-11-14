@@ -13,13 +13,11 @@ server:
 spring:
   datasource:
     url: ${USBSHIELD_DB_URL}
-    username: ${USBSHIELD_DB_USERNAME:sa}
+    username: ${USBSHIELD_DB_USERNAME:usbshield}
     password: ${USBSHIELD_DB_PASSWORD}
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
-  h2:
-    console:
-      enabled: false
 springdoc:
   api-docs:
     enabled: false

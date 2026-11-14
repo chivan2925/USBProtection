@@ -56,14 +56,18 @@ class EndpointManagerTest {
                 .agentToken("token-secret-xyz")
                 .currentPolicyVersion(0L)
                 .build();
-        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenReturn(Optional.of(response));
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(invocation -> {
+            EnrollmentRequest request = invocation.getArgument(0);
+            response.setAgentToken(request.getAgentToken());
+            return Optional.of(response);
+        });
 
         boolean enrolled = endpointManager.ensureEnrolled();
 
         assertTrue(enrolled);
         assertEquals("EP-UUID-999", endpointManager.getEndpointId());
         assertNotNull(endpointManager.getCurrentRegistration());
-        assertEquals("token-secret-xyz", endpointManager.getCurrentRegistration().getAgentToken());
+        assertTrue(endpointManager.getCurrentRegistration().getAgentToken().matches("[0-9a-f]{64}"));
 
         // File persistence check
         Path storageFile = tempDir.resolve("endpoint.json");
@@ -102,7 +106,11 @@ class EndpointManagerTest {
                 .agentToken("tok-01")
                 .currentPolicyVersion(1L)
                 .build();
-        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(invocation -> {
+            EnrollmentRequest request = invocation.getArgument(0);
+            response.setAgentToken(request.getAgentToken());
+            return Optional.of(response);
+        });
         endpointManager.ensureEnrolled();
 
         endpointManager.updateAppliedPolicyVersion(2L);
@@ -128,7 +136,11 @@ class EndpointManagerTest {
                 .agentToken("token-recovered")
                 .currentPolicyVersion(0L)
                 .build();
-        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(invocation -> {
+            EnrollmentRequest request = invocation.getArgument(0);
+            response.setAgentToken(request.getAgentToken());
+            return Optional.of(response);
+        });
 
         assertTrue(reloaded.ensureEnrolled(), "Should enroll afresh when storage file is corrupted");
         assertEquals("EP-RECOVERED", reloaded.getEndpointId());
@@ -152,7 +164,11 @@ class EndpointManagerTest {
                 .agentToken("tok-unsaved")
                 .currentPolicyVersion(0L)
                 .build();
-        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(invocation -> {
+            EnrollmentRequest request = invocation.getArgument(0);
+            response.setAgentToken(request.getAgentToken());
+            return Optional.of(response);
+        });
 
         boolean enrolled = failManager.ensureEnrolled();
         assertFalse(enrolled, "Enrollment must be marked failed if credentials cannot be written to disk");
@@ -167,7 +183,11 @@ class EndpointManagerTest {
                 .agentToken("tok-01")
                 .currentPolicyVersion(1L)
                 .build();
-        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(invocation -> {
+            EnrollmentRequest request = invocation.getArgument(0);
+            response.setAgentToken(request.getAgentToken());
+            return Optional.of(response);
+        });
         endpointManager.ensureEnrolled();
 
         // Simulate disk write failure by replacing endpoint.json file with a directory
@@ -192,7 +212,11 @@ class EndpointManagerTest {
                 .agentToken("tok-01")
                 .currentPolicyVersion(1L)
                 .build();
-        when(adminServerClient.enroll(any())).thenReturn(Optional.of(response));
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(invocation -> {
+            EnrollmentRequest request = invocation.getArgument(0);
+            response.setAgentToken(request.getAgentToken());
+            return Optional.of(response);
+        });
         endpointManager.ensureEnrolled();
 
         // Successfully update version to 2 (pendingAck = 2)
@@ -210,4 +234,59 @@ class EndpointManagerTest {
         assertEquals(2L, endpointManager.getCurrentRegistration().getPendingAckVersion(),
                 "Pending ACK version must be retained in memory when disk write fails");
     }
+    @Test
+    void lostHttpResponseRetainsStagedCredentialAcrossAgentRestart() {
+        java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(call -> {
+            EnrollmentRequest request = call.getArgument(0);
+            if (attempts.incrementAndGet() == 1) return Optional.empty();
+            return Optional.of(EnrollmentResponse.builder().endpointId("EP-STAGED")
+                    .agentToken(request.getAgentToken()).currentPolicyVersion(1L).build());
+        });
+
+        assertFalse(endpointManager.ensureEnrolled());
+        assertTrue(Files.exists(tempDir.resolve("enrollment-pending.json")));
+        EndpointManager restarted = new EndpointManager(properties, systemInfoProvider, adminServerClient, objectMapper);
+        restarted.init();
+        assertTrue(restarted.ensureEnrolled());
+        assertEquals("EP-STAGED", restarted.getEndpointId());
+        assertFalse(Files.exists(tempDir.resolve("enrollment-pending.json")));
+        var sent = org.mockito.ArgumentCaptor.forClass(EnrollmentRequest.class);
+        verify(adminServerClient, times(2)).enroll(sent.capture());
+        assertEquals(sent.getAllValues().get(0).getAgentToken(), sent.getAllValues().get(1).getAgentToken());
+        assertTrue(sent.getAllValues().get(0).getAgentToken().matches("[0-9a-f]{64}"));
+    }
+
+    @Test
+    void committedEnrollmentCanRecoverAfterEndpointJsonSaveFailure() throws Exception {
+        Files.createDirectory(tempDir.resolve("endpoint.json")); // fail credential rename AFTER HTTP success
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(call -> {
+            EnrollmentRequest request = call.getArgument(0);
+            return Optional.of(EnrollmentResponse.builder().endpointId("EP-PERSIST-RETRY")
+                    .agentToken(request.getAgentToken()).currentPolicyVersion(1L).build());
+        });
+        assertFalse(endpointManager.ensureEnrolled());
+        assertNull(endpointManager.getCurrentRegistration());
+        assertTrue(Files.exists(tempDir.resolve("enrollment-pending.json")));
+
+        Files.delete(tempDir.resolve("endpoint.json"));
+        EndpointManager restarted = new EndpointManager(properties, systemInfoProvider, adminServerClient, objectMapper);
+        restarted.init();
+        assertTrue(restarted.ensureEnrolled());
+        assertEquals("EP-PERSIST-RETRY", restarted.getEndpointId());
+        var sent = org.mockito.ArgumentCaptor.forClass(EnrollmentRequest.class);
+        verify(adminServerClient, times(2)).enroll(sent.capture());
+        assertEquals(sent.getAllValues().get(0).getAgentToken(), sent.getAllValues().get(1).getAgentToken());
+    }
+
+    @Test
+    void stagedEnrollmentWithChangedMachineIdRefusesUntrustedIdentityReuse() {
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenReturn(Optional.empty());
+        assertFalse(endpointManager.ensureEnrolled());
+        reset(adminServerClient);
+        when(systemInfoProvider.getMachineId()).thenReturn("different-machine");
+        assertFalse(endpointManager.ensureEnrolled());
+        verifyNoInteractions(adminServerClient);
+    }
+
 }

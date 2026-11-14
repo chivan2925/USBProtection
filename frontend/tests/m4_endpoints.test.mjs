@@ -50,7 +50,7 @@ const baseProps = {
 // --- EndpointsPage ---
 
 test('endpoint rows render with hostname, status, and policy version', () => {
-  const html = renderToStaticMarkup(createElement(Endpoints, baseProps))
+  const html = renderToStaticMarkup(createElement(Endpoints, { ...baseProps, demo: true }))
   assert.ok(html.includes('LAB-PC-01'), 'should render LAB-PC-01')
   assert.ok(html.includes('LAB-PC-02'), 'should render LAB-PC-02')
   assert.ok(html.includes('lab-pc-01.local'), 'should show hostname')
@@ -58,7 +58,7 @@ test('endpoint rows render with hostname, status, and policy version', () => {
 })
 
 test('endpoint list shows ID and distinct policy and applied versions, with a fallback when unapplied', () => {
-  const html = renderToStaticMarkup(createElement(Endpoints, baseProps))
+  const html = renderToStaticMarkup(createElement(Endpoints, { ...baseProps, demo: true }))
   assert.match(html, /<th scope="col">Endpoint ID<\/th>/)
   assert.match(html, /<th scope="col">Policy version<\/th><th scope="col">Last Applied Version<\/th>/)
   assert.match(html, /<td><span class="mono">POC-LAB-PC-01<\/span><\/td>/)
@@ -67,19 +67,19 @@ test('endpoint list shows ID and distinct policy and applied versions, with a fa
 })
 
 test('endpoint list has links to detail pages', () => {
-  const html = renderToStaticMarkup(createElement(Endpoints, baseProps))
+  const html = renderToStaticMarkup(createElement(Endpoints, { ...baseProps, demo: true }))
   assert.ok(html.includes('POC-LAB-PC-01'), 'should link to endpoint detail')
 })
 
 // --- EndpointDetailPage ---
 
-test('endpoint detail does not show devices from other endpoints', () => {
-  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-02' }))
+test('demo endpoint detail does not show devices from other endpoints', () => {
+  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-02', demo: true }))
   assert.ok(!html.includes('Kingston DataTraveler 2.0'), 'LAB-PC-02 should not show LAB-PC-01 devices')
 })
 
-test('endpoint detail shows devices that belong to the endpoint', () => {
-  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-01' }))
+test('demo endpoint detail shows devices that belong to the endpoint', () => {
+  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: 'POC-LAB-PC-01', demo: true }))
   assert.ok(html.includes('Kingston DataTraveler 2.0'), 'LAB-PC-01 should show its own device')
 })
 
@@ -182,12 +182,30 @@ test('management pages clear protected rows during loading, empty, unavailable a
   }
 })
 
-test('Settings explains unavailable service API instead of offering fake controls', () => {
+test('Settings keeps service configuration unavailable and demo read-only', () => {
   const html = renderToStaticMarkup(createElement(Settings))
-  assert.ok(html.includes('API cài đặt dịch vụ chưa có'))
-  assert.ok(html.includes('Chưa xác định'))
+  assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
+  assert.ok(html.includes('dữ liệu stale/offline hiển thị Unknown'))
+  assert.ok(html.includes('Demo chỉ đọc'))
+  assert.ok(!html.includes('admin-old-password'))
+  assert.ok(!html.includes('admin-new-password'))
   assert.ok(!html.includes('<input'))
   assert.ok(!html.includes('<button'))
+})
+
+test('Settings offers password change only to authenticated Admin', () => {
+  const html = renderToStaticMarkup(createElement(
+    AuthContext.Provider,
+    { value: { user: { username: 'test-admin' }, loading: false, error: '', sessionExpired: false } },
+    createElement(Settings),
+  ))
+  assert.ok(html.includes('test-admin'))
+  assert.ok(html.includes('Đổi mật khẩu Admin'))
+  assert.ok(html.includes('id="admin-old-password"'))
+  assert.ok(html.includes('id="admin-new-password"'))
+  assert.ok(html.includes('Đổi mật khẩu và đăng xuất'))
+  assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
+  assert.ok(!html.includes('Allow globally'))
 })
 
 test('expired session shows a persistent login message; fresh login and demo do not', () => {

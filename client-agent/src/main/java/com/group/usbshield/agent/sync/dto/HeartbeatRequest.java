@@ -12,4 +12,9 @@ import lombok.NoArgsConstructor;
 public class HeartbeatRequest {
     private String endpointId;
     private Long currentPolicyVersion;
+    private String ipAddress;
+    private String operatingSystem;
+    private String currentUser;
+    /** HEALTHY, DEGRADED, UNAVAILABLE, UNKNOWN. No raw daemon error or credentials. */
+    private String usbGuardStatus;
 }

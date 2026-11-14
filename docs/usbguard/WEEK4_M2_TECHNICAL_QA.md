@@ -12,7 +12,7 @@
 | **Vì sao không whitelist chỉ theo VID:PID?** | VID:PID thường trùng giữa nhiều USB cùng model; dùng hash hoặc serial+VID/PID để ràng buộc thiết bị cụ thể. |
 | **Nếu USB thiếu serial?** | Có thể dùng USBGuard hash nếu hợp lệ. Không có hash/serial đủ tin cậy thì hệ thống từ chối cấp grant cụ thể thay vì allow cả model. |
 | **Rule ID có cố định sau xóa/reboot không?** | Không. Sau mỗi lần xóa, M2 tra lại rule list và tìm ID hiện hành theo managed fingerprint, kể cả khi rollback. |
-| **Có thể thêm ngoại lệ USBGuard ngoài Web không?** | Admin/root trên client có thể sửa policy ngoài USBShield. Reconciler bảo toàn foreign rules có thể xác minh và fail trên rule nguy hiểm/không hiểu; vì vậy không được tuyên bố toàn policy chắc chắn chặn thiết bị lạ nếu có foreign Allow. |
+| **Có thể thêm ngoại lệ USBGuard ngoài Web không?** | Admin/root vẫn có thể sửa policy ngoài USBShield. Với source PR #57 trở đi, reconciler **thu hồi foreign `ALLOW` không thuộc USBShield hoặc base non-storage** sau khi kiểm tra policy an toàn; không ACK nếu cleanup thất bại. Các mô tả bảo toàn foreign Allows trong tài liệu cũ là **hành vi lịch sử**, chưa phải kết quả Ubuntu E2E hiện tại. |
 | **Admin biết chính xác ai cắm USB không?** | Chỉ biết tài khoản Ubuntu active-local/session tại thời điểm event, **không chứng minh** con người trực tiếp cắm. Ambiguous/remote-only trả `UNKNOWN`. |
 | **Không có GUI hoặc notifier chết thì sao?** | Không popup; USBGuard vẫn enforce và Agent vẫn cố gửi event. `DELIVERED` của IPC không tương đương với ảnh popup thật. |
 | **Có thể tắt service không?** | Normal user không có sudo/USBGuard modify IPC không được phép dừng/sửa protection. Root hoặc sudo vẫn có quyền quản trị hệ thống. |
@@ -20,7 +20,7 @@
 
 ## Demo checklist M2 → M5
 
-- Bắt đầu bằng topology Server + Ubuntu A, bổ sung Ubuntu B cho endpoint isolation.
+- Bắt đầu bằng topology Server + Ubuntu A, bổ sung Ubuntu B cho endpoint isolation. Allow/Revoke có hiệu lực kiểm chứng sau khi rút USB và cắm lại; không yêu cầu thay đổi tức thời trên thiết bị vẫn đang cắm.
 - Hiển thị hai rule nguyên tắc: canonical non-storage Allow và daemon default BLOCK; sau đó demo Insert USB thật, event + active username, Allow/Revoke A, B unchanged.
 - Thử HID, unknown USB, serialless hash case, logout/switch/UNKNOWN, server offline, reboot, popup bị BLOCK và bỏ qua khi ALLOWED/HID/Remove.
 - Với mọi test, ghi commit, Ubuntu/USBGuard version, endpoint ID, timestamp, expected versus observed, log đã che PII/credential.

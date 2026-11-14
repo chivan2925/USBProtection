@@ -1,102 +1,52 @@
 # USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu
 
-> **Dự án seminar 4 tuần:** Xây dựng ứng dụng ngăn chặn người dùng cắm USB Flash Disk vào máy tính Ubuntu chạy như dịch vụ không thể tắt, quản lý tập trung và định danh phiên người dùng active.  
-> **Hệ điều hành máy trạm (Client target):** Ubuntu 24.04 LTS (amd64)  
-> **Cơ chế thực thi trên Client:** USBGuard + systemd daemon + loginctl  
-> **Nền tảng Admin Server:** Java 21, Spring Boot 3.3.x, Spring Data JPA, H2 File Mode  
-> **Nền tảng Admin Web Console:** React + Vite + TypeScript  
+> **Baseline source đối chiếu:** `vinhkhang` HEAD `6923be001890bee9a303a8cee8e7dcc2cf2db180` (09/11/2026; docs/packaging sync). **Windows verifier PASS** theo log; **HTTPS/ACL VMnet8 PASS** theo kiểm tra thực địa; **Ubuntu Minimal Core P0 + C1–C5 PASS theo báo cáo owner 09/11**. Các bài test mở rộng **DEFERRED BY OWNER / NOT EXECUTED**. Không đồng nhất HEAD với artifact binary khi chưa ghi đủ SHA. Xem [owner E2E closeout](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [status](docs/IMPLEMENTATION_STATUS_20261109.md).
 
----
+> Seminar 4 tuần / demo trong LAN. Ubuntu Client: **24.04 LTS amd64**. Backend: **Java 21 + Spring Boot**. Admin Web: **React + Vite + TypeScript**. USB enforcement: **USBGuard + systemd**. Database: **PostgreSQL (dịch vụ riêng, lưu bền vững)**.
 
-## 1. Cấu trúc thư mục dự án
+## Tổng quan
 
-```text
-USBProtection/
-├── admin-server/       # [Member 1] Backend Spring Boot quản trị tập trung & API Ingestion
-│   ├── pom.xml
-│   └── src/
-├── client-agent/       # [Member 3] Ubuntu Client Agent service (Java 21 / systemd)
-│   ├── pom.xml
-│   └── src/
-├── frontend/           # [Member 4] Admin Web Console (React + Vite + TypeScript)
-├── packaging/          # [Member 3] Đóng gói cài đặt .deb & cấu hình systemd / rules.conf
-├── docs/               # Toàn bộ tài liệu kiến trúc, giao thức và bằng chứng kỹ thuật
-│   ├── ARCHITECTURE.md          # Kiến trúc hệ thống tổng thể & nguyên tắc vận hành
-│   ├── AGENT_SERVER_PROTOCOL.md # Đặc tả chi tiết giao thức JSON giữa Agent và Server
-│   ├── API.md                   # Danh mục RESTful API & Swagger guide
-│   ├── agent-contract/          # File JSON mẫu chốt giao thức (sample-usb-event.json)
-│   └── usbguard/                # [Member 2] Kết quả PoC, parser và bằng chứng USBGuard
-└── README.md           # Hướng dẫn tổng quan dự án
-```
+| Thành phần | Vai trò |
+|---|---|
+| `admin-server/` | Spring Boot: Admin login, Agent enrollment/heartbeat, per-endpoint policy, audit/event API, PostgreSQL |
+| `frontend/` | React Admin Web, build thành static assets và phục vụ từ cùng JAR Admin Server |
+| `client-agent/` | Agent không có Web; gửi event/heartbeat, đồng bộ chính sách USBGuard |
+| `packaging/` | Debian `.deb`, `systemd`, USBGuard base rule, notifier helper |
+| `docs/` | Blueprint, API/contract, guide, QA/test/evidence và tài liệu kỹ thuật |
 
----
+### Nguyên tắc cốt lõi
 
-## 2. Các nguyên tắc cốt lõi của hệ thống
+1. USB Mass Storage class `08` chưa được cấp phép phải BLOCK tại Client theo USBGuard local policy; non-storage/HID bình thường không bị chặn theo base rule.
+2. Admin Allow/Revoke theo **từng endpoint**, Agent đồng bộ local policy. Người dùng **rút USB rồi cắm lại** để áp dụng quyết định mới; không yêu cầu thay đổi runtime ngay trên thiết bị vẫn đang cắm.
+3. Sự kiện ghi nhận endpoint, USB và **tài khoản/session Ubuntu local active**, không khẳng định ai trực tiếp cắm vật lý.
+4. Normal user không có sudo/root hoặc quyền sửa USBGuard IPC/policy không được tắt/sửa protection. Root vẫn có thể quản trị hệ thống.
+5. **Mạng LAN thực tế:** HTTPS + xác thực chứng chỉ là bắt buộc với Agent `live`; Nginx/firewall ACL chỉ cho Client truy cập `/api/agent/**`, còn Web/Auth/Admin API thuộc allowlist IP máy Admin. Backend bind loopback, không mở port trực tiếp. **Không triển khai rate limiting** theo quyết định owner.
 
-1. **Fail-Closed Principle:** Mặc định chặn (`BLOCK`) toàn bộ USB Mass Storage (Class `08`). Cho phép chuột/bàn phím (Class `03`) hoạt động bình thường. Nếu mất kết nối mạng, máy trạm vẫn duy trì việc chặn tự trị.
-2. **Per-Endpoint Whitelist:** Whitelist áp dụng riêng biệt cho từng máy trạm (`endpoint_id + device_identity`). Tuyệt đối không tạo Global Allow-All.
-3. **Active User Attribution:** Ghi nhận chính xác tài khoản Ubuntu có session local đang active tại thời điểm cắm USB (`linuxUsername`, `linuxUid`, `sessionId`, `sessionType`, `seat`). Nếu không có user active hoặc không thể xác định rõ ràng, bắt buộc gán nhãn `UNKNOWN`.
+## Trạng thái kỹ thuật và nghiệm thu hiện tại (09/11/2026)
 
----
+- **Lịch sử:** ba đợt correctness/reliability/HTTPS-paging (04/11) được giữ theo mã finding riêng; **không trộn** với review mới F01–F14. Review mới đã sửa F02–F06, F08–F11, F14; F07 là quyết định giữ audit orphan có chủ đích; F01 Spring Boot OSS upgrade **không nằm trong phạm vi sửa demo**; F12 request trùng và F13 notification best-effort **được owner chấp nhận/defer**. Xem [review ledger 09/11](docs/qa/2026-11-09-review-and-packaging-sync.md).
+- **Bằng chứng Windows được owner cung cấp (09/11):** `verify-windows.ps1` PASS; Admin **60 tests PASS**, Agent **276 tests (273 PASS, 3 Linux-only SKIP)**, frontend **116 PASS**, lint/build PASS, Browser Live và HTTP Live trên PostgreSQL test DB PASS; `.deb` build và kiểm cấu trúc/MD5/SHA256 PASS. Bản sửa verifier phải được giữ: **build JAR sau Maven clean test và trước live browser tests**.
+- **Đã kiểm tại lab theo owner:** Windows Nginx HTTPS Admin login; Ubuntu A/B `403/403/403/401` trên bốn path; bypass 18080/5432 không truy cập được; IP nguồn Nginx A/B tách biệt. Ubuntu Agent `.deb` bản `1.0.0+build20261109091706653` hiện diện trên cả hai VM, C1–C5 (BLOCK/Allow/replug/isolation/Revoke) **PASS theo lời owner**. Không có log C1–C5 đầy đủ để review độc lập; Java Agent enrollment/auth thành công được **suy luận từ kết quả Core PASS**, không dùng log heartbeat 401 trước remediation làm bằng chứng. **Chưa chạy và owner hoãn:** `.deb` remove/upgrade, negative TLS, offline/recovery, reboot, Linux-only notifier IPC và các edge case.
 
-## 3. Admin Server development and deployment
+## Bắt đầu
 
-The supported API contract is frozen at v0.2; see [API](docs/API.md) and the
-[Agent–Server protocol](docs/AGENT_SERVER_PROTOCOL.md). Detailed build, test,
-configuration and operations instructions are in the [Developer Guide](docs/DEVELOPER_GUIDE.md).
+**Tất cả bước build, test, chạy Admin Server, HTTPS/LAN, đóng gói `.deb`, cấu hình Ubuntu Client và kịch bản Allow/Revoke nằm ở đúng một tài liệu:**
 
-### Local development
+**[docs/RUN_GUIDE.md](docs/RUN_GUIDE.md)**
 
-Requirements: JDK 21; the Week 4 Windows release build was verified with JDK
-22.0.2, Maven 3.9.9, Node.js 22.19.0 and npm 10.9.3. The project targets Java 21;
-validate other JDK versions against the pinned Lombok compiler integration.
-JDK 24 fails to compile with the pinned Lombok 1.18.36; set `JAVA_HOME` to JDK 21/22
-(see the Developer Guide).
-The default profile is for local development. It binds to port 8080, uses an
-ignored local H2 file under `admin-server/data/`, and does not create an Admin
-account or enable enrollment until their secrets are configured.
+Build/test hiện hành trên Windows: `./packaging/tests/verify-windows.ps1` (PowerShell 7.4+). Mỗi build `.deb` sinh `packaging/dist/usbshield-agent.release.json` (Version riêng, SHA256, Git SHA) và gói `.deb` tương ứng. Ubuntu tối giản: [Minimal Core E2E](docs/USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md); [HTTPS `usbprotection.lab` chi tiết](docs/USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md). Trạng thái các gate B01–B05 cần đối chiếu bằng chứng tương ứng; Windows PASS không tự đóng các mục native.
 
-```powershell
-$env:USBSHIELD_ADMIN_PASSWORD = '<local-only password>'
-$env:USBSHIELD_ENROLLMENT_TOKEN = '<local-only bootstrap token>'
-cd admin-server
-mvn spring-boot:run
-```
+PostgreSQL phải được cài/khởi động và có database cùng role riêng cho ứng dụng. Dev/test trên Windows có thể dùng `.env` (không commit) với `scripts/with-env.ps1` để nạp test credentials; xem runbook. **Không chạy baseline Flyway trên database test.** Admin Server vẫn là **một JAR**, Client Agent vẫn là **`.deb`**; không cần Docker cho bản demo một server. Ubuntu **Minimal Core E2E P0 + C1–C5 PASS theo báo cáo owner** cho baseline lab đã chạy; các bài Ubuntu nâng cao **DEFERRED BY OWNER** và không được tự ghi PASS. M4/M5 có thể sửa UI với [change guardrails](docs/admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md) và regression theo mức rủi ro.
 
-Local API docs are available at `http://localhost:8080/swagger-ui.html` and
-`http://localhost:8080/api-docs`. They are disabled in the `prod` profile.
+## Tài liệu khác
 
-### Production profile
+- [Blueprint chính thức](USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md)
+- [Trạng thái cập nhật 09/11 và phân loại review F01–F14](docs/IMPLEMENTATION_STATUS_20261109.md) · [Bản lịch sử 04/11](docs/IMPLEMENTATION_STATUS_20261104.md)
+- [Flyway baseline cho PostgreSQL hiện hữu](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md) · [HTTPS/ACL và API phân trang](docs/PHASE3_HTTPS_ACL_AND_PAGING.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Developer Guide](docs/DEVELOPER_GUIDE.md) — kỹ thuật mã nguồn và API, không phải runbook vận hành
+- [API v0.2](docs/API.md) · [Addendum API Phase 1–3](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) · [Agent–Server protocol](docs/AGENT_SERVER_PROTOCOL.md)
+- [Admin Guide](docs/ADMIN_GUIDE.md) — hướng dẫn **sử dụng Web**, không phải hướng dẫn chạy service
+- [Ubuntu acceptance](docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md) — **phần mở rộng** vẫn DEFERRED BY OWNER
 
-Set `USBSHIELD_DB_URL`, `USBSHIELD_DB_PASSWORD`, `USBSHIELD_ADMIN_PASSWORD`, and
-`USBSHIELD_ENROLLMENT_TOKEN` outside the repository, then run the packaged JAR
-with `--spring.profiles.active=prod`. Production binds to loopback by default,
-uses secure HttpOnly SameSite cookies, and requires HTTPS for Admin browser access.
-For remote access, terminate TLS at a trusted reverse proxy and proxy to the
-loopback listener. Do not expose the server over plain HTTP or set
-`USBSHIELD_COOKIE_SECURE=false` outside isolated local smoke tests.
-
-The H2 console and interactive API docs are disabled in production. Keep the DB
-file in a persistent private directory, restrict it to the service account, and
-back it up while the server is stopped. Runtime DB, endpoint credentials and event
-spool data are local state and must not be committed.
-
----
-
-## 4. Hướng dẫn khởi chạy Admin Web Console (`frontend`)
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Truy cập giao diện tại: `http://localhost:5173`
-
----
-
-## 5. Tài liệu kỹ thuật chi tiết
-
-- 📐 **Kiến trúc hệ thống:** Xem chi tiết tại [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- 🔌 **Đặc tả giao thức Agent ↔ Server:** Xem chi tiết tại [docs/AGENT_SERVER_PROTOCOL.md](docs/AGENT_SERVER_PROTOCOL.md)
-- 📖 **Danh mục REST API:** Xem chi tiết tại [docs/API.md](docs/API.md)
-- 🛡️ **Báo cáo PoC USBGuard & Active-User:** Xem chi tiết tại [docs/usbguard/USBGuard_POC.md](docs/usbguard/USBGuard_POC.md)
+**Closeout:** [Owner acceptance P0/C1–C5](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) · [M4/M5 UI guardrails](docs/admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md).

@@ -48,7 +48,7 @@ class PolicySyncServiceTest {
                         WhitelistedDeviceDto.builder()
                                 .vendorId("0951")
                                 .productId("1665")
-                                .fingerprintValue("id 0951:1665")
+                                .fingerprintValue("3vdbQ5w9vF+1AbCdEfGhIjKlMnOpQrstUVwxyz01234=")
                                 .build()
                 ))
                 .build();
@@ -82,7 +82,7 @@ class PolicySyncServiceTest {
                         WhitelistedDeviceDto.builder()
                                 .vendorId("0951")
                                 .productId("1665")
-                                .fingerprintValue("id 0951:1665")
+                                .fingerprintValue("3vdbQ5w9vF+1AbCdEfGhIjKlMnOpQrstUVwxyz01234=")
                                 .build()
                 ))
                 .build();
@@ -113,7 +113,7 @@ class PolicySyncServiceTest {
                         WhitelistedDeviceDto.builder()
                                 .vendorId("0951")
                                 .productId("1665")
-                                .fingerprintValue("id 0951:1665")
+                                .fingerprintValue("3vdbQ5w9vF+1AbCdEfGhIjKlMnOpQrstUVwxyz01234=")
                                 .build()
                 ))
                 .build();
@@ -131,4 +131,52 @@ class PolicySyncServiceTest {
         verify(adminServerClient, never()).acknowledgePolicy(anyString(), anyString(), any());
         verify(endpointManager, never()).clearPendingAck();
     }
+    @Test
+    void invalidOrMissingHashBlocksEntireApplyAndAck() {
+        var registration = EndpointRegistration.builder().endpointId("EP-001")
+                .agentToken("token-123").currentPolicyVersion(1L).build();
+        for (String invalid : new String[]{"id 0951:1665", "0951:1665", "x\nallow all", "  "}) {
+            var response = PolicyResponse.builder().policyVersion(2L).whitelistedDevices(List.of(
+                    WhitelistedDeviceDto.builder().fingerprintValue("ValidStableHashAbC1234=").build(),
+                    WhitelistedDeviceDto.builder().fingerprintValue(invalid).build())).build();
+            when(adminServerClient.fetchPolicy("EP-001", "token-123")).thenReturn(Optional.of(response));
+            assertFalse(policySyncService.syncPolicy(registration), invalid);
+        }
+        verify(usbGuardGateway, never()).applyWhitelist(anyList());
+        verify(endpointManager, never()).updateAppliedPolicyVersion(anyLong());
+        verify(adminServerClient, never()).acknowledgePolicy(anyString(), anyString(), any());
+    }
+
+    @Test
+    void duplicateAndConflictingHashesAreRejectedWithoutAck() {
+        var registration = EndpointRegistration.builder().endpointId("EP-001").agentToken("token-123").build();
+        for (var list : List.of(
+                List.of(WhitelistedDeviceDto.builder().fingerprintValue("ValidHash123").build(),
+                        WhitelistedDeviceDto.builder().fingerprintValue("ValidHash123").build()),
+                List.of(WhitelistedDeviceDto.builder().fingerprintValue("ValidHash123").deviceHash("OtherHash123").build()))) {
+            when(adminServerClient.fetchPolicy("EP-001", "token-123")).thenReturn(Optional.of(
+                    PolicyResponse.builder().policyVersion(2L).whitelistedDevices(list).build()));
+            assertFalse(policySyncService.syncPolicy(registration));
+        }
+        verify(usbGuardGateway, never()).applyWhitelist(anyList());
+        verify(adminServerClient, never()).acknowledgePolicy(anyString(), anyString(), any());
+    }
+
+    @Test
+    void successfulDurableApplyRecordsExactHashSetForHealthProbe() {
+        var probe = mock(UsbGuardHealthProbe.class);
+        var service = new PolicySyncService(adminServerClient, usbGuardGateway, endpointManager, probe);
+        var reg = EndpointRegistration.builder().endpointId("EP-001").agentToken("token-123")
+                .currentPolicyVersion(1L).build();
+        String hash = "Base64HashAbCd1234=";
+        when(adminServerClient.fetchPolicy("EP-001", "token-123")).thenReturn(Optional.of(
+                PolicyResponse.builder().policyVersion(2L).whitelistedDevices(List.of(
+                        WhitelistedDeviceDto.builder().deviceHash(hash).fingerprintValue(hash).build())).build()));
+        when(usbGuardGateway.applyWhitelist(anyList())).thenReturn(true);
+        when(endpointManager.updateAppliedPolicyVersion(2L)).thenReturn(true);
+        assertTrue(service.syncPolicy(reg));
+        verify(probe).recordAppliedHashes(List.of(hash));
+        verify(endpointManager).updateAppliedPolicyVersion(2L);
+    }
+
 }

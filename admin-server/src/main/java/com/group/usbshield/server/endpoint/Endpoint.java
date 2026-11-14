@@ -16,7 +16,6 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class Endpoint {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -36,11 +35,26 @@ public class Endpoint {
     @Column(length = 50)
     private String ipAddress;
 
+    @Column(length = 100)
+    private String operatingSystem;
+
+    // Avoid the PostgreSQL CURRENT_USER identifier; keep Java/JSON currentUser unchanged.
+    @Column(name = "active_username", length = 100)
+    private String currentUser;
+
     @Column(nullable = false, length = 30)
     @Builder.Default
     private String status = "OFFLINE";
 
     private Instant lastSeen;
+
+    /** Last Agent-reported daemon/policy evidence; a heartbeat is NOT itself health proof. */
+    @Column(name = "usbguard_reported_status", length = 20)
+    private String usbGuardReportedStatus;
+
+    /** Timestamp assigned by Server upon receiving the health report. */
+    @Column(name = "usbguard_checked_at")
+    private Instant usbGuardCheckedAt;
 
     @Column(nullable = false)
     @Builder.Default

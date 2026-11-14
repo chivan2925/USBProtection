@@ -11,6 +11,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import jakarta.annotation.PreDestroy;
 import java.util.Map;
 
 @Slf4j
@@ -68,13 +73,64 @@ public class EventSenderService {
         sendPayload(payload);
     }
 
+    /**
+     * USBGuard watch calls this instead of synchronous HTTP transport. Persist first,
+     * then dispatch on a single worker. Queue saturation coalesces wakeups, never events.
+     */
+    private final ThreadPoolExecutor transportWorker = new ThreadPoolExecutor(1, 1, 0,
+            TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(1), runnable -> {
+                Thread thread = new Thread(runnable, "usbshield-event-dispatch");
+                thread.setDaemon(true);
+                return thread;
+            }, (task, executor) -> log.debug("Transport drain already queued; durable spool retained"));
+
+    public void enqueuePayload(UsbEventPayload payload) {
+        if (payload == null) return;
+        ensureEventId(payload);
+        EndpointRegistration registration = endpointManager.getCurrentRegistration();
+        if (registration != null && registration.getEndpointId() != null && isPreEnrollmentId(payload.getEndpointId())) {
+            payload.setEndpointId(registration.getEndpointId());
+        }
+        if (!outboxSpoolService.spool(payload)) {
+            throw new IllegalStateException("CRITICAL: USB event could not be durably queued");
+        }
+        if (registration != null && registration.getEndpointId() != null) {
+            transportWorker.execute(() -> {
+                EndpointRegistration live = endpointManager.getCurrentRegistration();
+                if (live != null && live.getEndpointId() != null) {
+                    outboxSpoolService.drainOutbox(live.getEndpointId(), live.getAgentToken(), adminServerClient);
+                }
+            });
+        }
+    }
+
+    @PreDestroy
+    public void stopTransportWorker() {
+        transportWorker.shutdownNow(); // unsent records remain in durable spool
+    }
+
+    private static void ensureEventId(UsbEventPayload payload) {
+        if (payload.getEventId() == null || payload.getEventId().isBlank()) {
+            payload.setEventId(UUID.randomUUID().toString());
+        }
+    }
+
     public void sendPayload(UsbEventPayload payload) {
+        ensureEventId(payload);
         EndpointRegistration registration = endpointManager.getCurrentRegistration();
         String endpointId = registration != null ? registration.getEndpointId() : payload.getEndpointId();
         String agentToken = registration != null ? registration.getAgentToken() : "";
 
-        log.info("[USB-EVENT] Detected USB {} by user '{}' ({}) -> Decision: {}",
-                payload.getEventType(), payload.getLinuxUsername(), payload.getDevice(), payload.getDecision());
+        // A USB event may occur before enrollment finishes. Never send a temporary
+        // endpoint identity once the durable enrollment is available.
+        if (registration != null && registration.getEndpointId() != null
+                && isPreEnrollmentId(payload.getEndpointId())) {
+            payload.setEndpointId(registration.getEndpointId());
+        }
+        // Serial, device hash, active username and token are sensitive. They
+        // belong in the authorized event API, not in the system journal.
+        log.info("[USB-EVENT] type={} decision={}",
+                payload.getEventType(), payload.getDecision());
 
         // Thử gửi trực tiếp lên Admin Server
         boolean sent = false;
@@ -83,8 +139,15 @@ public class EventSenderService {
         }
 
         // Nếu gửi thất bại hoặc chưa có kết nối, lưu vào hàng đợi đệm ngoại tuyến
-        if (!sent) {
-            outboxSpoolService.spool(payload);
+        if (!sent && !outboxSpoolService.spool(payload)) {
+            // Returning normally would falsely acknowledge an audit event that
+            // neither reached the server nor became durable on disk.
+            // USBGuard enforcement stays independent; callers must see failure.
+            throw new IllegalStateException("CRITICAL: USB event was neither sent nor durably queued");
         }
+    }
+
+    private static boolean isPreEnrollmentId(String id) {
+        return "UNENROLLED".equals(id) || (id != null && id.startsWith("POC-UNENROLLED-"));
     }
 }

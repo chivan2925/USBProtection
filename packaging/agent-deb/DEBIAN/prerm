@@ -8,10 +8,61 @@ if systemctl is-active --quiet usbshield-agent.service 2>/dev/null; then
     systemctl stop usbshield-agent.service || true
 fi
 
-# Only disable service on complete removal, NOT on upgrade
+# Only disable service and remove package-owned IPC grant on complete removal.
+# Preserve an administrator-customized ACL instead of deleting arbitrary content.
 if [ "$ACTION" = "remove" ]; then
+    # Remove Agent-managed grants from the daemon BEFORE removing the IPC ACL.
+    # Upgrade must NOT revoke policies; normal removal must not orphan an ALLOW.
+    cleanup_failed=0
+    if ! systemctl is-active --quiet usbguard.service; then
+        echo 'ERROR: USBGuard is down: cannot prove managed grants have been revoked.' >&2
+        cleanup_failed=1
+    elif [ "$(usbguard get-parameter ImplicitPolicyTarget 2>/dev/null || true)" != block ]; then
+        echo 'ERROR: USBGuard implicit policy is not block; refusing unsafe removal.' >&2
+        cleanup_failed=1
+    else
+        for ((attempt=0; attempt<1024; attempt++)); do
+            if ! rule_list="$(usbguard list-rules)"; then
+                cleanup_failed=1; break
+            fi
+            # Only remove rules explicitly owned by USBShield. Other rules remain.
+            managed_id="$(printf '%s\n' "$rule_list" | awk '/label "usbshield-managed"/ {print $1; exit}')"
+            if [ -z "$managed_id" ]; then break; fi
+            if [[ ! "$managed_id" =~ ^[0-9]+:$ ]] || \
+                    ! usbguard remove-rule "${managed_id%:}"; then
+                cleanup_failed=1; break
+            fi
+        done
+        # An unexpectedly large rule set or an unstable USBGuard daemon must
+        # never produce a false clean-uninstall success.
+        if ! final_rules="$(usbguard list-rules)" || \
+                printf '%s\n' "$final_rules" | grep -q 'label "usbshield-managed"'; then
+            cleanup_failed=1
+        fi
+    fi
+    # The live rule set being clean is insufficient if the next USBGuard boot
+    # would restore grants from the persistent RuleFile.
+    if [ -f /etc/usbguard/rules.conf ] &&             grep -q 'label "usbshield-managed"' /etc/usbguard/rules.conf; then
+        echo 'ERROR: Persisted managed grants remain in rules.conf; inspect manually.' >&2
+        cleanup_failed=1
+    fi
+    if [ "$cleanup_failed" -ne 0 ]; then
+        echo 'ERROR: Agent removal paused; fix USBGuard and retry (managed grants may remain).' >&2
+        systemctl start usbshield-agent.service || true
+        exit 1
+    fi
     systemctl disable usbshield-agent.service || true
     rm -f /etc/sudoers.d/usbshield
+    ipc_acl=/etc/usbguard/IPCAccessControl.d/usbshield
+    expected_acl="$(printf 'Devices=list,listen\nPolicy=list,modify\nParameters=list\nExceptions=listen\n')"
+    if [ -f "$ipc_acl" ] && [ ! -L "$ipc_acl" ] && \
+            [ "$(stat -c '%u' "$ipc_acl")" = '0' ] && \
+            [ "$(cat "$ipc_acl")" = "$expected_acl" ]; then
+        rm -f -- "$ipc_acl"
+        echo 'Removed USBShield-owned USBGuard IPC ACL; restart usbguard after removal to revoke the cached permission.'
+    elif [ -e "$ipc_acl" ] || [ -L "$ipc_acl" ]; then
+        echo 'WARNING: Customized USBGuard IPC ACL retained for administrator review.' >&2
+    fi
     echo "USBShield Agent service stopped and disabled for removal."
 else
     echo "USBShield Agent service stopped for package upgrade (service remains enabled)."

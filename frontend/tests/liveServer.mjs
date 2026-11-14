@@ -1,4 +1,4 @@
-// Real Spring Boot + file-backed H2. Enrollment/events/ACK requests are synthetic.
+// Real Spring Boot + disposable PostgreSQL test database. Enrollment/events/ACK requests are synthetic.
 import assert from 'node:assert/strict'
 import { execFile, spawn } from 'node:child_process'
 import { randomUUID } from 'node:crypto'
@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs'
 import { mkdtemp, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:net'
 import { join, resolve } from 'node:path'
+import { createPostgresBrowserTestRun, postgresBrowserChildEnv, cleanupPostgresBrowserSchema } from './postgresTestDb.mjs'
 
 export async function startLiveServer(artifacts) {
   const repo = resolve(artifacts, '../..')
@@ -15,38 +16,42 @@ export async function startLiveServer(artifacts) {
   const runtime = await mkdtemp(join(artifacts, 'live-'))
   const password = randomUUID()
   const enrollmentToken = randomUUID()
+  const browserDb = createPostgresBrowserTestRun()
   const reservation = createServer()
   await new Promise(resolveListen => reservation.listen(0, '127.0.0.1', resolveListen))
   const port = reservation.address().port
   await new Promise(resolveClose => reservation.close(resolveClose))
   const origin = `http://127.0.0.1:${port}`
   let child
+  let initialStart = true
   let log = ''
   let cookie = ''
   let csrf
   async function start() {
+    if (initialStart) console.log(`Browser --live PostgreSQL target: usbshield_browser_test (role=usbshield_test, schema=${browserDb.schema})`)
     child = spawn(java, ['-jar', jar, `--server.port=${port}`, '--server.address=127.0.0.1',
-      `--spring.datasource.url=jdbc:h2:file:${join(runtime, 'db').replaceAll('\\', '/')};DB_CLOSE_ON_EXIT=FALSE`], {
+      ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
       cwd: repo, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, USBSHIELD_ADMIN_USERNAME: 'm4-live-admin', USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken },
+      env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: 'm4-live-admin', USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken }, browserDb),
     })
+    initialStart = false
     let launchError
     child.on('error', error => { launchError = error })
     child.stdout.on('data', data => { log += data })
     child.stderr.on('data', data => { log += data })
     for (let attempt = 0; attempt < 180; attempt++) {
       if (launchError) throw launchError
-      if (child.exitCode !== null) throw new Error(`Spring Boot exited: ${child.exitCode}`)
+      if (child.exitCode !== null) throw new Error(`Spring Boot exited: ${child.exitCode}\n${log.slice(-16000)}`)
       try { if ((await fetch(`${origin}/api/auth/csrf`)).ok) return } catch { /* Startup. */ }
       await new Promise(resolveDelay => setTimeout(resolveDelay, 250))
     }
-    throw new Error('Spring Boot readiness timeout.')
+    throw new Error(`Spring Boot readiness timeout.\n${log.slice(-16000)}`)
   }
   async function stop() {
     if (child?.pid && child.exitCode === null) {
       const stopped = new Promise(resolveExit => child.once('exit', resolveExit))
       // Windows java launchers can spawn a separate JVM. Killing only the
-      // launcher leaves that JVM serving requests and holding the H2 file.
+      // launcher leaves that JVM serving requests and holding the live database connection.
       if (process.platform === 'win32') {
         await new Promise((resolveKill, rejectKill) => {
           execFile('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, timeout: 15000 }, error => {
@@ -73,7 +78,17 @@ export async function startLiveServer(artifacts) {
     await http('/api/auth/login', { method: 'POST', admin: true, headers: { [csrf.headerName]: csrf.token }, body: { username: 'm4-live-admin', password } })
     csrf = await http('/api/auth/csrf', { admin: true })
   }
-  const close = async () => { await stop(); await writeFile(join(runtime, 'server.log'), log) }
+  let closed = false
+  const close = async () => {
+    if (closed) return
+    closed = true
+    await stop() // Never drop a schema while its backend JVM may still be running.
+    try {
+      await writeFile(join(runtime, 'server.log'), log)
+    } finally {
+      await cleanupPostgresBrowserSchema(browserDb, { java, jar, cwd: repo })
+    }
+  }
   try {
     await start()
     await http('/api/admin/endpoints', { expected: 401 })
@@ -120,11 +135,11 @@ export async function checkLiveBrowser(backend, { cdp, evaluate, until, screensh
   await until(() => evaluate(`!!document.querySelector('[role="alert"]')`), 'real wrong password 401')
   await screenshot('m4-live-login.png')
   await login()
-  await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '0'`), 'real empty H2 Dashboard')
+  await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '0'`), 'real empty PostgreSQL Dashboard')
   await screenshot('m4-live-empty.png')
   await backend.seed()
   await evaluate(`document.querySelector('.refresh-actions button').click()`)
-  await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '1' && document.querySelector('.status-ring strong')?.textContent === '2'`), 'real H2 endpoints and USB')
+  await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '1' && document.querySelector('.status-ring strong')?.textContent === '2'`), 'real PostgreSQL endpoints and USB')
   await screenshot('m4-live-dashboard.png')
   await cdp('Page.reload')
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '1'`), 'real session reload and rotated CSRF')
@@ -176,7 +191,7 @@ export async function checkLiveBrowser(backend, { cdp, evaluate, until, screensh
   assert.deepEqual((await backend.http('/api/agent/policy', { headers: backend.agentHeaders })).whitelistedDevices, [])
   await screenshot('m4-live-revoke-a.png')
   await navigate('/events', 'Lịch sử sự kiện')
-  await until(() => evaluate(`document.querySelector('tbody')?.innerText.includes('m4-synthetic-user')`), 'M5 event from real H2')
+  await until(() => evaluate(`document.querySelector('tbody')?.innerText.includes('m4-synthetic-user')`), 'M5 event from real PostgreSQL')
   await screenshot('m4-live-events.png')
   await cdp('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 1, mobile: true })
   assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true)
@@ -193,12 +208,12 @@ export async function checkLiveBrowser(backend, { cdp, evaluate, until, screensh
   assert.equal(await evaluate(`document.querySelectorAll('tbody tr').length`), 0, 'Expired session clears protected event rows')
   await screenshot('m4-live-expired-session.png')
   await login()
-  await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '1'`), 'login after H2 restart')
+  await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '1'`), 'login after PostgreSQL restart')
   await evaluate(`document.querySelector('[aria-label="Đăng xuất"]').click()`)
   await until(() => evaluate(`!!document.querySelector('#password')`), 'real logout')
   assert.equal(await evaluate(`fetch('/api/admin/endpoints').then(response => response.status)`), 401)
   assert.equal(await evaluate(`localStorage.length + sessionStorage.length`), 0)
-  console.log('PASS: real Spring Boot/Spring Security + file-backed H2; browser invalid/valid login, empty data, session reload, endpoint/event mapping, A Allow/idempotency/Revoke, B isolation, CSRF rejection, policy fetch, controlled HTTP ACK display, persistence after restart, expired session, logout, mobile.')
+  console.log('PASS: real Spring Boot/Spring Security + file-backed PostgreSQL; browser invalid/valid login, empty data, session reload, endpoint/event mapping, A Allow/idempotency/Revoke, B isolation, CSRF rejection, policy fetch, controlled HTTP ACK display, persistence after restart, expired session, logout, mobile.')
   console.log(JSON.stringify({ endpointA: backend.a.endpointId, endpointB: backend.b.endpointId, beforeA, allowedA, revokedA, persistedDesired: persistedA.policyVersion, persistedApplied: persistedA.appliedPolicyVersion, eventCount: 1 }))
   console.log('NOT EXECUTED: actual M3 Agent apply/ACK, Ubuntu USBGuard enforcement, physical USB, native notification. Events and HTTP ACK above are synthetic inputs to real backend.')
 }

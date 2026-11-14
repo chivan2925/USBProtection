@@ -1,3 +1,5 @@
+> **Current runtime (04/11/2026):** `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` uses **PostgreSQL** as the Admin Server's central database. The dated Week 1–4 H2 implementation reports below are retained as historical snapshots, not current design decisions. The Java JAR and Ubuntu `.deb` artifact types are unchanged. See [RUN_GUIDE.md](RUN_GUIDE.md).
+
 # USBShield Ubuntu — System Architecture Document (v0.1)
 
 > **Dự án:** USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu  
@@ -6,6 +8,27 @@
 > **Owner:** Member 1 (Admin Server Lead & Architecture/Integration Owner)  
 
 ---
+
+## Implementation update — 04/11/2026 (supersedes historic runtime notes)
+
+```text
+Admin workstation (allowed source IP) -- TLS/443 --> Nginx ACL --> Admin Web, /api/auth/**, /api/admin/**
+Ubuntu Agent (allowed client source IP) -- TLS/443 --> Nginx ACL --> /api/agent/** only
+                                                            |
+                                                     127.0.0.1:18080
+                                                            |
+                                                      Spring Boot JAR
+                                                            |
+                                              PostgreSQL (Flyway V1/V2)
+```
+
+- **Tách ACL và authentication:** Nginx giới hạn IP/route; Spring Security vẫn bắt buộc Admin session/CSRF và endpoint-bound Agent credentials. Client bị chặn tải static SPA; backend HTTP chỉ bind loopback. Tránh bypass proxy, untrusted forwarded headers hoặc gộp source NAT. Rate limiting **không được triển khai** theo quyết định owner.
+- **Chính sách USB:** Agent `live` chỉ chấp nhận HTTPS với CA/hostname validation, không fallback HTTP/redirect hay storage tương đối. Server validate HASH, Agent validate *toàn bộ* whitelist trước USBGuard; malformed policy không ACK. Event offline giữ được nếu timestamp không vượt ngưỡng tương lai.
+- **Trạng thái bảo vệ:** heartbeat có báo cáo USBGuard thật, khác với liveness và `appliedPolicyVersion` (ACK). Admin Web dùng bốn trạng thái `HEALTHY/DEGRADED/UNAVAILABLE/UNKNOWN`, checkedAt/staleness, heartbeat và version match. Đây là *Agent-reported* health, không phải chứng thực vật lý độc lập từ Server.
+- **Schema:** Flyway V1 khởi tạo tables, V2 thêm `admin_users.credential_version`, `endpoints.usbguard_reported_status`, `endpoints.usbguard_checked_at`; Hibernate `validate`. `usbshield_test`/`usbshield_browser_test` dùng test-only schemas ngẫu nhiên. Database hiện hữu cần baseline V1 một lần sau backup/preflight; không tự baseline.
+- **Read models:** `/api/admin/endpoints/page` và `/api/admin/whitelist/page` lọc/phân trang tại PostgreSQL, giảm N+1 HTTP; Endpoint detail và per-endpoint Allow/Revoke vẫn scoped, không có global Allow.
+
+Chi tiết: [RUN_GUIDE.md](RUN_GUIDE.md), [Phase 3 HTTPS/ACL/Paging](PHASE3_HTTPS_ACL_AND_PAGING.md), [Implementation status](IMPLEMENTATION_STATUS_20261104.md).
 
 ## Week 2 implementation update — v0.2 (2026-10-16)
 
@@ -17,7 +40,7 @@ Heartbeat is telemetry only; applied version changes through validated ACK.
 Policy wire field is `whitelistedDevices` (v0.2). See [API](API.md) for exact DTOs,
 paging, HASH-only grants, errors, startup and cross-member handoff.
 
-H2 update is additive for credential hash/event hostname and machineId uniqueness;
+Historical Week 2 H2 update was additive for credential hash/event hostname and machineId uniqueness;
 existing DB validation and deployment limits are documented in the
 [server integration report](member1/WEEK2_SERVER_INTEGRATION.md).
 Week 1 remains closed. Backend test results do not establish Ubuntu physical USB,
@@ -41,7 +64,7 @@ graph TB
 
     subgraph Admin_Central ["Admin Central Server"]
         AGENT -->|REST API / HTTP JSON| SERVER[USBShield Admin Server - Spring Boot 3]
-        SERVER -->|JPA / ORM| DB[(H2 File Database)]
+        SERVER -->|JPA / ORM| DB[(PostgreSQL Database)]
     end
 
     subgraph Admin_Console ["Admin Web Console"]
@@ -81,15 +104,15 @@ graph TB
 | Thành phần | Công nghệ | Nhiệm vụ chính |
 | :--- | :--- | :--- |
 | **Client Agent** (`client-agent`) | Java 21, Spring Boot, systemd service | Lắng nghe sự kiện từ USBGuard IPC, tra cứu session active qua logind, gửi heartbeat/event lên Server, đồng bộ whitelist vào USBGuard rules. |
-| **Admin Server** (`admin-server`) | Java 21, Spring Boot 3.3.x, Spring Data JPA, Security, H2 File Mode | Quản lý định danh Endpoint, lưu trữ lịch sử sự kiện, quản trị Per-endpoint Whitelist, cung cấp REST API cho Agent và Web Console. |
+| **Admin Server** (`admin-server`) | Java 21, Spring Boot 3.3.x, Spring Data JPA, Security, PostgreSQL | Quản lý định danh Endpoint, lưu trữ lịch sử sự kiện, quản trị Per-endpoint Whitelist, cung cấp REST API cho Agent và Web Console. |
 | **Admin Web Console** (`frontend`) | React, Vite, TypeScript | Giao diện dashboard cho quản trị viên theo dõi sự kiện thời gian thực, duyệt whitelist, xem trạng thái kết nối các máy trạm. |
 | **Packaging & Enforcement** (`packaging`) | Debian package (`.deb`), USBGuard daemon | Đóng gói cài đặt trọn gói trên Ubuntu 24.04 LTS, cấu hình systemd service tự chạy và bảo vệ chống tắt trái phép. |
 
 ---
 
-## 4. Mô hình dữ liệu quan hệ (Entity Data Model - H2 Database)
+## 4. Mô hình dữ liệu quan hệ (Entity Data Model - PostgreSQL)
 
-Admin Server sử dụng H2 Database ở chế độ File Mode (`./data/usbshield`) đảm bảo dữ liệu tồn tại bền vững qua các lần khởi động lại:
+Admin Server dùng PostgreSQL qua JDBC/Spring Data JPA. Dữ liệu tồn tại bền vững trên PostgreSQL service/data directory qua restart JAR; không phụ thuộc file H2 cục bộ. Các bảng Admin account, endpoint, device, event và per-endpoint whitelist do **Flyway V1/V2** tạo/nâng cấp; Hibernate chỉ `ddl-auto=validate`, không tự `update` schema. Database `usbshield` và role ứng dụng được tách khỏi `usbshield_test`/`usbshield_browser_test` phục vụ kiểm thử:
 
 ```mermaid
 erDiagram
@@ -97,6 +120,7 @@ erDiagram
         bigint id PK
         varchar username UK
         varchar password_hash
+        bigint credential_version
         timestamp created_at
     }
 
@@ -110,6 +134,8 @@ erDiagram
         timestamp last_seen
         bigint policy_version
         bigint applied_policy_version
+        varchar usbguard_reported_status
+        timestamp usbguard_checked_at
     }
 
     USB_DEVICE {
@@ -168,18 +194,18 @@ erDiagram
 7. Admin Server lưu trữ sự kiện vào bảng `usb_events` và thông báo tới Admin Console.
 
 ### 5.2. Luồng đồng bộ chính sách (Policy Synchronization Flow)
-1. Định kỳ mỗi 15-30 giây, Client Agent gửi `POST /api/agent/heartbeat` chứa `currentPolicyVersion`, kèm cả `X-Endpoint-Id` và `X-Agent-Token`.
+1. Client Agent định kỳ gửi `POST /api/agent/heartbeat` (mặc định 5 giây trong cấu hình Agent, có thể điều chỉnh), với `currentPolicyVersion` và hai header xác thực `X-Endpoint-Id`/`X-Agent-Token`.
 2. Admin Server kiểm tra nếu `desiredPolicyVersion > currentPolicyVersion`, phản hồi desired version để Agent quyết định đồng bộ.
 3. Client Agent gọi `GET /api/agent/policy` kèm cả `X-Endpoint-Id` và `X-Agent-Token`; cặp credential xác thực và giới hạn request vào một endpoint.
 4. Admin Server chỉ trả về danh sách Whitelist được gán riêng cho máy đó.
-5. Client Agent sinh luật tương thích với USBGuard, cập nhật file `/etc/usbguard/rules.conf` và nạp lại daemon.
+5. Client Agent reconcile bằng CLI USBGuard (`append-rule`, `remove-rule`) qua daemon IPC; ứng dụng Java không tự sửa trực tiếp `rules.conf` hoặc restart daemon trong luồng này. USBGuard quản lý lưu quy tắc theo cấu hình RuleFile/RuleFolder; cần xác nhận persistence qua reboot trên Ubuntu thật.
 6. Client Agent gửi `POST /api/agent/policy/ack` với cùng cặp header xác thực, chỉ sau khi đã áp dụng thành công phiên bản mới.
 
 ---
 
-## 6. Kế hoạch hoàn thiện các tuần tiếp theo (Roadmap)
+## 6. Kế hoạch theo tuần (lịch sử dự án; xem `RUN_GUIDE.md` để chạy hiện tại)
 
-- **Week 1 (Hiện tại):** Khởi tạo Server skeleton, H2 file DB, Freeze DTO & Schema hợp đồng, Unit Test Jackson Parser.
+- **Week 1 (lịch sử):** Khởi tạo Server skeleton, H2 file DB ở thời điểm đó, Freeze DTO & Schema hợp đồng, Unit Test Jackson Parser. **Hiện tại dùng PostgreSQL**.
 - **Week 2:** Kết nối Agent ↔ Server thực tế, xử lý outbox spool khi mất mạng, triển khai logic Per-endpoint Whitelist Admin CRUD.
 - **Week 3:** Hoàn thiện giao diện Admin Web Console (React), xác thực Admin Session, hoàn thiện gói `.deb` cài đặt Ubuntu.
 - **Week 4:** Kiểm thử toàn diện trên phần cứng thật (Flash Disk, Chuột, Bàn phím), đóng gói tài liệu báo cáo và chuẩn bị kịch bản Demo.
@@ -205,11 +231,13 @@ Agent-reported applied version. Heartbeat updates liveness only. See the canonic
 The `prod` profile requires externally supplied DB URL/password and enrollment
 bootstrap token, creates an Admin account only when an initial password is
 configured, binds to loopback by default, sets Secure/HttpOnly/SameSite session
-cookies, disables the H2 console and Swagger/OpenAPI, and does not trust forwarded
+cookies, disables Swagger/OpenAPI, and does not trust forwarded
 headers. Remote browser access therefore requires HTTPS termination at a trusted
 reverse proxy. The server JAR serves the React build and `/api` on the same origin.
-H2 file data and other runtime state belong in private persistent storage and are
-excluded from Git. This application has no clustering or HA database layer.
+PostgreSQL data/backup and runtime credentials belong in protected storage outside
+Git; PostgreSQL runs as an independently managed service. There is one Admin Server,
+no implemented clustering, HA or tested failover. Separate QA databases are used
+for destructive integration/browser tests.
 
 Week 4 Windows/JAR evidence and open release dependencies are tracked in
 [M1 Week 4 handoff](member1/WEEK4_SERVER_HANDOFF.md). None of that evidence claims

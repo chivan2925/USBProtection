@@ -12,5 +12,7 @@ public class AgentEnrollmentRequest {
     private String hostname;
     private String machineId;
     private String ipAddress;
+    private String operatingSystem;
     private String enrollmentToken;
+    private String agentToken;
 }

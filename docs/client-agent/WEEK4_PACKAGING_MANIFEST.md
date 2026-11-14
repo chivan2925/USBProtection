@@ -1,5 +1,7 @@
 # USBShield Client Agent — Week 4 Packaging Manifest & Provenance
 
+> **HISTORICAL BUILD MANIFEST (31/10/2026), not PR #50 artifact:** SHA-256, file lengths, dependency list and `tmpfiles.d`/`1777` design below belong to the earlier M3 staging output. The current `main` at `d5e156afdad382dc19d3b0a7198bf681fd36763e` adds Debian `acl` and the private `/run/user/<UID>` notifier socket. The owner reported new Maven test/package success, but did not provide final JAR SHA or regenerated staging/`.deb` hashes. Do **not** reuse old hashes to publish the new candidate. See [post-merge review](../rc/WEEK4_POST_MERGE_REVIEW_D5E156A.md).
+
 > **Mục tiêu:** Lưu trữ thông tin định danh, cấu trúc artifact, mã băm SHA-256 và môi trường đóng gói phục vụ Release Candidate (Week 4).  
 > **Trạng thái:** **RELEASE CANDIDATE PREPARED (WINDOWS STAGING VERIFIED / LINUX BUILD READY)**  
 > **Chủ sở hữu:** Member 3 (Client Agent & Packaging Engineer)  

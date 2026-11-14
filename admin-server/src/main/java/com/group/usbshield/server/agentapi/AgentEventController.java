@@ -4,6 +4,7 @@ import com.group.usbshield.server.agentapi.dto.AgentEventRequest;
 import com.group.usbshield.server.agentapi.dto.AgentUsbDeviceDto;
 import com.group.usbshield.server.device.UsbDevice;
 import com.group.usbshield.server.device.UsbDeviceRepository;
+import com.group.usbshield.server.endpoint.EndpointRepository;
 import com.group.usbshield.server.event.UsbEvent;
 import com.group.usbshield.server.event.UsbEventRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -26,6 +28,7 @@ public class AgentEventController {
 
     private final UsbEventRepository usbEventRepository;
     private final UsbDeviceRepository usbDeviceRepository;
+    private final EndpointRepository endpointRepository;
 
     @org.springframework.transaction.annotation.Transactional
     @PostMapping
@@ -36,6 +39,44 @@ public class AgentEventController {
 
         String effectiveEndpointId = principal.getName();
         AgentCredentialService.bind(effectiveEndpointId, request.getEndpointId());
+        // Reject implausible future events, but keep arbitrarily old offline events.
+        // Check before acquiring the catalog-wide transaction lock.
+        if (request.getOccurredAt().isAfter(Instant.now().plus(java.time.Duration.ofMinutes(5)))) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "Event timestamp exceeds allowed future clock skew");
+        }
+
+        // A per-endpoint lock alone does NOT serialize a new shared USB hash
+        // reported by two different endpoints. Lock one stable row across all
+        // instances/transactions before catalog find-or-create. A UNIQUE DB
+        // constraint provides the secondary invariant if another writer bypasses
+        // this API; deleting duplicate data must precede schema migration.
+        endpointRepository.lockDeviceCatalogCoordinator().orElseThrow(
+                () -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.UNAUTHORIZED, "No endpoint available"));
+        // Lock the authenticated endpoint row BEFORE the duplicate lookup and
+        // insert. This serializes concurrent deliveries across server instances
+        // using the database lock, without a check-then-insert uniqueness race.
+        endpointRepository.lockByEndpointId(effectiveEndpointId).orElseThrow(
+                () -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.UNAUTHORIZED, "Unknown endpoint"));
+        String payloadDigest = AgentEventCanonicalDigest.digest(effectiveEndpointId, request);
+        if (request.getEventId() != null) {
+            var existing = usbEventRepository.findByEndpointIdAndEventId(effectiveEndpointId, request.getEventId());
+            if (existing.isPresent()) {
+                UsbEvent stored = existing.get();
+                boolean sameEvent = stored.getPayloadDigest() != null
+                        ? stored.getPayloadDigest().equals(payloadDigest)
+                        : legacyEventMatches(stored, request);
+                if (!sameEvent) {
+                    throw new org.springframework.web.server.ResponseStatusException(
+                            org.springframework.http.HttpStatus.CONFLICT,
+                            "Event ID was already used for a different event on this endpoint");
+                }
+                return ResponseEntity.ok(Map.of("success", true, "eventId", stored.getId(),
+                        "receivedAt", stored.getReceivedAt()));
+            }
+        }
 
         Long usbDeviceId = null;
         AgentUsbDeviceDto deviceDto = request.getDevice();
@@ -49,7 +90,8 @@ public class AgentEventController {
                         .vendorId(deviceDto.getVendorId() != null ? deviceDto.getVendorId() : "UNKNOWN")
                         .productId(deviceDto.getProductId() != null ? deviceDto.getProductId() : "UNKNOWN")
                         .serialNumber(deviceDto.getSerial())
-                        .deviceHash(deviceDto.getHash())
+                        .deviceHash(deviceDto.getHash() == null || deviceDto.getHash().isBlank()
+                                ? null : deviceDto.getHash())
                         .deviceName(deviceDto.getName())
                         .interfaces(deviceDto.getInterfaceClass())
                         .build();
@@ -60,6 +102,8 @@ public class AgentEventController {
 
         UsbEvent usbEvent = UsbEvent.builder()
                 .endpointId(effectiveEndpointId)
+                .eventId(request.getEventId())
+                .payloadDigest(payloadDigest)
                 .hostname(request.getHostname())
                 .usbDeviceId(usbDeviceId)
                 .linuxUsername(request.getLinuxUsername())
@@ -84,4 +128,30 @@ public class AgentEventController {
                 "receivedAt", usbEvent.getReceivedAt()
         ));
     }
+    /** Compatibility for pre-digest event rows created by older Agent binaries. */
+    private boolean legacyEventMatches(UsbEvent stored, AgentEventRequest request) {
+        String username = request.getLinuxUsername();
+        boolean unknown = "UNKNOWN".equals(username);
+        if (!Objects.equals(stored.getEventType(), request.getEventType())
+                || !Objects.equals(stored.getDecision(), request.getDecision())
+                || !Objects.equals(stored.getOccurredAt(), request.getOccurredAt())
+                || !Objects.equals(stored.getHostname(), request.getHostname())
+                || !Objects.equals(stored.getLinuxUsername(), username)
+                || !Objects.equals(stored.getLinuxUid(), unknown ? null : request.getLinuxUid())
+                || !Objects.equals(stored.getSessionId(), unknown ? null : request.getSessionId())
+                || !Objects.equals(stored.getSessionType(), request.getSessionType())
+                || !Objects.equals(stored.getSeat(), request.getSeat())) return false;
+        AgentUsbDeviceDto requested = request.getDevice();
+        if (requested == null) return stored.getUsbDeviceId() == null;
+        if (stored.getUsbDeviceId() == null) return false;
+        var device = usbDeviceRepository.findById(stored.getUsbDeviceId());
+        return device.isPresent()
+                && Objects.equals(device.get().getVendorId(), requested.getVendorId())
+                && Objects.equals(device.get().getProductId(), requested.getProductId())
+                && Objects.equals(device.get().getSerialNumber(), requested.getSerial())
+                && Objects.equals(device.get().getDeviceName(), requested.getName())
+                && Objects.equals(device.get().getDeviceHash(), requested.getHash())
+                && Objects.equals(device.get().getInterfaces(), requested.getInterfaceClass());
+    }
+
 }

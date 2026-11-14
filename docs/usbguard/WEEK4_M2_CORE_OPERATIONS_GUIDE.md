@@ -20,7 +20,7 @@ allow with-interface none-of { 08:*:* }
 
 Together with daemon parameter `ImplicitPolicyTarget=block`, this permits devices **without** a class-08 Mass Storage interface and blocks an unmatched Mass Storage device. A composite device with any `08:*:*` interface does **not** match the base rule. This is an intended conservative policy; keyboard/mouse real-world safety must still be checked with native devices.
 
-USBGuard evaluates rules **in sequence (first matching rule wins)**. A preceding `block`/`reject` may override a later device-specific managed Allow, and a preceding broad Deny may also block a HID before the base rule. Reconciliation rejects these known/possible order conflicts; it does not silently reorder administrator-owned foreign rules. Foreign device-specific Allows may still authorize devices outside the desired USBShield whitelist: the reconciler preserves them and cannot assert that the *entire arbitrary foreign policy* is fail-closed.
+USBGuard evaluates rules **in sequence (first matching rule wins)**. A preceding `block`/`reject` may override a later device-specific managed Allow, and a preceding broad Deny may also block a HID before the base rule. Reconciliation rejects these known/possible order conflicts; it does not silently reorder administrator-owned foreign rules. In the current PR #57+ source, unauthorized foreign ALLOW rules are withdrawn after syntax/order checks; the reconciler re-lists IDs after every mutation and fails without ACK if withdrawal cannot be verified. The older preserve-foreign statement in historical Week 3/4 reports does not describe the current code. Native Ubuntu behavior remains unverified.
 
 ## 3. Identity and managed whitelist reconciliation
 
@@ -28,7 +28,7 @@ USBGuard evaluates rules **in sequence (first matching rule wins)**. A preceding
 - M2-created grants use `label "usbshield-managed"`. The synchronizer accepts only a single consistent definition per identity, compares full definitions and validates actual rules after applying changes.
 - Rule numbers from `usbguard list-rules` are **runtime IDs**, not stable identifiers. Reconciliation **re-lists rules before each removal**, including rollback cleanup, because another removal can renumber the remaining IDs. Rule number and allowed/fingerprint definition must never be conflated.
 - Before any mutation, the synchronizer checks the `ImplicitPolicyTarget=block`, canonical base rule, managed/foreign conflicts, rule order and the **entire recognized syntax of each numeric rule line**. Unsupported USBGuard rule attributes/conditions (for example `if ...`) cause a conservative **FAIL** pending operator review. This parser is intentionally a limited verifier, *not* the full upstream USBGuard grammar.
-- Unknown trailing tokens and malformed numeric headers (`2: permit ...`) are rejected. Do not rewrite an unsupported foreign rule automatically; inspect the complete policy with an administrator first.
+- Unknown trailing tokens and malformed numeric headers (`2: permit ...`) are rejected before mutation. Supported unauthorized foreign ALLOWs are removed and verified; unsupported syntax fails for administrator review. Never silently treat a failed cleanup as successful enforcement.
 - An append error can mean the rule was applied but the CLI reply was lost. The synchronizer attempts cleanup and throws on failure; neither the caller nor the server should report a successful ACK.
 - There is no lock shared with arbitrary administrators/other USBGuard clients: a concurrent out-of-band change after the last `list-rules` check is a remaining race, to be mitigated operationally by controlled policy ownership and native acceptance testing.
 
@@ -53,7 +53,7 @@ Native notification remains **best-effort feedback** after a USBGuard `PresenceC
 
 The listener resolves a UID/session, then M2's notification publisher attempts to connect over a per-UID **local Unix socket** to the GUI session helper. The helper checks the target UID/title/body *and now verifies the connecting process via Linux `SO_PEERCRED` as user `usbshield`*. `ClientNotificationPublisher.DELIVERED` means message passed to the helper, **not proof that a popup was displayed**. A missing helper, D-Bus or notification daemon must leave enforcement/event transport unaffected.
 
-**M3 packaging/ACL dependency:** Current `postinst` creates `/run/usbshield-notifier` (root-owned, mode `1777`), while the user-session helper makes `<UID>.sock` mode `0660` with the GUI user's default group. The `usbshield` service user may **not** have permission to connect to that socket. An arbitrary local user may also pre-create a conflicting pathname (availability issue). M3 must review secure per-UID socket ACL/ownership and start-up race handling; M2 does not change M3-owned installer/scripts. Do not resolve this by blindly making all sockets world-writable. Native Ubuntu tests and cross-owner signoff are pending.
+**Post-merge IPC candidate (`d5e156a`, PR #50):** The former global `1777` directory is retired. The GUI helper now binds `/run/user/<UID>/usbshield-notifier/notice.sock` in a logind-owned UID runtime directory, grants only `u:usbshield:--x` search permission on its parent/private directories and `u:usbshield:rw-` on the socket via `setfacl` (`acl` package), and refuses stale/symlink or wrong-owner paths. Both peers validate Linux `SO_PEERCRED`; this does not prove a visual popup or successful Ubuntu connectivity. M2 and M3 must still review effective ACL masks, GNOME/Wayland compatibility, startup after upgrade, and native denial/availability tests. See [IPC design](WEEK4_IPC_ACL_DESIGN.md). The old `1777`/`0660` risk was a **prior-source observation**, not current checked-in behavior.
 
 ## 7. Inspection commands for post-Week-4 Ubuntu test
 
@@ -67,7 +67,10 @@ sudo systemctl status usbguard usbshield-agent
 sudo journalctl -u usbguard -u usbshield-agent --since '10 minutes ago'
 loginctl list-sessions --no-legend
 loginctl show-session <session-id> -p Name -p User -p Active -p Remote -p Type -p Seat
-stat -c '%n %U:%G %a' /run/usbshield-notifier /run/usbshield-notifier/*.sock
+# Normal GUI account in the graphical session:
+printf '%s\n' "$XDG_RUNTIME_DIR"
+stat -c '%n %U:%G %a' "$XDG_RUNTIME_DIR" "$XDG_RUNTIME_DIR/usbshield-notifier" "$XDG_RUNTIME_DIR/usbshield-notifier/notice.sock"
+getfacl -p -- "$XDG_RUNTIME_DIR" "$XDG_RUNTIME_DIR/usbshield-notifier" "$XDG_RUNTIME_DIR/usbshield-notifier/notice.sock"
 id usbshield
 ```
 

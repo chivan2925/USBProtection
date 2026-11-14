@@ -1,6 +1,6 @@
 // Frontend view model mapped from the Admin API v0.2 at the adapter boundary.
 // Mapping and integration limits: docs/qa/EVENT_VIEW_MODEL_MAPPING.md.
-export type EventType = 'connected' | 'disconnected' | 'blocked' | 'allowed' | 'service'
+export type EventType = 'connected' | 'disconnected' | 'blocked' | 'allowed' | 'service' | 'policy_applied'
 export type EventDecision = 'allowed' | 'blocked' | 'unknown'
 export interface EventDevice {
   name?: string
@@ -46,7 +46,7 @@ export interface EventQuery {
   linuxUsername?: string
   deviceId?: string
   decision?: 'ALLOWED' | 'BLOCKED'
-  eventType?: 'CONNECTED' | 'DISCONNECTED'
+  eventType?: 'CONNECTED' | 'DISCONNECTED' | 'POLICY_APPLIED'
   from?: string
   to?: string
 }

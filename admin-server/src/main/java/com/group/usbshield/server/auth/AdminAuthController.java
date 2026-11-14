@@ -16,19 +16,24 @@ import org.springframework.web.server.ResponseStatusException;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @RestController @RequestMapping("/api/auth") @RequiredArgsConstructor
 public class AdminAuthController {
-    private final UserDetailsService users;
     private final PasswordEncoder encoder;
+    private final AdminUserRepository adminUsers;
     public record Login(@NotBlank String username,@NotBlank String password){}
     @GetMapping("/csrf") public Map<String,String> csrf(CsrfToken token){return Map.of("token",token.getToken(),"headerName",token.getHeaderName());}
-    @PostMapping("/login") public Map<String,String> login(@Valid @RequestBody Login body,HttpServletRequest request,HttpServletResponse response){
-        org.springframework.security.core.userdetails.UserDetails user;
-        try{user=users.loadUserByUsername(body.username());}catch(AuthenticationException e){throw new ResponseStatusException(UNAUTHORIZED,"Invalid credentials");}
-        if(!encoder.matches(body.password(),user.getPassword())) throw new ResponseStatusException(UNAUTHORIZED,"Invalid credentials");
+    @PostMapping("/login") @org.springframework.transaction.annotation.Transactional
+    public Map<String,String> login(@Valid @RequestBody Login body,HttpServletRequest request,HttpServletResponse response){
+        // Coordinate login with password rotation so old credentials cannot race a reset.
+        AdminUser user = adminUsers.lockByUsername(body.username())
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED,"Invalid credentials"));
+        if(!encoder.matches(body.password(),user.getPasswordHash())) throw new ResponseStatusException(UNAUTHORIZED,"Invalid credentials");
         if(request.getSession(false)!=null)request.changeSessionId();
         var context=SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(user.getUsername(),null,user.getAuthorities()));
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(user.getUsername(),null,
+                java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))));
         SecurityContextHolder.setContext(context);
         new HttpSessionSecurityContextRepository().saveContext(context,request,response);
+        request.getSession(true).setAttribute(AdminSessionVersionFilter.SESSION_VERSION,
+                user.getCredentialVersion() == null ? 0L : user.getCredentialVersion());
         new HttpSessionCsrfTokenRepository().saveToken(null,request,response);
         return Map.of("username",user.getUsername());
     }

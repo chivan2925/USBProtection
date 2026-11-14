@@ -8,6 +8,8 @@ import com.group.usbshield.server.device.UsbDeviceRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import com.group.usbshield.server.IsolatedPostgresDb;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 
@@ -17,11 +19,17 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@IsolatedPostgresDb
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-        "spring.datasource.url=jdbc:h2:mem:week1-http;DB_CLOSE_DELAY=-1",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
 class AgentHttpIntegrationTest {
+    @org.springframework.test.context.DynamicPropertySource
+    static void isolatedPostgres(org.springframework.test.context.DynamicPropertyRegistry registry) {
+        com.group.usbshield.server.TestPostgresSchemas.register(registry, AgentHttpIntegrationTest.class);
+    }
+
     @Autowired TestRestTemplate http;
     @Autowired ObjectMapper mapper;
     @Autowired DataSource dataSource;
@@ -31,9 +39,9 @@ class AgentHttpIntegrationTest {
     @Autowired org.springframework.security.crypto.password.PasswordEncoder encoder;
 
     @Test
-    void heartbeatAndMember2EventReachHttpServerAndPersistInH2() throws Exception {
+    void heartbeatAndMember2EventReachHttpServerAndPersistInPostgreSQL() throws Exception {
         try (var connection = dataSource.getConnection()) {
-            assertThat(connection.getMetaData().getDatabaseProductName()).isEqualTo("H2");
+            assertThat(connection.getMetaData().getDatabaseProductName()).isEqualTo("PostgreSQL");
             assertThat(connection.isValid(2)).isTrue();
         }
         Path sample = Path.of("../docs/agent-contract/sample-usb-event.json");

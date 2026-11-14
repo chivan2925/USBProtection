@@ -31,6 +31,7 @@ class HeartbeatCoordinatorTest {
         adminServerClient = mock(AdminServerClient.class);
         policySyncService = mock(PolicySyncService.class);
         outboxSpoolService = mock(OutboxSpoolService.class);
+        when(policySyncService.syncPolicy(any())).thenReturn(true);
 
         coordinator = new HeartbeatCoordinator(
                 endpointManager,
@@ -78,8 +79,8 @@ class HeartbeatCoordinatorTest {
     }
 
     @Test
-    @DisplayName("performHeartbeatCycle does NOT trigger policy sync if server version is not newer")
-    void noSyncWhenVersionIsEqualOrLower() {
+    @DisplayName("performHeartbeatCycle verifies equal-version rules on first heartbeat")
+    void initialSameVersionStillReconciles() {
         EndpointRegistration reg = EndpointRegistration.builder()
                 .endpointId("EP-01")
                 .agentToken("tok-01")
@@ -98,8 +99,10 @@ class HeartbeatCoordinatorTest {
 
         coordinator.performHeartbeatCycle();
 
-        verify(policySyncService, never()).syncPolicy(any());
-        verify(outboxSpoolService, times(1)).drainOutbox("EP-01", "tok-01", adminServerClient);
+        verify(policySyncService).syncPolicy(reg);
+        coordinator.performHeartbeatCycle();
+        verify(policySyncService, times(1)).syncPolicy(reg);
+        verify(outboxSpoolService, times(2)).drainOutbox("EP-01", "tok-01", adminServerClient);
     }
 
     @Test
@@ -192,6 +195,23 @@ class HeartbeatCoordinatorTest {
     }
 
     @Test
+    void pendingAckIsNotSentWhenFreshUsbGuardVerificationFails() {
+        EndpointRegistration reg = EndpointRegistration.builder()
+                .endpointId("EP-01").agentToken("tok-01")
+                .currentPolicyVersion(4L).pendingAckVersion(4L).build();
+        when(endpointManager.ensureEnrolled()).thenReturn(true);
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+        when(adminServerClient.sendHeartbeat(any(), eq("tok-01"))).thenReturn(Optional.of(
+                HeartbeatResponse.builder().serverPolicyVersion(4L).build()));
+        when(policySyncService.syncPolicy(reg)).thenReturn(false);
+
+        coordinator.performHeartbeatCycle();
+
+        verify(adminServerClient, never()).acknowledgePolicy(any(), any(), any());
+        verify(endpointManager, never()).clearPendingAck();
+    }
+
+    @Test
     @DisplayName("performHeartbeatCycle handles server unreachable gracefully without throwing exception")
     void serverUnreachableHandledGracefully() {
         EndpointRegistration reg = EndpointRegistration.builder()
@@ -209,4 +229,25 @@ class HeartbeatCoordinatorTest {
         verify(policySyncService, never()).syncPolicy(any());
         verify(outboxSpoolService, never()).drainOutbox(any(), any(), any());
     }
+    @Test
+    void heartbeatIncludesLiveHealthEvidenceWithoutConflatingPolicyAck() {
+        var health = mock(UsbGuardHealthProbe.class);
+        when(health.measure(false)).thenReturn("DEGRADED");
+        when(health.measure(true)).thenReturn("HEALTHY");
+        coordinator = new HeartbeatCoordinator(endpointManager, adminServerClient,
+                policySyncService, outboxSpoolService, null, null, health);
+        var reg = EndpointRegistration.builder().endpointId("EP-H").agentToken("tok-H")
+                .currentPolicyVersion(2L).build();
+        when(endpointManager.ensureEnrolled()).thenReturn(true);
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+        when(adminServerClient.sendHeartbeat(any(HeartbeatRequest.class), eq("tok-H")))
+                .thenReturn(Optional.of(HeartbeatResponse.builder().serverPolicyVersion(2L).build()));
+        coordinator.performHeartbeatCycle();
+        coordinator.performHeartbeatCycle();
+        var captor = ArgumentCaptor.forClass(HeartbeatRequest.class);
+        verify(adminServerClient, times(2)).sendHeartbeat(captor.capture(), eq("tok-H"));
+        assertEquals("DEGRADED", captor.getAllValues().get(0).getUsbGuardStatus());
+        assertEquals("HEALTHY", captor.getAllValues().get(1).getUsbGuardStatus());
+    }
+
 }

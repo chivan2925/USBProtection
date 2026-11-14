@@ -88,6 +88,7 @@ class EventSenderServiceTest {
         ActiveUserInfo user = ActiveUserInfo.resolved("student01", 1000L, "2", "wayland", "seat0");
         when(activeUserResolver.resolveCurrentActiveUser()).thenReturn(user);
 
+        when(outboxSpoolService.spool(any(UsbEventPayload.class))).thenReturn(true);
         // Server returns false (network unreachable/timeout)
         when(adminServerClient.sendEvent(eq("EP-01"), eq("tok-01"), any(UsbEventPayload.class)))
                 .thenReturn(false);
@@ -99,11 +100,35 @@ class EventSenderServiceTest {
     }
 
     @Test
+    @DisplayName("queued pre-enrollment event is rebound when durable endpoint identity becomes available")
+    void sendPayloadRebindsPlaceholderAfterEnrollment() {
+        EndpointRegistration registration = EndpointRegistration.builder()
+                .endpointId("EP-NEW")
+                .agentToken("new-token")
+                .build();
+        when(endpointManager.getCurrentRegistration()).thenReturn(registration);
+        when(adminServerClient.sendEvent(eq("EP-NEW"), eq("new-token"), any(UsbEventPayload.class)))
+                .thenReturn(true);
+        UsbEventPayload payload = UsbEventPayload.builder()
+                .endpointId("POC-UNENROLLED-ubuntu-desktop")
+                .eventType("CONNECTED")
+                .decision("BLOCKED")
+                .build();
+
+        eventSenderService.sendPayload(payload);
+
+        assertEquals("EP-NEW", payload.getEndpointId());
+        verify(adminServerClient).sendEvent(eq("EP-NEW"), eq("new-token"), same(payload));
+        verify(outboxSpoolService, never()).spool(any());
+    }
+
+    @Test
     @DisplayName("emitUsbEvent sets UNKNOWN when active user is not detected")
     void emitUsbEventUnknownUser() {
         when(endpointManager.getCurrentRegistration()).thenReturn(null);
         when(activeUserResolver.resolveCurrentActiveUser()).thenReturn(null);
 
+        when(outboxSpoolService.spool(any(UsbEventPayload.class))).thenReturn(true);
         Map<String, Object> device = Map.of("vendorId", "0951", "productId", "1666");
         eventSenderService.emitUsbEvent(device, "CONNECTED", "BLOCKED");
 
@@ -112,4 +137,29 @@ class EventSenderServiceTest {
         assertEquals("UNKNOWN", captor.getValue().getLinuxUsername());
         assertNull(captor.getValue().getLinuxUid());
     }
+    @Test
+    @DisplayName("offline audit quota rejection propagates to the caller")
+    void quotaRejectionMustNotBeSilentlyAcknowledged() {
+        EndpointRegistration reg = EndpointRegistration.builder()
+                .endpointId("EP-01").agentToken("tok-01").build();
+        when(endpointManager.getCurrentRegistration()).thenReturn(reg);
+        when(adminServerClient.sendEvent(eq("EP-01"), eq("tok-01"), any(UsbEventPayload.class)))
+                .thenReturn(false);
+        when(outboxSpoolService.spool(any(UsbEventPayload.class))).thenReturn(false);
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> eventSenderService.emitUsbEvent(Map.of("vendorId", "0951"), "CONNECTED", "BLOCKED"));
+        assertTrue(error.getMessage().contains("neither sent nor durably queued"));
+        verify(outboxSpoolService).spool(any(UsbEventPayload.class));
+    }
+
+    @Test
+    @DisplayName("pre-enrollment audit also rejects a failed local spool")
+    void preEnrollmentQuotaRejectionPropagates() {
+        when(endpointManager.getCurrentRegistration()).thenReturn(null);
+        when(outboxSpoolService.spool(any(UsbEventPayload.class))).thenReturn(false);
+        assertThrows(IllegalStateException.class,
+                () -> eventSenderService.emitUsbEvent(Map.of("vendorId", "0951"), "CONNECTED", "BLOCKED"));
+        verify(adminServerClient, never()).sendEvent(anyString(), anyString(), any());
+    }
+
 }
