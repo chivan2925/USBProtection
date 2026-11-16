@@ -9,14 +9,30 @@ let Devices
 let Events
 let EndpointDetail
 let DataTable
+let PageHeading
 before(async () => {
   vite = await createServer({ server: { middlewareMode: true, ws: false }, appType: 'custom' })
   ;({ Devices } = await vite.ssrLoadModule('/src/pages/Devices.tsx'))
   ;({ Events } = await vite.ssrLoadModule('/src/pages/Events.tsx'))
   ;({ EndpointDetail } = await vite.ssrLoadModule('/src/pages/Endpoints.tsx'))
   ;({ DataTable } = await vite.ssrLoadModule('/src/components/DataTable.tsx'))
+  ;({ PageHeading } = await vite.ssrLoadModule('/src/components/Common.tsx'))
 })
 after(async () => { await vite?.close() })
+
+test('page headings omit decorative copy without leaving empty elements', () => {
+  const render = extra => renderToStaticMarkup(createElement(PageHeading, { title: 'Test heading', ...extra }, createElement('button', null, 'Refresh')))
+  for (const extra of [{}, { eyebrow: '', description: '' }]) {
+    const html = render(extra)
+    assert.ok(html.includes('<h1>Test heading</h1>'))
+    assert.ok(html.includes('<button>Refresh</button>'))
+    assert.ok(!html.includes('class="eyebrow"'))
+    assert.ok(!html.includes('<p>'))
+  }
+  const html = render({ eyebrow: '404', description: 'Page not found.' })
+  assert.ok(html.includes('class="eyebrow">404</div>'))
+  assert.ok(html.includes('<p>Page not found.</p>'))
+})
 
 // Fixtures are test-only; the shipped application never imports these records.
 const devices = [

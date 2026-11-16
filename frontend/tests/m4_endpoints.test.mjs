@@ -162,8 +162,25 @@ test('policy sync distinguishes offline pending, missing ACK and reported applie
     const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, state, endpointId: endpoint.id }))
     assert.ok(html.includes(example.message), example.message)
     assert.equal(html.includes('Agent đã ACK phiên bản này'), example.policyVersion === example.appliedPolicyVersion)
+    assert.ok(html.includes('<dt>USBGuard</dt>'))
+    assert.ok(html.includes('<dt>Policy ACK</dt>'))
+    assert.ok(html.includes('>Unknown</span>'))
+    assert.ok(!html.includes('policy-sync'))
+    assert.ok(!html.includes('Mở toàn bộ Event History'))
     assert.ok(!html.includes('Hệ thống đang được bảo vệ'))
   }
+})
+
+test('embedded endpoint detail preserves scoped data without page navigation', () => {
+  const endpoint = mockEndpoints[0]
+  const html = renderToStaticMarkup(createElement(EndpointDetail, { ...baseProps, endpointId: endpoint.id, demo: true, embedded: true }))
+  assert.ok(!html.includes('class="back-link"'))
+  assert.ok(html.includes('LAB-PC-01'))
+  assert.ok(html.includes('Policy version'))
+  assert.ok(html.includes('Last Applied Version'))
+  assert.ok(html.includes('USBGuard'))
+  assert.ok(html.includes('Allow on this endpoint'))
+  assert.ok(!html.includes('LAB-PC-02'))
 })
 
 test('management pages clear protected rows during loading, empty, unavailable and failure', () => {

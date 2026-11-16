@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '../components/Icon'
-import { Badge } from '../components/Common'
 import { useToast } from '../hooks/useToast'
 import { useAuth } from '../hooks/useAuth'
 import { ApiError } from '../services/http'
@@ -37,19 +36,15 @@ export function Login({ demo = false }: { demo?: boolean }) {
 
   return <main className="login-page">
     <section className="login-story">
-      <a className="brand" href="#/dashboard"><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span><small>DEVICE SECURITY CONSOLE</small></span></a>
+      <a className="brand" href="#/dashboard"><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span></span></a>
       <div className="login-story-content">
         <div className="login-shield"><Icon name="shield" size={86} /></div>
-        <div className="eyebrow">CONTROL EVERY CONNECTION</div>
         <h1>An toàn bắt đầu<br />từ mỗi kết nối.</h1>
-        <p>Quản lý thiết bị USB, endpoints và chính sách bảo vệ hệ thống.</p>
         <div className="login-features"><span><Icon name="monitor" />Quản lý endpoints</span><span><Icon name="check" />Kiểm soát truy cập USB</span><span><Icon name="history" />Theo dõi hoạt động</span></div>
       </div>
-      <small>USB Protection · Device security management</small>
     </section>
     <section className="login-form-panel"><div className="login-form-content">
-      <Badge>ADMIN CONSOLE</Badge><h2>Chào mừng trở lại</h2>
-      <p>Đăng nhập để quản lý USB Protection.</p>
+      <h2>Chào mừng trở lại</h2>
       {demo && <p className="notice">Demo chỉ đọc. Thoát demo để đăng nhập bằng backend thật.</p>}
       {!demo && auth?.sessionExpired && <p className="notice" role="status">Phiên Admin đã hết hạn. Vui lòng đăng nhập lại.</p>}
       <form onSubmit={submit}>

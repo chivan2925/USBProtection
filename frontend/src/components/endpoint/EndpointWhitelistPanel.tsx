@@ -31,7 +31,6 @@ export function EndpointWhitelistPanel({
       <div className="panel-heading">
         <div>
           <h2>Whitelist thiết bị</h2>
-          <p>Whitelist server đã lưu cho endpoint này. Agent cần áp dụng và ACK để xác nhận đồng bộ.</p>
         </div>
       </div>
 

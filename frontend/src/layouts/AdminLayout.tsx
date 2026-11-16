@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Badge } from '../components/Common'
 import { Icon } from '../components/Icon'
 import type { IconName } from '../components/Icon'
 import { useAuth } from '../hooks/useAuth'
@@ -47,11 +46,11 @@ export function AdminLayout({ route, children, demo = false }: { route: string; 
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); mainRef.current?.focus() }}>Đến nội dung chính</a>
     {open && <button className="sidebar-overlay" aria-label="Đóng menu" onClick={() => setOpen(false)} />}
     <aside className={`sidebar ${open ? 'is-open' : ''}`} id="sidebar">
-      <a href="#/dashboard" className="brand" onClick={() => setOpen(false)}><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span><small>DEVICE SECURITY CONSOLE</small></span></a>
+      <a href="#/dashboard" className="brand" onClick={() => setOpen(false)}><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span></span></a>
       <nav aria-label="Điều hướng chính">{navigation.map((item, index) => <div key={item.route}>
         {navigation[index - 1]?.group !== item.group && <p className="nav-group">{item.group}</p>}
         <a href={`#${item.route}`} className={`nav-link ${active?.route === item.route ? 'active' : ''}`} aria-current={active?.route === item.route ? 'page' : undefined} onClick={() => setOpen(false)}>
-          <Icon name={item.icon} /><span>{item.label}</span>{active?.route === item.route && <span className="nav-active-dot" />}
+          <Icon name={item.icon} /><span>{item.label}</span>
         </a>
       </div>)}</nav>
       <div className="sidebar-bottom">
@@ -63,10 +62,9 @@ export function AdminLayout({ route, children, demo = false }: { route: string; 
     <div className="main-shell">
       <header className="topbar">
         <div className="breadcrumbs"><button className="icon-button mobile-toggle" aria-label={open ? 'Đóng menu' : 'Mở menu'} aria-expanded={open} aria-controls="sidebar" onClick={() => setOpen(!open)}><Icon name="menu" /></button><span className="breadcrumb-root">Workspace</span><span className="breadcrumb-slash">/</span><strong>{active?.label ?? 'Không tìm thấy'}</strong></div>
-        <div className="topbar-right"><Badge>{demo ? 'Demo · Read-only' : 'Phiên Admin'}</Badge><span className="topbar-divider" /><span className="profile-link"><span className="user-avatar"><Icon name="user" size={18} /></span><span>{auth?.user?.username ?? 'Demo'}</span></span></div>
+        <div className="topbar-right"><span className="topbar-divider" /><span className="profile-link"><span className="user-avatar"><Icon name="user" size={18} /></span><span>{auth?.user?.username ?? 'Demo'}</span></span></div>
       </header>
       <main id="main-content" ref={mainRef} tabIndex={-1}>{children}</main>
-      <footer className="app-footer"><span>USB Protection · Quản lý bảo mật thiết bị</span><span>Quyền USB được quản lý theo từng endpoint</span></footer>
     </div>
   </div>
 }

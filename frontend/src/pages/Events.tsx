@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react'
-import { Badge, PageHeading, Panel, ResourceNotice } from '../components/Common'
+import { PageHeading, Panel, ResourceNotice } from '../components/Common'
 import { EventTable } from '../components/event/EventTable'
 import { EventFilters } from '../components/event/EventFilters'
 import { emptyEventFilters } from '../types/event'
@@ -15,14 +15,13 @@ import { getEventQuery } from '../utils/eventFilters'
 export function Events({ state, refresh, refreshButton }: PageProps) {
   const [eventFilters, setEventFilters] = useState(emptyEventFilters)
   const events = state.status === 'ready' ? state.data.events : []
-  const demo = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('demo') === '1'
   const validDateRange = getEventDateRange(eventFilters).valid
   const rows = newestFirst(events.filter(event => matchesEventFilters(event, eventFilters)), event => event.timestamp)
 
   return <>
-    <PageHeading eyebrow="AUDIT & ACTIVITY" title="Lịch sử sự kiện" description="Tra cứu hoạt động USB và các sự kiện dịch vụ trên toàn hệ thống.">{refreshButton}</PageHeading>
+    <PageHeading title="Lịch sử sự kiện">{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
-    <Panel title="Event Logs" subtitle="Mới nhất trước · Khoảng ngày bao gồm cả ngày đầu và cuối, theo múi giờ trình duyệt" action={<Badge>{demo ? 'Dữ liệu mock · Demo' : state.status === 'ready' ? 'Nhật ký hệ thống' : 'Chưa có dữ liệu'}</Badge>}>
+    <Panel title="Event Logs">
       <EventFilters value={eventFilters} onChange={setEventFilters} onReset={() => setEventFilters(emptyEventFilters)} />
       {!validDateRange && <p className="field-error" role="alert">Khoảng ngày không hợp lệ. Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.</p>}
       <EventTable key={JSON.stringify(eventFilters)} events={rows} filtered={Object.values(eventFilters).some(Boolean)} loading={state.status === 'loading'} unavailable={state.status === 'unavailable'} failed={state.status === 'error'} />
@@ -30,7 +29,7 @@ export function Events({ state, refresh, refreshButton }: PageProps) {
   </>
 }
 
-export function LiveEvents({ onUnauthorized }: { onUnauthorized?: () => void }) {
+export function LiveEvents({ onUnauthorized, revision = 0 }: { onUnauthorized?: () => void; revision?: number }) {
   const [filters, setFilters] = useState(emptyEventFilters)
   const [page, setPage] = useState(0)
   const size = 20
@@ -43,16 +42,16 @@ export function LiveEvents({ onUnauthorized }: { onUnauthorized?: () => void }) 
     if (query.page > 0 && query.page >= result.totalPages) return protectionApi.getEventPage({ ...query, page: Math.max(0, result.totalPages - 1) }, signal)
     return result
   }, [filters, page])
-  const { state, refresh, updatedAt } = useResource(loader)
+  const { state, refresh, updatedAt } = useResource(loader, revision)
   useEffect(() => { if (state.status === 'error' && state.statusCode === 401) onUnauthorized?.() }, [state, onUnauthorized])
   const updateFilters = (next: typeof filters) => { setFilters(next); setPage(0) }
   const data = state.status === 'ready' ? state.data : undefined
   return <>
-    <PageHeading eyebrow="AUDIT & ACTIVITY" title="Lịch sử sự kiện" description="Sự kiện đã được máy chủ lưu, sắp xếp mới nhất trước.">
+    <PageHeading title="Lịch sử sự kiện">
       <div className="refresh-actions">{updatedAt && state.status === 'ready' && <span>Cập nhật: {formatDateForEvents(updatedAt)}</span>}<button className="button" disabled={state.status === 'loading'} onClick={() => void refresh()}>Refresh dữ liệu</button></div>
     </PageHeading>
     <ResourceNotice state={state} retry={() => void refresh()} />
-    <Panel title="Event Logs" subtitle="Tìm endpoint/USB theo tên hoặc ID · Ngày theo múi giờ trình duyệt" action={<Badge>{state.status === 'ready' ? 'Dữ liệu máy chủ' : 'Chưa tải được dữ liệu'}</Badge>}>
+    <Panel title="Event Logs">
       <EventFilters live value={filters} onChange={updateFilters} onReset={() => updateFilters(emptyEventFilters)} />
       <EventTable events={data?.content ?? []} filtered={Object.values(filters).some(Boolean)} loading={state.status === 'loading'} failed={state.status === 'error'} pagination={{ page: data?.page ?? page, size, totalElements: data?.totalElements ?? 0, totalPages: data?.totalPages ?? 0, onPageChange: setPage }} />
     </Panel>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AdminLayout } from './layouts/AdminLayout'
 import { ToastProvider } from './components/Toast'
 import { EmptyState, LoadingState, PageHeading, Panel } from './components/Common'
@@ -14,20 +14,18 @@ import { formatDate } from './utils/format'
 import { Dashboard } from './pages/Dashboard'
 import { Devices } from './pages/Devices'
 import { Events, LiveEvents } from './pages/Events'
-import { Endpoints, EndpointDetail } from './pages/Endpoints'
+import { Endpoints } from './pages/Endpoints'
+import { EndpointDetailModal } from './components/endpoint/EndpointDetailModal'
 import { Settings } from './pages/Settings'
 import { Login } from './pages/Login'
 import './App.css'
 
-function Console({ route, demo }: { route: string; demo: boolean }) {
+function Console({ route, demo, revision }: { route: string; demo: boolean; revision: number }) {
   const loader = useCallback((signal: AbortSignal) => {
     if (demo) return getDemoSnapshot(signal)
-    const match = route.match(/^\/endpoints\/([^/]+)$/)
-    let endpointId: string | undefined
-    try { if (match) endpointId = decodeURIComponent(match[1]) } catch { /* Invalid URL shows 404. */ }
-    return protectionApi.getSnapshot(signal, endpointId)
+    return protectionApi.getSnapshot(signal, undefined, route)
   }, [demo, route])
-  const { state, refresh, updatedAt } = useResource(loader)
+  const { state, refresh, updatedAt } = useResource(loader, revision)
   const notify = useToast()
 
   async function handleRefresh() {
@@ -56,12 +54,7 @@ function Console({ route, demo }: { route: string; demo: boolean }) {
     case '/endpoints': page = <Endpoints {...props} />; break
     case '/settings': page = <Settings />; break
     default: {
-      const match = route.match(/^\/endpoints\/([^/]+)$/)
-      let endpointId: string | undefined
-      try { if (match) endpointId = decodeURIComponent(match[1]) } catch { /* Show 404. */ }
-      page = endpointId
-        ? <EndpointDetail key={endpointId} {...props} endpointId={endpointId} />
-        : <><PageHeading eyebrow="404" title="Không tìm thấy trang" description="Đường dẫn này không tồn tại trong USB Protection." />
+      page = <><PageHeading eyebrow="404" title="Không tìm thấy trang" description="Đường dẫn này không tồn tại trong USB Protection." />
           <Panel title="Kiểm tra lại đường dẫn"><EmptyState icon="search" title="Trang không khả dụng" description="Sử dụng thanh điều hướng hoặc quay lại Dashboard." />
             <a className="button primary" href="#/dashboard">Về Dashboard</a>
           </Panel></>
@@ -81,6 +74,18 @@ function Console({ route, demo }: { route: string; demo: boolean }) {
 function Router({ demo }: { demo: boolean }) {
   const route = useRoute()
   const auth = useAuth()
+  const [backgroundRoute, setBackgroundRoute] = useState<string | null>(null)
+  const [revision, setRevision] = useState(0)
+  const match = route.match(/^\/endpoints\/([^/]+)$/)
+  let endpointId: string | undefined
+  try { if (match) endpointId = decodeURIComponent(match[1]) } catch { /* Show 404. */ }
+  const pageRoute = endpointId ? backgroundRoute ?? '/endpoints' : route
+  if (!endpointId && backgroundRoute !== route) setBackgroundRoute(route)
+  const refreshBackground = useCallback(() => setRevision(value => value + 1), [])
+  function closeDetail() {
+    if (backgroundRoute) window.history.back()
+    else window.location.replace('#/endpoints')
+  }
   useEffect(() => {
     if (demo || auth?.loading || auth?.error) return
     if (!auth?.user && route !== '/login') window.location.hash = '/login'
@@ -96,9 +101,12 @@ function Router({ demo }: { demo: boolean }) {
     </Panel>
   </main>
   if (route === '/login' || (!demo && !auth?.user)) return <Login demo={demo} />
-  if (route === '/events' && !demo) return <AdminLayout route={route}><LiveEvents /></AdminLayout>
-  // Mỗi trang bắt đầu bằng loading, không hiển thị snapshot của trang trước.
-  return <Console key={route} route={route} demo={demo} />
+  return <>
+    {pageRoute === '/events' && !demo
+      ? <AdminLayout route={pageRoute}><LiveEvents revision={revision} /></AdminLayout>
+      : <Console key={pageRoute} route={pageRoute} demo={demo} revision={revision} />}
+    {endpointId && <EndpointDetailModal key={endpointId} endpointId={endpointId} demo={demo} onClose={closeDetail} onPolicyChange={refreshBackground} />}
+  </>
 }
 
 export default function App() {

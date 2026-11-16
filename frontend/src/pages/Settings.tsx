@@ -10,7 +10,7 @@ export function Settings() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   return <>
-    <PageHeading eyebrow="SYSTEM CONFIGURATION" title="Cài đặt hệ thống" description="Thông tin phiên Admin và phạm vi quản lý USB." />
+    <PageHeading title="Cài đặt hệ thống" />
     <Panel title="Thông tin kết nối" action={<Badge>{auth?.user ? 'Phiên Admin' : 'Demo chỉ đọc'}</Badge>}>
       <dl className="settings-details">
         <div><dt>Tài khoản</dt><dd>{auth?.user?.username ?? 'Chưa đăng nhập'}</dd></div>

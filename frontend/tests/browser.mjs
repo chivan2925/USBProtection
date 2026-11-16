@@ -16,6 +16,7 @@ const executable = [process.env.CHROME_PATH, 'C:/Program Files/Google/Chrome/App
 assert.ok(executable, 'Set CHROME_PATH to a locally installed Chromium browser.')
 assert.ok(existsSync(join(root, 'dist/index.html')), 'Run npm run build first.')
 const live = process.argv.includes('--live')
+const modalOnly = process.argv.includes('--modal-only')
 const fixture = live ? await startLiveServer(artifacts) : await startAdminFixture()
 const profile = await mkdtemp(join(artifacts, 'chrome-'))
 const server = spawn(process.execPath, [join(root, 'node_modules/vite/bin/vite.js'), 'preview', '--host', '127.0.0.1', '--port', '4173', '--strictPort'], { cwd: root, env: { ...process.env, API_PROXY_TARGET: fixture.origin }, windowsHide: true, stdio: 'pipe' })
@@ -87,7 +88,7 @@ try {
   }
   const navigate = async (route, heading) => {
     await evaluate(`location.hash = ${JSON.stringify(route)}`)
-    await until(() => evaluate(`document.querySelector('h1')?.textContent === ${JSON.stringify(heading)}`), route)
+    await until(() => evaluate(`(document.querySelector('.endpoint-detail-modal h1') ?? document.querySelector('h1'))?.textContent === ${JSON.stringify(heading)}`), route)
   }
   const fillInput = async (selector, value) => {
     await evaluate(`{ const input = document.querySelector(${JSON.stringify(selector)}); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, ${JSON.stringify(value)}); input.dispatchEvent(new Event('input', { bubbles: true })); }`)
@@ -95,6 +96,94 @@ try {
   if (live) {
     try { await checkLiveBrowser(fixture, { cdp, evaluate, until, screenshot, navigate, fillInput }) }
     catch (error) { console.error(await evaluate('document.body.innerText')); await screenshot('m4-live-failure.png'); throw error }
+  } else if (modalOnly) {
+    await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/#/login' })
+    await until(() => evaluate(`!!document.querySelector('#password')`), 'modal fixture login')
+    await fillInput('#username', 'fixture-admin')
+    await fillInput('#password', 'fixture-only')
+    await evaluate(`document.querySelector('button[type="submit"]').click()`)
+    await until(() => evaluate(`!!document.querySelector('.stat-value')`), 'modal fixture session')
+    await navigate('/endpoints', 'Quản lý endpoints')
+    await fillInput('.filters input', 'fixture-ubuntu-a')
+    await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 1 && !!document.querySelector('a[href="#/endpoints/A"]')`), 'filtered endpoint list')
+    async function openDetail(endpointId) {
+      await evaluate(`{ const link = document.querySelector(${JSON.stringify(`a[href="#/endpoints/${endpointId}"]`)}); link.focus(); link.click(); }`)
+      await until(() => evaluate(`document.querySelector('.endpoint-detail-modal')?.matches(':modal') && document.querySelector('.endpoint-detail-modal h1')?.textContent !== 'Chi tiết endpoint' && !document.querySelector('.endpoint-detail-modal .loading-state')`), 'endpoint modal ready')
+    }
+    async function closeDetail(route) {
+      await evaluate(`document.querySelector('[aria-label="Đóng chi tiết endpoint"]').click()`)
+      await until(() => evaluate(`!document.querySelector('.endpoint-detail-modal') && location.hash === ${JSON.stringify(`#${route}`)}`), 'modal closed on original page')
+    }
+    await openDetail('A')
+    assert.equal(await evaluate(`document.querySelector('main h1').textContent`), 'Quản lý endpoints')
+    assert.equal(await evaluate(`document.body.style.overflow`), 'hidden')
+    await cdp('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 })
+    await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 })
+    assert.equal(await evaluate(`document.querySelector('.endpoint-detail-modal').contains(document.activeElement)`), true)
+    await screenshot('endpoint-modal-desktop.png')
+    await cdp('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 })
+    await cdp('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 })
+    await until(() => evaluate(`!document.querySelector('.endpoint-detail-modal') && location.hash === '#/endpoints'`), 'Escape closes modal')
+    assert.equal(await evaluate(`document.activeElement?.getAttribute('href')`), '#/endpoints/A')
+    assert.equal(await evaluate(`document.querySelector('.filters input').value`), 'fixture-ubuntu-a')
+    assert.equal(await evaluate(`document.body.style.overflow`), '')
+    await openDetail('A')
+    await evaluate(`history.back()`)
+    await until(() => evaluate(`!document.querySelector('.endpoint-detail-modal')`), 'Back closes modal')
+    await evaluate(`history.forward()`)
+    await until(() => evaluate(`document.querySelector('.endpoint-detail-modal h1')?.textContent === 'fixture-ubuntu-a'`), 'Forward reopens modal')
+    const beforeB = structuredClone(fixture.state.endpoints[1])
+    const beforeRulesB = structuredClone(fixture.state.whitelist.B)
+    async function allow() {
+      await evaluate(`document.querySelector('.endpoint-detail-modal [aria-label="Allow on this endpoint"]').click()`)
+      await until(() => evaluate(`!!document.querySelector('#usb-device-id option[value="1"]')`), 'modal scoped USB loaded')
+      await evaluate(`{ const select = document.querySelector('#usb-device-id'); select.value = '1'; select.dispatchEvent(new Event('change', { bubbles: true })); document.querySelector('.endpoint-detail-modal .policy-form button[type="submit"]').click(); }`)
+      await until(() => evaluate(`document.querySelector('.confirm-dialog')?.matches(':modal')`), 'nested confirmation')
+      await evaluate(`document.querySelector('.confirm-dialog .primary').click()`)
+    }
+    fixture.state.failMutation = 500
+    await allow()
+    await until(() => evaluate(`!!document.querySelector('.confirm-dialog [role="alert"]')`), 'nested mutation error visible')
+    assert.equal(fixture.state.whitelist.A.length, 0)
+    await evaluate(`document.querySelector('.confirm-dialog .button').click()`)
+    assert.equal(await evaluate(`document.querySelector('.endpoint-detail-modal').matches(':modal')`), true)
+    fixture.state.failMutation = 0
+    await allow()
+    await until(() => evaluate(`!!document.querySelector('.endpoint-detail-modal [aria-label^="Revoke on this endpoint"]')`), 'modal Allow refetch')
+    assert.equal(fixture.state.endpoints[0].policyVersion, 2)
+    assert.equal(fixture.state.endpoints[0].appliedPolicyVersion, 0)
+    await evaluate(`document.querySelector('.endpoint-detail-modal [aria-label^="Revoke on this endpoint"]').click()`)
+    await until(() => evaluate(`!!document.querySelector('.confirm-dialog[open]')`), 'modal Revoke confirmation')
+    await evaluate(`document.querySelector('.confirm-dialog .primary').click()`)
+    await until(() => evaluate(`!document.querySelector('.confirm-dialog') && document.querySelector('.endpoint-detail-modal [data-testid="endpoint-whitelist-panel"]')?.innerText.includes('Chưa có thiết bị nào')`), 'modal Revoke refetch')
+    assert.equal(fixture.state.endpoints[0].policyVersion, 3)
+    assert.equal(fixture.state.endpoints[0].appliedPolicyVersion, 0)
+    assert.deepEqual(fixture.state.endpoints[1], beforeB)
+    assert.deepEqual(fixture.state.whitelist.B, beforeRulesB)
+    await closeDetail('/endpoints')
+    assert.equal(await evaluate(`document.querySelector('.filters input').value`), 'fixture-ubuntu-a')
+    await until(() => evaluate(`document.querySelector('tbody tr')?.cells[5].textContent === '3'`), 'background reflects policy change')
+    for (const route of ['/devices', '/whitelist', '/blocked', '/events']) {
+      await navigate(route, route === '/devices' ? 'Quản lý thiết bị USB' : route === '/whitelist' ? 'Whitelist & Policy' : route === '/blocked' ? 'Thiết bị bị chặn' : 'Lịch sử sự kiện')
+      if (route === '/events') await fillInput('[aria-label="Endpoint"]', 'fixture-ubuntu-b')
+      await until(() => evaluate(`!!document.querySelector('tbody a[href^="#/endpoints/"]')`), 'table detail link')
+      const endpointId = await evaluate(`decodeURIComponent(document.querySelector('tbody a[href^="#/endpoints/"]').hash.split('/').at(-1))`)
+      await openDetail(endpointId)
+      await closeDetail(route)
+      if (route === '/events') assert.equal(await evaluate(`document.querySelector('[aria-label="Endpoint"]').value`), 'fixture-ubuntu-b')
+    }
+    const beforeDemo = fixture.state.requests.length
+    await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/?demo=1#/endpoints/POC-LAB-PC-01' })
+    await until(() => evaluate(`document.querySelector('.endpoint-detail-modal h1')?.textContent === 'LAB-PC-01'`), 'deep link modal')
+    assert.equal(await evaluate(`document.querySelector('.endpoint-detail-modal [aria-label="Allow on this endpoint"]').disabled`), true)
+    assert.equal(fixture.state.requests.length, beforeDemo)
+    await cdp('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 1, mobile: true })
+    assert.equal(await evaluate(`{ const bounds = document.querySelector('.endpoint-detail-modal').getBoundingClientRect(); bounds.left >= 0 && bounds.right <= innerWidth && document.documentElement.scrollWidth <= innerWidth; }`), true)
+    await screenshot('endpoint-modal-mobile.png')
+    await closeDetail('/endpoints')
+    assert.equal(await evaluate(`document.body.style.overflow`), '')
+    assert.ok(requests.every(url => url.startsWith('http://127.0.0.1:4173/api/')))
+    console.log('PASS: endpoint modal links from all tables, filter/focus restoration, Escape, Back/Forward, deep links, mobile, nested Allow/Revoke/errors, A/B isolation and desired/applied versions. HTTP fixture only; no backend/DB deployment.')
   } else {
   async function login(password = 'fixture-only') {
     await fillInput('#username', 'fixture-admin')
@@ -129,8 +218,8 @@ try {
     await until(() => evaluate(`!!document.querySelector('#usb-device-id')`), 'allow form')
     await evaluate(`{ const select = document.querySelector('#usb-device-id'); select.value = '1'; select.dispatchEvent(new Event('change', { bubbles: true })); }`)
     await evaluate(`document.querySelector('.policy-form button[type="submit"]').click()`)
-    await until(() => evaluate(`!!document.querySelector('dialog[open]')`), 'allow confirmation')
-    await evaluate(`document.querySelector('dialog .primary').click()`)
+    await until(() => evaluate(`!!document.querySelector('.confirm-dialog[open]')`), 'allow confirmation')
+    await evaluate(`document.querySelector('.confirm-dialog .primary').click()`)
   }
   await openAllow('fixture-hash-a')
   await until(() => evaluate(`document.querySelector('[data-testid="endpoint-whitelist-panel"]')?.innerText.includes('fixture-hash-a')`), 'Allow refetch whitelist')
@@ -140,12 +229,12 @@ try {
   assert.deepEqual(fixture.state.whitelist.B, beforeRulesB)
   await screenshot('m4-allow-a.png')
   await openAllow('fixture-hash-a')
-  await until(() => evaluate(`!document.querySelector('dialog[open]') && !document.querySelector('.loading-state')`), 'duplicate Allow succeeds without version bump')
+  await until(() => evaluate(`!document.querySelector('.confirm-dialog[open]') && !document.querySelector('.loading-state')`), 'duplicate Allow succeeds without version bump')
   assert.equal(fixture.state.endpoints[0].policyVersion, 2)
   assert.equal(fixture.state.whitelist.A.length, 1)
   await evaluate(`document.querySelector('[aria-label^="Revoke on this endpoint"]').click()`)
-  await until(() => evaluate(`!!document.querySelector('dialog[open]')`), 'revoke confirmation')
-  await evaluate(`document.querySelector('dialog .primary').click()`)
+  await until(() => evaluate(`!!document.querySelector('.confirm-dialog[open]')`), 'revoke confirmation')
+  await evaluate(`document.querySelector('.confirm-dialog .primary').click()`)
   await until(() => evaluate(`document.querySelector('[data-testid="endpoint-whitelist-panel"]')?.innerText.includes('Chưa có thiết bị nào')`), 'Revoke refetch')
   assert.equal(fixture.state.endpoints[0].policyVersion, 3)
   assert.equal(fixture.state.endpoints[0].appliedPolicyVersion, 0)
@@ -154,10 +243,10 @@ try {
 
   fixture.state.failMutation = 500
   await openAllow('fixture-failed-hash')
-  await until(() => evaluate(`document.querySelector('dialog [role="alert"]')?.textContent.includes('Máy chủ gặp lỗi')`), 'mutation error visible')
+  await until(() => evaluate(`document.querySelector('.confirm-dialog [role="alert"]')?.textContent.includes('Máy chủ gặp lỗi')`), 'mutation error visible')
   assert.equal(fixture.state.whitelist.A.length, 0)
   await screenshot('m4-mutation-error.png')
-  await evaluate(`document.querySelector('dialog .button').click()`)
+  await evaluate(`document.querySelector('.confirm-dialog .button').click()`)
   fixture.state.failMutation = 0
   await navigate('/endpoints/B', 'fixture-ubuntu-b')
   await until(() => evaluate(`document.querySelector('[data-testid="endpoint-whitelist-panel"]')?.innerText.includes('fixture-hash-a')`), 'B rule remains')
@@ -223,7 +312,7 @@ try {
   assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true, 'Demo desktop endpoint list overflow')
   await screenshot('demo-endpoints-list-desktop.png')
   await evaluate(`document.querySelector('a[href="#/endpoints/POC-LAB-PC-01"]').click()`)
-  await until(() => evaluate(`document.querySelector('h1')?.textContent === 'LAB-PC-01'`), 'demo endpoint link')
+  await until(() => evaluate(`document.querySelector('.endpoint-detail-modal h1')?.textContent === 'LAB-PC-01'`), 'demo endpoint link')
   assert.equal(await evaluate(`document.querySelector('[data-testid="endpoint-whitelist-panel"]').innerText.includes('Kingston')`), true)
   assert.equal(await evaluate(`document.querySelector('[data-testid="endpoint-whitelist-panel"] [aria-label^="Revoke"]').disabled`), true)
   assert.equal(await evaluate(`document.querySelector('[aria-label="Allow on this endpoint"]').disabled`), true)
@@ -261,7 +350,7 @@ try {
   await resetEvents()
   await screenshot('demo-events-desktop.png')
   await evaluate(`document.querySelector('a[href="#/endpoints/POC-LAB-PC-01"]').click()`)
-  await until(() => evaluate(`document.querySelector('h1')?.textContent === 'LAB-PC-01'`), 'demo event detail link')
+  await until(() => evaluate(`document.querySelector('.endpoint-detail-modal h1')?.textContent === 'LAB-PC-01'`), 'demo event detail link')
   await cdp('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 1, mobile: true })
   for (const [route, heading] of [['/dashboard', 'Tổng quan bảo vệ'], ['/events', 'Lịch sử sự kiện'], ['/endpoints', 'Quản lý endpoints'], ['/endpoints/POC-LAB-PC-01', 'LAB-PC-01'], ['/endpoints/POC-LAB-PC-02', 'LAB-PC-02']]) {
     await navigate(route, heading)

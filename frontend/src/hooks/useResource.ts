@@ -8,7 +8,7 @@ export type ResourceState<T> =
   | { status: 'unavailable'; data?: never; error?: never }
   | { status: 'error'; data?: never; error: string; statusCode?: number }
 
-export function useResource<T>(loader: (signal: AbortSignal) => Promise<T>) {
+export function useResource<T>(loader: (signal: AbortSignal) => Promise<T>, revision = 0) {
   const [state, setState] = useState<ResourceState<T>>({ status: 'loading' })
   const [updatedAt, setUpdatedAt] = useState<string>()
   const active = useRef<AbortController | null>(null)
@@ -38,6 +38,6 @@ export function useResource<T>(loader: (signal: AbortSignal) => Promise<T>) {
     // cleanup cancels the scheduled read as well as any in-flight request.
     const initialRead = setTimeout(() => { void refresh() }, 0)
     return () => { clearTimeout(initialRead); active.current?.abort() }
-  }, [refresh])
+  }, [refresh, revision])
   return { state, refresh, updatedAt }
 }

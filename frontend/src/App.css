@@ -38,3 +38,29 @@
   flex-basis: 100%;
   color: #6b7c70;
 }
+
+.endpoint-detail-modal {
+  width: min(1180px, calc(100% - 48px));
+  max-width: none;
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface, #f5f8f6);
+  color: inherit;
+  box-shadow: 0 24px 80px #102d2440;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.endpoint-detail-modal::backdrop { background: #102d2480; }
+.endpoint-detail-modal > .page-heading { align-items: flex-start; }
+.endpoint-detail-modal .heading-actions { min-width: 0; }
+.endpoint-modal-actions { display: flex; align-items: flex-start; gap: 12px; }
+.endpoint-detail-modal .table-scroll { max-width: 100%; }
+@media (max-width: 760px) {
+  .endpoint-detail-modal { width: calc(100% - 24px); max-height: calc(100dvh - 24px); padding: 18px; border-radius: 12px; }
+  .endpoint-detail-modal > .page-heading { flex-direction: column; gap: 16px; }
+  .endpoint-detail-modal .heading-actions { padding-top: 0; width: 100%; }
+  .endpoint-modal-actions { justify-content: space-between; }
+}

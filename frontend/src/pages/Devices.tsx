@@ -10,9 +10,9 @@ import type { PageProps } from './types'
 
 type Mode = 'devices' | 'whitelist' | 'blocked'
 const pageCopy = {
-  devices: { title: 'Quản lý thiết bị USB', description: 'USB đã được ghi nhận trong lịch sử sự kiện.', table: 'Danh sách thiết bị' },
-  whitelist: { title: 'Whitelist & Policy', description: 'Mỗi quyền sử dụng USB thuộc một endpoint cụ thể.', table: 'Whitelist theo endpoint' },
-  blocked: { title: 'Thiết bị bị chặn', description: 'USB có quyết định BLOCKED trong sự kiện gần nhất.', table: 'Danh sách chặn' },
+  devices: { title: 'Quản lý thiết bị USB', table: 'Danh sách thiết bị' },
+  whitelist: { title: 'Whitelist & Policy', table: 'Whitelist theo endpoint' },
+  blocked: { title: 'Thiết bị bị chặn', table: 'Danh sách chặn' },
 }
 
 export function Devices({ state, refresh, refreshButton, mode, demo = false }: PageProps & { mode: Mode }) {
@@ -86,11 +86,11 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
   function changeFilter(value: string) { setPage(0); setFilter(value) }
 
   return <>
-    <PageHeading eyebrow="DEVICE MANAGEMENT" title={copy.title} description={copy.description}>{refreshButton}</PageHeading>
+    <PageHeading title={copy.title}>{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
     {!demo && selectedRead.status === 'error' &&
       <p role="alert" className="field-error">Không tải được trang {mode === 'whitelist' ? 'whitelist' : 'thiết bị'}: {selectedRead.error}</p>}
-    <Panel title={copy.table} subtitle={mode === 'whitelist' ? 'Whitelist có tìm kiếm và phân trang tại Server; Agent áp dụng theo policy version' : 'Trạng thái mới nhất theo từng USB và endpoint, phân trang tại Server'} action={<Badge>{mode === 'whitelist' ? 'Per-endpoint rules' : 'USB history'}</Badge>}>
+    <Panel title={copy.table}>
       <Filters query={query} onQuery={changeQuery} value={filter} onValue={changeFilter} options={options} placeholder="Tìm USB, fingerprint hoặc endpoint…" filterLabel={mode === 'devices' ? 'Lọc theo trạng thái' : 'Lọc theo endpoint'} />
       {!demo && mode === 'whitelist' && <p className="helper-note">Bộ lọc Endpoint gợi ý các máy trong trang tổng quan; ô tìm kiếm phía trên vẫn tìm trên toàn bộ whitelist, kể cả các Endpoint chưa xuất hiện trong danh sách gợi ý.</p>}
       {mode === 'whitelist'
@@ -115,6 +115,6 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
           { key: 'actions', label: 'Thao tác', render: device => endpointLink(device.endpointId) },
         ]} />}
     </Panel>
-    <div className="helper-note"><Icon name="info" size={17} /><p>Mở chi tiết endpoint để Allow/Revoke USB trên máy đó. Theo dõi Last Applied Version sau thay đổi.</p></div>
+    
   </>
 }

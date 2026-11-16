@@ -47,10 +47,10 @@ export function Endpoints({ state, refresh, refreshButton, demo = false }: PageP
     failed: state.status === 'error' || serverPage.state.status === 'error',
   }
   return <>
-    <PageHeading eyebrow="ENDPOINT SECURITY" title="Quản lý endpoints" description="Theo dõi các máy Ubuntu và trạng thái kết nối với hệ thống.">{refreshButton}</PageHeading>
+    <PageHeading title="Quản lý endpoints">{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
     {!demo && serverPage.state.status === 'error' && <p role="alert" className="field-error">Không tải được danh sách Endpoint: {serverPage.state.error}</p>}
-    <Panel title="Danh sách máy tính" subtitle="Lọc, tìm kiếm và phân trang tại Server" action={<Badge>Managed endpoints</Badge>}>
+    <Panel title="Danh sách máy tính" >
       <Filters query={query} onQuery={value => { setPage(0); setQuery(value) }} value={filter}
         onValue={value => { setPage(0); setFilter(value) }}
         options={[{ value: 'all', label: 'Tất cả trạng thái' }, ...Object.entries(endpointLabels).map(([value, label]) => ({ value, label }))]}
@@ -77,7 +77,7 @@ export function Endpoints({ state, refresh, refreshButton, demo = false }: PageP
 
 type PendingAction = { action: 'allow'; usbDeviceId: number; hash: string } | { action: 'revoke'; entryId: string }
 
-export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo = false }: PageProps & { endpointId: string }) {
+export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo = false, embedded = false, onPolicyChange }: PageProps & { endpointId: string; embedded?: boolean; onPolicyChange?: () => void }) {
   const [showForm, setShowForm] = useState(false)
   const [usbDeviceId, setUsbDeviceId] = useState('')
   const [pending, setPending] = useState<PendingAction>()
@@ -136,11 +136,12 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
     setUsbDeviceId('')
     notify('Server đã lưu thay đổi whitelist. Đang tải lại phiên bản; Agent cần áp dụng chính sách.', 'success')
     refresh()
+    onPolicyChange?.()
   }
 
   return <>
-    <a className="back-link" href="#/endpoints">← Danh sách endpoints</a>
-    <PageHeading eyebrow="ENDPOINT DETAIL" title={endpoint?.name ?? 'Chi tiết endpoint'} description="Thông tin máy tính, người dùng và chính sách USB theo endpoint.">{refreshButton}</PageHeading>
+    {!embedded && <a className="back-link" href="#/endpoints">← Danh sách endpoints</a>}
+    <PageHeading title={endpoint?.name ?? 'Chi tiết endpoint'}>{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
     {state.status === 'ready' && !endpoint
       ? <Panel title="Không tìm thấy endpoint"><EmptyState icon="monitor" title="Endpoint không tồn tại" description="Hãy quay lại danh sách endpoints." /></Panel>
@@ -151,15 +152,12 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
             ['Người dùng hiện tại (backend)', endpoint?.currentUser], ['Người dùng gần nhất (event)', latestUser],
             ['Policy version', endpoint?.policyVersion], ['Last Applied Version', endpoint?.appliedPolicyVersion],
             ['Kết nối gần nhất', formatDate(endpoint?.lastSeenAt)], ['Kiểm tra USBGuard', formatDate(endpoint?.usbGuardCheckedAt)], ['Endpoint ID', endpoint?.id],
-          ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>)}</dl>
-          {endpoint && <div className="panel-bottom policy-sync" role="status">
-            <p>Trạng thái USBGuard thực tế: <UsbGuardStatus endpoint={endpoint} />. Healthy yêu cầu kiểm tra daemon và policy còn mới; Last Applied Version chỉ là ACK đã ghi nhận.</p>
-            <Badge tone={synced ? 'green' : 'amber'}>{syncMessage}</Badge>
-            <p>Desired là phiên bản server muốn áp dụng; Last Applied Version là phiên bản Agent đã ACK.
-              {!synced && ' Bấm Refresh dữ liệu để kiểm tra tiến độ. Chưa có ACK không đồng nghĩa áp dụng thất bại.'}
-              {endpoint.status === 'offline' && ' Endpoint đang offline; trạng thái bảo vệ hiện tại chưa được xác minh.'}
-            </p>
-          </div>}
+          ].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value ?? '—'}</dd></div>)}
+            {endpoint && <>
+              <div><dt>USBGuard</dt><dd><UsbGuardStatus endpoint={endpoint} /></dd></div>
+              <div><dt>Policy ACK</dt><dd role="status"><Badge tone={synced ? 'green' : 'amber'}>{syncMessage}</Badge></dd></div>
+            </>}
+          </dl>
         </Panel>
         {endpoint && <EndpointWhitelistPanel endpointId={endpointId} entries={entries} disabled={disabled} disabledReason={demo ? 'Demo chỉ đọc; không thay đổi whitelist.' : 'Cần phiên Admin hợp lệ và dữ liệu đã tải.'} onAllow={() => setShowForm(true)} onRevoke={entryId => setPending({ action: 'revoke', entryId })} />}
         {endpoint && showForm && !disabled && <Panel title="Cho phép USB trên endpoint này">
@@ -178,7 +176,7 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
             <div className="row-actions"><button className="button primary" type="submit">Kiểm tra và xác nhận</button><button className="button" type="button" onClick={() => setShowForm(false)}>Hủy</button></div>
           </form>
         </Panel>}
-        <Panel title="USB & Policy trên endpoint" subtitle="Quyết định mới nhất trên toàn bộ USB; tìm kiếm và phân trang tại Server">
+        <Panel title="USB & Policy trên endpoint">
           {!demo && <div className="policy-form"><label htmlFor="endpoint-device-search">Tìm USB trong endpoint này</label>
             <input id="endpoint-device-search" type="search" value={deviceQuery} onChange={event => { setUsbDeviceId(''); setDevicePage(0); setDeviceQuery(event.target.value) }} placeholder="Tên, HASH, Vendor / Product ID…" /></div>}
           {!demo && deviceRead.state.status === 'error' && <p role="alert" className="field-error">Không tải được thiết bị: {deviceRead.state.error}</p>}
@@ -189,14 +187,13 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
             { key: 'time', label: 'Thời gian event', render: device => formatDate(device.detectedAt) },
           ]} />
         </Panel>
-        <Panel title="Sự kiện trên endpoint" subtitle="100 sự kiện gần nhất; xem Event History để tìm trên toàn bộ lịch sử">
+        <Panel title="Sự kiện trên endpoint (100 gần nhất)">
           <DataTable {...tableState} rows={events} label="Sự kiện trên endpoint (100 gần nhất)" columns={[
             { key: 'time', label: 'Thời gian', render: event => formatDate(event.timestamp) },
             { key: 'type', label: 'Sự kiện', render: event => eventLabels[event.type] },
             { key: 'message', label: 'USB / Nội dung', render: event => event.message || event.deviceName || '—' },
             { key: 'user', label: 'Người dùng', render: event => event.username ?? '—' },
           ]} />
-          <a className="panel-link" href="#/events">Mở toàn bộ Event History →</a>
           {events.some(event => event.device?.hash) && <details className="policy-form"><summary>Hash USB trong sự kiện</summary>
             {events.filter(event => event.device?.hash).map(event => <p key={event.id}>{event.deviceName ?? 'USB'}: <code>{event.device?.hash}</code></p>)}
           </details>}
