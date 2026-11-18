@@ -14,6 +14,7 @@ const navigation: { route: string; label: string; icon: IconName; group: string 
   { route: '/events', label: 'Event Logs', icon: 'history', group: 'HỆ THỐNG' },
   { route: '/settings', label: 'Settings', icon: 'settings', group: 'HỆ THỐNG' },
 ]
+const visibleNavigation = navigation.filter(item => item.route !== '/settings')
 
 export function AdminLayout({ route, children, demo = false }: { route: string; children: ReactNode; demo?: boolean }) {
   const [open, setOpen] = useState(false)
@@ -47,8 +48,8 @@ export function AdminLayout({ route, children, demo = false }: { route: string; 
     {open && <button className="sidebar-overlay" aria-label="Đóng menu" onClick={() => setOpen(false)} />}
     <aside className={`sidebar ${open ? 'is-open' : ''}`} id="sidebar">
       <a href="#/dashboard" className="brand" onClick={() => setOpen(false)}><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span></span></a>
-      <nav aria-label="Điều hướng chính">{navigation.map((item, index) => <div key={item.route}>
-        {navigation[index - 1]?.group !== item.group && <p className="nav-group">{item.group}</p>}
+      <nav aria-label="Điều hướng chính">{visibleNavigation.map((item, index) => <div key={item.route}>
+        {visibleNavigation[index - 1]?.group !== item.group && <p className="nav-group">{item.group}</p>}
         <a href={`#${item.route}`} className={`nav-link ${active?.route === item.route ? 'active' : ''}`} aria-current={active?.route === item.route ? 'page' : undefined} onClick={() => setOpen(false)}>
           <Icon name={item.icon} /><span>{item.label}</span>
         </a>
@@ -56,13 +57,13 @@ export function AdminLayout({ route, children, demo = false }: { route: string; 
       <div className="sidebar-bottom">
         {auth?.user && !demo
           ? <button className="sidebar-user logout-button" onClick={() => void logout()} disabled={busy} aria-label="Đăng xuất"><span className="user-avatar"><Icon name="user" size={18} /></span><span>{auth.user.username}<small>{busy ? 'Đang đăng xuất…' : 'Đăng xuất'}</small></span><Icon name="logout" size={17} /></button>
-          : <a href="#/login" className="sidebar-user" onClick={() => setOpen(false)}><span className="user-avatar"><Icon name="user" size={18} /></span><span>{demo ? 'Demo chỉ đọc' : 'Chưa đăng nhập'}<small>Đăng nhập quản trị</small></span><Icon name="logout" size={17} /></a>}
+          : <a href={demo ? '/#/login' : '#/login'} className="sidebar-user" onClick={() => setOpen(false)}><span className="user-avatar"><Icon name="user" size={18} /></span><span>{demo ? 'Demo chỉ đọc' : 'Chưa đăng nhập'}<small>Đăng nhập quản trị</small></span><Icon name="logout" size={17} /></a>}
       </div>
     </aside>
     <div className="main-shell">
       <header className="topbar">
         <div className="breadcrumbs"><button className="icon-button mobile-toggle" aria-label={open ? 'Đóng menu' : 'Mở menu'} aria-expanded={open} aria-controls="sidebar" onClick={() => setOpen(!open)}><Icon name="menu" /></button><span className="breadcrumb-root">Workspace</span><span className="breadcrumb-slash">/</span><strong>{active?.label ?? 'Không tìm thấy'}</strong></div>
-        <div className="topbar-right"><span className="topbar-divider" /><span className="profile-link"><span className="user-avatar"><Icon name="user" size={18} /></span><span>{auth?.user?.username ?? 'Demo'}</span></span></div>
+        <div className="topbar-right"><span className="topbar-divider" /><span className="profile-link"><span className="user-avatar"><Icon name="user" size={18} /></span><span>{auth?.user?.username ?? (demo ? 'Demo' : 'Admin')}</span></span></div>
       </header>
       <main id="main-content" ref={mainRef} tabIndex={-1}>{children}</main>
     </div>

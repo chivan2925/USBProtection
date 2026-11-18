@@ -250,19 +250,19 @@ try {
   await cdp('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1050, deviceScaleFactor: 1, mobile: false })
   await cdp('Fetch.enable', { patterns: [{ urlPattern: '*/api/admin/events*', requestStage: 'Request' }] })
   injectFailure = '403'
-  await evaluate('document.querySelector(".refresh-actions button").click()')
+  await cdp('Page.reload')
   await until(() => bodyHas('Không có quyền'), 'injected HTTP 403 UI')
   assert.equal(await evaluate('document.querySelectorAll("tbody tr").length'), 0)
   injectFailure = '500'
-  await evaluate('document.querySelector(".refresh-actions button").click()')
+  await cdp('Page.reload')
   await until(() => bodyHas('Máy chủ gặp lỗi'), 'injected HTTP 500 UI')
   assert.equal(await evaluate('document.querySelectorAll("tbody tr").length'), 0)
   injectFailure = 'network'
-  await evaluate('document.querySelector(".refresh-actions button").click()')
+  await cdp('Page.reload')
   await until(() => bodyHas('Không kết nối'), 'injected network outage UI')
   assert.equal(await evaluate('document.querySelectorAll("tbody tr").length'), 0)
   await cdp('Fetch.disable')
-  await evaluate('document.querySelector(".refresh-actions button").click()')
+  await cdp('Page.reload')
   await until(() => bodyHas('1–20 trên 25 bản ghi'), 'recovery without demo fallback')
 
   // Week 3 synthetic attribution and isolation regression; no Linux resolver is run.
@@ -283,8 +283,7 @@ try {
   }, headersB)
   const resetWeek3 = async () => {
     await evaluate(`document.querySelector('[aria-label="Đặt lại tất cả bộ lọc"]').click()`)
-    // An unchanged reset may not trigger a read; Refresh always requests the current source.
-    await evaluate('document.querySelector(".refresh-actions button").click()')
+    await cdp('Page.reload')
     await until(() => bodyHas('1–20 trên 28 bản ghi'), 'Week 3 global history reset')
   }
   await resetWeek3()

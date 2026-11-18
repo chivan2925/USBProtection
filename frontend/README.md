@@ -2,7 +2,7 @@
 
 React + Vite + TypeScript; tích hợp vào Admin Server Spring Boot JAR, sử dụng **PostgreSQL/Flyway**. Current branch `vinhkhang` commit `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` (04/11/2026, chưa merge `main`). Hướng dẫn vận hành tập trung: [RUN_GUIDE](../docs/RUN_GUIDE.md); [API hiện hành](../docs/API_PHASE1_TO_PHASE3_ADDENDUM.md); [Admin Guide](../docs/ADMIN_GUIDE.md); [Implementation status](../docs/IMPLEMENTATION_STATUS_20261104.md).
 
-## Dev và demo (chỉ loopback)
+## Dev và API thật (chỉ loopback)
 
 Node.js 22.20+ và npm; thư mục `frontend/`:
 
@@ -11,7 +11,9 @@ npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
-Admin Server local ở `http://127.0.0.1:8080`, Vite tại `http://127.0.0.1:5173/`; proxy `/api` về backend (tùy chọn `API_PROXY_TARGET`). Trang Login dùng session/CSRF thật; mật khẩu bootstrap chỉ tạo Admin nếu chưa tồn tại. **Không dùng Vite/HTTP loopback làm cấu hình production/LAN.** Mở demo qua liên kết Login hoặc `?demo=1#/dashboard`: dữ liệu mock, chỉ đọc, không có credential và không thay đổi USBGuard/policy.
+Vite tại `http://127.0.0.1:5173/`; proxy `/api` mặc định về `https://usbprotection.lab`, giữ kiểm tra chứng chỉ TLS. Máy chạy Vite phải phân giải được hostname lab và tin cậy CA hiện có; không tắt TLS verification hoặc thêm fallback cổng backend. `API_PROXY_TARGET` chỉ ghi đè đích proxy khi chủ động chạy môi trường dev/test riêng. **Không dùng Vite/HTTP loopback làm cấu hình production/LAN.**
+
+Để xem dữ liệu thật, mở `https://usbprotection.lab/#/login`, đăng nhập Admin bằng tài khoản hiện có. Các trang và modal chi tiết dùng `/api/auth/**` và `/api/admin/**`, cookie session/CSRF, filter và phân trang tại server; API rỗng/lỗi không được thay bằng mock. Giao diện chính không còn liên kết hoặc nút demo; `?demo=1` không bật mock. Chỉ `/demo` (hoặc `/demo/`) dùng dữ liệu minh họa, chỉ đọc, không gọi API hay thay đổi USBGuard/policy. Các trang con dùng hash, ví dụ `/demo#/endpoints`; tải lại vẫn giữ chế độ mock. Build Vite không cập nhật UI trong JAR đang chạy; owner cần triển khai lại UI theo [guardrails](../docs/admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md), API, auth và nghiệp vụ backend giữ nguyên; mapping giao diện `/demo` được thêm để phục vụ cùng `index.html`. Không đổi DB, Nginx hay CA.
 
 ## Runtime và quyền truy cập
 
@@ -23,7 +25,7 @@ Admin Server local ở `http://127.0.0.1:8080`, Vite tại `http://127.0.0.1:517
 
 | Hash route | Nội dung |
 |---|---|
-| `#/login` | Admin session/CSRF login hoặc demo chỉ đọc |
+| `#/login` | Admin session/CSRF login, không có chế độ demo |
 | `#/dashboard` | Thống kê backend toàn cục và hoạt động gần đây |
 | `#/endpoints` | Server-side search/filter/pagination; online/offline totals toàn hệ thống |
 | `#/endpoints/:id` | Metadata, `Healthy/Degraded/Unavailable/Unknown`, checkedAt/stale, desired/applied ACK, USB/whitelist scoped theo endpoint |

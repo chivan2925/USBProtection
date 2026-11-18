@@ -8,7 +8,7 @@ Với môi trường phát triển mặc định:
 
 - Admin Web: `http://127.0.0.1:5173/`.
 - Backend API: `http://127.0.0.1:8080`.
-- Demo chỉ đọc: `http://127.0.0.1:5173/?demo=1#/dashboard`.
+- Demo chỉ đọc: `http://127.0.0.1:5173/demo` khi chạy Vite loopback, hoặc `/demo` trên cùng HTTPS origin của Admin Web.
 - **Vận hành LAN:** truy cập Admin Web bằng `https://<tên-miền-đúng-chứng-chỉ>/` từ **máy Admin thuộc allowlist**. Máy Ubuntu Client không được mở Web/Login; chỉ Agent gọi `/api/agent/**` qua HTTPS. Đây là cấu hình phải được kiểm thử thực tế, không phải kết quả đã nghiệm thu.
 
 Người phụ trách backend cấp tài khoản Admin qua cấu hình ngoài repository. Không có mật khẩu production mặc định. Bootstrap chỉ tạo tài khoản chưa tồn tại; đổi biến môi trường không đổi mật khẩu tài khoản đã có.
@@ -107,7 +107,7 @@ Nút xác nhận bị khóa khi đang gửi. Nếu có lỗi, đọc thông báo
 | Payload API sai | UI từ chối dữ liệu thay vì hiển thị thành công giả; chuyển lỗi cho M1/M4. |
 | Danh sách rỗng | Có thể chưa có endpoint/event; live UI không tự dùng mock thay thế. |
 
-Demo có nhãn **Dữ liệu mock**, chỉ để xem giao diện và luôn khóa thay đổi policy. Dùng **Thoát demo** để trở lại API thật.
+Mock chỉ có tại `/demo` hoặc `/demo/`, các trang con dùng hash như `/demo#/events`. Demo chỉ đọc, không gọi API và luôn khóa thay đổi policy; liên kết **Đăng nhập quản trị** quay lại `/#/login`. Giao diện chính chỉ dùng API thật, không có liên kết bật demo và không nhận cờ `?demo=1`; API rỗng/lỗi không được thay bằng mock.
 
 ## Xác nhận M4 Week 4 — chỉ là hồ sơ kiểm thử lịch sử
 

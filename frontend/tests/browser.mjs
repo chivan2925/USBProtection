@@ -173,7 +173,7 @@ try {
       if (route === '/events') assert.equal(await evaluate(`document.querySelector('[aria-label="Endpoint"]').value`), 'fixture-ubuntu-b')
     }
     const beforeDemo = fixture.state.requests.length
-    await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/?demo=1#/endpoints/POC-LAB-PC-01' })
+    await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/demo#/endpoints/POC-LAB-PC-01' })
     await until(() => evaluate(`document.querySelector('.endpoint-detail-modal h1')?.textContent === 'LAB-PC-01'`), 'deep link modal')
     assert.equal(await evaluate(`document.querySelector('.endpoint-detail-modal [aria-label="Allow on this endpoint"]').disabled`), true)
     assert.equal(fixture.state.requests.length, beforeDemo)
@@ -190,8 +190,9 @@ try {
     await fillInput('#password', password)
     await evaluate(`document.querySelector('button[type="submit"]').click()`)
   }
-  await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/#/endpoints/A' })
+  await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/?demo=1#/endpoints/A' })
   await until(() => evaluate(`location.hash === '#/login' && !!document.querySelector('#password')`), 'protected route redirects')
+  assert.equal(await evaluate(`/demo|mock/i.test(document.body.innerText)`), false, 'Legacy demo query cannot bypass login or expose demo controls')
   assert.equal(fixture.state.requests.some(item => item.path.startsWith('/api/admin/')), false, 'No Admin reads before /me succeeds')
   await login('wrong-fixture-password')
   await until(() => evaluate(`document.querySelector('[role="alert"]')?.textContent.includes('không đúng')`), 'invalid login')
@@ -201,6 +202,7 @@ try {
   await login()
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '2'`), 'authenticated Dashboard')
   assert.deepEqual(await evaluate(`[...document.querySelectorAll('.stat-value')].map(el => el.textContent)`), ['2', '1', '1', '2'])
+  assert.equal(await evaluate(`/demo|mock/i.test(document.body.innerText)`), false, 'Authenticated pages use only real API data and controls')
   assert.equal(await evaluate(`document.querySelector('.sidebar-user').innerText.includes('fixture-admin')`), true)
   assert.equal(await evaluate(`document.body.innerText.includes('Hệ thống đang được bảo vệ')`), false, 'No invented USBGuard health')
   await screenshot('m4-dashboard.png')
@@ -261,7 +263,7 @@ try {
 
   for (const status of [403, 500]) {
     fixture.state.failure = status
-    await evaluate(`document.querySelector('.refresh-actions button').click()`)
+    await cdp('Page.reload')
     await until(() => evaluate(`document.querySelector('.error-notice')?.innerText.includes(${JSON.stringify(status === 403 ? 'Không có quyền' : 'Máy chủ gặp lỗi')})`), `read error ${status}`)
     assert.equal(await evaluate(`document.querySelectorAll('tbody tr').length`), 0, 'No stale or mock rows')
     fixture.state.failure = 0
@@ -269,7 +271,7 @@ try {
     await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 2`), 'retry recovery')
   }
   fixture.state.empty = true
-  await evaluate(`document.querySelector('.refresh-actions button').click()`)
+  await cdp('Page.reload')
   await until(() => evaluate(`document.body.innerText.includes('Chưa có dữ liệu')`), 'empty API remains empty')
   assert.equal(await evaluate(`document.querySelectorAll('tbody tr').length`), 0)
   assert.equal(await evaluate(`document.body.innerText.includes('student01') || document.body.innerText.includes('Kingston')`), false)
@@ -301,10 +303,18 @@ try {
   assert.equal(fixture.state.sessions.size, 0)
   assert.equal(await evaluate(`localStorage.length + sessionStorage.length`), 0)
   const beforeDemoRequests = fixture.state.requests.length
-  await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/?demo=1#/dashboard' })
+  await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/demo' })
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '2'`), 'demo snapshot load')
-  assert.equal(await evaluate(`document.body.innerText.includes('Chế độ demo · Dữ liệu mock')`), true)
+  for (const text of ['Chế độ demo · Dữ liệu mock', 'Truy cập nhanh', 'Người dùng gần đây', 'Refresh dữ liệu']) {
+    assert.equal(await evaluate(`document.body.innerText.includes(${JSON.stringify(text)})`), false, text)
+  }
+  assert.equal(await evaluate(`!!document.querySelector('nav a[href="#/settings"]')`), false)
+  assert.equal(await evaluate(`document.querySelector('.sidebar-user').innerText.includes('Demo chỉ đọc')`), true)
   assert.deepEqual(await evaluate(`[...document.querySelectorAll('.stat-value')].map(el => el.textContent)`), ['2', '1', '1', '6'])
+  await cdp('Page.reload')
+  await until(() => evaluate(`document.querySelectorAll('.stat-value')[3]?.textContent === '6'`), 'demo reload stays mock')
+  await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/demo/#/dashboard' })
+  await until(() => evaluate(`document.querySelectorAll('.stat-value')[3]?.textContent === '6'`), 'trailing slash demo route')
   await screenshot('demo-dashboard-desktop.png')
   await navigate('/endpoints', 'Quản lý endpoints')
   assert.deepEqual(await evaluate(`Array.from(document.querySelectorAll('thead th'), th => th.textContent)`), ['Máy tính', 'Endpoint ID', 'Hệ điều hành', 'Trạng thái', 'Người dùng', 'Policy version', 'Last Applied Version', 'Kết nối gần nhất', 'Chi tiết'])
@@ -355,6 +365,7 @@ try {
   for (const [route, heading] of [['/dashboard', 'Tổng quan bảo vệ'], ['/events', 'Lịch sử sự kiện'], ['/endpoints', 'Quản lý endpoints'], ['/endpoints/POC-LAB-PC-01', 'LAB-PC-01'], ['/endpoints/POC-LAB-PC-02', 'LAB-PC-02']]) {
     await navigate(route, heading)
     assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true, `Demo mobile overflow: ${route}`)
+    assert.equal(await evaluate(`document.querySelectorAll('.refresh-actions button').length`), 0, `No Refresh button: ${route}`)
   }
   await navigate('/events', 'Lịch sử sự kiện')
   await screenshot('demo-events-mobile.png')
@@ -362,12 +373,12 @@ try {
   await screenshot('demo-endpoint-mobile.png')
 
   assert.equal(fixture.state.requests.length, beforeDemoRequests, 'Demo issues no HTTP or mutation requests')
-  await evaluate(`Array.from(document.querySelectorAll('a')).find(link => link.textContent === 'Thoát demo').click()`)
+  await evaluate(`document.querySelector('.sidebar-user').click()`)
   await until(() => evaluate(`!location.search && !!document.querySelector('#password')`), 'exit demo requires Admin login')
   await login()
   await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '2'`), 'session before network failure')
   await cdp('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: 0, uploadThroughput: 0 })
-  await evaluate(`document.querySelector('.refresh-actions button').click()`)
+  await navigate('/devices', 'Quản lý thiết bị USB')
   await until(() => evaluate(`document.querySelector('.error-notice')?.innerText.includes('Không kết nối')`), 'network error has retry and no demo fallback')
   await screenshot('m4-network.png')
   assert.equal(await evaluate(`document.body.innerText.includes('student01') || document.body.innerText.includes('Kingston')`), false)

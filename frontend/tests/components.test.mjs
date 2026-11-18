@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import { after, before, test } from 'node:test'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -10,6 +11,10 @@ let Events
 let EndpointDetail
 let DataTable
 let PageHeading
+let Dashboard
+let AdminLayout
+let LiveEvents
+let EndpointDetailModal
 before(async () => {
   vite = await createServer({ server: { middlewareMode: true, ws: false }, appType: 'custom' })
   ;({ Devices } = await vite.ssrLoadModule('/src/pages/Devices.tsx'))
@@ -17,6 +22,10 @@ before(async () => {
   ;({ EndpointDetail } = await vite.ssrLoadModule('/src/pages/Endpoints.tsx'))
   ;({ DataTable } = await vite.ssrLoadModule('/src/components/DataTable.tsx'))
   ;({ PageHeading } = await vite.ssrLoadModule('/src/components/Common.tsx'))
+  ;({ Dashboard } = await vite.ssrLoadModule('/src/pages/Dashboard.tsx'))
+  ;({ AdminLayout } = await vite.ssrLoadModule('/src/layouts/AdminLayout.tsx'))
+  ;({ LiveEvents } = await vite.ssrLoadModule('/src/pages/Events.tsx'))
+  ;({ EndpointDetailModal } = await vite.ssrLoadModule('/src/components/endpoint/EndpointDetailModal.tsx'))
 })
 after(async () => { await vite?.close() })
 
@@ -44,6 +53,40 @@ const props = {
   state: { status: 'ready', data: { devices, whitelist: [{ id: 'rule-a', endpointId: 'a', name: 'WHITELIST_RULE_DEVICE', vendorId: '0951', productId: '1666', addedAt: '2026-10-14T10:00:00Z' }], endpoints: [{ id: 'a', name: 'TEST_ENDPOINT', status: 'online' }], events: [] } },
   refresh() {}, refreshButton: null,
 }
+test('dashboard omits removed controls while retaining overview and error recovery', () => {
+  const html = renderToStaticMarkup(createElement(Dashboard, { ...props, refreshButton: createElement('button', null, 'Refresh dữ liệu') }))
+  for (const text of ['Truy cập nhanh', 'Người dùng gần đây', 'Refresh dữ liệu']) assert.ok(!html.includes(text), text)
+  for (const text of ['Tổng quan bảo vệ', 'Hoạt động USB gần nhất', 'Trạng thái endpoints']) assert.ok(html.includes(text), text)
+  const failed = renderToStaticMarkup(createElement(Dashboard, { ...props, state: { status: 'error', error: 'Offline' } }))
+  assert.ok(failed.includes('Thử lại'))
+})
+test('sidebar hides Settings without removing its route metadata or other links', () => {
+  for (const demo of [false, true]) {
+    const html = renderToStaticMarkup(createElement(AdminLayout, { route: '/settings', demo }, 'Page content'))
+    assert.ok(!html.includes('href="#/settings"'))
+    assert.ok(html.includes('<strong>Settings</strong>'))
+    assert.ok(html.includes('href="#/endpoints"'))
+    assert.ok(html.includes('Page content'))
+    if (demo) assert.ok(html.includes('href="/#/login"'))
+    else assert.ok(!/demo|mock/i.test(html))
+  }
+})
+test('refresh buttons and update timestamps are removed while filter reset and modal close remain', async () => {
+  for (const file of ['App.tsx', 'pages/Events.tsx', 'components/endpoint/EndpointDetailModal.tsx']) {
+    const source = await readFile(new URL(`../src/${file}`, import.meta.url), 'utf8')
+    assert.ok(!source.includes('Refresh dữ liệu'), file)
+    assert.ok(!source.includes('Cập nhật:'), file)
+    assert.ok(!source.includes('updatedAt'), file)
+  }
+  const events = renderToStaticMarkup(createElement(LiveEvents))
+  assert.ok(!events.includes('Refresh dữ liệu'))
+  assert.ok(!events.includes('Cập nhật:'))
+  assert.ok(events.includes('aria-label="Đặt lại tất cả bộ lọc"'))
+  const modal = renderToStaticMarkup(createElement(EndpointDetailModal, { endpointId: 'a', demo: true, onClose() {}, onPolicyChange() {} }))
+  assert.ok(!modal.includes('Refresh dữ liệu'))
+  assert.ok(!modal.includes('Cập nhật:'))
+  assert.ok(modal.includes('aria-label="Đóng chi tiết endpoint"'))
+})
 test('demo whitelist uses rules rather than ALLOWED event states; demo blocked list uses observations', () => {
   const whitelist = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'whitelist', demo: true }))
   const blocked = renderToStaticMarkup(createElement(Devices, { ...props, mode: 'blocked', demo: true }))

@@ -200,7 +200,7 @@ test('management pages clear protected rows during loading, empty, unavailable a
 })
 
 test('Settings keeps service configuration unavailable and demo read-only', () => {
-  const html = renderToStaticMarkup(createElement(Settings))
+  const html = renderToStaticMarkup(createElement(Settings, { demo: true }))
   assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
   assert.ok(html.includes('dữ liệu stale/offline hiển thị Unknown'))
   assert.ok(html.includes('Demo chỉ đọc'))
@@ -223,22 +223,22 @@ test('Settings offers password change only to authenticated Admin', () => {
   assert.ok(html.includes('Đổi mật khẩu và đăng xuất'))
   assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
   assert.ok(!html.includes('Allow globally'))
+  assert.ok(html.includes('Admin API'))
+  assert.ok(!/demo|mock/i.test(html))
 })
 
-test('expired session shows a persistent login message; fresh login and demo do not', () => {
-  function render(sessionExpired, demo = false) {
+test('login uses real Admin authentication without demo controls', () => {
+  function render(sessionExpired) {
     return renderToStaticMarkup(createElement(AuthContext.Provider, {
       value: { user: null, loading: false, error: '', sessionExpired },
-    }, createElement(Login, { demo })))
+    }, createElement(Login)))
   }
-  const previousWindow = globalThis.window
-  globalThis.window = { location: { pathname: '/' } }
-  try {
-    assert.ok(render(true).includes('Phiên Admin đã hết hạn. Vui lòng đăng nhập lại.'))
-    assert.ok(!render(false).includes('Phiên Admin đã hết hạn'))
-    assert.ok(!render(true, true).includes('Phiên Admin đã hết hạn'))
-  } finally {
-    if (previousWindow === undefined) delete globalThis.window
-    else globalThis.window = previousWindow
+  assert.ok(render(true).includes('Phiên Admin đã hết hạn. Vui lòng đăng nhập lại.'))
+  assert.ok(!render(false).includes('Phiên Admin đã hết hạn'))
+  for (const expired of [false, true]) {
+    const html = render(expired)
+    assert.ok(!/demo|mock/i.test(html))
+    assert.ok(html.includes('type="submit"'))
+    assert.ok(html.includes('autoComplete="current-password"'))
   }
 })

@@ -4,7 +4,7 @@ import { EventTable } from '../components/event/EventTable'
 import { EventFilters } from '../components/event/EventFilters'
 import { emptyEventFilters } from '../types/event'
 import { getEventDateRange, matchesEventFilters } from '../utils/eventFilters'
-import { formatDate as formatDateForEvents, newestFirst } from '../utils/format'
+import { newestFirst } from '../utils/format'
 import type { PageProps } from './types'
 import { useCallback, useEffect } from 'react'
 import { useResource } from '../hooks/useResource'
@@ -42,14 +42,12 @@ export function LiveEvents({ onUnauthorized, revision = 0 }: { onUnauthorized?: 
     if (query.page > 0 && query.page >= result.totalPages) return protectionApi.getEventPage({ ...query, page: Math.max(0, result.totalPages - 1) }, signal)
     return result
   }, [filters, page])
-  const { state, refresh, updatedAt } = useResource(loader, revision)
+  const { state, refresh } = useResource(loader, revision)
   useEffect(() => { if (state.status === 'error' && state.statusCode === 401) onUnauthorized?.() }, [state, onUnauthorized])
   const updateFilters = (next: typeof filters) => { setFilters(next); setPage(0) }
   const data = state.status === 'ready' ? state.data : undefined
   return <>
-    <PageHeading title="Lịch sử sự kiện">
-      <div className="refresh-actions">{updatedAt && state.status === 'ready' && <span>Cập nhật: {formatDateForEvents(updatedAt)}</span>}<button className="button" disabled={state.status === 'loading'} onClick={() => void refresh()}>Refresh dữ liệu</button></div>
-    </PageHeading>
+    <PageHeading title="Lịch sử sự kiện" />
     <ResourceNotice state={state} retry={() => void refresh()} />
     <Panel title="Event Logs">
       <EventFilters live value={filters} onChange={updateFilters} onReset={() => updateFilters(emptyEventFilters)} />

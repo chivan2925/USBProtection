@@ -4,7 +4,7 @@ import { useToast } from '../hooks/useToast'
 import { useAuth } from '../hooks/useAuth'
 import { ApiError } from '../services/http'
 
-export function Login({ demo = false }: { demo?: boolean }) {
+export function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -16,7 +16,7 @@ export function Login({ demo = false }: { demo?: boolean }) {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (demo || !auth) return
+    if (!auth) return
     setBusy(true)
     setError('')
     try {
@@ -45,22 +45,18 @@ export function Login({ demo = false }: { demo?: boolean }) {
     </section>
     <section className="login-form-panel"><div className="login-form-content">
       <h2>Chào mừng trở lại</h2>
-      {demo && <p className="notice">Demo chỉ đọc. Thoát demo để đăng nhập bằng backend thật.</p>}
-      {!demo && auth?.sessionExpired && <p className="notice" role="status">Phiên Admin đã hết hạn. Vui lòng đăng nhập lại.</p>}
+      {auth?.sessionExpired && <p className="notice" role="status">Phiên Admin đã hết hạn. Vui lòng đăng nhập lại.</p>}
       <form onSubmit={submit}>
         <label htmlFor="username">Tên đăng nhập</label>
-        <input id="username" name="username" autoComplete="username" placeholder="Nhập tên đăng nhập" value={username} onChange={event => setUsername(event.target.value)} required disabled={demo || busy} />
+        <input id="username" name="username" autoComplete="username" placeholder="Nhập tên đăng nhập" value={username} onChange={event => setUsername(event.target.value)} required disabled={busy} />
         <label htmlFor="password">Mật khẩu</label>
         <div className="password-field">
-          <input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Nhập mật khẩu" value={password} onChange={event => setPassword(event.target.value)} required disabled={demo || busy} />
-          <button type="button" className="text-button" aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} aria-pressed={showPassword} disabled={demo || busy} onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Ẩn' : 'Hiện'}</button>
+          <input id="password" name="password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" placeholder="Nhập mật khẩu" value={password} onChange={event => setPassword(event.target.value)} required disabled={busy} />
+          <button type="button" className="text-button" aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'} aria-pressed={showPassword} disabled={busy} onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Ẩn' : 'Hiện'}</button>
         </div>
         {error && <p role="alert" className="field-error">{error}</p>}
-        <button className="button primary login-submit" type="submit" disabled={demo || busy}>{busy ? 'Đang đăng nhập…' : 'Đăng nhập'}<Icon name="arrow" size={17} /></button>
+        <button className="button primary login-submit" type="submit" disabled={busy}>{busy ? 'Đang đăng nhập…' : 'Đăng nhập'}<Icon name="arrow" size={17} /></button>
       </form>
-      <div className="login-divider"><span>Xem giao diện</span></div>
-      <a className="button login-preview" href={demo ? `${window.location.pathname}#/login` : '?demo=1#/dashboard'}>{demo ? 'Thoát demo để đăng nhập' : 'Xem demo Admin Web'}<Icon name="arrow" size={17} /></a>
-      <p className="login-footnote">Demo không tạo phiên đăng nhập và không cấp quyền quản trị.</p>
     </div></section>
   </main>
 }

@@ -3,7 +3,7 @@ import { protectionApi } from '../services/api'
 import { Badge, PageHeading, Panel } from '../components/Common'
 import { useAuth } from '../hooks/useAuth'
 
-export function Settings() {
+export function Settings({ demo = false }: { demo?: boolean }) {
   const auth = useAuth()
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -11,15 +11,15 @@ export function Settings() {
   const [error, setError] = useState('')
   return <>
     <PageHeading title="Cài đặt hệ thống" />
-    <Panel title="Thông tin kết nối" action={<Badge>{auth?.user ? 'Phiên Admin' : 'Demo chỉ đọc'}</Badge>}>
+    <Panel title="Thông tin kết nối" action={<Badge>{demo ? 'Demo chỉ đọc' : auth?.user ? 'Phiên Admin' : 'Chưa đăng nhập'}</Badge>}>
       <dl className="settings-details">
         <div><dt>Tài khoản</dt><dd>{auth?.user?.username ?? 'Chưa đăng nhập'}</dd></div>
-        <div><dt>Nguồn dữ liệu</dt><dd>{auth?.user ? 'Admin API · Refresh để cập nhật' : 'Demo · Dữ liệu minh họa'}</dd></div>
+        <div><dt>Nguồn dữ liệu</dt><dd>{demo ? 'Demo · Dữ liệu minh họa' : 'Admin API · Tải lại trang để cập nhật'}</dd></div>
         <div><dt>Whitelist</dt><dd>Quản lý theo từng endpoint</dd></div>
         <div><dt>Trạng thái Agent</dt><dd>Xem Policy version / Last Applied Version trên endpoint</dd></div>
       </dl>
     </Panel>
-    {auth?.user && <Panel title="Đổi mật khẩu Admin" subtitle="Đổi xong, mọi phiên Admin sẽ bị đăng xuất, kể cả phiên hiện tại.">
+    {!demo && auth?.user && <Panel title="Đổi mật khẩu Admin" subtitle="Đổi xong, mọi phiên Admin sẽ bị đăng xuất, kể cả phiên hiện tại.">
       <form className="policy-form" onSubmit={async event => {
         event.preventDefault(); setError(''); setBusy(true)
         try {

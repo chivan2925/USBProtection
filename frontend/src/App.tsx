@@ -2,15 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { AdminLayout } from './layouts/AdminLayout'
 import { ToastProvider } from './components/Toast'
 import { EmptyState, LoadingState, PageHeading, Panel } from './components/Common'
-import { Icon } from './components/Icon'
 import { useToast } from './hooks/useToast'
 import { useResource } from './hooks/useResource'
 import { useRoute } from './hooks/useRoute'
 import { AuthProvider } from './hooks/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import { protectionApi } from './services/api'
-import { getDemoSnapshot } from './services/demo'
-import { formatDate } from './utils/format'
 import { Dashboard } from './pages/Dashboard'
 import { Devices } from './pages/Devices'
 import { Events, LiveEvents } from './pages/Events'
@@ -21,11 +18,11 @@ import { Login } from './pages/Login'
 import './App.css'
 
 function Console({ route, demo, revision }: { route: string; demo: boolean; revision: number }) {
-  const loader = useCallback((signal: AbortSignal) => {
-    if (demo) return getDemoSnapshot(signal)
+  const loader = useCallback(async (signal: AbortSignal) => {
+    if (demo) return (await import('./services/demo')).getDemoSnapshot(signal)
     return protectionApi.getSnapshot(signal, undefined, route)
   }, [demo, route])
-  const { state, refresh, updatedAt } = useResource(loader, revision)
+  const { state, refresh } = useResource(loader, revision)
   const notify = useToast()
 
   async function handleRefresh() {
@@ -36,13 +33,7 @@ function Console({ route, demo, revision }: { route: string; demo: boolean; revi
 
   const props = {
     state, demo, refresh: () => { void handleRefresh() },
-    refreshButton: <div className="refresh-actions">
-      {updatedAt && <span>Cập nhật: {formatDate(updatedAt)}</span>}
-      <button className="button" onClick={() => void handleRefresh()} disabled={state.status === 'loading'}>
-        <Icon name="refresh" size={16} className={state.status === 'loading' ? 'spin' : ''} />
-        {state.status === 'loading' ? 'Đang tải…' : 'Refresh dữ liệu'}
-      </button>
-    </div>,
+    refreshButton: null,
   }
   let page
   switch (route) {
@@ -52,7 +43,7 @@ function Console({ route, demo, revision }: { route: string; demo: boolean; revi
     case '/blocked': page = <Devices key="blocked" {...props} mode="blocked" />; break
     case '/events': page = <Events {...props} />; break
     case '/endpoints': page = <Endpoints {...props} />; break
-    case '/settings': page = <Settings />; break
+    case '/settings': page = <Settings demo={demo} />; break
     default: {
       page = <><PageHeading eyebrow="404" title="Không tìm thấy trang" description="Đường dẫn này không tồn tại trong USB Protection." />
           <Panel title="Kiểm tra lại đường dẫn"><EmptyState icon="search" title="Trang không khả dụng" description="Sử dụng thanh điều hướng hoặc quay lại Dashboard." />
@@ -61,12 +52,6 @@ function Console({ route, demo, revision }: { route: string; demo: boolean; revi
     }
   }
   return <AdminLayout route={route} demo={demo}>
-    <div className="notice" role="status"><Icon name="info" />
-      <div><strong>{demo ? 'Chế độ demo · Dữ liệu mock' : 'Admin Web · Dữ liệu từ API'}</strong>
-        <p>{demo ? 'Dữ liệu minh họa, chỉ đọc. Không thay đổi quyền USB trên máy thật.' : 'Allow/Revoke áp dụng cho endpoint được chọn. Theo dõi Last Applied Version để biết phiên bản Agent đã áp dụng.'}</p>
-      </div>
-      <a href={demo ? `${window.location.pathname}#/dashboard` : '?demo=1#/dashboard'}>{demo ? 'Thoát demo' : 'Mở demo'}</a>
-    </div>
     {page}
   </AdminLayout>
 }
@@ -87,7 +72,11 @@ function Router({ demo }: { demo: boolean }) {
     else window.location.replace('#/endpoints')
   }
   useEffect(() => {
-    if (demo || auth?.loading || auth?.error) return
+    if (demo) {
+      if (route === '/login') window.location.replace('/#/login')
+      return
+    }
+    if (auth?.loading || auth?.error) return
     if (!auth?.user && route !== '/login') window.location.hash = '/login'
     if (auth?.user && route === '/login') window.location.hash = '/dashboard'
   }, [demo, auth?.loading, auth?.error, auth?.user, route])
@@ -97,10 +86,9 @@ function Router({ demo }: { demo: boolean }) {
     <Panel title="Không kiểm tra được phiên Admin">
       <p role="alert" className="field-error">{auth.error}</p>
       <button className="button" onClick={auth.retry}>Thử lại kết nối</button>
-      <a className="button" href="?demo=1#/dashboard">Xem demo chỉ đọc</a>
     </Panel>
   </main>
-  if (route === '/login' || (!demo && !auth?.user)) return <Login demo={demo} />
+  if (route === '/login' || (!demo && !auth?.user)) return demo ? <LoadingState /> : <Login />
   return <>
     {pageRoute === '/events' && !demo
       ? <AdminLayout route={pageRoute}><LiveEvents revision={revision} /></AdminLayout>
@@ -110,6 +98,6 @@ function Router({ demo }: { demo: boolean }) {
 }
 
 export default function App() {
-  const demo = new URLSearchParams(window.location.search).get('demo') === '1'
+  const demo = /^\/demo\/?$/.test(window.location.pathname)
   return <ToastProvider><AuthProvider demo={demo}><Router demo={demo} /></AuthProvider></ToastProvider>
 }
