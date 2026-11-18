@@ -92,7 +92,7 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
       <p role="alert" className="field-error">Không tải được trang {mode === 'whitelist' ? 'whitelist' : 'thiết bị'}: {selectedRead.error}</p>}
     <Panel title={copy.table}>
       <Filters query={query} onQuery={changeQuery} value={filter} onValue={changeFilter} options={options} placeholder="Tìm USB, fingerprint hoặc endpoint…" filterLabel={mode === 'devices' ? 'Lọc theo trạng thái' : 'Lọc theo endpoint'} />
-      {!demo && mode === 'whitelist' && <p className="helper-note">Bộ lọc Endpoint gợi ý các máy trong trang tổng quan; ô tìm kiếm phía trên vẫn tìm trên toàn bộ whitelist, kể cả các Endpoint chưa xuất hiện trong danh sách gợi ý.</p>}
+      
       {mode === 'whitelist'
         ? <DataTable key={demo ? `${query}:${filter}` : 'server-whitelist'} {...tableState} rows={whitelistRows} label={copy.table}
           pagination={!demo && whitelistPage ? { page: whitelistPage.page, size: whitelistPage.size,
