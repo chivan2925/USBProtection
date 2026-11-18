@@ -31,9 +31,10 @@ Vite tại `http://127.0.0.1:5173/`; proxy `/api` mặc định về `https://us
 | `#/endpoints/:id` | Metadata, `Healthy/Degraded/Unavailable/Unknown`, checkedAt/stale, desired/applied ACK, USB/whitelist scoped theo endpoint |
 | `#/devices` | Device lookup/filter với server pagination |
 | `#/whitelist` | Một API chung `/api/admin/whitelist/page`, phân trang và tìm kiếm; không N+1 theo từng endpoint |
-| `#/blocked` | Sự kiện/thiết bị bị block được ghi nhận, không phải phép đo enforcement trực tiếp |
 | `#/events` | Event History: filter và phân trang ở Server, giữ source timestamps |
 | `#/settings` | **Đổi mật khẩu Admin** khi có phiên, đăng xuất các phiên cũ; cấu hình USBGuard trực tiếp từ Web chưa có API |
+
+Các bảng có phân trang dùng cố định **10 bản ghi/trang**, cả API thật và `/demo`. Trang Blocked Devices đã bỏ; xem quyết định bị chặn bằng bộ lọc **Bị chặn** trong Devices. Bộ lọc **Chưa xác định** vẫn gửi trạng thái API `detected`.
 
 **Status boundary:** online chỉ là heartbeat; ACK chỉ là Agent-reported policy applied version; `Healthy` chỉ được hiển thị khi báo cáo USBGuard còn mới và đồng bộ, **không phải xác nhận USB vật lý độc lập từ Server**. Giao diện rỗng/lỗi/401/403 không được tự sinh mock records ngoài Demo.
 

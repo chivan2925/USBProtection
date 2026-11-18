@@ -1,6 +1,5 @@
-import { Icon } from '../Icon'
 import type { EventFilterValues } from '../../types/event'
-export function EventFilters({ value, onChange, onReset, live = false }: { value: EventFilterValues; onChange: (value: EventFilterValues) => void; onReset: () => void; live?: boolean }) {
+export function EventFilters({ value, onChange, live = false }: { value: EventFilterValues; onChange: (value: EventFilterValues) => void; live?: boolean }) {
   const update = (key: keyof EventFilterValues, next: string) => onChange({ ...value, [key]: next })
   return <div className="filters event-filters">
     <label>Endpoint<input aria-label="Endpoint" placeholder="Tên hoặc ID endpoint" value={value.endpoint} onChange={event => update('endpoint', event.target.value)} /></label>
@@ -10,6 +9,5 @@ export function EventFilters({ value, onChange, onReset, live = false }: { value
     <label>Decision<select aria-label="Decision" value={value.decision} onChange={event => update('decision', event.target.value)}><option value="">Tất cả</option><option value="allowed">ALLOW</option><option value="blocked">BLOCK</option>{!live && <><option value="unknown">UNKNOWN</option><option value="none">Không áp dụng</option></>}</select></label>
     <label>Từ ngày<input type="date" aria-label="From Date" value={value.dateFrom} max={value.dateTo || undefined} onChange={event => update('dateFrom', event.target.value)} /></label>
     <label>Đến ngày<input type="date" aria-label="To Date" value={value.dateTo} min={value.dateFrom || undefined} onChange={event => update('dateTo', event.target.value)} /></label>
-    <button type="button" className="button small" aria-label="Đặt lại tất cả bộ lọc" title="Đặt lại tất cả bộ lọc" onClick={onReset}><Icon name="refresh" size={18} /></button>
   </div>
 }

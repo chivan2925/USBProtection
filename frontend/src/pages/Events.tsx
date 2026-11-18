@@ -22,7 +22,7 @@ export function Events({ state, refresh, refreshButton }: PageProps) {
     <PageHeading title="Lịch sử sự kiện">{refreshButton}</PageHeading>
     <ResourceNotice state={state} retry={refresh} />
     <Panel title="Event Logs">
-      <EventFilters value={eventFilters} onChange={setEventFilters} onReset={() => setEventFilters(emptyEventFilters)} />
+      <EventFilters value={eventFilters} onChange={setEventFilters} />
       {!validDateRange && <p className="field-error" role="alert">Khoảng ngày không hợp lệ. Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.</p>}
       <EventTable key={JSON.stringify(eventFilters)} events={rows} filtered={Object.values(eventFilters).some(Boolean)} loading={state.status === 'loading'} unavailable={state.status === 'unavailable'} failed={state.status === 'error'} />
     </Panel>
@@ -32,7 +32,7 @@ export function Events({ state, refresh, refreshButton }: PageProps) {
 export function LiveEvents({ onUnauthorized, revision = 0 }: { onUnauthorized?: () => void; revision?: number }) {
   const [filters, setFilters] = useState(emptyEventFilters)
   const [page, setPage] = useState(0)
-  const size = 20
+  const size = 10
   const loader = useCallback(async (signal: AbortSignal) => {
     let query
     try { query = getEventQuery(filters, page, size) }
@@ -50,7 +50,7 @@ export function LiveEvents({ onUnauthorized, revision = 0 }: { onUnauthorized?: 
     <PageHeading title="Lịch sử sự kiện" />
     <ResourceNotice state={state} retry={() => void refresh()} />
     <Panel title="Event Logs">
-      <EventFilters live value={filters} onChange={updateFilters} onReset={() => updateFilters(emptyEventFilters)} />
+      <EventFilters live value={filters} onChange={updateFilters} />
       <EventTable events={data?.content ?? []} filtered={Object.values(filters).some(Boolean)} loading={state.status === 'loading'} failed={state.status === 'error'} pagination={{ page: data?.page ?? page, size, totalElements: data?.totalElements ?? 0, totalPages: data?.totalPages ?? 0, onPageChange: setPage }} />
     </Panel>
   </>

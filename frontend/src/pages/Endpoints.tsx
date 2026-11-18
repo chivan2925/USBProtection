@@ -21,9 +21,9 @@ export function Endpoints({ state, refresh, refreshButton, demo = false }: PageP
   const [filter, setFilter] = useState('all')
   const [page, setPage] = useState(0)
   const loadPage = useCallback((signal: AbortSignal) => {
-    if (demo) return Promise.resolve({ content: [], page: 0, size: 20,
+    if (demo) return Promise.resolve({ content: [], page: 0, size: 10,
       totalElements: 0, totalPages: 0, onlineEndpoints: 0, offlineEndpoints: 0 })
-    return protectionApi.getEndpointPage({ page, size: 20, q: query.trim() || undefined,
+    return protectionApi.getEndpointPage({ page, size: 10, q: query.trim() || undefined,
       status: filter === 'all' ? undefined : filter as 'online' | 'offline' }, signal)
   }, [demo, filter, page, query])
   const serverPage = useResource(loadPage)
@@ -87,8 +87,8 @@ export function EndpointDetail({ state, refresh, refreshButton, endpointId, demo
   const notify = useToast()
   const endpoint = state.data?.endpoints.find(item => item.id === endpointId)
   const loadDevicePage = useCallback((signal: AbortSignal) => {
-    if (demo) return Promise.resolve({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 })
-    return protectionApi.getDevicePage({ page: devicePage, size: 20, endpointId, q: deviceQuery.trim() || undefined }, signal)
+    if (demo) return Promise.resolve({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0 })
+    return protectionApi.getDevicePage({ page: devicePage, size: 10, endpointId, q: deviceQuery.trim() || undefined }, signal)
   }, [demo, devicePage, deviceQuery, endpointId])
   const deviceRead = useResource(loadDevicePage)
   const { refresh: refreshDevices } = deviceRead

@@ -2,6 +2,12 @@
 import { test } from 'node:test'
 import { execFileSync } from 'node:child_process'
 import { getEventDateRange, getEventQuery, matchesEventFilters } from '../src/utils/eventFilters.ts'
+
+test('event queries default to ten records per page', () => {
+  assert.equal(getEventQuery(emptyEventFilters).size, 10)
+  assert.equal(getEventQuery(emptyEventFilters, 2).page, 2)
+  assert.equal(getEventQuery(emptyEventFilters, 2).size, 10)
+})
 import { emptyEventFilters } from '../src/types/event.ts'
 const event = { id: '1', type: 'connected', timestamp: '2026-10-05T03:30:00Z', endpointName: 'LAB-PC-01', username: 'student01', deviceName: 'Kingston', decision: 'blocked', message: '' }
 test('event field filters combine and reset', () => {

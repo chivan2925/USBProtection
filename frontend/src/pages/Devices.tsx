@@ -8,11 +8,10 @@ import { protectionApi } from '../services/api'
 import { deviceLabels, formatDate, matches, newestFirst } from '../utils/format'
 import type { PageProps } from './types'
 
-type Mode = 'devices' | 'whitelist' | 'blocked'
+type Mode = 'devices' | 'whitelist'
 const pageCopy = {
   devices: { title: 'Quản lý thiết bị USB', table: 'Danh sách thiết bị' },
   whitelist: { title: 'Whitelist & Policy', table: 'Whitelist theo endpoint' },
-  blocked: { title: 'Thiết bị bị chặn', table: 'Danh sách chặn' },
 }
 
 export function Devices({ state, refresh, refreshButton, mode, demo = false }: PageProps & { mode: Mode }) {
@@ -23,24 +22,23 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
   const entries = state.data?.whitelist ?? []
   const endpoints = state.data?.endpoints ?? []
   const options = mode === 'devices'
-    ? [{ value: 'all', label: 'Tất cả trạng thái' }, ...Object.entries(deviceLabels).map(([value, label]) => ({ value, label }))]
+    ? [{ value: 'all', label: 'Tất cả trạng thái' }, ...Object.entries(deviceLabels).map(([value, label]) => ({ value, label: value === 'detected' ? 'Chưa xác định' : label }))]
     : [{ value: 'all', label: 'Tất cả endpoints' }, ...endpoints.map(endpoint => ({ value: endpoint.id, label: endpoint.name }))]
 
   // Do not derive inventory from a truncated audit preview. Each filter/page is
   // sent to the backend and only the returned page is rendered.
   const loadDevices = useCallback((signal: AbortSignal) => {
-    if (demo || mode === 'whitelist') return Promise.resolve({ content: [], page: 0, size: 20, totalElements: 0, totalPages: 0 })
+    if (demo || mode === 'whitelist') return Promise.resolve({ content: [], page: 0, size: 10, totalElements: 0, totalPages: 0 })
     return protectionApi.getDevicePage({
-      page, size: 20, q: query.trim() || undefined,
-      ...(mode === 'devices' ? { status: filter === 'all' ? undefined : filter as 'allowed' | 'blocked' | 'detected' | 'disconnected' }
-        : { status: 'blocked' as const, endpointId: filter === 'all' ? undefined : filter }),
+      page, size: 10, q: query.trim() || undefined,
+      status: filter === 'all' ? undefined : filter as 'allowed' | 'blocked' | 'detected' | 'disconnected',
     }, signal)
   }, [demo, mode, page, filter, query])
   const deviceRead = useResource(loadDevices)
   const loadWhitelist = useCallback((signal: AbortSignal) => {
-    if (demo || mode !== 'whitelist') return Promise.resolve({ content: [], page: 0, size: 20,
+    if (demo || mode !== 'whitelist') return Promise.resolve({ content: [], page: 0, size: 10,
       totalElements: 0, totalPages: 0 })
-    return protectionApi.getWhitelistPage({ page, size: 20, q: query.trim() || undefined,
+    return protectionApi.getWhitelistPage({ page, size: 10, q: query.trim() || undefined,
       endpointId: filter === 'all' ? undefined : filter }, signal)
   }, [demo, mode, page, query, filter])
   const whitelistRead = useResource(loadWhitelist)
@@ -61,8 +59,7 @@ export function Devices({ state, refresh, refreshButton, mode, demo = false }: P
   }, [demo, mode, state.data, state.status, refreshDevices, refreshWhitelist])
 
   const demoDeviceRows = newestFirst((state.data?.devices ?? []).filter(device =>
-    (mode !== 'blocked' || device.status === 'blocked') &&
-    (filter === 'all' || (mode === 'devices' ? device.status : device.endpointId) === filter) &&
+    (filter === 'all' || device.status === filter) &&
     matches(query, device.name, device.vendorId, device.productId, device.serialNumber, device.endpointId, device.endpointName)),
     device => device.detectedAt)
   const devicePage = deviceRead.state.status === 'ready' ? deviceRead.state.data : undefined

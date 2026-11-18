@@ -24,7 +24,7 @@ export function getEventDateRange(filters: Pick<EventFilterValues, 'dateFrom' | 
 // inclusive, so use the last representable microsecond BEFORE next local midnight.
 // Passing .999999999 rounds UP to midnight in the PostgreSQL JDBC driver and
 // would include an event from the next day.
-export function getEventQuery(filters: EventFilterValues, page = 0, size = 20): EventQuery {
+export function getEventQuery(filters: EventFilterValues, page = 0, size = 10): EventQuery {
   const range = getEventDateRange(filters)
   if (!range.valid) throw new Error('Khoảng ngày không hợp lệ. Kiểm tra ngày bắt đầu và kết thúc.')
   if (!Number.isInteger(page) || page < 0 || !Number.isInteger(size) || size < 1 || size > 100) throw new Error('Trang hoặc kích thước trang không hợp lệ.')

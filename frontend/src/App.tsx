@@ -40,7 +40,6 @@ function Console({ route, demo, revision }: { route: string; demo: boolean; revi
     case '/dashboard': page = <Dashboard {...props} />; break
     case '/devices': page = <Devices key="devices" {...props} mode="devices" />; break
     case '/whitelist': page = <Devices key="whitelist" {...props} mode="whitelist" />; break
-    case '/blocked': page = <Devices key="blocked" {...props} mode="blocked" />; break
     case '/events': page = <Events {...props} />; break
     case '/endpoints': page = <Endpoints {...props} />; break
     case '/settings': page = <Settings demo={demo} />; break

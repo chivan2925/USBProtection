@@ -128,17 +128,17 @@ test('EventTable preserves source time, escaped attribution and encoded endpoint
 test('EventTable last server page retains all rows, their order and global pagination', () => {
   const events = Array.from({ length: 5 }, (_, index) => ({ ...mockEvents[0], id: String(25 - index), username: `page-two-user-${index}`, usbDeviceId: String(index + 1) }))
   const html = renderToStaticMarkup(createElement(EventTable, {
-    events, pagination: { page: 1, size: 20, totalElements: 25, totalPages: 2, onPageChange() {} },
+    events, pagination: { page: 2, size: 10, totalElements: 25, totalPages: 3, onPageChange() {} },
   }))
   assert.equal((html.match(/<tbody><tr>|<\/tr><tr>/g) ?? []).length, 5)
   assert.ok(html.includes('21–25 trên 25 bản ghi'))
-  assert.ok(html.includes('Trang 2 / 2'))
+  assert.ok(html.includes('Trang 3 / 3'))
   assert.ok(html.indexOf('page-two-user-0') < html.indexOf('page-two-user-4'))
   assert.ok(html.includes('ID: 5'))
 })
 
 test('live filters match table labels and accept endpoint/USB names on a text keyboard', () => {
-  const html = renderToStaticMarkup(createElement(EventFilters, { live: true, value: { endpoint: '', username: '', device: '', eventType: '', decision: '', dateFrom: '', dateTo: '' }, onChange() {}, onReset() {} }))
+  const html = renderToStaticMarkup(createElement(EventFilters, { live: true, value: { endpoint: '', username: '', device: '', eventType: '', decision: '', dateFrom: '', dateTo: '' }, onChange() {} }))
   for (const label of ['Endpoint', 'Linux User', 'USB']) assert.ok(html.includes(`<label>${label}<input`))
   for (const placeholder of ['Tên hoặc ID endpoint', 'Tên hoặc một phần tên', 'Tên hoặc ID USB']) assert.ok(html.includes(`placeholder="${placeholder}"`))
   assert.ok(!html.includes('inputMode="numeric"'))
@@ -150,4 +150,13 @@ test('live endpoint cell displays the name and its searchable ID together', () =
   }))
   assert.ok(html.includes('lab-pc-01.local'))
   assert.ok(html.includes('class="endpoint-event-id">ID: POC-LAB-PC-01'))
+})
+
+test('live and demo event filters retain all fields without the reset button', () => {
+  for (const live of [false, true]) {
+    const html = renderToStaticMarkup(createElement(EventFilters, { live, value: { endpoint: '', username: '', device: '', eventType: '', decision: '', dateFrom: '', dateTo: '' }, onChange() {} }))
+    assert.ok(!html.includes('<button'))
+    assert.equal((html.match(/<input\b/g) ?? []).length, 5)
+    assert.equal((html.match(/<select\b/g) ?? []).length, 2)
+  }
 })

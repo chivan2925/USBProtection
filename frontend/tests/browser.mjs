@@ -163,8 +163,8 @@ try {
     await closeDetail('/endpoints')
     assert.equal(await evaluate(`document.querySelector('.filters input').value`), 'fixture-ubuntu-a')
     await until(() => evaluate(`document.querySelector('tbody tr')?.cells[5].textContent === '3'`), 'background reflects policy change')
-    for (const route of ['/devices', '/whitelist', '/blocked', '/events']) {
-      await navigate(route, route === '/devices' ? 'Quản lý thiết bị USB' : route === '/whitelist' ? 'Whitelist & Policy' : route === '/blocked' ? 'Thiết bị bị chặn' : 'Lịch sử sự kiện')
+    for (const route of ['/devices', '/whitelist', '/events']) {
+      await navigate(route, route === '/devices' ? 'Quản lý thiết bị USB' : route === '/whitelist' ? 'Whitelist & Policy' : 'Lịch sử sự kiện')
       if (route === '/events') await fillInput('[aria-label="Endpoint"]', 'fixture-ubuntu-b')
       await until(() => evaluate(`!!document.querySelector('tbody a[href^="#/endpoints/"]')`), 'table detail link')
       const endpointId = await evaluate(`decodeURIComponent(document.querySelector('tbody a[href^="#/endpoints/"]').hash.split('/').at(-1))`)
@@ -172,6 +172,35 @@ try {
       await closeDetail(route)
       if (route === '/events') assert.equal(await evaluate(`document.querySelector('[aria-label="Endpoint"]').value`), 'fixture-ubuntu-b')
     }
+    await navigate('/blocked', 'Không tìm thấy trang')
+    assert.equal(await evaluate(`!!document.querySelector('a[href="#/blocked"]')`), false)
+    await navigate('/dashboard', 'Tổng quan bảo vệ')
+    await until(() => evaluate(`document.querySelector('.stat-value')?.textContent === '2'`), 'overview before pagination check')
+    const savedEvents = fixture.state.events
+    fixture.state.events = [...savedEvents, ...Array.from({ length: 23 }, (_, index) => ({
+      ...savedEvents[0], id: index + 3, usbDeviceId: index + 2, decision: 'UNKNOWN',
+      device: { ...savedEvents[0].device, hash: `fixture-paged-usb-${index}` },
+    }))]
+    await navigate('/events', 'Lịch sử sự kiện')
+    await until(() => evaluate(`document.body.innerText.includes('1–10 trên 25 bản ghi')`), 'ten records on first event page')
+    assert.equal(await evaluate(`document.querySelectorAll('tbody tr').length`), 10)
+    for (const [range, count] of [['11–20', 10], ['21–25', 5]]) {
+      await evaluate(`document.querySelector('[aria-label="Trang sau"]').click()`)
+      await until(() => evaluate(`document.body.innerText.includes('${range} trên 25 bản ghi')`), range)
+      assert.equal(await evaluate(`document.querySelectorAll('tbody tr').length`), count)
+    }
+    await fillInput('[aria-label="Linux Username"]', 'fixture-linux-user')
+    await until(() => evaluate(`document.body.innerText.includes('1–10 trên 24 bản ghi')`), 'filter returns to first page')
+    await navigate('/devices', 'Quản lý thiết bị USB')
+    await until(() => evaluate(`document.body.innerText.includes('1–10 trên 25 bản ghi')`), 'ten devices per page')
+    assert.equal(await evaluate(`document.querySelector('option[value="detected"]').textContent`), 'Chưa xác định')
+    await evaluate(`{ const select = document.querySelector('[aria-label="Lọc theo trạng thái"]'); select.value = 'detected'; select.dispatchEvent(new Event('change', { bubbles: true })); }`)
+    await until(() => evaluate(`document.body.innerText.includes('1–10 trên 23 bản ghi')`), 'unknown label retains detected API filter')
+    assert.equal(new URLSearchParams(fixture.state.requests.findLast(item => item.path === '/api/admin/device-states').query).get('status'), 'detected')
+    for (const path of ['/api/admin/endpoints/page', '/api/admin/device-states', '/api/admin/whitelist/page', '/api/admin/events']) {
+      assert.ok(fixture.state.requests.some(item => item.path === path && new URLSearchParams(item.query).get('size') === '10'), path)
+    }
+    fixture.state.events = savedEvents
     const beforeDemo = fixture.state.requests.length
     await cdp('Page.navigate', { url: 'http://127.0.0.1:4173/demo#/endpoints/POC-LAB-PC-01' })
     await until(() => evaluate(`document.querySelector('.endpoint-detail-modal h1')?.textContent === 'LAB-PC-01'`), 'deep link modal')
@@ -258,7 +287,8 @@ try {
   await evaluate(`{ const select = document.querySelector('[aria-label="Decision"]'); select.value = 'blocked'; select.dispatchEvent(new Event('change', { bubbles: true })); }`)
   await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 1`), 'live event filter')
   assert.equal(await evaluate(`document.querySelector('tbody').innerText.includes('fixture-linux-user')`), true)
-  await evaluate(`document.querySelector('[aria-label="Đặt lại tất cả bộ lọc"]').click()`)
+  await cdp('Page.reload')
+  await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 2`), 'reload clears live filters')
   await screenshot('m4-events.png')
 
   for (const status of [403, 500]) {
@@ -279,7 +309,7 @@ try {
   fixture.state.empty = false
 
   await cdp('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 1, mobile: true })
-  for (const [route, heading] of [['/dashboard', 'Tổng quan bảo vệ'], ['/devices', 'Quản lý thiết bị USB'], ['/whitelist', 'Whitelist & Policy'], ['/blocked', 'Thiết bị bị chặn'], ['/events', 'Lịch sử sự kiện'], ['/endpoints', 'Quản lý endpoints'], ['/endpoints/A', 'fixture-ubuntu-a'], ['/settings', 'Cài đặt hệ thống'], ['/missing', 'Không tìm thấy trang'], ['/endpoints/%ZZ', 'Không tìm thấy trang']]) {
+  for (const [route, heading] of [['/dashboard', 'Tổng quan bảo vệ'], ['/devices', 'Quản lý thiết bị USB'], ['/whitelist', 'Whitelist & Policy'], ['/blocked', 'Không tìm thấy trang'], ['/events', 'Lịch sử sự kiện'], ['/endpoints', 'Quản lý endpoints'], ['/endpoints/A', 'fixture-ubuntu-a'], ['/settings', 'Cài đặt hệ thống'], ['/missing', 'Không tìm thấy trang'], ['/endpoints/%ZZ', 'Không tìm thấy trang']]) {
     await navigate(route, heading)
     await until(() => evaluate(`!document.querySelector('.loading-state')`), 'route read finished')
     assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true, `Mobile overflow: ${route}`)
@@ -342,7 +372,7 @@ try {
   await evaluate(`const input = document.querySelector('[aria-label="Endpoint"]'); Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'no-such-endpoint'); input.dispatchEvent(new Event('input', { bubbles: true }))`)
   await until(() => evaluate(`document.body.innerText.includes('Không tìm thấy kết quả')`), 'demo empty filter')
   const resetEvents = async () => {
-    await evaluate(`document.querySelector('[aria-label="Đặt lại tất cả bộ lọc"]').click()`)
+    await cdp('Page.reload')
     await until(() => evaluate(`document.querySelectorAll('tbody tr').length === 6`), 'reset demo filters')
   }
   await resetEvents()

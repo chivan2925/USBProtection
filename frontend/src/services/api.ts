@@ -230,7 +230,7 @@ export const protectionApi = {
     const summary = mapSummary(await request(`/api/admin/dashboard/summary?${dates}`, { signal }))
 
     const activeRoute = route ?? (typeof window === 'undefined' ? undefined : window.location.hash.replace(/^#/, '').split('?')[0])
-    // EndpointDetail independently fetches an endpoint-scoped device page (size=20).
+    // EndpointDetail independently fetches an endpoint-scoped device page (size=10).
     // Do not prefetch and discard a second, differently sized 100-row inventory.
     const devices: Device[] = []
     const whitelist: WhitelistEntry[] = []

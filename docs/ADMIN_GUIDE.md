@@ -87,11 +87,11 @@ Nếu chưa có USB phù hợp, cần Agent gửi sự kiện trước. Frontend
 
 Nút xác nhận bị khóa khi đang gửi. Nếu có lỗi, đọc thông báo và thử lại; không coi lỗi mạng là bằng chứng thao tác chưa được server lưu. Refresh để kiểm tra trạng thái hiện tại.
 
-## Devices, Whitelist, Blocked Devices và Settings
+## Devices, Whitelist và Settings
 
 - **Devices:** thiết bị được ghi nhận từ lịch sử event, theo từng endpoint.
 - **Whitelist:** rule server đã lưu; mở endpoint để Allow/Revoke. Không có quyền Allow toàn hệ thống.
-- **Blocked Devices:** quyết định BLOCKED trong sự kiện gần nhất, không phải phép đo USBGuard thời gian thực.
+- Trang **Blocked Devices** đã bỏ. Dùng bộ lọc **Bị chặn** trong Devices; đây là quyết định BLOCKED gần nhất, không phải phép đo USBGuard thời gian thực. Bộ lọc **Chưa xác định** tương ứng trạng thái API `detected`. Các bảng có phân trang dùng cố định **10 bản ghi/trang**.
 - **Event Logs:** xem sự kiện và bộ lọc do phần Event History của M5 cung cấp.
 - **Settings:** đổi mật khẩu Admin có xác thực và quản lý phiên; **API cấu hình USBGuard từ Web vẫn chưa được triển khai** (không được nhầm với health telemetry).
 

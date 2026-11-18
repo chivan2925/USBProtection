@@ -10,7 +10,6 @@ const navigation: { route: string; label: string; icon: IconName; group: string 
   { route: '/endpoints', label: 'Endpoints', icon: 'monitor', group: 'TỔNG QUAN' },
   { route: '/devices', label: 'Devices', icon: 'usb', group: 'QUẢN LÝ USB' },
   { route: '/whitelist', label: 'Whitelist', icon: 'check', group: 'QUẢN LÝ USB' },
-  { route: '/blocked', label: 'Blocked Devices', icon: 'block', group: 'QUẢN LÝ USB' },
   { route: '/events', label: 'Event Logs', icon: 'history', group: 'HỆ THỐNG' },
   { route: '/settings', label: 'Settings', icon: 'settings', group: 'HỆ THỐNG' },
 ]
