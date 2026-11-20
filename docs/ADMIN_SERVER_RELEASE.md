@@ -1,6 +1,6 @@
-# USBShield — Admin Server: build, Windows verification, JAR distribution and runtime
+# USBProtection — Admin Server: build, Windows verification, JAR distribution and runtime
 
-> **Source baseline:** `main` `79384e26563ea08db7c16c223c618e1f51e9a3d9` (20/11/2026). This document describes the scripts **as committed at that source SHA**; it is not a fresh test report or release attestation. `RUN_GUIDE.md` has also been synchronized with the current 20/11 release workflow; use that runbook for complete deployments and this guide for the narrower JAR/build/Windows verification procedures. For end-to-end Ubuntu deployment, use [RUN_GUIDE.md](RUN_GUIDE.md). For Java/API development, use [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
+> **Source baseline (post-Settings removal):** `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026); release scripts were introduced in earlier commit `79384e2`. This guide describes workflow and the **owner-reported** Windows gate result, not a fresh independent E2E run or release attestation. `RUN_GUIDE.md` has also been synchronized with the current 20/11 release workflow; use that runbook for complete deployments and this guide for the narrower JAR/build/Windows verification procedures. For end-to-end Ubuntu deployment, use [RUN_GUIDE.md](RUN_GUIDE.md). For Java/API development, use [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
 
 ## 1. Keep the responsibilities separate
 
@@ -72,6 +72,17 @@ Optional parameters:
 ```
 
 **Do not interpret `BUILD SUCCESS` or a generated JAR as evidence of a complete verifier pass.** Publish a clean-source artifact only after the verification gates relevant to the release pass. Keep the manifest and checksum alongside the JAR; the Git commit alone does not identify a dirty-build binary.
+
+### Actual committed build at 20/11 — not fully qualified
+
+Owner reported that `verify-windows.ps1` **PASSed the executed Windows gates** after fixing obsolete frontend Settings tests, and `build-release.ps1` packaged a JAR. The committed file is `releases/usbshield-admin-server_b12bb597d452_20261120T144326Z.jar`, with SHA-256 `8cd573ca4ee70a3bf3c276623d30512cc3a4af92d819c961c57437dfdb7909e0` and a sibling `.manifest.json`. **Read the manifest, not only the filename**:
+
+- `source.commit`: `b12bb597d45289ff507150554d6562b87c5848f4` — **not** the current `c7381fc7` HEAD.
+- `source.workingTreeCleanAtStart`: `false` — build had local changes; source commit alone does **not** reproduce the binary.
+- `build.backendTestsExecuted`: `true`; `build.frontendBuildExecuted`: `true` — these fields do **not** certify full Windows/HTTPS/Ubuntu acceptance.
+- The build printed `WARNING: This build is not fully release-qualified (tests skipped and/or dirty Git tree).` In this case the manifest **confirms dirty Git tree**, regardless of test success.
+
+To produce a release-qualified candidate, rebuild after committing from a **clean working tree**, retain the newly generated manifest + SHA-256, run the required verification gates, and record separate native HTTPS/ACL and Ubuntu tests where applicable. Linux-only Agent test skips on Windows are expected for tests annotated `@EnabledOnOs(OS.LINUX)`; they do not constitute Linux E2E.
 
 ## 5. Run a JAR locally with `prod` settings
 

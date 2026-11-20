@@ -1,6 +1,6 @@
-# USBShield Admin Web — Hướng dẫn sử dụng và quản trị
+# USBProtection Admin Web — Hướng dẫn sử dụng và quản trị
 
-> **Đối chiếu giao diện:** `main` `721f164f63533461b6c18b62e1607baa4ab1b731` (20/11/2026). Hướng dẫn này dành cho **người sử dụng Admin Web**, không phải hướng dẫn build, phát hành JAR hay cài Ubuntu Agent. Xem [RUN_GUIDE.md](RUN_GUIDE.md) và [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md) khi cần triển khai. Các số liệu kiểm thử Week 4 ở cuối là **hồ sơ lịch sử**, không phải một lần nghiệm thu mới của source hiện tại.
+> **Đối chiếu giao diện:** `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026). Hướng dẫn này dành cho **người sử dụng Admin Web**, không phải hướng dẫn build, phát hành JAR hay cài Ubuntu Agent. Xem [RUN_GUIDE.md](RUN_GUIDE.md) và [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md) khi cần triển khai. Các số liệu kiểm thử Week 4 ở cuối là **hồ sơ lịch sử**, không phải một lần nghiệm thu mới của source hiện tại.
 
 ## 1. Truy cập Admin Web và phân biệt môi trường
 
@@ -72,7 +72,7 @@ Nếu USB chưa từng xuất hiện, Agent cần ghi nhận event để Server 
 
 Nút xác nhận bị khóa khi request đang được xử lý. Nếu timeout/network error, không tự kết luận thao tác đã rollback — tải lại danh sách và version để kiểm tra trạng thái persisted trước khi thử lại.
 
-## 7. Devices, Whitelist, Event Logs và Settings
+## 7. Devices, Whitelist và Event Logs
 
 **Devices:** hiển thị thiết bị đã được ghi nhận theo endpoint, cho phép tìm kiếm thiết bị theo tên/ID và lọc quyết định gần nhất. `BLOCKED`/`ALLOWED` phản ánh event/trạng thái được ghi nhận, **không** phải kết quả USBGuard đo ngay lúc người dùng nhìn trang. **Blocked Devices** không còn là trang độc lập; dùng bộ lọc **Bị chặn** trong Devices. Trạng thái **Chưa xác định** phản ánh dữ liệu `detected` của API.
 
@@ -80,17 +80,17 @@ Nút xác nhận bị khóa khi request đang được xử lý. Nếu timeout/n
 
 **Event Logs:** trong chế độ live, sử dụng API `/api/admin/events` với phân trang máy chủ (mỗi trang **10 bản ghi**). Các bộ lọc gồm Endpoint (tên/ID), Linux User (tìm phần tên không phân biệt hoa/thường), USB (tên/ID), Event Type, Decision (ALLOW/BLOCK), Từ ngày và Đến ngày. Khoảng ngày được hiểu theo ngày lịch local của frontend để tạo giới hạn thời gian truy vấn; không tự sửa UTC dữ liệu nguồn. Có thể thấy 14 bản ghi phù hợp nhưng trang đầu chỉ hiện 10: đó là **phân trang bình thường**, không phải thiếu dữ liệu. Khi bộ lọc không có kết quả, Web hiển thị “Không tìm thấy kết quả”.
 
-**Settings → Đổi mật khẩu Admin:** nhập mật khẩu hiện tại và mật khẩu mới. Mật khẩu mới ít nhất 12 ký tự, tối đa 72 byte UTF-8 theo backend và khác mật khẩu cũ. Thành công sẽ vô hiệu hóa các phiên Admin cũ và đưa về đăng nhập. Nếu quên mật khẩu cần bảo trì offline do người vận hành Server xử lý, không có API reset mật khẩu công khai. Trang Settings **không** cung cấp API chỉnh trực tiếp cấu hình USBGuard; health telemetry không phải cấu hình enforcement.
+**Settings đã được xóa:** Menu, trang `/#/settings` và API `POST /api/admin/account/password` không còn tồn tại ở HEAD `c7381fc7`. Truy cập trực tiếp hash route cũ hiển thị trang không tìm thấy. Admin **không đổi mật khẩu qua Web**. Nếu quên mật khẩu, liên hệ người quản trị máy Server để thực hiện quy trình reset **offline, không HTTP** qua profile `admin-reset`; không thay `USBSHIELD_ADMIN_PASSWORD` rồi restart vì đây chỉ là biến bootstrap. Chỉnh cấu hình USBGuard trực tiếp từ Web cũng không được hỗ trợ; telemetry health không phải thao tác cấu hình enforcement.
 
 ## 8. Khi gặp lỗi
 
 | Biểu hiện | Xử lý |
 |---|---|
-| Không tải được dữ liệu, timeout, không kết nối | Kiểm tra Server/Nginx/HTTPS/network ACL; thử lại hoặc Refresh. |
+| Không tải được dữ liệu, timeout, không kết nối | Kiểm tra Server/Nginx/HTTPS/network ACL; dùng nút thử lại nếu có hoặc tải lại trang. |
 | HTTP 401 / phiên hết hạn | Đăng nhập lại, không tiếp tục với dữ liệu cũ. |
 | HTTP 403 | Kiểm tra quyền, session và CSRF; tải lại trang để lấy CSRF mới. |
 | HTTP 404 | Kiểm tra endpoint/đường dẫn và dữ liệu không còn tồn tại. |
-| HTTP 409 | Có thay đổi đồng thời hoặc dữ liệu trùng/cũ; Refresh rồi xác nhận lại. |
+| HTTP 409 | Có thay đổi đồng thời hoặc dữ liệu trùng/cũ; tải lại trang rồi xác nhận trạng thái trước khi thử lại. |
 | HTTP 5xx | Server lỗi; lưu thông tin thời điểm/request phù hợp nhưng không chụp credentials hay token. |
 | Payload API sai | Web từ chối hiển thị thành công giả; báo lỗi cho người phụ trách backend/frontend. |
 | Không có endpoint/event | Không tự suy ra lỗi: hệ thống mới chưa có dữ liệu hoặc Agent chưa kết nối. |
@@ -100,4 +100,4 @@ Nút xác nhận bị khóa khi request đang được xử lý. Nếu timeout/n
 
 **Hồ sơ M4 Week 4 ngày 28–30/10/2026, không phải lần chạy mới của HEAD hiện tại:** `npm test` 96 PASS; lint/build PASS; `test:browser` PASS; `test:live` khi đó dùng HTTP/H2 và event mô phỏng, với bằng chứng tại [Week 4 evidence](qa/week4-evidence/2026-10-28/windows-regression/README.md). Không sửa hoặc ghi lại các con số lịch sử này thành kết quả PostgreSQL mới.
 
-**Báo cáo owner ngày 09/11/2026** ghi Windows verifier PASS, HTTPS/ACL lab PASS và Ubuntu Minimal Core P0/C1–C5 PASS theo owner. Các test Ubuntu mở rộng (reboot/offline/negative TLS/remove-upgrade/native IPC) chưa hoàn thành theo scope. Source `main` ngày 20/11 có thêm thay đổi script/frontend, **không được đánh dấu full Windows/Ubuntu PASS nếu chưa có log tái kiểm đúng source/artifact mới**. Tham khảo [owner closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md), [status snapshot](IMPLEMENTATION_STATUS_20261109.md) và [release workflow](ADMIN_SERVER_RELEASE.md).
+**Báo cáo owner ngày 09/11/2026** ghi Windows verifier PASS, HTTPS/ACL lab PASS và Ubuntu Minimal Core P0/C1–C5 PASS theo owner. Các test Ubuntu mở rộng (reboot/offline/negative TLS/remove-upgrade/native IPC) chưa hoàn thành theo scope. Source `main` tại `c7381fc7` có thay đổi xóa Settings. **Owner đã báo `verify-windows.ps1` PASS các gate được thực thi** sau khi sửa test frontend, nhưng điều này không thay thế thử nghiệm HTTPS/ACL và Ubuntu USBGuard native. JAR trong `releases/` được build từ working tree dirty và không đạt trạng thái full release qualification. Tham khảo [owner closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md), [status snapshot](IMPLEMENTATION_STATUS_20261109.md) và [release workflow](ADMIN_SERVER_RELEASE.md).

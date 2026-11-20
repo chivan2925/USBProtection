@@ -1,6 +1,6 @@
-# USBShield — Functional Test Catalog (current entrypoints + historical refactor)
+# USBProtection — Functional Test Catalog (current entrypoints + historical refactor)
 
-> **Source/tree inspected:** `main` `721f164f63533461b6c18b62e1607baa4ab1b731` (20/11/2026). This is an **inventory of tests and scripts**, not a fresh test result. Test counts and renames from 03–09/11 are historical snapshots; they do not prove this HEAD passed. The older refactor snapshot counted **303 `@Test` annotations** at its own commit, not current executed cases. See [Admin Server Release](ADMIN_SERVER_RELEASE.md) and [Run Guide](RUN_GUIDE.md).
+> **Source/tree inspected:** `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026). This is an **inventory of tests and scripts**, not a fresh test result. Test counts and renames from 03–09/11 are historical snapshots; they do not prove this HEAD passed. The older refactor snapshot counted **303 `@Test` annotations** at its own commit, not current executed cases. See [Admin Server Release](ADMIN_SERVER_RELEASE.md) and [Run Guide](RUN_GUIDE.md).
 
 ## 1. Canonical Windows verification (currently present)
 
@@ -40,7 +40,7 @@ The following names were found under `admin-server/src/test` at the inspected HE
 | `ServerSecurityAndStatusTest` | Auth/security/status and SPA routes |
 | `EndpointMetadataIntegrationTest` | Agent metadata → endpoint/Admin API |
 | `EventSearchIntegrationTest`, `AgentHttpIntegrationTest`, `AgentEventContractTest` | Event search and authenticated Agent API contracts |
-| `AdminPassword*Test`, `AdminSessionVersionFilterTest` | Password change/reset and session invalidation |
+| `AdminBootstrapPasswordPolicyTest`, `AdminPasswordPolicyTest`, `AdminSessionVersionFilterTest` | Initial password validation, password policy, session credential-version invalidation; **`AdminPasswordControllerTest` was removed** with the Web password-change endpoint. Offline `AdminPasswordResetRunner` remains in main source. |
 | `UsbHashIdentityTest`, `UsbGuardHealthProjectionTest` | HASH validation and reported health/staleness |
 | `FlywaySchemaIntegrationTest`, `TestPostgresSchemaSafetyTest` | Migration and test DB safety |
 | `EndpointAndWhitelistPaginationIntegrationTest` | Backend filtering, total counts and bounded pagination |
@@ -67,7 +67,14 @@ Active Agent suites include:
 - `npm --prefix frontend run test:browser:live` and `npm --prefix frontend run test:live` are separate HTTP/browser integration suites; both are invoked by the normal Windows verifier (unless skipped).
 - Frontend Event Logs uses **10 rows/page**; an event filter with 14 results must show **1–10 on page 1 and 11–14 on page 2**, not 1–14 on the first page. A stale UI assertion must be fixed in the test; don't change correct pagination code merely to make a test pass.
 
-## 6. Independent native deployment evidence still required
+## 6. Owner verification on 20/11 and release qualification
+
+- Owner reran `packaging/tests/verify-windows.ps1` after removal of the Settings page and adjustment of frontend tests and reported **`RESULT: PASS for executed Windows verification gates`**. No exact fresh Surefire/test count was supplied with the final report; do not copy the old 09/11 numbers as if they were re-executed.
+- On Windows, `NotifierStaleSocketRecoveryTest` is annotated `@EnabledOnOs(OS.LINUX)` and contains **three** `@Test` methods; these may be skipped intentionally on Windows. Confirm by local Surefire XML rather than assuming all skipped tests always have this cause. `Skipped` is not `Failed`, but also not native Linux acceptance.
+- `admin-server/build-release.ps1` produced a JAR and a warning. Its committed manifest records `source.commit=b12bb597...`, `workingTreeCleanAtStart=false`, `backendTestsExecuted=true`, `frontendBuildExecuted=true`; artifact SHA-256 `8cd573ca4ee70a3bf3c276623d30512cc3a4af92d819c961c57437dfdb7909e0`. **Not a clean-tree/release-qualified build of HEAD `c7381fc7`**.
+- `packaging/tests/verify-phase3-https-acl.sh` remains present, must be executed from actual Admin and Ubuntu Client origins, and is **not integrated** into `verify-windows.ps1`.
+
+## 7. Independent native deployment evidence still required
 
 Windows unit/integration tests do not independently verify Nginx CA/host name, real two-source-IP route ACL, Ubuntu `.deb` install/upgrade/remove, reboot resilience, physical USBGuard rule application, per-endpoint hardware isolation, desktop popup, offline spool recovery or Linux-only notifier IPC. The owner-reported minimal Ubuntu P0/C1–C5 PASS is documented on the **09/11 baseline**, with extended scenarios still deferred; see [owner acceptance](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md).
 

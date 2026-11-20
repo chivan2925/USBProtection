@@ -1,8 +1,8 @@
-# USBShield Admin Server Developer Guide
+# USBProtection Admin Server Developer Guide
 
 > **Vận hành và cài đặt:** xem [RUN_GUIDE.md](RUN_GUIDE.md). **Phát hành Admin JAR và Windows verification tại HEAD 20/11/2026:** xem [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md). Tài liệu này giữ kiến trúc, API, build workflow và ghi chú developer; không thay thế runbook triển khai chung.
 
-Owner: M1. Runtime database update: 2026-11-04 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`). Earlier Week 4 evidence remains historical. API contract: frozen v0.2. Current scripts reference: `main` `79384e26563ea08db7c16c223c618e1f51e9a3d9` (20/11/2026), **not a fresh acceptance claim**.
+Owner: M1. Runtime database update: 2026-11-04 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`). Earlier Week 4 evidence remains historical. API contract: frozen v0.2. Current source baseline: `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026); scripts originally introduced earlier. Owner-reported Windows PASS is scoped to executed gates; the committed `releases/` JAR is a dirty-tree build and is not fully release-qualified.
 
 This guide covers the Spring Boot Admin Server, its same-origin React bundle,
 local development, production configuration and Windows release checks. It does
@@ -79,7 +79,7 @@ The frozen baseline is [API v0.2](API.md); the current [Phase 1–3 API/transpor
   `appliedPolicyVersion`.
 - Endpoint/whitelist list views use `/api/admin/endpoints/page` and `/api/admin/whitelist/page`; both are bounded, DB-filtered and paginated. Legacy endpoint list has a compatibility cap of 100. Endpoint detail and scoped Allow/Revoke are retained.
 - Fingerprint/HASH policy validation must agree Server ↔ Agent; malformed policy is rejected before USBGuard and is not ACKed. Agent `live` fails closed when HTTPS/cert/hostname or durable storage is unavailable.
-- Authenticated Admin can change password via Settings/Admin API; emergency reset runs only in the no-web maintenance profile. Password change invalidates existing sessions. The Admin bootstrap environment variable remains **initialization-only**.
+- **No Settings UI and no Admin password-change HTTP API** at HEAD `c7381fc7` (`POST /api/admin/account/password` was removed). Login/logout, CSRF/session and `AdminBootstrap` remain. Emergency Admin password recovery still uses `AdminPasswordResetRunner` under the **no-web** `admin-reset` profile, with `USBSHIELD_ADMIN_RESET_USERNAME`/`USBSHIELD_ADMIN_RESET_PASSWORD`; a successful reset increments credential version and invalidates existing sessions. `USBSHIELD_ADMIN_PASSWORD` remains **initialization-only**.
 - Enrollment never silently rotates an existing machine's credential. A duplicate
   machine ID returns 409 and needs a controlled administrator recovery process.
 - Agent tokens are returned only at enrollment and persisted as BCrypt hashes.
@@ -158,7 +158,7 @@ Historical M1 Week 4 manifests and acceptance reports stay untouched; they refer
   rotate credentials silently; use the agreed administrator recovery workflow.
 - Endpoint shown OFFLINE: the last authenticated heartbeat is older than
   `USBSHIELD_OFFLINE_AFTER_SECONDS` (90 seconds by default). Connection status is separate from **Agent-reported USBGuard health**; stale/unknown health is not a healthy-enforcement assertion.
-- Admin login fails after changing the environment password: bootstrap only creates a first account. Use the authenticated password-change flow or offline maintenance reset; do not assume a restart resets credentials.
+- Admin login fails after changing the environment password: bootstrap only creates an initial account. There is **no authenticated password-change Web flow** after Settings removal; use the offline no-web `admin-reset` maintenance path for authorized recovery, not an `.env` edit and restart.
 - PostgreSQL login failure: check `USBSHIELD_DB_URL`, host/port, role, password,
   service status, firewall and `pg_hba.conf` authentication. IntelliJ may have a
   separate saved password from the terminal running Maven/JAR.

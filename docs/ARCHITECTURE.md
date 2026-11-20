@@ -1,6 +1,6 @@
-# USBShield Ubuntu — System Architecture (current runtime, 20/11/2026)
+# USBProtection — System Architecture (current runtime, 20/11/2026)
 
-> **Source inspected:** `main` `721f164f63533461b6c18b62e1607baa4ab1b731`. This document describes the current design boundary, **not a fresh Windows/Ubuntu acceptance result**. The earlier architecture v0.1/Week 1–4 notes remain in Git history and the dated files under `docs/member1/`, `docs/qa/`, `docs/usbguard/` and `docs/client-agent/`. For operations use [RUN_GUIDE.md](RUN_GUIDE.md), for executable JAR releases use [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md), for wire contracts use [API.md](API.md) plus the [Phase 1–3 addendum](API_PHASE1_TO_PHASE3_ADDENDUM.md).
+> **Source inspected:** `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51`. This document describes the current design boundary, **not a fresh Windows/Ubuntu acceptance result**. The earlier architecture v0.1/Week 1–4 notes remain in Git history and the dated files under `docs/member1/`, `docs/qa/`, `docs/usbguard/` and `docs/client-agent/`. For operations use [RUN_GUIDE.md](RUN_GUIDE.md), for executable JAR releases use [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md), for wire contracts use [API.md](API.md) plus the [Phase 1–3 addendum](API_PHASE1_TO_PHASE3_ADDENDUM.md).
 
 ## 1. Tổng quan hệ thống (System Overview)
 
@@ -153,7 +153,7 @@ This is a **conceptual** ER diagram: table definitions, nullability and constrai
 
 ### 5.3. Admin Web rendering and read paths
 
-Admin Web and Admin API run behind the **same HTTPS origin**. Endpoint list and global whitelist use backend filter and bounded pagination (`/api/admin/endpoints/page`, `/api/admin/whitelist/page`), avoiding per-endpoint N+1 requests for a global list. Event History uses server pagination, **10 rows/page** in the current UI. Login/session/CSRF and password changes are controlled by Spring Security; changing the bootstrap password variable does not reset a previously created Admin account.
+Admin Web and Admin API run behind the **same HTTPS origin**. Endpoint list and global whitelist use backend filter and bounded pagination (`/api/admin/endpoints/page`, `/api/admin/whitelist/page`), avoiding per-endpoint N+1 requests for a global list. Event History uses server pagination, **10 rows/page** in the current UI. Login/session/CSRF are controlled by Spring Security. The Settings page and `POST /api/admin/account/password` were deleted at `c7381fc7`; password recovery is available **only as a no-HTTP maintenance operation** through `AdminPasswordResetRunner`/`admin-reset`. Changing the bootstrap password environment variable does not reset a previously created Admin account.
 
 ## 6. Kế hoạch theo tuần và bằng chứng nghiệm thu (historical boundary)
 

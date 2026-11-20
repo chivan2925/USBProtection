@@ -1,6 +1,6 @@
-# USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu
+# USBProtection — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu
 
-> **Source kiểm tra tài liệu 20/11/2026:** `main` HEAD [`721f164f63533461b6c18b62e1607baa4ab1b731`](https://github.com/chivan2925/USBProtection/commit/721f164f63533461b6c18b62e1607baa4ab1b731), gồm các script được đưa vào tại [`79384e2`](https://github.com/chivan2925/USBProtection/commit/79384e26563ea08db7c16c223c618e1f51e9a3d9). Đây là mốc **source/script**, không tự chứng minh các test hay artifact binary tại mốc này đã PASS. **Bằng chứng lịch sử 09/11/2026:** Windows verifier PASS theo log owner; HTTPS/ACL VMnet8 PASS tại lab; Ubuntu Minimal Core P0 + C1–C5 PASS theo báo cáo owner. Extended Ubuntu E2E: **DEFERRED BY OWNER / NOT EXECUTED**. Xem [owner E2E closeout](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [snapshot trạng thái 09/11](docs/IMPLEMENTATION_STATUS_20261109.md).
+> **Source đối chiếu tài liệu 20/11/2026:** `main` HEAD [`c7381fc7b9ba34aa561083431ce7c68b9a514a51`](https://github.com/chivan2925/USBProtection/commit/c7381fc7b9ba34aa561083431ce7c68b9a514a51). Theo log owner cung cấp, `verify-windows.ps1` đã **PASS các gate được thực thi** sau khi sửa test Settings; kết quả này **không thay thế** HTTPS/LAN hay Ubuntu USBGuard E2E. JAR đã commit ở `releases/` có manifest ghi source commit **`b12bb597`**, `workingTreeCleanAtStart=false`, `backendTestsExecuted=true`, `frontendBuildExecuted=true`; SHA-256 `8cd573ca4ee70a3bf3c276623d30512cc3a4af92d819c961c57437dfdb7909e0`. Vì build từ working tree chưa sạch, script đã cảnh báo **chưa fully release-qualified**; không xem đây là binary chứng minh source HEAD `c7381fc7`. **Bằng chứng lab 09/11/2026:** Windows verifier PASS, HTTPS/ACL lab PASS và Ubuntu Minimal Core P0+C1–C5 PASS theo owner tại mốc cũ; Ubuntu extended E2E **DEFERRED/NOT EXECUTED**. Xem [owner closeout](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [audit đợt này](docs/DOCUMENTATION_SYNC_20261120_c7381fc7.md).
 
 > Seminar 4 tuần / demo trong LAN. Ubuntu Client: **24.04 LTS amd64**. Backend: **Java 21 + Spring Boot**. Admin Web: **React + Vite + TypeScript**. USB enforcement: **USBGuard + systemd**. Database: **PostgreSQL (dịch vụ riêng, lưu bền vững)**.
 
@@ -9,7 +9,7 @@
 | Thành phần | Vai trò |
 |---|---|
 | `admin-server/` | Spring Boot: Admin login, Agent enrollment/heartbeat, per-endpoint policy, audit/event API, PostgreSQL |
-| `frontend/` | React Admin Web, build thành static assets và phục vụ từ cùng JAR Admin Server |
+| `frontend/` | React Admin Web (Login, Dashboard, Endpoints, Devices, Whitelist, Event Logs; **không còn Settings**), build thành static assets và phục vụ từ cùng JAR Admin Server |
 | `client-agent/` | Agent không có Web; gửi event/heartbeat, đồng bộ chính sách USBGuard |
 | `packaging/` | Debian `.deb`, `systemd`, USBGuard base rule, notifier helper |
 | `docs/` | Blueprint, API/contract, guide, QA/test/evidence và tài liệu kỹ thuật |
@@ -22,12 +22,13 @@
 4. Normal user không có sudo/root hoặc quyền sửa USBGuard IPC/policy không được tắt/sửa protection. Root vẫn có thể quản trị hệ thống.
 5. **Mạng LAN thực tế:** HTTPS + xác thực chứng chỉ là bắt buộc với Agent `live`; Nginx/firewall ACL chỉ cho Client truy cập `/api/agent/**`, còn Web/Auth/Admin API thuộc allowlist IP máy Admin. Backend bind loopback, không mở port trực tiếp. **Không triển khai rate limiting** theo quyết định owner.
 
-## Trạng thái kỹ thuật và nghiệm thu (các bằng chứng lịch sử ngày 09/11/2026)
+## Trạng thái kỹ thuật và nghiệm thu (20/11 và hồ sơ lịch sử 09/11/2026)
 
 - **Lịch sử:** ba đợt correctness/reliability/HTTPS-paging (04/11) được giữ theo mã finding riêng; **không trộn** với review mới F01–F14. Review mới đã sửa F02–F06, F08–F11, F14; F07 là quyết định giữ audit orphan có chủ đích; F01 Spring Boot OSS upgrade **không nằm trong phạm vi sửa demo**; F12 request trùng và F13 notification best-effort **được owner chấp nhận/defer**. Xem [review ledger 09/11](docs/qa/2026-11-09-review-and-packaging-sync.md).
 - **Bằng chứng Windows do owner cung cấp (09/11):** `verify-windows.ps1` PASS tại source lúc đó; Admin **60 tests PASS**, Agent **276 tests (273 PASS, 3 Linux-only SKIP)**, frontend **116 PASS**, lint/build PASS, Browser Live và HTTP Live trên PostgreSQL test DB PASS; `.deb` build và kiểm cấu trúc/MD5/SHA256 PASS. Đây **không phải kết quả của HEAD 20/11**.
 - **Đã kiểm tại lab theo owner:** Windows Nginx HTTPS Admin login; Ubuntu A/B `403/403/403/401` trên bốn path; bypass 18080/5432 không truy cập được; IP nguồn Nginx A/B tách biệt. Ubuntu Agent `.deb` bản `1.0.0+build20261109091706653` hiện diện trên cả hai VM, C1–C5 (BLOCK/Allow/replug/isolation/Revoke) **PASS theo lời owner**. Không có log C1–C5 đầy đủ để review độc lập; Java Agent enrollment/auth thành công được **suy luận từ kết quả Core PASS**, không dùng log heartbeat 401 trước remediation làm bằng chứng. **Chưa chạy và owner hoãn:** `.deb` remove/upgrade, negative TLS, offline/recovery, reboot, Linux-only notifier IPC và các edge case.
-- **20/11:** `main` đã thay đổi release build và Windows verifier. Không tái sử dụng số lượng test hoặc hash cũ làm kết quả cho source mới; phải chạy lại các gate trên checkout thực tế, ghi commit SHA và log mới.
+- **20/11, sau khi xóa Settings:** `main` đã xóa route, component và API đổi mật khẩu Admin `POST /api/admin/account/password` (cùng test liên quan), **nhưng giữ** bootstrap/login/session và reset mật khẩu bảo trì không mở HTTP (`AdminPasswordResetRunner`). Owner đã chạy lại Windows verifier và báo **PASS cho các gate được thực thi**. Ba Agent tests chỉ dành cho Linux có thể được JUnit bỏ qua trên Windows; phải đối chiếu Surefire thực tế, không đánh đồng `Skipped` với `Failed` hoặc với native Ubuntu acceptance.
+- **JAR trong `releases/`**: file `usbshield-admin-server_b12bb597d452_20261120T144326Z.jar` đi kèm manifest/checksum, nhưng manifest ghi **working tree dirty**, nên không tuyên bố release-qualified hoặc tương đương HEAD `c7381fc7`. Một clean-tree rebuild sau commit + verify theo đúng source mới là điều kiện nếu muốn phát hành một bản có provenance sạch.
 
 ## Bắt đầu
 
@@ -58,11 +59,11 @@ Tại root repository, dùng PowerShell 7.6+ trên Windows:
 
 Khi biến runtime đã được thiết lập sẵn ở hệ điều hành/PowerShell, có thể gọi `java -jar ...` trực tiếp. **Profile `prod` yêu cầu `USBSHIELD_DB_URL`, `USBSHIELD_DB_PASSWORD` và `USBSHIELD_ENROLLMENT_TOKEN`**; PostgreSQL dịch vụ riêng phải đang hoạt động. `build-release.ps1` nạp `.env` trong lúc test và khôi phục môi trường sau build; nó **không cấu hình runtime cho lần chạy JAR sau này**.
 
-Windows gate không thay thế HTTPS/ACL từ Client IP hoặc Ubuntu USBGuard E2E. Nginx/TLS, CA trust, firewall và ACL cấu hình **ngoài JAR**. Tránh đưa bí mật `.env.e2e.local`, token hoặc database dump vào GitHub Release.
+Windows gate không thay thế HTTPS/ACL từ Client IP hoặc Ubuntu USBGuard E2E. `packaging/tests/verify-phase3-https-acl.sh` **vẫn cần** cho phép thử từ IP nguồn thực (Admin/Client); nó **chưa được gộp** vào `verify-windows.ps1`. Nginx/TLS, CA trust, firewall và ACL cấu hình **ngoài JAR**. Tránh đưa bí mật `.env.e2e.local`, token hoặc database dump vào GitHub Release.
 
 ## Tài liệu khác
 
-- [Blueprint chính thức](USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md)
+- [Blueprint chính thức](USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md) · [Frontend README](frontend/README.md) · [Đối chiếu tài liệu sau khi xóa Settings](docs/DOCUMENTATION_SYNC_20261120_c7381fc7.md)
 - [Trạng thái/snapshot review 09/11 và phân loại F01–F14](docs/IMPLEMENTATION_STATUS_20261109.md) · [Bản lịch sử 04/11](docs/IMPLEMENTATION_STATUS_20261104.md)
 - [Admin Server release, JAR và runtime](docs/ADMIN_SERVER_RELEASE.md) · [Flyway baseline cho PostgreSQL hiện hữu](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md)
 - [HTTPS/ACL và API phân trang](docs/PHASE3_HTTPS_ACL_AND_PAGING.md) · [Cấu hình HTTPS lab](docs/USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md)

@@ -1,4 +1,4 @@
-# USBShield Ubuntu — Project Blueprint
+# USBProtection — Project Blueprint
 
 > **Đề tài:** Xây dựng hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu  
 > **Bối cảnh:** Đồ án 4 tuần / 5 thành viên; kế hoạch Week 1–4 bên dưới là lịch sử, không phải bảng tiến độ hiện tại.  
@@ -7,7 +7,7 @@
 > **Ubuntu Client:** 24.04 LTS amd64; enforcement bằng USBGuard và quản lý lifecycle bằng systemd.  
 > **Database:** PostgreSQL, Flyway V1/V2, Hibernate `ddl-auto=validate` (không còn H2 runtime).  
 > **Phân phối:** Admin Server JAR; Ubuntu Agent `.deb` có tên phiên bản động và SHA-256/manifest.  
-> **Đối chiếu source:** `chivan2925/USBProtection` `main` **`721f164f63533461b6c18b62e1607baa4ab1b731` (20/11/2026)**.  
+> **Đối chiếu source:** `chivan2925/USBProtection` `main` **`c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026)**. Nội dung hành vi hiện hành đã đối chiếu sau khi xóa Settings.  
 > **Phạm vi kết quả:** Không coi việc cập nhật tài liệu hay kiểm tra source là một lượt chạy test mới.
 
 ## Trạng thái triển khai tại source 20/11/2026 — phần ưu tiên khi đọc blueprint
@@ -20,11 +20,13 @@
 | Backend & DB | Spring Boot, PostgreSQL `usbshield`; Flyway V1/V2 tạo 5 bảng, Hibernate `validate` | Database `usbshield_test` và `usbshield_browser_test` dùng riêng; không chạy destructive test vào app DB |
 | Authentication | Admin session/cookie + CSRF; Agent enrollment token và endpoint-bound Agent token; reset mật khẩu Admin bằng maintenance mode không mở HTTP | Không có mật khẩu production mặc định; không trao Agent token cho trình duyệt |
 | Network | Nginx HTTPS TLS/443 và ACL theo source IP/route; backend HTTP bind loopback; `/api/agent/**` tách Web/Auth/Admin | HTTPS/ACL ở lab 09/11 **PASS theo owner**; không có rate limiting theo quyết định owner |
-| Frontend | Login, Dashboard, Endpoints, Devices, Whitelist, Event Logs, Settings; các list chính có filter/phân trang tại backend | Trang Blocked độc lập đã bỏ; dùng lọc Blocked của Devices; dữ liệu demo tách live |
+| Frontend | Login, Dashboard, Endpoints, Devices, Whitelist, Event Logs; **không còn Settings** (kể cả route/redirect) | Trang Blocked độc lập đã bỏ; dùng lọc Blocked của Devices; dữ liệu demo tách live |
 | Client | Java Agent `live`, systemd service, local event spool/quarantine, USBGuard health telemetry, desktop notifier best-effort qua user session | GUI/native notifier IPC và các negative/offline/reboot cases nâng cao chưa được xác nhận đầy đủ |
-| Release | `admin-server/build-release.ps1`, `packaging/tests/verify-windows.ps1`, `scripts/with-env.ps1`; `.deb` build bằng `packaging/scripts/build-deb.{ps1,sh}` | Build thành công ≠ full Windows verifier PASS ≠ Ubuntu physical E2E PASS |
+| Release | `admin-server/build-release.ps1`, `packaging/tests/verify-windows.ps1`, `scripts/with-env.ps1`; `.deb` build bằng `packaging/scripts/build-deb.{ps1,sh}` | Owner báo Windows gate PASS ngày 20/11; JAR `releases/` build với **dirty tree** từ `b12bb597` và chưa release-qualified; Windows PASS ≠ Ubuntu physical E2E PASS |
 
 **Bằng chứng lab 09/11/2026:** Windows verifier và HTTPS/ACL được báo PASS theo log/báo cáo owner; Ubuntu **Minimal Core P0 + C1–C5** (A BLOCK → Allow A + ACK + rút/cắm lại ALLOW → B BLOCK → Revoke A + ACK + rút/cắm lại BLOCK) **PASS theo báo cáo owner**, thiếu raw log từng checkpoint để kiểm chứng độc lập. **Ubuntu extended acceptance** (`.deb` upgrade/remove, reboot, offline recovery, negative TLS, notifier IPC, stress/security) **DEFERRED BY OWNER / NOT EXECUTED**. Không gọi đây là full production release acceptance.
+
+**Kiểm chứng Windows mới 20/11:** owner đã chạy lại `packaging/tests/verify-windows.ps1` và `admin-server/build-release.ps1`; cả hai báo PASS các phần thực thi. Client Agent Linux-only tests có thể SKIP hợp lệ trên Windows. **Cảnh báo release** tồn tại vì JAR manifest xác nhận working tree không sạch lúc build. `verify-phase3-https-acl.sh` vẫn là bài test HTTPS/ACL riêng từ máy Admin và Client, chưa được `verify-windows.ps1` thay thế. Không nâng mức nghiệm thu Ubuntu native/HTTPS từ kết quả Windows này.
 
 **Tài liệu vận hành/source-of-truth:** [RUN_GUIDE](docs/RUN_GUIDE.md) · [ADMIN_SERVER_RELEASE](docs/ADMIN_SERVER_RELEASE.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [API v0.2 frozen](docs/API.md) + [Phase 1–3 addendum](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) · [ADMIN_GUIDE](docs/ADMIN_GUIDE.md) · [DOCUMENT_INDEX](docs/DOCUMENT_INDEX.md). [Trạng thái 09/11](docs/IMPLEMENTATION_STATUS_20261109.md) và [owner acceptance](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) là snapshot/evidence lịch sử.
 
@@ -34,7 +36,7 @@
 - **Week 2:** M2 tiếp quản core USBGuard/session từ M3; bổ sung desktop notification; Agent–Server wire contract v0.2. Phần mô tả tuần ở cuối tài liệu là **kế hoạch thời điểm đó**.
 - **03–04/11:** Chốt cách vận hành demo, đổi H2 sang PostgreSQL, Flyway V1/V2, bổ sung TLS/ACL, HASH policy, health và pagination. Các ID finding cũ **khác** ID của review 07–09/11.
 - **09/11:** Owner báo Windows, HTTPS/ACL và Ubuntu Minimal Core P0+C1–C5 PASS ở lab, nhưng hoãn nghiệm thu Ubuntu mở rộng.
-- **20/11:** Trên `main`, dùng scripts build/release và Windows verifier mới; các script `admin-server/verify-week1.ps1`, `verify-week2.ps1`, `verify-week3.ps1` không còn. Không đổi API wire v0.2 chỉ vì cập nhật blueprint.
+- **20/11:** Trên `main`, dùng scripts build/release và Windows verifier mới; các script `admin-server/verify-week1.ps1`, `verify-week2.ps1`, `verify-week3.ps1` không còn. Thay đổi `c7381fc7` xóa trang Settings, API đổi mật khẩu Admin qua Web và test tương ứng; **không xóa** `AdminPasswordResetRunner` (bảo trì offline). Owner báo Windows verifier PASS sau sửa; manifest JAR tại `releases/` ghi source `b12bb597`, dirty tree, chưa release-qualified. Không đổi API wire v0.2 chỉ vì cập nhật blueprint; riêng addendum phải phản ánh endpoint bị loại bỏ.
 
 ---
 
@@ -954,10 +956,10 @@ Admin chỉ cần browser. Client Ubuntu **không chạy React UI**.
 | `/#/devices` | Trạng thái USB gần nhất theo từng endpoint, tìm kiếm/filter/phân trang; **Blocked là filter ở đây**, không còn trang Blocked độc lập |
 | `/#/whitelist` | Danh sách whitelist tổng hợp có phân trang; thao tác thay đổi vẫn ở một endpoint cụ thể |
 | `/#/events` | Event Logs, filter endpoint/user/USB/event type/decision/date; server-side pagination, mặc định **10 bản ghi mỗi trang** |
-| `/#/settings` | Thông tin kết nối và đổi mật khẩu Admin; đổi xong các session cũ bị vô hiệu; chưa có API web để chỉnh USBGuard daemon |
+| `/#/settings` | **Đã xóa ở `c7381fc7`**; không có trang Settings hay API đổi mật khẩu Admin qua Web. Truy cập hash cũ hiển thị 404. |
 
 - Frontend dùng React/Vite/TypeScript với components/CSS trong repo; **không có dependency MUI/Ant Design ở HEAD này**. Production là static bundle nhúng trong Admin Server JAR, API cùng origin, không chạy Vite trên Ubuntu Client.
-- Demo ở `/demo` có dữ liệu minh họa **chỉ đọc**. Không thay kết quả API thật bằng mock khi live đang rỗng/lỗi.
+- Demo ở `/demo` có dữ liệu minh họa **chỉ đọc**. Không thay kết quả API thật bằng mock khi live đang rỗng/lỗi. Reset mật khẩu Admin khi mất quyền truy cập chỉ qua profile `admin-reset` chạy **không Web/HTTP**, không có API/công cụ đổi mật khẩu từ trang Settings.
 - Online (heartbeat), desired/applied ACK và USBGuard health (`HEALTHY/DEGRADED/UNAVAILABLE/UNKNOWN`, checkedAt/stale) là **ba loại tín hiệu khác nhau**; không hiển thị thành công giả.
 - Các bộ lọc và số đếm phải đi qua API PostgreSQL phân trang; không tải toàn bộ event history vào browser để mô phỏng tìm kiếm toàn hệ thống.
 
@@ -1013,17 +1015,16 @@ usbguard/      gateway, list/watch, policy reconcile, rule validation
 
 **Không sử dụng route nháp `/api/endpoints` hoặc `/api/events`.** Các route Admin hiện hành nằm dưới `/api/admin/**`; phần chi tiết wire (DTO, mã lỗi, giới hạn fields) được bảo quản ở [API v0.2](docs/API.md) và [Phase 1–3 addendum](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md). Cập nhật blueprint **không bump** wire contract lên v0.3.
 
-## 18.1. Admin session, CSRF, password
+## 18.1. Admin session, CSRF và bảo trì mật khẩu offline
 
 ```http
 GET  /api/auth/csrf
 POST /api/auth/login
 GET  /api/auth/me
 POST /api/auth/logout
-POST /api/admin/account/password
 ```
 
-Admin login dùng cookie `JSESSIONID` + CSRF token được làm mới phù hợp với phiên. Các Admin mutation yêu cầu phiên hợp lệ và CSRF. Prod có Secure/HttpOnly/SameSite Strict cookie, tắt Swagger/OpenAPI; reset khẩn cấp không qua HTTP public route.
+Admin login dùng cookie `JSESSIONID` + CSRF token được làm mới phù hợp với phiên. Các Admin mutation còn tồn tại yêu cầu phiên hợp lệ và CSRF. **`POST /api/admin/account/password` đã bị xóa** cùng trang Settings tại HEAD `c7381fc7`; không đưa endpoint này vào tài liệu API hiện hành. Prod có Secure/HttpOnly/SameSite Strict cookie, tắt Swagger/OpenAPI. **Khôi phục mật khẩu khẩn cấp** vẫn có `AdminPasswordResetRunner` qua profile `admin-reset`, chỉ chạy no-web/offline, không mở HTTP public route.
 
 ## 18.2. Endpoint, whitelist, event và dashboard
 
@@ -1119,7 +1120,7 @@ Tạo JAR phát hành từ clean Git tree (PowerShell 7 trên Windows, JDK 21, M
 # hoặc: .\admin-server\build-release.ps1 -OutputDirectory 'C:\USBShieldReleases'
 ```
 
-Script build React mới, Maven `-Pwith-frontend clean package`, kiểm tra JAR static assets/Flyway, sinh `admin-server/target/usbshield-admin-server.jar` và copy bản release `usbshield-admin-server_<commit12>_<UTC>.jar` cùng JSON manifest/SHA-256 (mặc định `admin-server/target/release/`). `-AllowDirtyTree` cho build dev chưa được release-qualified; `-SkipTests` giảm mức độ bằng chứng. **Không coi Maven BUILD SUCCESS là verifier PASS.** `admin-server/verify-week1/2/3.ps1` không còn trong HEAD.
+Script build React mới, Maven `-Pwith-frontend clean package`, kiểm tra JAR static assets/Flyway, sinh `admin-server/target/usbshield-admin-server.jar` và copy bản release `usbshield-admin-server_<commit12>_<UTC>.jar` cùng JSON manifest/SHA-256 (mặc định `admin-server/target/release/`). `-AllowDirtyTree` cho build dev chưa được release-qualified; `-SkipTests` giảm mức độ bằng chứng. **Không coi Maven BUILD SUCCESS là verifier PASS.** Ở thời điểm đối chiếu, manifest JAR đã commit trong `releases/` ghi source `b12bb597`, `workingTreeCleanAtStart=false`, backend tests/frontend build đã chạy, SHA-256 `8cd573ca4ee70a3bf3c276623d30512cc3a4af92d819c961c57437dfdb7909e0`; nó **không chứng minh** clean release build từ `c7381fc7`. `admin-server/verify-week1/2/3.ps1` không còn trong HEAD.
 
 ## 20.3. Biến môi trường test khác runtime `prod`
 

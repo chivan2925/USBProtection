@@ -1,11 +1,11 @@
-# USBShield — Kịch bản demo hiện hành (20/11/2026)
+# USBProtection — Kịch bản demo hiện hành (20/11/2026)
 
-> **Source checklist:** `main` `721f164f63533461b6c18b62e1607baa4ab1b731`. Đây là **kịch bản trình diễn dự kiến**, không phải bằng chứng đã thực thi các bước này trên HEAD vừa nêu. [DEMO_SCRIPT.md](DEMO_SCRIPT.md) tiếp tục lưu kịch bản rehearsal Week 4 ngày 28/10–01/11 và kết quả tại thời điểm đó; không sửa hoặc tái gán các log cũ.
+> **Source checklist:** `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51`. Đây là **kịch bản trình diễn dự kiến**, không phải bằng chứng đã thực thi các bước này trên HEAD vừa nêu. [DEMO_SCRIPT.md](DEMO_SCRIPT.md) tiếp tục lưu kịch bản rehearsal Week 4 ngày 28/10–01/11 và kết quả tại thời điểm đó; không sửa hoặc tái gán các log cũ.
 
 ## 1. Chuẩn bị trước demo (không thực hiện các bước phá hủy DB)
 
 - Đặt máy Admin Server và Ubuntu A/B trong LAN lab đã được kiểm tra routing. PostgreSQL application DB `usbshield` là **database dùng chạy demo**, khác `usbshield_test` và `usbshield_browser_test` dành cho kiểm thử.
-- Trước khi tạo bản JAR phát hành từ source sạch, chạy `packaging/tests/verify-windows.ps1` và `admin-server/build-release.ps1` theo [runbook release](ADMIN_SERVER_RELEASE.md). Chỉ báo PASS dựa trên log đúng HEAD và không có gate bị SKIP. **Không** chạy test DB cleanup vào database demo.
+- Trước khi tạo bản JAR phát hành từ source sạch, chạy `packaging/tests/verify-windows.ps1` và `admin-server/build-release.ps1` theo [runbook release](ADMIN_SERVER_RELEASE.md). Báo PASS chỉ cho các gate **thực sự được chạy**; Linux-only skip trên Windows cần ghi nhận tách biệt. **Không** chạy test DB cleanup vào database demo. Bản `releases/usbshield-admin-server_b12bb597d452_20261120T144326Z.jar` có manifest **dirty tree** và không phải build đã release-qualified từ HEAD `c7381fc7`; không sử dụng nó như bằng chứng cho HEAD này.
 - Admin Server `prod` phải nạp biến runtime từ `.env.e2e.local` của **máy owner** hoặc môi trường OS/service đã cấu hình. `java -jar --spring.profiles.active=prod` không tự tìm `.env.e2e.local`; thiếu `USBSHIELD_DB_URL` có thể gây lỗi Hikari JDBC URL chưa được resolve.
 - Kiểm chứng Nginx HTTPS/CA/SAN, server `127.0.0.1:18080`, Admin IP allowlist và Client IP chỉ vào `/api/agent/**`. PostgreSQL TCP/5432 và backend loopback không được lộ cho Ubuntu Clients; không ghi credentials/private keys vào video.
 - Ubuntu A/B phải có Agent `.deb` riêng đúng phiên bản, USBGuard active, hostname/CA trust, token enroll đúng, identity riêng cho từng máy. Không copy `endpoint.json` hoặc spool từ A sang B.
@@ -37,7 +37,7 @@ Nếu chạy một JAR phát hành có tên kèm commit/timestamp, thay đườn
 | 6–7 phút | Cắm cùng USB tại B | B vẫn BLOCK nếu chưa được Allow riêng, chứng minh endpoint isolation |
 | 7–8 phút | Revoke tại A, chờ ACK rồi rút/cắm lại | A trở về BLOCK sau replug; không dùng riêng API 200/ACK làm bằng chứng vật lý |
 | 8–9 phút | Event Logs: tìm kiếm Linux User, tên/ID USB, Decision BLOCK/ALLOW, phân trang | Backend-filtered results, 10 dòng/trang; ngày lọc từ/đến hợp lệ |
-| 9–10 phút | Settings và kết luận | Đổi mật khẩu phải xác minh session/CSRF; không cần thực sự đổi mật khẩu live nếu thiếu thời gian. Nêu rõ phạm vi chưa test |
+| 9–10 phút | Đăng xuất và kết luận | Đăng xuất kết thúc phiên Admin, đăng nhập lại cần credentials hợp lệ. **Không trình diễn Settings/đổi mật khẩu Web** vì đã xóa route/API; nêu rõ phạm vi Ubuntu extended chưa test. |
 
 ## 4. Tùy chọn negative/security checks (chỉ nếu có sẵn môi trường xác minh)
 

@@ -1,6 +1,6 @@
-# USBShield — Hướng dẫn chạy và triển khai chung (Admin Server + Ubuntu Client)
+# USBProtection — Hướng dẫn chạy và triển khai chung (Admin Server + Ubuntu Client)
 
-> **Phạm vi:** Canonical deployment guide, không thay thế test evidence. Source/script baseline đối chiếu **`main` `79384e26563ea08db7c16c223c618e1f51e9a3d9` (20/11/2026)**. **Evidence lab lịch sử 09/11** thuộc source/artifact ở thời điểm đó: Windows verifier PASS theo owner, HTTPS/ACL và **Minimal Core Ubuntu P0+C1–C5 PASS theo owner**; đây **không phải** một lượt test mới của HEAD 20/11. Extended Ubuntu acceptance **DEFERRED BY OWNER / NOT EXECUTED**. Xem [closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [hướng dẫn release JAR](ADMIN_SERVER_RELEASE.md).
+> **Phạm vi:** Canonical deployment guide, không thay thế test evidence. Source baseline đối chiếu **`main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026)**; scripts release/Windows có từ `79384e2`. **Evidence lab lịch sử 09/11** thuộc source/artifact ở thời điểm đó: Windows verifier PASS theo owner, HTTPS/ACL và **Minimal Core Ubuntu P0+C1–C5 PASS theo owner**; đây **không phải** một lượt test mới của HEAD 20/11. Extended Ubuntu acceptance **DEFERRED BY OWNER / NOT EXECUTED**. Xem [closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [hướng dẫn release JAR](ADMIN_SERVER_RELEASE.md).
 
 ## 1. Chọn mô hình tối giản
 
@@ -115,6 +115,12 @@ Admin Server muốn khởi động cần PostgreSQL sẵn sàng và role ứng d
 ### Tồn tại dữ liệu, backup và khôi phục
 
 PostgreSQL lưu dữ liệu vào data directory của PostgreSQL service, **không nằm trong JAR hay file H2 `.mv.db`**. Restart JAR không làm mất dữ liệu khi vẫn dùng cùng PostgreSQL database. Dừng JAR không đồng nghĩa dừng PostgreSQL. Dùng cơ chế backup PostgreSQL như `pg_dump`/`pg_restore` (cộng với bảo vệ secrets và kiểm thử restore); **không sao chép file dữ liệu đang mở** và không xóa database `usbshield` khi dọn test. Đảm bảo backup và role DB được giới hạn quyền truy cập.
+
+### Quản trị tài khoản sau khi loại bỏ Settings
+
+Từ `c7381fc7`, **không còn** trang Settings hoặc `POST /api/admin/account/password`. Các endpoint đăng nhập, CSRF, kiểm tra session và đăng xuất vẫn hoạt động. `USBSHIELD_ADMIN_USERNAME`/`USBSHIELD_ADMIN_PASSWORD` chỉ là **bootstrap** khi tài khoản tương ứng chưa tồn tại trong PostgreSQL; sửa các biến này không đặt lại mật khẩu cũ. Khi cần khôi phục, người có quyền trên Server dùng **maintenance profile `admin-reset` không mở Web/HTTP**, với `USBSHIELD_ADMIN_RESET_USERNAME` và `USBSHIELD_ADMIN_RESET_PASSWORD` được cấp phát an toàn; không gửi secret qua API/Web hoặc đưa vào Git. Xem [Developer Guide](DEVELOPER_GUIDE.md) và source `AdminPasswordResetRunner.java`.
+
+**Kết quả kiểm chứng owner 20/11:** `verify-windows.ps1` báo PASS các gate đã thực thi; Agent Linux-only tests có thể SKIP khi chạy trên Windows. `build-release.ps1` thành công nhưng JAR manifest đã commit ghi `source.commit=b12bb597`, `workingTreeCleanAtStart=false` và cảnh báo **not fully release-qualified**. Cần build lại từ HEAD/clean tree và kiểm các gate phù hợp trước khi công bố một binary chính thức. `verify-phase3-https-acl.sh` vẫn là test HTTPS/ACL riêng từ source IP thực, không được thay bằng verifier Windows.
 
 ## 4. Phân quyền Admin Web và Agent API trên LAN
 
