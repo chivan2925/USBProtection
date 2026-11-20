@@ -60,13 +60,13 @@ test('dashboard omits removed controls while retaining overview and error recove
   const failed = renderToStaticMarkup(createElement(Dashboard, { ...props, state: { status: 'error', error: 'Offline' } }))
   assert.ok(failed.includes('Thử lại'))
 })
-test('sidebar hides Settings without removing its route metadata or other links', () => {
+test('sidebar no longer exposes Settings route metadata or links', () => {
   for (const demo of [false, true]) {
     const html = renderToStaticMarkup(createElement(AdminLayout, { route: '/settings', demo }, 'Page content'))
     assert.ok(!html.includes('href="#/settings"'))
     assert.ok(!html.includes('href="#/blocked"'))
     assert.ok(!html.includes('Blocked Devices'))
-    assert.ok(html.includes('<strong>Settings</strong>'))
+    assert.ok(html.includes('<strong>Không tìm thấy</strong>'))
     assert.ok(html.includes('href="#/endpoints"'))
     assert.ok(html.includes('Page content'))
     if (demo) assert.ok(html.includes('href="/#/login"'))

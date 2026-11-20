@@ -13,7 +13,6 @@ import { Devices } from './pages/Devices'
 import { Events, LiveEvents } from './pages/Events'
 import { Endpoints } from './pages/Endpoints'
 import { EndpointDetailModal } from './components/endpoint/EndpointDetailModal'
-import { Settings } from './pages/Settings'
 import { Login } from './pages/Login'
 import './App.css'
 
@@ -42,7 +41,6 @@ function Console({ route, demo, revision }: { route: string; demo: boolean; revi
     case '/whitelist': page = <Devices key="whitelist" {...props} mode="whitelist" />; break
     case '/events': page = <Events {...props} />; break
     case '/endpoints': page = <Endpoints {...props} />; break
-    case '/settings': page = <Settings demo={demo} />; break
     default: {
       page = <><PageHeading eyebrow="404" title="Không tìm thấy trang" description="Đường dẫn này không tồn tại trong USB Protection." />
           <Panel title="Kiểm tra lại đường dẫn"><EmptyState icon="search" title="Trang không khả dụng" description="Sử dụng thanh điều hướng hoặc quay lại Dashboard." />

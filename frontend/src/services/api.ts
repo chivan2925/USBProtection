@@ -15,7 +15,7 @@ export class BackendUnavailableError extends Error {
 
 export const capabilities = Object.freeze({
   monitoring: true, authentication: true, events: true,
-  allow: true, block: false, revoke: true, settings: false,
+  allow: true, block: false, revoke: true,
 })
 
 export interface AdminUser { username: string }
@@ -123,14 +123,6 @@ export const protectionApi = {
     await refreshCsrfToken()
     await request('/api/auth/login', { method: 'POST', body: { username, password }, notifyUnauthorized: false })
     return protectionApi.getCurrentAdmin()
-  },
-
-  async changeAdminPassword(currentPassword: string, newPassword: string): Promise<void> {
-    const result = readObject(await request('/api/admin/account/password', {
-      method: 'POST', body: { currentPassword, newPassword },
-    }))
-    if (result.changed !== true) throw new Error('Máy chủ chưa xác nhận đổi mật khẩu.')
-    clearCsrfToken()
   },
 
   async logout() {

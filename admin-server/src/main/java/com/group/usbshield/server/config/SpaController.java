@@ -12,7 +12,7 @@ public class SpaController {
     }
 
     @GetMapping({"/login", "/dashboard", "/endpoints", "/endpoints/{id}",
-            "/devices", "/whitelist", "/blocked", "/events", "/settings"})
+            "/devices", "/whitelist", "/blocked", "/events"})
     public String page(jakarta.servlet.http.HttpServletRequest request) {
         return "redirect:/#" + request.getRequestURI().substring(request.getContextPath().length());
     }
