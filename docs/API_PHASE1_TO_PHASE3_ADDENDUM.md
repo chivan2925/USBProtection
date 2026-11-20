@@ -1,6 +1,6 @@
 # USBShield — API/Transport Addendum (Phase 1–3, 04/11/2026)
 
-**Source:** `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` (chưa merge `main`). Tài liệu này **bổ sung** [API v0.2](API.md) và [Agent–Server Protocol](AGENT_SERVER_PROTOCOL.md) lịch sử; không thay đổi các HTTP evidence đã công bố. Test Windows không chứng minh TLS/ACL/USBGuard thực tế trên Ubuntu.
+> **Trạng thái tài liệu (20/11/2026):** Đây là phần mở rộng hợp đồng HTTP/API từ giai đoạn 04/11, hiện đã có trong nhánh `main` tại baseline kiểm tra `721f164f63533461b6c18b62e1607baa4ab1b731`. Dòng ghi chú cũ “`vinhkhang` chưa merge `main`” không còn đúng. Tài liệu này bổ sung [API v0.2](API.md) và [Agent–Server Protocol v0.2](AGENT_SERVER_PROTOCOL.md); không thay thế hai hợp đồng đó. Không suy ra Windows/Ubuntu E2E PASS chỉ từ source hoặc từ tài liệu này. Xem [Admin Server release](ADMIN_SERVER_RELEASE.md), [Run Guide](RUN_GUIDE.md) và [Implementation status 09/11 — snapshot lịch sử](IMPLEMENTATION_STATUS_20261109.md).
 
 ## Admin authentication và đổi mật khẩu (F03)
 
@@ -43,4 +43,4 @@
 - Nginx chỉ cho source IP Admin tới Web/static và `/api/auth/**`, `/api/admin/**`; source Client chỉ được tới `/api/agent/**` (vẫn yêu cầu Agent auth). Backend bind `127.0.0.1:18080`, không lộ trực tiếp trên LAN; PostgreSQL 5432 không mở cho Client.
 - **Không triển khai rate limiting** (owner decision); ACL không ngăn brute-force từ Admin source được phép. IP ACL không phân biệt được Admin/Client nếu chúng bị NAT về cùng source IP.
 
-Chi tiết vận hành: [RUN_GUIDE](RUN_GUIDE.md), [Phase 3 HTTPS/ACL/Paging](PHASE3_HTTPS_ACL_AND_PAGING.md), [Implementation status](IMPLEMENTATION_STATUS_20261104.md).
+Chi tiết vận hành: [RUN_GUIDE](RUN_GUIDE.md), [Phase 3 HTTPS/ACL/Paging](PHASE3_HTTPS_ACL_AND_PAGING.md), [Implementation status 04/11 — snapshot lịch sử](IMPLEMENTATION_STATUS_20261104.md).

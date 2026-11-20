@@ -1,12 +1,16 @@
 # USBShield — Danh mục tài liệu hiện hành và lịch sử
 
-> **Source đối chiếu cho tài liệu vận hành:** `main` `79384e26563ea08db7c16c223c618e1f51e9a3d9` (20/11/2026). **Evidence lab lịch sử 09/11/2026:** Windows verifier PASS theo log; HTTPS/ACL và Ubuntu **P0+C1–C5 PASS theo owner** trên baseline lab khi đó, không phải independent re-run của HEAD hiện tại. Extended Ubuntu acceptance **DEFERRED BY OWNER**.
+> **Source đối chiếu docs:** `main` `721f164f63533461b6c18b62e1607baa4ab1b731` (20/11/2026); release/Windows scripts from `79384e26563ea08db7c16c223c618e1f51e9a3d9`. **Evidence lab lịch sử 09/11/2026:** Windows verifier PASS theo log; HTTPS/ACL và Ubuntu **P0+C1–C5 PASS theo owner** trên baseline lab khi đó, không phải independent re-run của HEAD hiện tại. Extended Ubuntu acceptance **DEFERRED BY OWNER**.
 
 ## Tài liệu hiện hành (sử dụng theo mục đích)
 
 | Mục đích | Tài liệu |
 |---|---|
 | **Runbook tổng hợp: build/test, PostgreSQL, Spring JAR, Client DEB** | **[RUN_GUIDE.md](RUN_GUIDE.md)** |
+| **Audit và phân loại toàn bộ docs/ (20/11)** | [DOCUMENTATION_AUDIT_20261120.md](DOCUMENTATION_AUDIT_20261120.md) — phân biệt tài liệu hiện hành, hợp đồng đóng băng và evidence lịch sử |
+| **Admin Web: sử dụng Login/Dashboard/Endpoints/Allow/Revoke/Events/Settings** | **[ADMIN_GUIDE.md](ADMIN_GUIDE.md)** |
+| **Kiến trúc runtime PostgreSQL, Nginx HTTPS và Agent USBGuard** | **[ARCHITECTURE.md](ARCHITECTURE.md)** |
+| **Demo mới và rehearsal Week 4 lịch sử** | **[DEMO_RUNBOOK_20261120.md](DEMO_RUNBOOK_20261120.md)** (hiện hành); [DEMO_SCRIPT.md](DEMO_SCRIPT.md) (snapshot lịch sử) |
 | **Admin JAR: Windows verifier, `build-release.ps1`, `.env` vs `.env.e2e.local`, phân phối và chạy `prod`** | **[ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md)** |
 | **Cấu hình HTTPS `usbprotection.lab` từng bước, Windows Nginx + CA + Ubuntu A/B** | **[USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md)** |
 | **Core E2E USB Kingston trên Ubuntu A/B** | **[USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md](USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md)** (giữ filename lịch sử, nội dung cập nhật) |
@@ -14,10 +18,10 @@
 | **M4/M5: giới hạn sửa UI sau E2E** | [admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md](admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md) |
 | **Snapshot 09/11: trạng thái code, review F01–F14 và Windows PASS lịch sử** | **[IMPLEMENTATION_STATUS_20261109.md](IMPLEMENTATION_STATUS_20261109.md)**; [QA ledger](qa/2026-11-09-review-and-packaging-sync.md). Không coi là test mới cho HEAD 20/11. |
 | Cấu hình HTTPS/ACL contract và API phân trang | [PHASE3_HTTPS_ACL_AND_PAGING.md](PHASE3_HTTPS_ACL_AND_PAGING.md) |
-| Phạm vi chức năng và hợp đồng | [Blueprint](../USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md), [ARCHITECTURE.md](ARCHITECTURE.md), [API.md](API.md), [API addendum](API_PHASE1_TO_PHASE3_ADDENDUM.md), [AGENT_SERVER_PROTOCOL.md](AGENT_SERVER_PROTOCOL.md) |
+| Phạm vi chức năng và hợp đồng | [Blueprint](../USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md), [API v0.2 — frozen](API.md), [API addendum — Phase 1–3](API_PHASE1_TO_PHASE3_ADDENDUM.md), [Agent–Server protocol v0.2](AGENT_SERVER_PROTOCOL.md) |
 | Hướng dẫn phát triển / dùng Web | [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md), [ADMIN_GUIDE.md](ADMIN_GUIDE.md) |
 | PostgreSQL migration cho **database hiện hữu, có dữ liệu** | [POSTGRES_FLYWAY_BASELINE.md](../admin-server/ops/POSTGRES_FLYWAY_BASELINE.md) — preflight + backup + baseline V1 một lần; **không** baseline DB trống/test |
-| Danh mục/plan kiểm thử | [TEST_CATALOG.md](TEST_CATALOG.md), [TEST_PLAN.md](TEST_PLAN.md), [Ubuntu acceptance](qa/WEEK4_UBUNTU_ACCEPTANCE.md) |
+| Danh mục/plan kiểm thử | [TEST_CATALOG.md](TEST_CATALOG.md) (entrypoints hiện hành), [TEST_PLAN.md](TEST_PLAN.md) (kế hoạch lịch sử), [Ubuntu acceptance](qa/WEEK4_UBUNTU_ACCEPTANCE.md) (native extended) |
 | Tham chiếu USBGuard / M2 | [usbguard/WEEK4_M2_TECHNICAL_QA.md](usbguard/WEEK4_M2_TECHNICAL_QA.md) |
 
 ## Scripts/tests hiện hành tại source baseline 20/11
@@ -32,6 +36,8 @@
 ## Tài liệu/bằng chứng lịch sử — không sửa retroactive
 
 - [IMPLEMENTATION_STATUS_20261104.md](IMPLEMENTATION_STATUS_20261104.md) mô tả **ba đợt sửa trước**. Finding ID trong đó **khác phạm vi** static review F01–F14 ngày 07–09/11.
+- `API.md` và `AGENT_SERVER_PROTOCOL.md` giữ **wire contract v0.2 đã freeze**: tên file có Week 2 là provenance, không phải lý do tự phát minh v0.3. Addendum Phase 1–3 bổ sung API/runtime mới. `admin-web/SCALABILITY_PHASE3.md` giữ snapshot Phase 3, còn trang Blocked riêng đã được gộp vào bộ lọc Devices trong giao diện hiện hành.
+- `DEMO_SCRIPT.md` là rehearsal Week 4, không phải kịch bản hiện hành; xem `DEMO_RUNBOOK_20261120.md`.
 - Các báo cáo `docs/member1/`, `docs/client-agent/WEEK*.md`, `docs/admin-web/WEEK*.md`, `docs/usbguard/WEEK*.md`, `docs/rc/`, `docs/qa/` và thư mục evidence vẫn giữ thời điểm/SHA/test mà chúng ghi nhận. H2 và các tên `.deb` cố định trong evidence cũ không phải runtime hiện tại.
 - `CLIENT_INSTALLATION.md` là redirect lịch sử tới `RUN_GUIDE.md`. Không dùng hướng dẫn staging/patch cũ.
 

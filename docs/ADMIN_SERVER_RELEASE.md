@@ -1,6 +1,6 @@
 # USBShield — Admin Server: build, Windows verification, JAR distribution and runtime
 
-> **Source baseline:** `main` `79384e26563ea08db7c16c223c618e1f51e9a3d9` (20/11/2026). This document describes the scripts **as committed at that source SHA**; it is not a fresh test report or release attestation. Where `RUN_GUIDE.md` still describes the older 09/11 workflow, the **20/11 script invocation and environment rules in this document take precedence**; its PostgreSQL, HTTPS, Ubuntu and policy instructions remain applicable. For end-to-end Ubuntu deployment, use [RUN_GUIDE.md](RUN_GUIDE.md). For Java/API development, use [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
+> **Source baseline:** `main` `79384e26563ea08db7c16c223c618e1f51e9a3d9` (20/11/2026). This document describes the scripts **as committed at that source SHA**; it is not a fresh test report or release attestation. `RUN_GUIDE.md` has also been synchronized with the current 20/11 release workflow; use that runbook for complete deployments and this guide for the narrower JAR/build/Windows verification procedures. For end-to-end Ubuntu deployment, use [RUN_GUIDE.md](RUN_GUIDE.md). For Java/API development, use [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md).
 
 ## 1. Keep the responsibilities separate
 

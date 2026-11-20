@@ -1,6 +1,6 @@
 # USBShield Ubuntu — Hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu
 
-> **Source hiện hành (đối chiếu tài liệu 20/11/2026):** `main` HEAD [`79384e26563ea08db7c16c223c618e1f51e9a3d9`](https://github.com/chivan2925/USBProtection/commit/79384e26563ea08db7c16c223c618e1f51e9a3d9). Đây là mốc **source/script**, không tự chứng minh các test hay artifact binary tại mốc này đã PASS. **Bằng chứng lịch sử 09/11/2026:** Windows verifier PASS theo log owner; HTTPS/ACL VMnet8 PASS tại lab; Ubuntu Minimal Core P0 + C1–C5 PASS theo báo cáo owner. Extended Ubuntu E2E: **DEFERRED BY OWNER / NOT EXECUTED**. Xem [owner E2E closeout](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [snapshot trạng thái 09/11](docs/IMPLEMENTATION_STATUS_20261109.md).
+> **Source kiểm tra tài liệu 20/11/2026:** `main` HEAD [`721f164f63533461b6c18b62e1607baa4ab1b731`](https://github.com/chivan2925/USBProtection/commit/721f164f63533461b6c18b62e1607baa4ab1b731), gồm các script được đưa vào tại [`79384e2`](https://github.com/chivan2925/USBProtection/commit/79384e26563ea08db7c16c223c618e1f51e9a3d9). Đây là mốc **source/script**, không tự chứng minh các test hay artifact binary tại mốc này đã PASS. **Bằng chứng lịch sử 09/11/2026:** Windows verifier PASS theo log owner; HTTPS/ACL VMnet8 PASS tại lab; Ubuntu Minimal Core P0 + C1–C5 PASS theo báo cáo owner. Extended Ubuntu E2E: **DEFERRED BY OWNER / NOT EXECUTED**. Xem [owner E2E closeout](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [snapshot trạng thái 09/11](docs/IMPLEMENTATION_STATUS_20261109.md).
 
 > Seminar 4 tuần / demo trong LAN. Ubuntu Client: **24.04 LTS amd64**. Backend: **Java 21 + Spring Boot**. Admin Web: **React + Vite + TypeScript**. USB enforcement: **USBGuard + systemd**. Database: **PostgreSQL (dịch vụ riêng, lưu bền vững)**.
 
@@ -66,10 +66,10 @@ Windows gate không thay thế HTTPS/ACL từ Client IP hoặc Ubuntu USBGuard E
 - [Trạng thái/snapshot review 09/11 và phân loại F01–F14](docs/IMPLEMENTATION_STATUS_20261109.md) · [Bản lịch sử 04/11](docs/IMPLEMENTATION_STATUS_20261104.md)
 - [Admin Server release, JAR và runtime](docs/ADMIN_SERVER_RELEASE.md) · [Flyway baseline cho PostgreSQL hiện hữu](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md)
 - [HTTPS/ACL và API phân trang](docs/PHASE3_HTTPS_ACL_AND_PAGING.md) · [Cấu hình HTTPS lab](docs/USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md)
-- [Architecture](docs/ARCHITECTURE.md)
+- [Architecture — current runtime](docs/ARCHITECTURE.md) · [Tổng rà soát và phân loại docs (20/11)](docs/DOCUMENTATION_AUDIT_20261120.md)
 - [Developer Guide](docs/DEVELOPER_GUIDE.md) — kỹ thuật mã nguồn và API, không phải runbook vận hành
-- [API v0.2](docs/API.md) · [Addendum API Phase 1–3](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) · [Agent–Server protocol](docs/AGENT_SERVER_PROTOCOL.md)
-- [Admin Guide](docs/ADMIN_GUIDE.md) — hướng dẫn **sử dụng Web**, không phải hướng dẫn chạy service
+- [API v0.2 — hợp đồng đóng băng](docs/API.md) · [Addendum API Phase 1–3](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) · [Agent–Server protocol v0.2](docs/AGENT_SERVER_PROTOCOL.md)
+- [Admin Guide](docs/ADMIN_GUIDE.md) — hướng dẫn **sử dụng Web**, không phải chạy service · [Demo hiện hành](docs/DEMO_RUNBOOK_20261120.md) · [Kịch bản Week 4 lịch sử](docs/DEMO_SCRIPT.md)
 - [Ubuntu Minimal Core E2E](docs/USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md) · [Ubuntu acceptance mở rộng](docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md) (**DEFERRED BY OWNER**)
 
 **Closeout lịch sử:** [Owner acceptance P0/C1–C5](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) · [M4/M5 UI guardrails](docs/admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md).

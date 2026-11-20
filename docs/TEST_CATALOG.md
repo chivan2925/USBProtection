@@ -1,64 +1,74 @@
-# USBShield — Functional Test Catalog (03/11/2026)
+# USBShield — Functional Test Catalog (current entrypoints + historical refactor)
 
-> **Updated 04/11/2026 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`):** Admin Server migrated from H2 to PostgreSQL, with new PostgreSQL persistence and isolated test-database coverage. Original refactor snapshot 03/11 counted 303 `@Test` before/after **at that historical commit**; do not treat that count as current execution results. Test verification after database migration must target PostgreSQL.
+> **Source/tree inspected:** `main` `721f164f63533461b6c18b62e1607baa4ab1b731` (20/11/2026). This is an **inventory of tests and scripts**, not a fresh test result. Test counts and renames from 03–09/11 are historical snapshots; they do not prove this HEAD passed. The older refactor snapshot counted **303 `@Test` annotations** at its own commit, not current executed cases. See [Admin Server Release](ADMIN_SERVER_RELEASE.md) and [Run Guide](RUN_GUIDE.md).
 
-## Nguyên tắc
+## 1. Canonical Windows verification (currently present)
 
-- Test file đặt tên theo **component, behavior hoặc API contract**, không dùng `Week`, `Copilot` hay số PR.
-- **Gộp** nếu cùng class/logic được test và fixture tương thích; giữ nguyên từng assertion và case.
-- **Giữ riêng** những integration suite có Spring context/DB/setup khác, hoặc boundary khác (USBGuard live watch vs policy reconciler, filesystem outbox vs HTTP dispatch).
-- Các tài liệu trong `docs/qa/` và `docs/*/week*-evidence/` là **hồ sơ lịch sử**, có thể dùng tên test cũ để truy vết; không sửa thành tên mới như thể từng chạy ở thời điểm đó.
-
-## Admin Server
-
-- `PostgreSqlPersistenceIntegrationTest`: CRUD/persistence integration against PostgreSQL; legacy H2 compatibility and upgrade test classes were removed because the test data do not need migration.
-- `IsolatedPostgresDb`: shared test configuration for the dedicated `usbshield_test` database; this is a helper, not an executable test class.
-- `ServerApiIntegrationTest`: các luồng Admin/API/endpoints/events/policy end-to-end qua Spring context; giữ một test suite hợp đồng tích hợp, không chia khiến context setup trùng.
-- `ProductionProfileSecurityTest`: profile prod, cookie, OpenAPI security (không còn H2 console runtime).
-- `ServerSecurityAndStatusTest`: request auth/security + policy status và SPA route.
-- `EndpointMetadataIntegrationTest`: metadata từ Agent → Admin API/whitelist.
-- Các test theo chức năng đã có sẵn giữ nguyên: `EventSearchIntegrationTest`, `AgentHttpIntegrationTest`, `AgentEventContractTest`, `ConcurrentUsbCatalogIntegrationTest`, `EnrollmentRetryContractTest`, v.v. Các test nâng cấp schema H2 (`UsbCatalogUpgrade*`) đã bị xóa cùng H2 preflight.
-
-## Client Agent — các file được gộp
-
-- `SystemInfoProviderRegressionTest` + `SystemInfoProviderRoutingTest` → **`SystemInfoProviderTest`**: IP local và OS metadata.
-- `BlockNotificationPolicyTest` + `Week3NotificationPolicyTest` + **phần policy** của `Week4NotificationCorrectnessTest` → **`BlockNotificationPolicyTest`**: phân loại BLOCK, dedup/cooldown, remove/reinsert, active GUI user, bound.
-- **Phần publisher/service** của `Week4NotificationCorrectnessTest` → `DesktopNotificationServiceTest`: notifier unavailable/disabled không ảnh hưởng enforcement.
-- `Week3ActiveSessionTransitionTest` + `Week4ActiveSessionSafetyTest` → **`ActiveSessionSelectionTest`**: login/logout, user switching, ambiguous/remote-only/TTY và invalid session.
-
-## Client Agent — các test đổi tên nhưng vẫn giữ fixture riêng
-
-- `UsbGuardDurableAuditRetryTest`, `UsbGuardPendingPolicyLifecycleTest`, `UsbGuardWatchLossPolicyRecoveryTest`, `UsbGuardIpcRecoverySynchronizationTest`: các ranh giới khác nhau của pending audits, watch loss và IPC recovery.
-- `UsbGuardAuditLifecycleTest`, `UsbGuardEffectiveAllowTransitionTest`, `UsbGuardFinalDecisionIntegrationTest`: audit lifecycle và chuyển quyết định cuối.
-- `UsbGuardPolicySafetyValidationTest`, `UsbGuardFingerprintValidationTest`, `UsbGuardPolicyReconciliationTest`, `UsbGuardRuleMutationSafetyTest`, `UsbGuardManagedPolicyIntegrityTest`: USBGuard policy, identity/rule ordering/rollback.
-- `UsbGuardWatchRecoveryTest`, `UsbGuardWatchResilienceTest`, `UsbGuardNotificationDecisionTargetTest`: watch replay/bounds/final target và notification.
-- `NotifierIpcSecurityTest`: gộp kiểm tra peer authorization + hợp đồng IPC/Unix socket.
-
-## PostgreSQL test isolation (sau migration)
-
-- Maven Admin tests dùng PostgreSQL `usbshield_test` với `USBSHIELD_TEST_DB_PASSWORD`; **mỗi integration test class** có schema `usbshield_it_*` riêng, cleanup theo class. Flyway migrate trong schema test và Hibernate `validate` kết quả; test không được nhắm database app. **Không bao giờ trỏ Maven integration suite vào `usbshield` của ứng dụng.**
-- `npm run test:live` và `npm run test:browser:live` dùng role `usbshield_test` trên database `usbshield_browser_test`, schema riêng theo lần chạy; browser tests không cấp quyền cho role test trong `usbshield` ứng dụng. Các schema `usbshield_e2e_*` được cleanup sau khi browser JVM dừng; hard-kill có thể để lại orphan cần dọn có kiểm soát.
-- Đây là test integration trên Windows với event HTTP tổng hợp; không chứng minh USBGuard trên Ubuntu. Ghi PASS sau khi chạy thực tế, không suy từ code/harness.
-
-## Kiểm thử bổ sung Phase 1–3 trên HEAD hiện hành
-
-- **Admin:** `AdminPassword*Test`, `AdminSessionVersionFilterTest` (đổi/reset/invalidated sessions); `UsbHashIdentityTest`, `UsbGuardHealthProjectionTest` (HASH, health+stale); `FlywaySchemaIntegrationTest`, `TestPostgresSchemaSafetyTest`; `EndpointAndWhitelistPaginationIntegrationTest` (filter/count/page và API bounded).
-- **Agent:** `AdminServerClientTlsTest` (HTTPS, CA/hostname, no redirect/fallback), `UsbGuardHealthProbeTest`, `PolicySyncServiceTest`; `NotifierStaleSocketRecoveryTest` có các test **Linux-only**, skip trên Windows là đúng thiết kế.
-- **Frontend:** `phase3_endpoint_whitelist_pagination.test.mjs`, `usbguard-health-contract.test.mjs` và browser-live PostgreSQL test. Kiểm tra `npm test`, lint, build và hai browser-live suites riêng biệt.
-- **Chưa được chứng minh bằng Windows tests:** TLS/ACL thực qua Nginx từ hai nguồn IP riêng, `.deb` postinst/service/reboot, stale socket Ubuntu, USBGuard enforcement, USB thật và GUI notification. Cần ghi evidence mới, không nâng số liệu lịch sử lên làm kết quả nghiệm thu.
-
-## Xác nhận sau refactor
-
-Từ repository root:
+From the repository root, in **Windows PowerShell 7.6+** with PostgreSQL test databases and untracked `.env` test credentials configured:
 
 ```powershell
-mvn -f admin-server/pom.xml clean test
-mvn -f client-agent/pom.xml clean test
+# Admin Maven + frontend unit/lint/build + packaged JAR + browser/HTTP-live
+.\packaging\tests\verify-windows.ps1 -AdminOnly
 
-# Phát hiện class test legacy hoặc tên test không còn đúng:
-Get-ChildItem admin-server/src/test,client-agent/src/test -Recurse -Filter *.java | Where-Object { $_.Name -match '(Week\d|Copilot|PR\d+)' }
-
-git diff --check
+# Above plus Client Agent Maven tests and Windows-built .deb checks
+.\packaging\tests\verify-windows.ps1
 ```
 
-**Không chạy `git rm` cũ trước khi đã giải nén các file mới**, vì khi đó các bộ test sẽ tạm thời thiếu. Không coi Maven PASS từ trước refactor là PASS cho source mới. Ghi nhận source HEAD và số lượng test thực chạy từ Surefire để đối chiếu; `303` ở trên là **số annotation**, không phải số case thực thi đã xác minh.
+`verify-windows.ps1` parses the current release/verifier script syntax, validates dedicated test DB role, executes the selected test gates, rebuilds the JAR **after** Maven `clean test`, checks packaged React/Flyway and launches real Spring/PostgreSQL-backed browser/HTTP-live suites. Full mode additionally builds/checks the Agent `.deb`. `-SkipTests`, `-SkipBrowserLive`, `-SkipDebBuild` reduce coverage; record skips explicitly and do **not** claim full PASS.
+
+- `admin-server/verify-week1.ps1`, `verify-week2.ps1`, `verify-week3.ps1` **do not exist in this HEAD**. Their previous purposes were Week 1–3 historical milestone validation, **not** a mandatory runtime check. Do not reintroduce `ddl-auto=create` or destructive test-DB resets into the Windows gate.
+- `admin-server/build-release.ps1` **builds and verifies a distributable JAR** with optional Maven tests and SHA-256/manifest; it is a release builder, not the comprehensive Windows test entrypoint.
+- `scripts/with-env.ps1` loads `.env` for individual test commands or `.env.e2e.local` for the owner's runtime E2E setup. Spring Boot itself does not read those files automatically.
+
+## 2. Database isolation and non-destructive boundary
+
+- `.env` supplies **test-only** PostgreSQL connection settings; use role `usbshield_test`, database `usbshield_test` for Admin Maven integration and `usbshield_browser_test` for browser/HTTP-live. Never use `usbshield` application DB for testing, dropping schemas or resetting tables.
+- Admin tests use class-scoped schema names such as `usbshield_it_*`; browser harnesses use disposable schemas `usbshield_e2e_*`. Schema cleanup is expected under normal completion, but a hard kill can leave an orphan requiring ownership/target verification before manual removal.
+- Flyway migrates test schemas, Hibernate uses `validate`; do not add `ddl-auto=create`/`create-drop`, and do not run one-time application Flyway baseline on test DBs.
+- HTTP browser test data are synthetic; they are **not** actual USBGuard enforcement results. Successful Windows tests cannot substitute for separate HTTPS/ACL/USB native acceptance.
+
+## 3. Admin Server test inventory
+
+The following names were found under `admin-server/src/test` at the inspected HEAD:
+
+| Test / helper | Coverage boundary |
+|---|---|
+| `PostgreSqlPersistenceIntegrationTest` | PostgreSQL CRUD/persistence |
+| `IsolatedPostgresDb` | Shared isolated schema helper; **not itself a test class** |
+| `ServerApiIntegrationTest` | API integration across Admin and Agent contracts |
+| `ProductionProfileSecurityTest` | `prod` security/cookie/OpenAPI assertions |
+| `ServerSecurityAndStatusTest` | Auth/security/status and SPA routes |
+| `EndpointMetadataIntegrationTest` | Agent metadata → endpoint/Admin API |
+| `EventSearchIntegrationTest`, `AgentHttpIntegrationTest`, `AgentEventContractTest` | Event search and authenticated Agent API contracts |
+| `AdminPassword*Test`, `AdminSessionVersionFilterTest` | Password change/reset and session invalidation |
+| `UsbHashIdentityTest`, `UsbGuardHealthProjectionTest` | HASH validation and reported health/staleness |
+| `FlywaySchemaIntegrationTest`, `TestPostgresSchemaSafetyTest` | Migration and test DB safety |
+| `EndpointAndWhitelistPaginationIntegrationTest` | Backend filtering, total counts and bounded pagination |
+
+Use test-class names only as inventory; do not infer exact current number of passed test methods without a fresh Surefire report.
+
+## 4. Client Agent test inventory and historical refactor mapping
+
+The historical Week 3/4 cleanup grouped `SystemInfoProviderRegressionTest` + `SystemInfoProviderRoutingTest` into `SystemInfoProviderTest`, split `Week4NotificationCorrectnessTest` into policy tests (`BlockNotificationPolicyTest`) and publisher tests (`DesktopNotificationServiceTest`), and consolidated active-session tests into `ActiveSessionSelectionTest`. These mappings remain useful for searching old QA evidence, but should not be used as current class/file names without confirming the source tree.
+
+Active Agent suites include:
+
+- `UsbGuardDurableAuditRetryTest`, `UsbGuardPendingPolicyLifecycleTest`, `UsbGuardWatchLossPolicyRecoveryTest`, `UsbGuardIpcRecoverySynchronizationTest`: durability, replay, watch and IPC boundaries.
+- `UsbGuardAuditLifecycleTest`, `UsbGuardEffectiveAllowTransitionTest`, `UsbGuardFinalDecisionIntegrationTest`: end-to-end decision/audit models.
+- `UsbGuardPolicySafetyValidationTest`, `UsbGuardFingerprintValidationTest`, `UsbGuardPolicyReconciliationTest`, `UsbGuardRuleMutationSafetyTest`, `UsbGuardManagedPolicyIntegrityTest`: policy identity and mutation safety.
+- `UsbGuardWatchRecoveryTest`, `UsbGuardWatchResilienceTest`, `UsbGuardNotificationDecisionTargetTest`: watch recovery and notifications.
+- `NotifierIpcSecurityTest`, `AdminServerClientTlsTest`, `UsbGuardHealthProbeTest`, `PolicySyncServiceTest`: IPC authorization, transport validation, health and sync.
+- `NotifierStaleSocketRecoveryTest`: Linux-only cases may be skipped on Windows. Such SKIP is **not** proof of Linux PASS.
+
+## 5. Frontend test inventory
+
+- Unit/contract tests include `phase3_endpoint_whitelist_pagination.test.mjs` and `usbguard-health-contract.test.mjs`.
+- `frontend/tests/browser-live.mjs` validates the **packaged React UI against real Spring/PostgreSQL** using synthetic HTTP events, including server-side pagination/search/date filtering and login/session.
+- `npm --prefix frontend run test:browser:live` and `npm --prefix frontend run test:live` are separate HTTP/browser integration suites; both are invoked by the normal Windows verifier (unless skipped).
+- Frontend Event Logs uses **10 rows/page**; an event filter with 14 results must show **1–10 on page 1 and 11–14 on page 2**, not 1–14 on the first page. A stale UI assertion must be fixed in the test; don't change correct pagination code merely to make a test pass.
+
+## 6. Independent native deployment evidence still required
+
+Windows unit/integration tests do not independently verify Nginx CA/host name, real two-source-IP route ACL, Ubuntu `.deb` install/upgrade/remove, reboot resilience, physical USBGuard rule application, per-endpoint hardware isolation, desktop popup, offline spool recovery or Linux-only notifier IPC. The owner-reported minimal Ubuntu P0/C1–C5 PASS is documented on the **09/11 baseline**, with extended scenarios still deferred; see [owner acceptance](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md).
+
+For a new release candidate, capture `git rev-parse HEAD`, `git status --short`, actual build flags, Surefire/frontend results, JAR/`.deb` hashes, skipped gates and separate Ubuntu/HTTPS test evidence. `git diff --check` validates patch whitespace only; it is not a runtime test.
