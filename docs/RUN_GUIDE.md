@@ -1,6 +1,6 @@
 # USBShield — Hướng dẫn chạy và triển khai chung (Admin Server + Ubuntu Client)
 
-> **Phạm vi:** Canonical deployment guide, không thay thế test evidence. Code baseline đối chiếu: `vinhkhang` `6923be001890bee9a303a8cee8e7dcc2cf2db180` (09/11/2026), Windows verifier PASS theo owner. HTTPS/ACL và **Minimal Core Ubuntu P0+C1–C5 PASS theo owner 09/11**; extended Ubuntu acceptance **DEFERRED BY OWNER / NOT EXECUTED**. Xem [closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md).
+> **Phạm vi:** Canonical deployment guide, không thay thế test evidence. Source/script baseline đối chiếu **`main` `79384e26563ea08db7c16c223c618e1f51e9a3d9` (20/11/2026)**. **Evidence lab lịch sử 09/11** thuộc source/artifact ở thời điểm đó: Windows verifier PASS theo owner, HTTPS/ACL và **Minimal Core Ubuntu P0+C1–C5 PASS theo owner**; đây **không phải** một lượt test mới của HEAD 20/11. Extended Ubuntu acceptance **DEFERRED BY OWNER / NOT EXECUTED**. Xem [closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) và [hướng dẫn release JAR](ADMIN_SERVER_RELEASE.md).
 
 ## 1. Chọn mô hình tối giản
 
@@ -40,7 +40,25 @@ Yêu cầu: JDK 21, Maven, Node/npm theo [Developer Guide](DEVELOPER_GUIDE.md), 
 
 **Khởi tạo cấu hình test một lần:** `Copy-Item .env.example .env`, điền `USBSHIELD_TEST_DB_USERNAME=usbshield_test` và `USBSHIELD_TEST_DB_PASSWORD` thật vào file `.env` **không được commit**. `scripts/with-env.ps1` đọc `.env` như dữ liệu, không thực thi shell expressions. Các lệnh Maven/npm chạy trực tiếp không tự load `.env`.
 
-**Verifier Windows hiện hành sau package đồng bộ:** chạy `./packaging/tests/verify-windows.ps1` trong PowerShell 7.4+ (owner dùng 7.6.9). Script này thay cho `verify-week2-windows.ps1`, `verify-week3-windows.ps1`, `verify-week4-windows.ps1` và các staging-verifier cũ. Chạy trên source checkout hiện hành; không dùng `git add .` thay cho kiểm thử. Đối với Ubuntu: `packaging/tests/check-usbshield-core.sh` chỉ là kiểm tra read-only và không thay thế E2E vật lý.
+**Tách hai workflow hiện hành:**
+
+```powershell
+# A. Windows tests (sử dụng .env test):
+.\packaging\tests\verify-windows.ps1 -AdminOnly
+.\packaging\tests\verify-windows.ps1
+
+# B. Build một JAR để giao cho người khác (mặc định cần clean Git tree):
+.\admin-server\build-release.ps1
+# Tùy chọn nơi xuất artifact, ví dụ:
+.\admin-server\build-release.ps1 -OutputDirectory 'C:\USBShieldReleases'
+```
+
+`build-release.ps1` chạy `npm ci`, build React, chạy Maven tests với `.env` test (trừ khi `-SkipTests`), rồi sinh `admin-server/target/usbshield-admin-server.jar`. Nó kiểm tra `jar tf`/React/Flyway, xuất bản JAR tên `usbshield-admin-server_<commit>_<UTC>.jar` tại `admin-server/target/release/` mặc định (hoặc `-OutputDirectory`), kèm manifest và SHA-256. `-AllowDirtyTree` cho phép tạo **bản development không đủ release qualification**, không phải PASS chính thức. JAR phát hành có thể tải qua GitHub Releases; không nên commit binary vào root `admin-server/`. Máy nhận cần Java 21+, PostgreSQL application DB, secrets runtime và nếu truy cập qua LAN cần cấu hình Nginx/HTTPS/CA/ACL độc lập; không cần source/Node/npm để chỉ chạy JAR. Xem [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md).
+
+
+**Verifier Windows hiện hành:** chạy `./packaging/tests/verify-windows.ps1` trong **PowerShell 7.6+ trên Windows**. Tham số `-AdminOnly` chỉ kiểm Admin Server, React và live HTTP/browser suites; mặc định kiểm thêm Agent Maven tests và bản build `.deb`. `-SkipTests`, `-SkipBrowserLive`, `-SkipDebBuild` làm giảm phạm vi và phải ghi SKIP. Verifier giữ thứ tự build JAR sau Maven clean test, không chuyển nguyên logic `verify-week3.ps1` lịch sử hoặc `ddl-auto=create` vào gate mới. Chạy trên checkout hiện hành, ghi SHA và số lượng test của lần chạy. Ubuntu: `packaging/tests/check-usbshield-core.sh` chỉ là kiểm tra read-only, không thay thế E2E vật lý. Xem [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md).
+
+Các lệnh **thực hiện thủ công tương đương** (không cần chạy lại khi đã dùng script tổng ở trên):
 
 ```powershell
 npm --prefix frontend ci
@@ -55,13 +73,22 @@ mvn -f admin-server/pom.xml -Pwith-frontend -DskipTests package
 git diff --check
 ```
 
-**Thứ tự bắt buộc:** `mvn ... clean test` xóa `admin-server/target/`; vì vậy build React rồi `mvn -f admin-server/pom.xml -Pwith-frontend -DskipTests package` **sau** bước clean test và **trước** `test:browser:live` / `test:live`. Bản `verify-windows.ps1` trong package thực hiện chính thứ tự này. Không cần build JAR thủ công ngay trước verifier. Trên log owner 09/11: Admin 60 tests PASS, Agent 276 tests (3 Linux-only SKIP), frontend 116 tests PASS, cả hai browser-live suites PASS, DEB structure/hash PASS. Đây là kết quả máy owner, không phải test mới của package này.
+**Thứ tự bắt buộc:** `mvn ... clean test` xóa `admin-server/target/`; vì vậy build React rồi `mvn -f admin-server/pom.xml -Pwith-frontend -DskipTests package` **sau** bước clean test và **trước** `test:browser:live` / `test:live`. `verify-windows.ps1` tự làm đúng thứ tự; không cần build JAR thủ công trước verifier. **Số liệu lịch sử owner 09/11:** Admin 60 tests PASS, Agent 276 tests (3 Linux-only SKIP), frontend 116 tests PASS, hai live suites PASS và DEB structure/hash PASS. **Không tái sử dụng các số liệu đó để khẳng định HEAD 20/11 đã PASS.**
 
 Admin test Java dùng `usbshield_test`/schema riêng; browser-live dùng `usbshield_browser_test`/schema riêng. Agent notifier **3 Linux-only tests sẽ skip trên Windows**; cần chạy trên Ubuntu để nghiệm thu F09. Các bộ browser gửi HTTP events/ACK tổng hợp, không xác nhận USBGuard thật.
 
-`admin-server/target/usbshield-admin-server.jar` là **executable JAR** có React static bundle và API cùng origin. `npm run test:live` là bộ browser/Spring khác có thể chạy riêng; `test:browser:live` tự kích hoạt build frontend (`pretest:browser:live`) và dùng `usbshield_browser_test`/schema riêng với event HTTP tổng hợp. Không đánh đồng các test này với thiết bị Ubuntu thật. Không dùng database `usbshield` cho QA.
+`admin-server/target/usbshield-admin-server.jar` là **executable JAR** có React static bundle và API cùng origin. Bản phát hành đã copy ra thư mục khác chạy theo **đường dẫn/tên file JAR được phát hành** chứ không cần giữ nguyên `target/`. Không đưa `.env`, secret hoặc cert vào ZIP/JAR. `npm run test:live` là bộ browser/Spring khác có thể chạy riêng; `test:browser:live` tự kích hoạt build frontend (`pretest:browser:live`) và dùng `usbshield_browser_test`/schema riêng với event HTTP tổng hợp. Không đánh đồng các test này với thiết bị Ubuntu thật. Không dùng database `usbshield` cho QA.
 
-**Chạy profile `prod`** từ thư mục root repository trong PowerShell, sau khi đã cấp các secrets cần thiết:
+**Chạy profile `prod`** từ root repository sau khi đã cấp các secrets runtime cần thiết. `--spring.profiles.active=prod` chỉ chọn `application-prod.yml`, **không tự đọc `.env` hoặc `.env.e2e.local`**. Có hai cách: (a) nạp `.env.e2e.local` của môi trường E2E bằng `scripts/with-env.ps1`; (b) thiết lập biến trong PowerShell/OS (ví dụ dưới). `.env` test được `build-release.ps1`/`verify-windows.ps1` đọc **chỉ khi build/test**, không biến thành runtime config và không được nhúng vào JAR. Không chuyển `.env.e2e.local` của owner cho người nhận JAR.
+
+```powershell
+# Từ root repo, dùng file runtime E2E ở máy owner (file không commit):
+.\scripts\with-env.ps1 -EnvFile .env.e2e.local -Command {
+    java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
+}
+```
+
+Hoặc, **nếu đã thiết lập sẵn** các biến runtime (ví dụ như sau), chạy `java -jar` trực tiếp:
 
 ```powershell
 $env:USBSHIELD_DB_URL = 'jdbc:postgresql://127.0.0.1:5432/usbshield'
@@ -79,7 +106,7 @@ $env:PORT = '18080'
 java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
 ```
 
-Profile mặc định `application.yml` dùng URL `jdbc:postgresql://${USBSHIELD_DB_HOST:127.0.0.1}:${USBSHIELD_DB_PORT:5432}/${USBSHIELD_DB_NAME:usbshield}`, username `usbshield` và password từ `USBSHIELD_DB_PASSWORD`. **Profile `prod` yêu cầu `USBSHIELD_DB_URL` và `USBSHIELD_DB_PASSWORD`**; không mặc định dùng `USBSHIELD_DB_HOST/NAME` để thay thế URL này. Flyway tạo/nâng cấp schema V1/V2 trước khi Hibernate chạy `ddl-auto=validate`. **Không** đặt `ddl-auto=update/create-drop` cho ứng dụng. Database hiện hữu chưa versioned cần baseline một lần theo mục 2; không tự baseline bằng cấu hình toàn cục.
+Profile mặc định `application.yml` dùng URL `jdbc:postgresql://${USBSHIELD_DB_HOST:127.0.0.1}:${USBSHIELD_DB_PORT:5432}/${USBSHIELD_DB_NAME:usbshield}`, username `usbshield` và password từ `USBSHIELD_DB_PASSWORD`. **Profile `prod` yêu cầu `USBSHIELD_DB_URL`, `USBSHIELD_DB_PASSWORD` và `USBSHIELD_ENROLLMENT_TOKEN`**; không mặc định dùng `USBSHIELD_DB_HOST/NAME` để thay thế URL này. Flyway tạo/nâng cấp schema V1/V2 trước khi Hibernate chạy `ddl-auto=validate`. **Không** đặt `ddl-auto=update/create-drop` cho ứng dụng. Database hiện hữu chưa versioned cần baseline một lần theo mục 2; không tự baseline bằng cấu hình toàn cục.
 
 Admin Server muốn khởi động cần PostgreSQL sẵn sàng và role ứng dụng có quyền tạo/cập nhật schema ban đầu. Password bootstrap Admin **chỉ tạo tài khoản nếu chưa có**, không đổi mật khẩu của account đã tồn tại. `USBSHIELD_ENROLLMENT_TOKEN` phải được quản lý như bí mật và chuyển an toàn đến IT cấu hình Client; **không đưa vào ZIP/commit/screenshot**.
 
