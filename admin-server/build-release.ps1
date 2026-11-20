@@ -1,90 +1,237 @@
+#requires -Version 7.4
+<#
+.SYNOPSIS
+    Build a distributable Admin Server JAR from the current React + Java sources.
+.DESCRIPTION
+    Output is written to admin-server/target/release by default (gitignored),
+    not to the source folder. The JAR includes the React production bundle.
+    A clean Git working tree is required unless -AllowDirtyTree is specified.
+    Tests run by default using the repo-root, untracked .env test database.
+    The .env file is loaded only for build-time tests; environment variables are
+    restored when the script finishes. JAR runtime requires separately configured
+    environment variables (or scripts/with-env.ps1).
+    Does not install/start PostgreSQL, Nginx, or the Admin Server.
+.EXAMPLE
+    .\admin-server\build-release.ps1
+.EXAMPLE
+    .\admin-server\build-release.ps1 -SkipTests -AllowDirtyTree
+.EXAMPLE
+    .\admin-server\build-release.ps1 -OutputDirectory 'D:\USBShield-Releases'
+#>
+[CmdletBinding()]
 param(
     [string]$JavaHome = $env:JAVA_HOME,
-    [switch]$AllowDirtyTree
+    [switch]$AllowDirtyTree,
+    [switch]$SkipTests,
+    [string]$OutputDirectory
 )
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-$repo = Split-Path $PSScriptRoot -Parent
-$evidence = Join-Path $repo 'docs/member1/week4-evidence'
-$artifact = Join-Path $PSScriptRoot 'target/usbshield-admin-server.jar'
-$manifestPath = Join-Path $evidence 'server-release-manifest.json'
-$previousJava = $env:JAVA_HOME
+$PSNativeCommandUseErrorActionPreference = $false
+
+if (-not $IsWindows -or $PSVersionTable.PSEdition -ne 'Core') {
+    throw 'Use PowerShell 7 on Windows to build this release.'
+}
+
+$repo = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+$target = Join-Path $PSScriptRoot 'target'
+$artifact = Join-Path $target 'usbshield-admin-server.jar'
+$previousJavaHome = $env:JAVA_HOME
+$savedTestVars = @{}
+$savedProdVars = @{}
+# Get-Command may return multiple installed copies (e.g. GraalVM 21 + JDK 25).
+# Resolve one executable, never an array of paths.
+function Resolve-Application([string]$Name) {
+    $command = Get-Command -Name $Name -CommandType Application -ErrorAction Stop | Select-Object -First 1
+    if ($null -eq $command -or [string]::IsNullOrWhiteSpace($command.Source)) {
+        throw "Required executable not found: $Name"
+    }
+    return [string]$command.Source
+}
+
+$git = Resolve-Application 'git.exe'
+$mvn = Resolve-Application 'mvn.cmd'
+$npm = Resolve-Application 'npm.cmd'
+$node = Resolve-Application 'node.exe'
+
+function Invoke-Checked([string]$Title, [string]$Executable, [string[]]$Arguments, [string]$WorkingDirectory) {
+    Write-Host "`n== $Title ==" -ForegroundColor Cyan
+    Push-Location -LiteralPath $WorkingDirectory
+    try {
+        $global:LASTEXITCODE = 0
+        & $Executable @Arguments
+        if ($LASTEXITCODE -ne 0) { throw "$Title failed with exit code $LASTEXITCODE" }
+    } finally { Pop-Location }
+}
 
 try {
-    if ($JavaHome) { $env:JAVA_HOME = $JavaHome }
-
-    $sourceCommit = (& git -C $repo rev-parse HEAD).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot determine source commit.' }
-    $sourceTree = (& git -C $repo rev-parse 'HEAD^{tree}').Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot determine source tree.' }
-    $dirty = @(& git -C $repo status --porcelain)
-    if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect source tree status.' }
-    if ($dirty.Count -gt 0 -and !$AllowDirtyTree) {
-        throw 'Source tree is dirty. Commit changes before creating a release artifact, or explicitly pass -AllowDirtyTree for a non-release build.'
+    if ($JavaHome) {
+        $javaExecutable = Join-Path $JavaHome 'bin/java.exe'
+        if (-not (Test-Path -LiteralPath $javaExecutable -PathType Leaf)) {
+            throw "JAVA_HOME does not contain bin/java.exe: $JavaHome"
+        }
+        $env:JAVA_HOME = $JavaHome
+    }
+    $java = if ($JavaHome) { $javaExecutable } else { Resolve-Application 'java.exe' }
+    # jar.exe must come from the same JDK as java.exe, not an arbitrary PATH hit.
+    $jarTool = Join-Path (Split-Path -Parent $java) 'jar.exe'
+    if (-not (Test-Path -LiteralPath $jarTool -PathType Leaf)) {
+        throw "Selected Java installation is missing jar.exe (JDK 21+ required): $jarTool"
     }
 
-    $javaExecutable = if ($JavaHome) { Join-Path $JavaHome 'bin/java.exe' } else { (Get-Command java.exe).Source }
-    if (!(Test-Path $javaExecutable)) { throw "Java executable not found: $javaExecutable" }
-    $javaVersion = (& $javaExecutable -version 2>&1 | Out-String).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'Java version query failed.' }
-    $mavenOutput = @(& mvn.cmd -version 2>&1)
-    if ($LASTEXITCODE -ne 0) { throw 'Maven version query failed.' }
-    $mavenVersion = $mavenOutput[0].ToString().Trim()
-    $nodeVersion = (& node.exe --version).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'Node version query failed.' }
-    $npmVersion = (& npm.cmd --version).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'npm version query failed.' }
+    $global:LASTEXITCODE = 0
+    $commit = (& $git -C $repo rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0 -or $commit -notmatch '^[0-9a-f]{40}$') { throw 'Cannot read Git HEAD.' }
+    $tree = (& $git -C $repo rev-parse 'HEAD^{tree}').Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot read Git tree.' }
+    $branch = (& $git -C $repo branch --show-current).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot determine branch.' }
+    $dirty = @(& $git -C $repo status --porcelain --untracked-files=normal)
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect working tree.' }
+    if ($dirty.Count -gt 0 -and -not $AllowDirtyTree) {
+        throw 'Working tree is not clean. Commit/stash changes or use -AllowDirtyTree for a NON-RELEASE development build.'
+    }
 
-    New-Item -ItemType Directory -Force $evidence | Out-Null
-    Push-Location (Join-Path $repo 'frontend')
-    try {
-        & npm.cmd run build
-        if ($LASTEXITCODE -ne 0) { throw 'React production build failed.' }
-    } finally { Pop-Location }
-    if (!(Test-Path (Join-Path $repo 'frontend/dist/index.html'))) { throw 'React index.html missing.' }
+    $outDir = if ([string]::IsNullOrWhiteSpace($OutputDirectory)) {
+        Join-Path $target 'release'
+    } else {
+        $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputDirectory)
+    }
+    # Do not create output before the build: Maven clean deletes target/.
+    $global:LASTEXITCODE = 0
+    $javaVersion = (& $java -version 2>&1 | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'java -version failed.' }
+    $global:LASTEXITCODE = 0
+    $mavenLines = @(& $mvn -version 2>&1)
+    if ($LASTEXITCODE -ne 0 -or $mavenLines.Count -lt 1) { throw 'mvn -version failed.' }
+    $mavenVersion = [string]$mavenLines[0]
+    $global:LASTEXITCODE = 0
+    $nodeVersion = (& $node --version).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'node --version failed.' }
+    $global:LASTEXITCODE = 0
+    $npmVersion = (& $npm --version).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'npm --version failed.' }
 
-    & mvn.cmd -B -f (Join-Path $PSScriptRoot 'pom.xml') -Pwith-frontend clean package
-    if ($LASTEXITCODE -ne 0) { throw 'Server Maven test/package lifecycle failed.' }
-    if (!(Test-Path $artifact)) { throw 'Server JAR missing after package.' }
+    Invoke-Checked 'Install pinned frontend dependencies' $npm @('ci') (Join-Path $repo 'frontend')
+    Invoke-Checked 'Build current React frontend' $npm @('run', 'build') (Join-Path $repo 'frontend')
+    $index = Join-Path $repo 'frontend/dist/index.html'
+    if (-not (Test-Path -LiteralPath $index -PathType Leaf)) { throw 'Frontend dist/index.html is missing.' }
 
-    $artifactInfo = Get-Item -LiteralPath $artifact
-    $artifactHash = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($SkipTests) {
+        Invoke-Checked 'Package Admin Server (tests explicitly skipped)' $mvn @(
+            '-B', '-f', (Join-Path $PSScriptRoot 'pom.xml'), '-Pwith-frontend', '-DskipTests', 'clean', 'package'
+        ) $repo
+    } else {
+        $envFile = Join-Path $repo '.env'
+        if (-not (Test-Path -LiteralPath $envFile -PathType Leaf)) {
+            throw 'Missing test .env. Configure test PostgreSQL and .env, or explicitly use -SkipTests.'
+        }
+        # Do not allow inherited application/prod datasource settings to redirect tests.
+        foreach ($item in (Get-ChildItem Env:)) {
+            if ($item.Name -match '^(USBSHIELD_DB_|SPRING_DATASOURCE_|SPRING_FLYWAY_|SPRING_JPA_|SPRING_SQL_|SPRING_PROFILES_ACTIVE$|SPRING_CONFIG_|SPRING_APPLICATION_JSON$|FLYWAY_)') {
+                $savedProdVars[$item.Name] = $item.Value
+                [System.Environment]::SetEnvironmentVariable($item.Name, $null, 'Process')
+            }
+        }
+        foreach ($name in @('USBSHIELD_TEST_DB_HOST','USBSHIELD_TEST_DB_PORT','USBSHIELD_TEST_DB_USERNAME','USBSHIELD_TEST_DB_PASSWORD')) {
+            $savedTestVars[$name] = [System.Environment]::GetEnvironmentVariable($name, 'Process')
+        }
+        $lineNo = 0
+        foreach ($line in [System.IO.File]::ReadAllLines($envFile)) {
+            $lineNo++
+            $trimmed = $line.Trim()
+            if (-not $trimmed -or $trimmed.StartsWith('#')) { continue }
+            if ($trimmed -notmatch '^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$') {
+                throw "Invalid test .env at line $lineNo"
+            }
+            $key = $Matches[1]; $value = $Matches[2].Trim()
+            if ($value.Length -ge 2 -and (
+                ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+                ($value.StartsWith("'") -and $value.EndsWith("'")))) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+            if ($savedTestVars.ContainsKey($key)) {
+                [System.Environment]::SetEnvironmentVariable($key, $value, 'Process')
+            }
+        }
+        if ($env:USBSHIELD_TEST_DB_USERNAME -cne 'usbshield_test' -or
+            [string]::IsNullOrWhiteSpace($env:USBSHIELD_TEST_DB_PASSWORD) -or
+            $env:USBSHIELD_TEST_DB_PASSWORD -ceq 'REPLACE_WITH_YOUR_TEST_PASSWORD') {
+            throw 'Test PostgreSQL role must be usbshield_test with a real test password.'
+        }
+        Invoke-Checked 'Test and package Admin Server' $mvn @(
+            '-B', '-f', (Join-Path $PSScriptRoot 'pom.xml'), '-Pwith-frontend', 'clean', 'package'
+        ) $repo
+    }
+
+    if (-not (Test-Path -LiteralPath $artifact -PathType Leaf)) { throw 'Admin Server JAR was not generated.' }
+    $global:LASTEXITCODE = 0
+    $entries = @(& $jarTool tf $artifact)
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect the JAR with jar tf.' }
+    foreach ($entry in @(
+        'org/springframework/boot/loader/launch/JarLauncher.class',
+        'BOOT-INF/classes/com/group/usbshield/server/UsbShieldServerApplication.class',
+        'BOOT-INF/classes/static/index.html',
+        'BOOT-INF/classes/db/migration/V1__initial_postgresql_schema.sql',
+        'BOOT-INF/classes/db/migration/V2__admin_session_and_usbguard_health.sql'
+    )) {
+        if ($entries -cnotcontains $entry) { throw "Required JAR entry missing: $entry" }
+    }
+    $assets = @($entries | Where-Object { $_ -like 'BOOT-INF/classes/static/assets/*' -and $_ -notlike '*/' })
+    if ($assets.Count -lt 2) { throw 'React JS/CSS assets missing from the JAR.' }
+
+    New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+    $stamp = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ')
+    $fileName = "usbshield-admin-server_$($commit.Substring(0,12))_$stamp.jar"
+    $releaseJar = Join-Path $outDir $fileName
+    Copy-Item -LiteralPath $artifact -Destination $releaseJar -ErrorAction Stop
+    $hash = (Get-FileHash -LiteralPath $releaseJar -Algorithm SHA256).Hash.ToLowerInvariant()
+    $relativeManifest = "$fileName.manifest.json"
     $manifest = [ordered]@{
-        schemaVersion = 1
-        owner = 'M1'
+        schemaVersion = 2
         builtAtUtc = [DateTime]::UtcNow.ToString('o')
-        sourceCommit = $sourceCommit
-        sourceTree = $sourceTree
-        branch = (& git -C $repo branch --show-current).Trim()
-        workingTreeCleanAtStart = ($dirty.Count -eq 0)
-        environment = [ordered]@{
-            os = [System.Runtime.InteropServices.RuntimeInformation]::OSDescription
-            powershell = $PSVersionTable.PSVersion.ToString()
-            processArchitecture = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString()
+        source = [ordered]@{
+            commit = $commit
+            tree = $tree
+            branch = $branch
+            workingTreeCleanAtStart = ($dirty.Count -eq 0)
         }
         toolchain = [ordered]@{
             java = ($javaVersion -split "`r?`n")[0]
-            maven = $mavenVersion
+            maven = [string]$mavenVersion
             node = $nodeVersion
             npm = $npmVersion
             javaTarget = '21'
         }
         build = [ordered]@{
+            backendTestsExecuted = (-not $SkipTests)
+            frontendBuildExecuted = $true
+            includesReact = $true
             command = 'admin-server/build-release.ps1'
-            result = 'PASS'
-            lifecycle = 'mvn -B -Pwith-frontend clean package'
         }
         artifact = [ordered]@{
-            path = 'admin-server/target/usbshield-admin-server.jar'
-            sizeBytes = $artifactInfo.Length
-            sha256 = $artifactHash
-            includesReactDist = $true
+            filename = $fileName
+            sizeBytes = (Get-Item -LiteralPath $releaseJar).Length
+            sha256 = $hash
         }
     }
-    $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $manifestPath -Encoding utf8NoBOM
-    Write-Output "PASS: built $($manifest.artifact.path)"
-    Write-Output "SHA-256: $artifactHash"
-    Write-Output "Manifest: $manifestPath"
+    $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $outDir $relativeManifest) -Encoding utf8NoBOM
+    "$hash  $fileName" | Set-Content -LiteralPath (Join-Path $outDir "$fileName.sha256") -Encoding ascii
+
+    Write-Host "`nPASS: Admin Server JAR packaged with current frontend." -ForegroundColor Green
+    Write-Host "JAR: $releaseJar"
+    Write-Host "SHA256: $hash"
+    Write-Host "Manifest: $(Join-Path $outDir $relativeManifest)"
+    if ($SkipTests -or $dirty.Count -gt 0) {
+        Write-Warning 'This build is not fully release-qualified (tests skipped and/or dirty Git tree).'
+    }
 } finally {
-    $env:JAVA_HOME = $previousJava
+    foreach ($key in $savedTestVars.Keys) {
+        [System.Environment]::SetEnvironmentVariable($key, $savedTestVars[$key], 'Process')
+    }
+    foreach ($key in $savedProdVars.Keys) {
+        [System.Environment]::SetEnvironmentVariable($key, $savedProdVars[$key], 'Process')
+    }
+    $env:JAVA_HOME = $previousJavaHome
 }

@@ -224,9 +224,44 @@ try {
   await evaluate(`{ const select = document.querySelector('[aria-label="Event Type"]'); select.value = 'disconnected'; select.dispatchEvent(new Event('change', { bubbles: true })); }`)
   await until(() => bodyHas('Không tìm thấy kết quả'), 'event type global filter')
   await reset()
-  await evaluate(`{ const select = document.querySelector('[aria-label="Decision"]'); select.value = 'blocked'; select.dispatchEvent(new Event('change', { bubbles: true })); }`)
-  await until(() => bodyHas('1–14 trên 14 bản ghi'), 'server decision filter')
-  assert.equal(await evaluate('Array.from(document.querySelectorAll("tbody tr"), row => row.lastElementChild.textContent).every(value => value === "BLOCK")'), true)
+  await evaluate(`{
+  const select = document.querySelector('[aria-label="Decision"]');
+  select.value = 'blocked';
+  select.dispatchEvent(new Event('change', { bubbles: true }));
+}`)
+
+  await until(
+      () => bodyHas('1–10 trên 14 bản ghi'),
+      'server decision filter'
+  )
+
+  assert.equal(
+      await evaluate('document.querySelectorAll("tbody tr").length'),
+      10
+  )
+
+  assert.equal(
+      await evaluate('Array.from(document.querySelectorAll("tbody tr"), row => row.lastElementChild.textContent).every(value => value === "BLOCK")'),
+      true
+  )
+
+// Verify the remaining four records on page two.
+  await evaluate(`document.querySelector('[aria-label="Trang sau"]').click()`)
+
+  await until(
+      () => bodyHas('11–14 trên 14 bản ghi'),
+      'server decision filter second page'
+  )
+
+  assert.equal(
+      await evaluate('document.querySelectorAll("tbody tr").length'),
+      4
+  )
+
+  assert.equal(
+      await evaluate('Array.from(document.querySelectorAll("tbody tr"), row => row.lastElementChild.textContent).every(value => value === "BLOCK")'),
+      true
+  )
   await reset()
   await fill('[aria-label="From Date"]', '2026-10-16')
   await fill('[aria-label="To Date"]', '2026-10-16')
