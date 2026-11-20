@@ -1,41 +1,42 @@
 # USBShield Ubuntu — Project Blueprint
 
-> **Đề tài:** Xây dựng hệ thống ngăn chặn và quản lý USB Flash Disk trên hệ điều hành Ubuntu  
-> **Thời gian:** 4 tuần  
-> **Nhân sự:** 5 thành viên  
-> **Frontend:** React + Vite + TypeScript — Admin Web Console  
-> **Backend:** Java 21 + Spring Boot — Admin Server + Ubuntu Client Agent  
-> **Hệ điều hành client mục tiêu MVP:** Ubuntu 24.04 LTS amd64  
-> **Cơ chế enforcement trên client:** USBGuard + systemd  
-> **Database Admin Server (04/11/2026):** PostgreSQL + Flyway V1/V2, Hibernate `ddl-auto=validate` — database ứng dụng tách database test; schema hiện hữu yêu cầu baseline có điều kiện  
-> **Phân phối client:** `usbshield-agent_1.0.0_amd64.deb`  
-> **Java runtime trên client:** phương án A — `.deb` khai báo `openjdk-21-jre-headless` là runtime dependency, người dùng không phải tự cài Java bằng tay.
-> **Scope update (từ Week 2):** Thêm desktop notification trên chính Ubuntu Client khi USB Mass Storage bị USBGuard `BLOCK`. **Week 1 được giữ nguyên, không hồi tố yêu cầu notification vào Week 1.**
-> **Ownership update (từ Week 2):** M3 bàn giao nguyên trạng các class đang có dưới `client-agent/.../usbguard/` và `client-agent/.../session/` cho M2 tiếp quản, không tự tiếp tục sửa hai package này. M2 rà soát và chỉnh sửa trực tiếp trên code đã merge, không tạo bản trùng.
+> **Đề tài:** Xây dựng hệ thống ngăn chặn và quản lý USB Flash Disk trên Ubuntu  
+> **Bối cảnh:** Đồ án 4 tuần / 5 thành viên; kế hoạch Week 1–4 bên dưới là lịch sử, không phải bảng tiến độ hiện tại.  
+> **Admin Web:** React + Vite + TypeScript, source `frontend/`; production build tích hợp vào Spring Boot JAR.  
+> **Backend:** Java 21 + Spring Boot, Admin Server có Web/API và Ubuntu Agent non-web.  
+> **Ubuntu Client:** 24.04 LTS amd64; enforcement bằng USBGuard và quản lý lifecycle bằng systemd.  
+> **Database:** PostgreSQL, Flyway V1/V2, Hibernate `ddl-auto=validate` (không còn H2 runtime).  
+> **Phân phối:** Admin Server JAR; Ubuntu Agent `.deb` có tên phiên bản động và SHA-256/manifest.  
+> **Đối chiếu source:** `chivan2925/USBProtection` `main` **`721f164f63533461b6c18b62e1607baa4ab1b731` (20/11/2026)**.  
+> **Phạm vi kết quả:** Không coi việc cập nhật tài liệu hay kiểm tra source là một lượt chạy test mới.
 
+## Trạng thái triển khai tại source 20/11/2026 — phần ưu tiên khi đọc blueprint
+
+**Phân biệt bằng chứng:** (1) *Source fact* là điều đã đối chiếu với cây mã nguồn/config ở SHA trên; (2) *owner-reported* là kết quả báo cáo của người chạy lab ngày 09/11; (3) *deferred/not executed* chưa được chứng minh. Kết quả 09/11 không tự chuyển sang JAR/`.deb` được build từ HEAD 20/11. Để nghiệm thu một binary, phải ghi cả commit, working-tree state, JAR/DEB SHA-256, cấu hình, thời điểm và log thực tế.
+
+| Hạng mục | Thiết kế/source hiện tại | Ranh giới kiểm chứng |
+|---|---|---|
+| Enforcement | USBGuard local, non-storage base allow và `ImplicitPolicyTarget=block`; whitelist per endpoint; Agent pull/reconcile rồi ACK | ACK và heartbeat là báo cáo phần mềm, không phải chứng cứ USB đang cắm bị đổi trạng thái |
+| Backend & DB | Spring Boot, PostgreSQL `usbshield`; Flyway V1/V2 tạo 5 bảng, Hibernate `validate` | Database `usbshield_test` và `usbshield_browser_test` dùng riêng; không chạy destructive test vào app DB |
+| Authentication | Admin session/cookie + CSRF; Agent enrollment token và endpoint-bound Agent token; reset mật khẩu Admin bằng maintenance mode không mở HTTP | Không có mật khẩu production mặc định; không trao Agent token cho trình duyệt |
+| Network | Nginx HTTPS TLS/443 và ACL theo source IP/route; backend HTTP bind loopback; `/api/agent/**` tách Web/Auth/Admin | HTTPS/ACL ở lab 09/11 **PASS theo owner**; không có rate limiting theo quyết định owner |
+| Frontend | Login, Dashboard, Endpoints, Devices, Whitelist, Event Logs, Settings; các list chính có filter/phân trang tại backend | Trang Blocked độc lập đã bỏ; dùng lọc Blocked của Devices; dữ liệu demo tách live |
+| Client | Java Agent `live`, systemd service, local event spool/quarantine, USBGuard health telemetry, desktop notifier best-effort qua user session | GUI/native notifier IPC và các negative/offline/reboot cases nâng cao chưa được xác nhận đầy đủ |
+| Release | `admin-server/build-release.ps1`, `packaging/tests/verify-windows.ps1`, `scripts/with-env.ps1`; `.deb` build bằng `packaging/scripts/build-deb.{ps1,sh}` | Build thành công ≠ full Windows verifier PASS ≠ Ubuntu physical E2E PASS |
+
+**Bằng chứng lab 09/11/2026:** Windows verifier và HTTPS/ACL được báo PASS theo log/báo cáo owner; Ubuntu **Minimal Core P0 + C1–C5** (A BLOCK → Allow A + ACK + rút/cắm lại ALLOW → B BLOCK → Revoke A + ACK + rút/cắm lại BLOCK) **PASS theo báo cáo owner**, thiếu raw log từng checkpoint để kiểm chứng độc lập. **Ubuntu extended acceptance** (`.deb` upgrade/remove, reboot, offline recovery, negative TLS, notifier IPC, stress/security) **DEFERRED BY OWNER / NOT EXECUTED**. Không gọi đây là full production release acceptance.
+
+**Tài liệu vận hành/source-of-truth:** [RUN_GUIDE](docs/RUN_GUIDE.md) · [ADMIN_SERVER_RELEASE](docs/ADMIN_SERVER_RELEASE.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [API v0.2 frozen](docs/API.md) + [Phase 1–3 addendum](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) · [ADMIN_GUIDE](docs/ADMIN_GUIDE.md) · [DOCUMENT_INDEX](docs/DOCUMENT_INDEX.md). [Trạng thái 09/11](docs/IMPLEMENTATION_STATUS_20261109.md) và [owner acceptance](docs/qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md) là snapshot/evidence lịch sử.
+
+## Lịch sử quyết định — giữ nguyên thời điểm
+
+- **Week 1:** Đề bài gốc và contract khởi đầu; không hồi tố yêu cầu desktop notification.
+- **Week 2:** M2 tiếp quản core USBGuard/session từ M3; bổ sung desktop notification; Agent–Server wire contract v0.2. Phần mô tả tuần ở cuối tài liệu là **kế hoạch thời điểm đó**.
+- **03–04/11:** Chốt cách vận hành demo, đổi H2 sang PostgreSQL, Flyway V1/V2, bổ sung TLS/ACL, HASH policy, health và pagination. Các ID finding cũ **khác** ID của review 07–09/11.
+- **09/11:** Owner báo Windows, HTTPS/ACL và Ubuntu Minimal Core P0+C1–C5 PASS ở lab, nhưng hoãn nghiệm thu Ubuntu mở rộng.
+- **20/11:** Trên `main`, dùng scripts build/release và Windows verifier mới; các script `admin-server/verify-week1.ps1`, `verify-week2.ps1`, `verify-week3.ps1` không còn. Không đổi API wire v0.2 chỉ vì cập nhật blueprint.
 
 ---
-
-## Cập nhật kiến trúc 04/11/2026 — PostgreSQL
-
-Đây là quyết định **đã có code trên `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`**: thay H2 bằng PostgreSQL cho Admin Server; **không migrate dữ liệu H2 test**, giữ executable JAR cho Server và `.deb` cho Agent. Database `usbshield` (app) tách khỏi `usbshield_test` và `usbshield_browser_test` (test); không cấp test role quyền DDL trên app DB. JDBC, role, build, test và backup: [RUN_GUIDE.md](docs/RUN_GUIDE.md). Các mốc kết quả Week 1–4 dùng H2 chỉ có giá trị lịch sử; PostgreSQL migration không đồng nghĩa Ubuntu hardware E2E đã PASS.
-
-## Cập nhật triển khai 04/11/2026 — F01–F14 và I03 (hiện hành)
-
-Đây là **addendum kỹ thuật cho HEAD `vinhkhang`**; các phần Week 1–4 phía dưới là kế hoạch/contract lịch sử, không được dùng để phủ nhận phần đã triển khai.
-
-| Phạm vi | Thiết kế hiện hành |
-|---|---|
-| F03 | Đổi mật khẩu trong Admin session, CSRF; reset có kiểm soát bằng profile bảo trì tắt HTTP; phiên cũ bị vô hiệu |
-| F04/F06 | Server/Agent dùng quy tắc HASH hợp lệ; toàn bộ whitelist phải được validate trước khi áp dụng; policy sai **không ACK** |
-| F05/F08 | Storage `live` phải dùng đường dẫn an toàn, không fallback sang `./data`; event timestamp tương lai bất thường bị từ chối, offline event cũ hợp lệ được lưu |
-| I03 | Agent kiểm tra daemon/rules/reconciliation USBGuard và gửi heartbeat; Server lưu `usbguard_reported_status`, `usbguard_checked_at`, tính stale, online và version ACK trước khi hiển thị `Healthy/Degraded/Unavailable/Unknown` |
-| F07 | Flyway quản lý schema V1/V2; Hibernate `validate`. Database `usbshield` cũ phải backup và baseline V1 **chỉ khi đủ điều kiện**; database mới tự migrate |
-| F09/F10/F11 | Khôi phục stale notifier socket với bảo vệ UID/inode/active listener; test Java `usbshield_it_*`/browser `usbshield_e2e_*` cô lập và cleanup |
-| F12/F14 | `/api/admin/endpoints/page` và `/api/admin/whitelist/page` phân trang/lọc tại DB, giảm N+1 HTTP; endpoint API legacy chỉ tương thích có giới hạn |
-| F01/F02/I02 | Ubuntu Agent `live` **bắt buộc HTTPS**, xác thực CA/hostname; Nginx/firewall ACL chỉ mở Agent API cho Client, Admin Web/API cho máy Admin. Không có rate limiting |
-
-**Vận hành:** [RUN_GUIDE.md](docs/RUN_GUIDE.md) là runbook chính; [Flyway baseline](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md), [HTTPS/ACL](docs/PHASE3_HTTPS_ACL_AND_PAGING.md) là hướng dẫn chuyên biệt. [Trạng thái và giới hạn nghiệm thu](docs/IMPLEMENTATION_STATUS_20261104.md). Windows synthetic tests không thay thế Ubuntu USB/GUI/TLS/ACL E2E; **Ubuntu E2E vẫn chưa được xác nhận**.
 
 ## 0. Mục đích của tài liệu này
 
@@ -122,7 +123,7 @@ Mỗi máy Ubuntu cần bảo vệ là một **endpoint/client**. Admin quản l
 - **Client Agent** cài bằng gói `.deb` được build và kiểm chứng, không mặc định GitHub URL chứa artifact sẵn. `server-url` trỏ về Admin Server trong LAN/VPN, không dùng `localhost` từ Client.
 - **Dịch vụ "không tắt được"** giới hạn với người dùng Ubuntu thông thường **không có sudo/root và không có quyền sửa USBGuard IPC/policy**. Root và quản trị viên hệ điều hành vẫn có quyền dừng/sửa dịch vụ.
 - **Chốt Allow/Revoke theo lần cắm kế tiếp:** Admin thay đổi whitelist của đúng endpoint → Agent kéo và áp dụng local USBGuard policy → xác nhận policy version đã áp dụng (ACK) → người dùng **rút USB ra rồi cắm lại** để USBGuard đánh giá theo policy mới. **Không triển khai** `allow-device`/`block-device` tức thời cho USB vẫn đang cắm trong phạm vi demo. ACK xác nhận áp dụng rule, **không chứng minh** trạng thái của thiết bị đang kết nối đã đổi.
-- **Ubuntu hardware E2E tiếp tục DEFERRED** theo quyết định owner; trạng thái này không đồng nghĩa release FULL PASS. HTTPS vẫn là điều kiện triển khai thực tế ngoài demo cô lập.
+- **Ubuntu Minimal Core P0+C1–C5 PASS theo báo cáo owner ngày 09/11**, không phải độc lập xác minh cho HEAD 20/11. **Ubuntu extended/hardening E2E vẫn DEFERRED**; chưa được phép đánh dấu full release PASS. HTTPS/TLS/ACL vẫn là điều kiện thực tế qua LAN.
 
 ---
 
@@ -243,7 +244,7 @@ last-known local policy vẫn enforce
 unknown USB không tự nhiên được ALLOW
 ```
 
-Agent nên retry gửi event khi server quay lại. Nếu chưa hoàn thiện durable outbox trong MVP, phải ghi rõ giới hạn và tuyệt đối không làm mất khả năng enforcement local.
+Agent hiện có disk outbox/retry/quarantine và cơ chế giới hạn dung lượng. Khi API/network lỗi, bảo toàn event trong giới hạn đã cấu hình và xử lý theo phân loại lỗi; không bảo đảm gửi thành công tuyệt đối nếu mất đĩa/đầy quota/hỏng dữ liệu. USBGuard local enforcement không được phụ thuộc thành công của HTTP hay desktop notification.
 
 ---
 
@@ -306,7 +307,7 @@ MVP có thể lấy thông tin qua `systemd-logind/loginctl`. Production-quality
 ---
 
 
-# 6. Scope chính thức — 17 hạng mục bắt buộc
+# 6. Scope chốt của đồ án — 17 hạng mục (yêu cầu; trạng thái triển khai xem phần đầu)
 
 ## 1. Nhận diện USB Flash Disk / Mass Storage
 
@@ -433,24 +434,18 @@ Database ứng dụng là `usbshield` (role `usbshield`); các integration/brows
 
 ## 13. Client `.deb` installer + uninstall
 
-```text
-usbshield-agent_1.0.0_amd64.deb
-```
+Gói phát hành nằm ở `packaging/dist/`, dùng **version theo build** (`usbshield-agent_<version>_amd64.deb`); đi kèm `usbshield-agent.release.json` và SHA-256. `1.0.0` là base package version, **không** phải tên artifact cố định.
 
-Dependencies:
+Dependencies khai báo trong `packaging/agent-deb/DEBIAN/control`:
 
 ```text
 openjdk-21-jre-headless
 usbguard
+libnotify-bin
+acl
 ```
 
-Installer phải cấu hình:
-
-- Agent;
-- systemd;
-- USBGuard base policy;
-- server URL/enrollment information;
-- permissions.
+Installer phải đóng gói Agent + systemd + USBGuard base policy + notifier helper; kiểm tra quyền USBGuard IPC và fail-closed policy. **Trước khi cài**, operator tạo `/etc/usbshield-agent/agent.env` (root-owned, `0600`) chứa URL HTTPS, enrollment token và cấu hình CA nếu cần; `postinst` có thể khởi động service ngay. Không nhúng secret thật vào `.deb`.
 
 ## 14. Developer Guide
 
@@ -527,7 +522,7 @@ Bonus nếu core xong sớm:
 
 - realtime Admin UI bằng SSE/WebSocket;
 - export CSV;
-- durable agent outbox/retry nâng cao;
+- message broker hoặc queue engine mới (Agent đã có disk spool/retry/quarantine với giới hạn rõ ràng);
 - desktop notification cho **Admin** (bonus, khác với client BLOCK notification bắt buộc từ Week 2);
 - charts.
 
@@ -630,70 +625,53 @@ Không có GUI hoặc không resolve được user → chỉ ghi log + gửi eve
 ---
 
 
-# 9. Kiến trúc tổng thể
+# 9. Kiến trúc tổng thể (runtime hiện tại)
 
 ```text
-                         ADMIN MACHINE / SERVER
-┌──────────────────────────────────────────────────────────┐
-│ React Admin Web                                          │
-│ Login | Endpoints | Endpoint Detail | Events | Whitelist │
-│                         │                                │
-│                         ▼                                │
-│              Spring Boot Admin Server                    │
-│ Auth | Endpoint | Event | Policy | Audit | Agent API     │
-│                         │                                │
-│                         ▼                                │
-│                    PostgreSQL DB                            │
-└─────────────────────────┬────────────────────────────────┘
-                          │ LAN / HTTP(S)
-              events ↑    │    ↓ policy/heartbeat response
-                          │
-             ┌────────────┴─────────────┐
-             │                          │
-             ▼                          ▼
-      UBUNTU CLIENT A             UBUNTU CLIENT B
-┌──────────────────────┐    ┌──────────────────────┐
-│ student01 active     │    │ employee07 active    │
-│                      │    │                      │
-│ USBShield Agent      │    │ USBShield Agent      │
-│ ├─ USB event listener│    │ ├─ user resolver     │
-│ ├─ ActiveUserResolver│    │ ├─ policy sync       │
-│ ├─ PolicySync        │    │ └─ event sender      │
-│ └─ EventSender       │    │          │           │
-│          │           │    │          ▼           │
-│          ▼           │    │      USBGuard        │
-│      USBGuard        │    │          │           │
-│          │           │    │          ▼           │
-│          ▼           │    │       USB device     │
-│       USB device     │    └──────────────────────┘
-└──────────────────────┘
+          ADMIN WORKSTATION (IP được allow)
+             HTTPS/443, browser + Admin session/CSRF
+                              │
+                              ▼
+                    NGINX TLS + IP/route ACL
+                        (Windows lab server)
+                   ┌──────────┴───────────────┐
+            Web, /api/auth/**             /api/agent/**
+             /api/admin/**                 (Agent-only)
+                   │                           ▲
+                   ▼                           │ HTTPS/443
+             127.0.0.1:18080          UBUNTU CLIENT A / B
+                SPRING BOOT JAR        ├─ systemd + Java Agent non-web
+             ├─ React static bundle   ├─ USBGuard IPC/rules (enforcement)
+             ├─ Admin & Agent API     ├─ logind local-user attribution
+             ├─ auth / CSRF / token   ├─ durable outbox/retry/quarantine
+             └─ Flyway + JPA          └─ desktop notifier best-effort
+                   │
+                   ▼
+          PostgreSQL `usbshield` (không mở 5432 cho Client)
 ```
+
+- Từ máy Ubuntu Client, chỉ `/api/agent/**` được phép đi qua network ACL; không có Admin Web/Session/API cho Client. Spring Security vẫn xác thực riêng Admin và Agent. Nginx/host firewall phải chặn truy cập trực tiếp backend và DB; IP ACL phải kiểm bằng **source IP thật**, tránh cấu hình NAT chung vô hiệu hóa phân tách.
+- Admin Web và REST API được phục vụ từ **một** executable JAR (React trong static resources); trong dev Vite chạy riêng ở `127.0.0.1:5173` và proxy `/api` về backend.
+- USBGuard trên client, không phải PostgreSQL/React, quyết định USB có được sử dụng. Khi server mất mạng, chính sách USBGuard local vẫn là nguồn enforcement.
+- Token và private key không có trong source/JAR/`.deb`. Agent `live` yêu cầu HTTPS và xác thực certificate CA/SAN; Admin browser truy cập HTTPS để Secure cookie hoạt động.
+- Sơ đồ là thiết kế source/deployment; muốn chứng minh behavior phải có logs Windows, Nginx/ACL và Ubuntu physical E2E tương ứng.
 
 ## Policy sync model
 
-Admin Server giữ **desired whitelist theo endpoint**.
-
-Mỗi Agent định kỳ heartbeat/pull policy version:
-
 ```text
-Agent local policyVersion = 4
-Server desired policyVersion = 5
-        ↓
-Agent fetch whitelist for itself
-        ↓
-reconcile USBGuard rules
-        ↓
-ack version 5
-        ↓
-User removes and reinserts the USB
-        ↓
-USBGuard applies the new decision on the next insertion
+Admin Allow/Revoke đúng endpoint
+  → server cập nhật whitelist/desired policyVersion
+  → Agent endpoint đó heartbeat/pull policy
+  → validate toàn bộ rule và reconcile USBGuard local
+  → Agent gửi ACK cho appliedPolicyVersion
+  → Admin phân biệt desired / applied / USBGuard health / online
+  → người dùng rút USB rồi cắm lại
+  → USBGuard đánh giá lần cắm mới: ALLOW hoặc BLOCK
 ```
 
-**ACK chỉ xác nhận rule/policy đã được áp dụng ở Agent**, không xác nhận thiết bị đang cắm đã chuyển ngay từ BLOCK sang ALLOW hoặc ngược lại. Mô hình pull giúp client không cần mở public inbound management port.
+**ACK** chỉ là báo cáo Agent đã áp dụng phiên bản policy, **không** xác nhận state của USB đang cắm chuyển ngay. USBGuard `HEALTHY` là health do Agent báo, có kiểm tra mới/cũ, chứ không phải chứng thực độc lập. Không có global Allow hay push-port inbound mở trên Ubuntu Client.
 
 ---
-
 
 # 10. Vì sao kiến trúc này hợp lý?
 
@@ -791,26 +769,11 @@ Composite USB có Storage + Keyboard  → không match none-of  → BLOCK
 
 # 12. Nhận dạng một USB cụ thể
 
-Không chỉ dùng `VID:PID`, vì nhiều thiết bị cùng model có thể giống nhau.
+Server lưu VID/PID, tên thiết bị, serial và USBGuard device HASH để hỗ trợ hiển thị/audit. **Đối với whitelist/policy hiện hành, chỉ chấp nhận fingerprint kiểu `HASH` hợp lệ**. Tên USB, VID/PID riêng lẻ hoặc serial+VID/PID **không đủ** để cấp quyền vì nguy cơ đồng nhất nhiều USB cùng model. Thiết bị không có serial vẫn có thể được quản lý nếu có HASH hợp lệ.
 
-Thông tin lưu:
+Luồng Allow thực tế: Admin chọn một thiết bị đã được Agent ghi nhận trên **endpoint đích** → server lấy `usbDeviceId` và HASH hợp lệ → ghi `endpoint_whitelist_entries` cho endpoint đó → Agent nhận policy `{policyVersion, whitelistedDevices}` và kiểm tra toàn bộ whitelist trước khi mutate rules. Whitelist sai/không hợp lệ không được áp dụng một phần rồi ACK. Mọi HASH nhận qua HTTP phải được xác thực và đối chiếu server ↔ Agent.
 
-```text
-vendor_id
-product_id
-serial_number
-device_hash
-name
-interfaces
-```
-
-Ưu tiên fingerprint:
-
-1. USBGuard hash;
-2. serial + VID + PID;
-3. các attributes khác nếu thiết bị thiếu serial.
-
-App không nên coi tên USB là unique identifier.
+Bản ghi audit có thể giữ `usb_device_id` tham chiếu lịch sử ngay cả khi metadata không còn; không tự đặt foreign key xóa lịch sử để “làm sạch” schema. Xem [API](docs/API.md), [addendum](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) và [finding F07](docs/qa/FINDING_F07_RELATIONAL_CONTRACT.md).
 
 ---
 
@@ -877,7 +840,7 @@ ActiveUserInfo
 
 ## 13.4. Agent ↔ Server
 
-Agent gửi:
+Ví dụ payload ở thời điểm thiết kế; **source of truth của wire contract hiện hành là `docs/API.md`**, gồm endpoint-bound credentials và DTO v0.2. Agent gửi:
 
 ```json
 {
@@ -934,20 +897,20 @@ M2 UsbGuardEventListener + active-user resolver
 |---|---|---|
 | Client OS | Ubuntu 24.04 LTS amd64 | Freeze target |
 | Admin Frontend | React + Vite + TypeScript | Central web console |
-| UI | MUI hoặc Ant Design | Dashboard nhanh |
+| UI | React components + CSS nội bộ | Giao diện hiện tại không dùng MUI/Ant Design |
 | Admin Server | Java 21 + Spring Boot | REST, Security, persistence |
-| Client Agent | Java 21 + Spring Boot hoặc Spring Boot non-web profile | Reuse Java/Spring stack |
+| Client Agent | Java 21 + Spring Boot non-web (`live` trên Ubuntu) | Agent service, không cung cấp Web UI |
 | Admin Auth | Spring Security + session/cookie | Web cùng origin, đơn giản hơn JWT |
 | Agent Auth | Endpoint token / enrollment token | Xác thực client |
 | ORM | Spring Data JPA | Central persistence |
-| DB MVP | PostgreSQL (Admin Server kết nối qua JDBC) | Theo yêu cầu giảng viên, lưu trữ độc lập khỏi JAR |
+| DB MVP | PostgreSQL + Flyway V1/V2; Hibernate `validate` | DB ứng dụng và các DB test tách biệt |
 | User attribution | systemd-logind / `loginctl` MVP | Active Linux session |
 | Ubuntu Client notification (Week 2+) | `libnotify-bin` / `notify-send` + user-session D-Bus | Native desktop feedback for BLOCKED Mass Storage |
 | USB enforcement | USBGuard | Linux USB authorization |
 | Client lifecycle | systemd | Auto-start/restart |
-| Client packaging | Debian `.deb` | Native Ubuntu install |
+| Client packaging | Debian `.deb` + SHA-256/release manifest | Native Ubuntu install, nguồn `.deb` theo từng build |
 | Java client runtime | `openjdk-21-jre-headless` dependency | APT xử lý |
-| API docs | springdoc/OpenAPI | Dev contract |
+| API docs | springdoc/OpenAPI | Chỉ bật local/dev; profile `prod` tắt Swagger/OpenAPI |
 | Testing | JUnit 5 + Mockito + Spring Boot Test | Unit/integration |
 | Hardware test | USB thật + VMware passthrough | Core requirement |
 | VCS | Git + GitHub | Collaboration |
@@ -980,483 +943,267 @@ Admin chỉ cần browser. Client Ubuntu **không chạy React UI**.
 ---
 
 
-# 16. Frontend screens — Admin Web
+# 16. Frontend screens — Admin Web (source `frontend/` hiện hành)
 
-## 16.1. Login
+| Màn hình/route | Hành vi thực tế |
+|---|---|
+| `/#/login` | Admin session/cookie; lấy CSRF; khi chưa đăng nhập không mở trang live quản trị |
+| `/#/dashboard` | Các tổng hợp server-side (thiết bị, quyết định, số sự kiện) và preview sự kiện gần đây; không suy số liệu toàn cục từ trang dữ liệu đầu tiên |
+| `/#/endpoints` | Tìm kiếm/filter ONLINE/OFFLINE, phân trang server; mở endpoint detail, xem policy desired/applied và health |
+| `/#/endpoints/{endpointId}` | Modal/chi tiết endpoint; Allow/Revoke có xác nhận, HASH từ USB đã quan sát; xem sự kiện gần đây và ACK |
+| `/#/devices` | Trạng thái USB gần nhất theo từng endpoint, tìm kiếm/filter/phân trang; **Blocked là filter ở đây**, không còn trang Blocked độc lập |
+| `/#/whitelist` | Danh sách whitelist tổng hợp có phân trang; thao tác thay đổi vẫn ở một endpoint cụ thể |
+| `/#/events` | Event Logs, filter endpoint/user/USB/event type/decision/date; server-side pagination, mặc định **10 bản ghi mỗi trang** |
+| `/#/settings` | Thông tin kết nối và đổi mật khẩu Admin; đổi xong các session cũ bị vô hiệu; chưa có API web để chỉnh USBGuard daemon |
 
-Admin username/password.
+- Frontend dùng React/Vite/TypeScript với components/CSS trong repo; **không có dependency MUI/Ant Design ở HEAD này**. Production là static bundle nhúng trong Admin Server JAR, API cùng origin, không chạy Vite trên Ubuntu Client.
+- Demo ở `/demo` có dữ liệu minh họa **chỉ đọc**. Không thay kết quả API thật bằng mock khi live đang rỗng/lỗi.
+- Online (heartbeat), desired/applied ACK và USBGuard health (`HEALTHY/DEGRADED/UNAVAILABLE/UNKNOWN`, checkedAt/stale) là **ba loại tín hiệu khác nhau**; không hiển thị thành công giả.
+- Các bộ lọc và số đếm phải đi qua API PostgreSQL phân trang; không tải toàn bộ event history vào browser để mô phỏng tìm kiếm toàn hệ thống.
 
-## 16.2. Dashboard
-
-Hiển thị:
-
-- endpoint online/offline;
-- blocked today;
-- recent USB events;
-- recent users;
-- policy sync failures nếu có.
-
-## 16.3. Endpoints
-
-Columns:
-
-```text
-Hostname
-Endpoint ID
-IP
-Status
-Last Seen
-Policy Version
-Last Applied Version
-```
-
-## 16.4. Endpoint Detail
-
-Ví dụ `LAB-PC-01`:
-
-- status/heartbeat;
-- active/recent users;
-- recent USB devices;
-- whitelist của **LAB-PC-01**;
-- Allow/Revoke trên máy này (hiệu lực được kiểm tra khi rút USB rồi cắm lại sau khi Agent đồng bộ).
-
-## 16.5. Event History
-
-Filter:
-
-- endpoint;
-- Linux username;
-- date range;
-- USB/device;
-- event type;
-- ALLOWED/BLOCKED.
-
-Table:
-
-```text
-Timestamp | Endpoint | Linux User | USB | Event | Decision
-```
-
-## 16.6. Whitelist UX
-
-Admin luôn thao tác trong context endpoint:
-
-```text
-Endpoints
-→ LAB-PC-01
-→ Whitelist
-→ Allow SanDisk A
-→ Đợi Agent xác nhận applied policy version
-→ Rút SanDisk A và cắm lại tại endpoint đó
-→ Kiểm tra ALLOWED (Revoke thì kiểm tra BLOCKED)
-```
-
-Không có nút “Allow on all endpoints” trong MVP; không có điều khiển thay đổi trạng thái tức thời của thiết bị đang kết nối.
+Xem [ADMIN_GUIDE](docs/ADMIN_GUIDE.md), [API addendum](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) và [M4/M5 UI guardrails](docs/admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md).
 
 ---
 
+# 17. Các module/package đúng theo source hiện tại
 
-# 17. Backend modules
+## 17.1. Admin Server
 
-## 17.1. Admin Server packages
-
-```text
-com.group.usbshield.server
-├── auth
-├── admin
-├── endpoint
-├── device
-├── policy
-├── event
-├── audit
-├── agentapi
-├── config
-└── common
-```
-
-### `auth`
-
-- Admin login/logout;
-- password hashing;
-- Spring Security session.
-
-### `endpoint`
-
-- register/enroll;
-- heartbeat;
-- online/offline;
-- policy version.
-
-### `policy`
-
-- per-endpoint whitelist;
-- desired policy;
-- policy version increment;
-- applied-version ack.
-
-### `event`
-
-- ingest Client USB events;
-- query/filter for Admin.
-
-### `agentapi`
-
-- endpoint authentication;
-- heartbeat;
-- event ingestion;
-- policy sync.
-
-## 17.2. Client Agent packages
+Base package: `admin-server/src/main/java/com/group/usbshield/server/` (Spring Boot).
 
 ```text
-com.group.usbshield.agent
-├── usbguard              # M2 từ Week 2; M3 bàn giao code hiện có
-├── session               # M2 từ Week 2; M3 bàn giao code hiện có
-├── notification          # M2 logic/client; M3 desktop autostart/IPC packaging
-├── event                 # M3 transport; M2 enrichment tại boundary đã chốt
-├── sync
-├── endpoint
-├── outbox
-├── system
-├── config
-└── common
+agentapi/   enrollment, credential-bound Agent auth, heartbeat, Agent event DTO
+             (Agent policy endpoint nằm dưới policy/)
+auth/       Admin session/login/logout, bootstrap, change/reset password,
+             credential-version session invalidation
+config/     Security, OpenAPI local-only, SPA routing
+device/     USB device catalog và persistence
+endpoint/   endpoint model, controller, registry, online/offline
+event/      events/history, dashboard summary, device states và paging
+policy/     endpoint whitelist, HASH identity, policy version/ACK, paging
+common/     API exception handling
+resources/  application.yml, application-prod.yml, Flyway migrations V1/V2
 ```
 
-### `usbguard`
+API Admin session và Agent credentials tách biệt. Admin mutation phải qua CSRF; Agent sử dụng `X-Endpoint-Id` + `X-Agent-Token` (trừ enrollment). Bootstrap token chỉ để enroll lần đầu; không auto-rotate trùng `machineId`.
+
+## 17.2. Client Agent
+
+Base package: `client-agent/src/main/java/com/group/usbshield/agent/` (Spring Boot **non-web**, profile `live` trên Ubuntu).
 
 ```text
-UsbGuardGateway
-UsbGuardCliGateway
-UsbGuardCommandRunner
-UsbGuardOutputParser
-UsbGuardEventListener
-UsbGuardPolicySynchronizer
+config/        AgentProperties, cấu hình runtime
+endpoint/      identity/enrollment management
+event/         event enrichment, event sender, payload
+notification/  block notification policy, local notifier IPC, desktop helper
+outbox/        disk spool/retry/quarantine/retention bounds
+session/       logind session resolution, active user selection
+sync/          HTTPS transport, heartbeat, policy sync, USBGuard health probe
+system/        local host/OS metadata
+usbguard/      gateway, list/watch, policy reconcile, rule validation
 ```
 
-### `session`
-
-```text
-ActiveUserResolver
-LoginctlActiveUserResolver
-ActiveUserInfo
-```
-
-### `notification` (bắt đầu Week 2)
-
-```text
-UsbBlockNotification
-BlockNotificationPolicy
-ClientNotificationPublisher
-DesktopNotificationClient
-NotifySendDesktopCommand
-```
-
-Các tên class này là cấu trúc gợi ý, không được tạo class trùng nếu đã có implementation tương đương. Code M2 phân loại/publish; M3 cài đặt session helper, tự khởi động và cấp quyền local IPC an toàn.
-
-### `sync`
-
-- heartbeat;
-- policy version check;
-- fetch desired whitelist;
-- reconcile USBGuard;
-- ack applied version.
-
-### `outbox`
-
-Nếu event POST fail, retry. MVP có thể dùng lightweight disk spool thay vì thêm message broker.
+- M2/M3 ownership theo Week 2 là **phân công lịch sử**, không phải hướng dẫn tạo thêm class từ sơ đồ cũ. Tái sử dụng implementation đã tồn tại.
+- **USBGuard daemon** là enforcement plane; Agent reconcile bằng USBGuard CLI/IPC. `notification/` chạy best-effort tới đúng graphical session, không biến GUI user thành principal có quyền sửa USBGuard.
+- `live` không fallback HTTP, không bỏ xác thực CA/hostname, không sử dụng storage tương đối. Ranh giới lỗi Agent/outbox không được làm USBGuard fail-open.
 
 ---
 
+# 18. REST API thực tế — contract v0.2 + Phase 1–3 addendum
 
-# 18. REST API gợi ý
+**Không sử dụng route nháp `/api/endpoints` hoặc `/api/events`.** Các route Admin hiện hành nằm dưới `/api/admin/**`; phần chi tiết wire (DTO, mã lỗi, giới hạn fields) được bảo quản ở [API v0.2](docs/API.md) và [Phase 1–3 addendum](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md). Cập nhật blueprint **không bump** wire contract lên v0.3.
 
-## 18.1. Admin authentication
+## 18.1. Admin session, CSRF, password
 
 ```http
+GET  /api/auth/csrf
 POST /api/auth/login
-POST /api/auth/logout
 GET  /api/auth/me
+POST /api/auth/logout
+POST /api/admin/account/password
 ```
 
-## 18.2. Admin endpoints
+Admin login dùng cookie `JSESSIONID` + CSRF token được làm mới phù hợp với phiên. Các Admin mutation yêu cầu phiên hợp lệ và CSRF. Prod có Secure/HttpOnly/SameSite Strict cookie, tắt Swagger/OpenAPI; reset khẩn cấp không qua HTTP public route.
+
+## 18.2. Endpoint, whitelist, event và dashboard
 
 ```http
-GET /api/endpoints
-GET /api/endpoints/{endpointId}
-GET /api/endpoints/{endpointId}/events
-GET /api/endpoints/{endpointId}/whitelist
-POST /api/endpoints/{endpointId}/whitelist
-DELETE /api/endpoints/{endpointId}/whitelist/{whitelistId}
+GET    /api/admin/endpoints/page?page=0&size=20&q=&status=online
+GET    /api/admin/endpoints                   # legacy, tối đa 100
+GET    /api/admin/endpoints/{endpointId}
+GET    /api/admin/endpoints/{endpointId}/whitelist
+POST   /api/admin/endpoints/{endpointId}/whitelist
+DELETE /api/admin/endpoints/{endpointId}/whitelist/{entryId}
+GET    /api/admin/whitelist/page?page=0&size=20
+GET    /api/admin/events?page=0&size=20
+GET    /api/admin/events/{id}
+GET    /api/admin/dashboard/summary
+GET    /api/admin/device-states?page=0&size=20
 ```
 
-Whitelist request phải chứa fingerprint/device cụ thể; server luôn gắn `endpointId` từ URL/context.
+Các API list lọc và đếm **trước phân trang tại backend**. UI Event Logs đặt page size 10, khác default chung của API Events (20). Allow `POST` nhận `usbDeviceId` đã quan sát; không có global Allow, endpoint delete hay tự cấp quyền bằng VID/PID/name. Duplicate Allow và Revoke đã có idempotency theo contract. Server tăng desired policy của đúng endpoint khi cần; không tự coi server update là applied trên USBGuard.
 
-## 18.3. Event query
+## 18.3. Agent HTTP API
 
 ```http
-GET /api/events?endpointId=&username=&decision=&from=&to=
+POST /api/agent/enroll         # body enrollmentToken; chưa có Agent token
+POST /api/agent/heartbeat      # headers X-Endpoint-Id + X-Agent-Token
+POST /api/agent/events         # cùng headers và endpoint identity
+GET  /api/agent/policy         # cùng headers; whitelistedDevices
+POST /api/agent/policy/ack     # version đã áp dụng; cùng headers
 ```
 
-## 18.4. Agent API
+- Enrollment trả về `{endpointId, agentToken, currentPolicyVersion}`; Agent token lưu hash ở Server và không phát lại công khai. Trùng machineId bị từ chối, không âm thầm thay token.
+- Heartbeat là telemetry/online và có thể mang USBGuard health; **không** cập nhật applied version. Chỉ ACK hợp lệ mới cập nhật applied: future/regressive ACK bị từ chối, duplicate hợp lệ idempotent.
+- Policy trả `whitelistedDevices` (không phải tên `allowedDevices` từ v0.1), HASH-only; payload rule sai bị validate/reject, không ACK giả.
+- Agent `live` yêu cầu HTTPS và certificate đúng; ngoại lệ CSRF cho Agent APIs là do chúng dùng Agent token, **không** cho Agent truy cập Admin API.
 
-```http
-POST /api/agent/enroll
-POST /api/agent/heartbeat
-POST /api/agent/events
-GET  /api/agent/policy
-POST /api/agent/policy/ack
+---
+
+# 19. PostgreSQL schema thực tế (Flyway V1/V2)
+
+Database ứng dụng: **`usbshield`**, role **`usbshield`**. Bảng nghiệp vụ thực tế (không phải sơ đồ gợi ý Week 1) được tạo trong `admin-server/src/main/resources/db/migration/`:
+
+| Bảng | Cột/ý nghĩa tiêu biểu |
+|---|---|
+| `admin_users` | `id`, `username` UNIQUE, `password_hash`, `created_at`; V2 thêm `credential_version` |
+| `endpoints` | `endpoint_id` UNIQUE, `hostname`, `machine_id` UNIQUE, `agent_token_hash`, `ip_address`, `operating_system`, `active_username`, `status`, `last_seen`, `policy_version`, `applied_policy_version`; V2 thêm `usbguard_reported_status`, `usbguard_checked_at` |
+| `usb_devices` | VID/PID, serial, HASH (`device_hash` UNIQUE), name, interfaces, `created_at` |
+| `usb_events` | `endpoint_id`, `event_id`, `payload_digest`, `usb_device_id`, hostname, Linux username/UID/session, type/decision, `occurred_at`, `received_at`; `(endpoint_id,event_id)` UNIQUE |
+| `endpoint_whitelist_entries` | `endpoint_id`, `usb_device_id`, `fingerprint_type`, `fingerprint_value`, `enabled`, `created_at`; UNIQUE `(endpoint_id, fingerprint_value)` |
+
+**Không có bảng `admins`, `endpoint_whitelist` hay `audit_logs` độc lập trong Flyway V1/V2.** Audit sự kiện USB tập trung qua `usb_events`; không suy diễn mọi hành động Admin đã có bảng audit riêng. Bảng whitelist dùng **số nhiều** `endpoint_whitelist_entries`, khác tên nháp ở thiết kế Week 1.
+
+- Flyway chạy V1/V2 trên **database mới/trống**; với PostgreSQL **đã tồn tại schema chưa được version**, phải backup và chạy preflight/baseline V1 theo quy trình reviewed, không đặt `baseline-on-migrate=true` tràn lan.
+- Hibernate `ddl-auto=validate`, **không** `create`, `create-drop`, `update` trên DB ứng dụng. Database và credentials đặt ngoài JAR; restart JAR không xóa dữ liệu khi PostgreSQL vẫn lưu bền vững.
+- **Maven integration:** database `usbshield_test`, các schema `usbshield_it_*`; **browser/HTTP-live:** database `usbshield_browser_test`, schema `usbshield_e2e_*`, role `usbshield_test` và cleanup có kiểm soát. Không cấp test role quyền DDL trên DB `usbshield`.
+- Không tự thêm FK cho `usb_events.usb_device_id` làm mất event orphan lịch sử; giữ quyết định audit retention trong review F07. Xem [schema baseline](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md) và [F07 contract](docs/qa/FINDING_F07_RELATIONAL_CONTRACT.md).
+
+---
+
+# 20. Packaging và deployment hiện tại
+
+## 20.1. Client Ubuntu 24.04 LTS amd64 — `.deb`
+
+- Builder: `packaging/scripts/build-deb.ps1` (Windows) hoặc `packaging/scripts/build-deb.sh` (Ubuntu); phát hành dưới `packaging/dist/` với version theo build, `usbshield-agent.release.json`/SHA-256. Không dùng tên artifact `usbshield-agent_1.0.0_amd64.deb` như filename luôn tồn tại.
+- Dependencies theo control file: **`openjdk-21-jre-headless`, `usbguard`, `libnotify-bin`, `acl`**. Java runtime không được bundle vào `.deb`; APT xử lý dependency.
+- Trước `apt install`, operator cấp `/etc/usbshield-agent/agent.env` **root:root, mode 0600** với `USBSHIELD_SERVER_URL=https://<DNS đúng SAN>`, `USBSHIELD_ENROLLMENT_TOKEN` và `USBSHIELD_TLS_CA_CERTIFICATE` nếu dùng private CA. Không commit secret, không copy `endpoint.json` giữa các client.
+- Gói chứa Agent JAR, `application.yml`, systemd unit, USBGuard base rule, notifier desktop helper/autostart. Agent data ở `/var/lib/usbshield-agent/`; executable JAR ở `/opt/usbshield-agent/usbshield-agent.jar`.
+- `usbshield-agent.service` chạy **`--spring.profiles.active=live`**, thêm config ở `/etc/usbshield-agent/application.yml`, User/Group `usbshield`, tự restart khi lỗi; USBGuard phải có `ImplicitPolicyTarget=block` và IPC ACL thích hợp. Installer có check, nhưng **format `.deb` PASS trên Windows không chứng minh postinst/upgrade/remove trên Ubuntu PASS**.
+
+Ví dụ install khi artifact đã có, test trong VM được chỉ định:
+
+```bash
+# Đảm bảo thư mục chỉ chứa đúng một gói `.deb` đã kiểm SHA-256.
+sudo apt install ./usbshield-agent_*_amd64.deb
+systemctl status usbguard.service usbshield-agent.service
+journalctl -u usbshield-agent.service -n 100 --no-pager
 ```
 
-Agent requests dùng endpoint credential/token riêng.
+## 20.2. Admin Server JAR — build và Windows verification
 
-## 18.5. Policy sync semantics
+Tại root repository, PowerShell **7.6+ trên Windows** cho canonical verifier:
 
-Heartbeat response có thể trả:
+```powershell
+# Admin/frontend + JAR + Browser-live/HTTP-live; bỏ Agent và .deb
+.\packaging\tests\verify-windows.ps1 -AdminOnly
 
-```json
-{
-  "serverPolicyVersion": 5,
-  "lastAppliedPolicyVersion": 4
+# Toàn bộ gate Windows: Admin, Agent, frontend, browser/HTTP-live và .deb
+.\packaging\tests\verify-windows.ps1
+```
+
+Tạo JAR phát hành từ clean Git tree (PowerShell 7 trên Windows, JDK 21, Maven, Node/npm, Git, PostgreSQL test DB khi chạy tests):
+
+```powershell
+.\admin-server\build-release.ps1
+# hoặc: .\admin-server\build-release.ps1 -OutputDirectory 'C:\USBShieldReleases'
+```
+
+Script build React mới, Maven `-Pwith-frontend clean package`, kiểm tra JAR static assets/Flyway, sinh `admin-server/target/usbshield-admin-server.jar` và copy bản release `usbshield-admin-server_<commit12>_<UTC>.jar` cùng JSON manifest/SHA-256 (mặc định `admin-server/target/release/`). `-AllowDirtyTree` cho build dev chưa được release-qualified; `-SkipTests` giảm mức độ bằng chứng. **Không coi Maven BUILD SUCCESS là verifier PASS.** `admin-server/verify-week1/2/3.ps1` không còn trong HEAD.
+
+## 20.3. Biến môi trường test khác runtime `prod`
+
+| File/cách nạp | Dùng cho | Lưu ý |
+|---|---|---|
+| `.env` (untracked, từ `.env.example`) | PostgreSQL **test** (`USBSHIELD_TEST_DB_*`) khi `build-release.ps1` chạy tests, `verify-windows.ps1` | Không thay thế runtime `USBSHIELD_DB_URL` và không ghi vào JAR |
+| `.env.e2e.local` (untracked của operator) | Lab runtime `prod`: `USBSHIELD_DB_URL`, `USBSHIELD_DB_PASSWORD`, Admin bootstrap/enrollment secret, bind/port | Lab `prod` profile **không đồng nghĩa production acceptance** |
+| `scripts/with-env.ps1` | Nạp một `.env`-style file vào tiến trình thực thi lệnh | Không đóng gói vào JAR; không giúp các lần chạy Java khác tự biết biến |
+
+```powershell
+# Khi runtime credentials đang nằm trong .env.e2e.local:
+.\scripts\with-env.ps1 -EnvFile .env.e2e.local -Command {
+    java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
 }
-```
 
-Agent thấy version khác thì gọi `/api/agent/policy`, apply rồi ack.
-
----
-
-
-# 19. Database model gợi ý
-
-## `admins`
-
-```text
-id
-username
-password_hash
-created_at
-```
-
-## `endpoints`
-
-```text
-id
-hostname
-machine_id
-ip_address
-agent_version
-agent_token_hash
-status
-last_seen
-policy_version
-last_applied_policy_version
-created_at
-```
-
-## `usb_devices`
-
-```text
-id
-vendor_id
-product_id
-serial_number
-device_hash
-device_name
-interfaces
-```
-
-## `endpoint_whitelist`
-
-```text
-id
-endpoint_id
-usb_device_id
-fingerprint_type
-fingerprint_value
-enabled
-created_by_admin_id
-created_at
-```
-
-Unique logic tối thiểu:
-
-```text
-(endpoint_id, fingerprint_value)
-```
-
-Đây là điểm bảo đảm whitelist **per endpoint**.
-
-## `usb_events`
-
-```text
-id
-endpoint_id
-usb_device_id
-linux_username
-linux_uid
-session_id
-session_type
-seat
-event_type
-decision
-occurred_at
-received_at
-details
-```
-
-## `audit_logs`
-
-```text
-id
-admin_id
-action
-endpoint_id
-target_type
-target_id
-details
-occurred_at
-```
-
-### Important
-
-Central DB không phải nơi duy nhất quyết định enforcement. Agent phải materialize desired whitelist thành local USBGuard policy; policy local tiếp tục chạy khi server mất kết nối.
-
----
-
-
-# 20. Packaging và deployment
-
-## 20.1. Client Ubuntu
-
-Admin/IT cài:
-
-```bash
-sudo apt install ./usbshield-agent_1.0.0_amd64.deb
-```
-
-Package dependency:
-
-```text
-openjdk-21-jre-headless
-usbguard
-```
-
-Client sau cài có:
-
-```text
-/opt/usbshield-agent/usbshield-agent.jar
-/etc/usbshield-agent/application.yml
-/var/lib/usbshield-agent/
-/usr/lib/systemd/system/usbshield-agent.service
-/etc/usbguard/rules.conf
-```
-
-Config tối thiểu:
-
-```yaml
-usbshield:
-  server-url: https://<admin-server-lan-dns>
-  enrollment-token: ...
-```
-
-Sau enrollment lưu endpoint credential ở root-owned config/data.
-
-## 20.2. Admin Server (xem docs/RUN_GUIDE.md)
-
-MVP có thể chạy trên laptop Admin/development machine:
-
-```bash
+# Chỉ dùng được khi USBSHIELD_DB_URL/password và secrets đã có trong process environment:
 java -jar admin-server/target/usbshield-admin-server.jar --spring.profiles.active=prod
 ```
 
-JAR chứa React production build và API; **PostgreSQL chạy riêng**, JAR không chứa database. Client Agent vẫn là `.deb`.
+`--spring.profiles.active=prod` **không tự load `.env.e2e.local`**. Thiếu `USBSHIELD_DB_URL` gây lỗi Hikari/Driver nhận literal `${USBSHIELD_DB_URL}`; đó là lỗi cấu hình môi trường, không phải bằng chứng JAR không được build.
 
-Admin mở browser:
+## 20.4. Deploy qua LAN và phân phối JAR
 
-```text
-https://<admin-server-lan-dns>
-```
+- Spring Boot `prod` bind `127.0.0.1` theo mặc định, port có thể đặt `PORT=18080` cho Nginx lab. Admin browser truy cập **HTTPS** qua Nginx/IP ACL; Client Agent chỉ gọi `/api/agent/**`; DB 5432 không mở ra Client. Phân biệt Secure cookie, Agent TLS verification và HTTPS proxy.
+- JAR có thể đặt ngoài `target/` và đổi tên theo release; chạy bằng **đúng đường dẫn thực tế**. Không cần Maven/npm/repository source trên máy người nhận JAR; cần Java runtime, PostgreSQL, secrets và nếu truy cập LAN, TLS/Nginx/firewall. Nên phát hành trên GitHub Releases kèm SHA-256 + manifest thay vì commit binary JAR vào source.
+- Không gửi `.env.e2e.local` thật, enrollment token, Agent token hoặc CA private key cho người khác; người nhận tự cấu hình môi trường được phân quyền.
+- Ubuntu Minimal Core P0+C1–C5 đã có **owner-reported PASS** trong lab 09/11. `.deb` native upgrade/remove, reboot/offline, negative TLS và notifier IPC vẫn deferred; không suy từ source hoặc Windows verifier.
 
-Trong demo một laptop có thể chạy Admin Server trên host, Ubuntu VM làm Client. Khi demo nhiều endpoint, có thể dùng thêm VM/laptop trong cùng LAN.
-
-## 20.3. Client systemd concept
-
-```ini
-[Unit]
-Description=USBShield Client Agent
-After=network-online.target usbguard.service
-Wants=network-online.target
-Requires=usbguard.service
-
-[Service]
-Type=simple
-User=usbshield
-ExecStart=/usr/bin/java -jar /opt/usbshield-agent/usbshield-agent.jar
-Restart=on-failure
-RestartSec=2
-
-[Install]
-WantedBy=multi-user.target
-```
-
-## 20.4. Install flow
-
-```text
-1. APT resolve Java + USBGuard
-2. create system user usbshield
-3. copy Agent JAR/config
-4. configure USBGuard base policy
-5. configure permissions/IPC
-6. configure Admin Server URL + enrollment
-7. install systemd unit
-8. enable/start USBGuard
-9. enable/start Agent
-10. enroll endpoint
-11. verify heartbeat on Admin Web
-```
-
-## 20.5. Java runtime — phương án A giữ nguyên
-
-Client không bundle JRE trong version đầu; `.deb` khai báo OpenJDK 21 runtime dependency.
+Runbook canonical: [RUN_GUIDE](docs/RUN_GUIDE.md), [ADMIN_SERVER_RELEASE](docs/ADMIN_SERVER_RELEASE.md), [Ubuntu Minimal Core](docs/USBShield_Ubuntu24_Minimal_Core_E2E_vinhkhang_f446c04_20261107.md), [HTTPS lab](docs/USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md).
 
 ---
 
-
-# 21. Repo structure đề xuất
+# 21. Repo structure thực tế (`main`, 20/11/2026)
 
 ```text
-usbshield/
+USBProtection/
+├── README.md
+├── USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md
+├── .env.example                  # template test; .env thật không commit
+├── scripts/
+│   └── with-env.ps1
 ├── admin-server/
 │   ├── pom.xml
-│   └── src/
+│   ├── build-release.ps1
+│   ├── ops/POSTGRES_FLYWAY_BASELINE.md
+│   └── src/main/{java,resources}/  # Flyway V1/V2, prod profile, controllers
 ├── client-agent/
 │   ├── pom.xml
-│   └── src/
-├── admin-web/
+│   └── src/main/{java,resources}/  # live non-web, USBGuard, outbox, notifier
+├── frontend/
 │   ├── package.json
-│   └── src/
+│   ├── src/{pages,components,services,hooks,...}/
+│   └── tests/
 ├── packaging/
-│   ├── agent-deb/
-│   ├── systemd/
-│   ├── usbguard/
-│   └── scripts/
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── DEVELOPER_GUIDE.md
-│   ├── ADMIN_GUIDE.md
-│   ├── RUN_GUIDE.md
-│   ├── USBGUARD_CORE.md
-│   ├── AGENT_SERVER_PROTOCOL.md
-│   ├── TEST_PLAN.md
-│   ├── DEMO_SCRIPT.md
-│   └── API.md
-├── .github/workflows/
-└── README.md
+│   ├── agent-deb/DEBIAN/{control,postinst,prerm}
+│   ├── desktop/
+│   ├── firewall/
+│   ├── nginx/
+│   ├── scripts/build-deb.{ps1,sh}
+│   ├── systemd/usbshield-agent.service
+│   ├── tests/{verify-windows.ps1,check-usbshield-core.sh,...}
+│   └── usbguard/rules-v0.1.conf
+└── docs/
+    ├── DOCUMENT_INDEX.md
+    ├── RUN_GUIDE.md
+    ├── ADMIN_SERVER_RELEASE.md
+    ├── DEVELOPER_GUIDE.md
+    ├── ADMIN_GUIDE.md
+    ├── ARCHITECTURE.md
+    ├── API.md
+    ├── API_PHASE1_TO_PHASE3_ADDENDUM.md
+    ├── AGENT_SERVER_PROTOCOL.md
+    ├── TEST_CATALOG.md
+    ├── TEST_PLAN.md              # lịch sử
+    ├── DEMO_RUNBOOK_20261120.md  # hiện hành
+    ├── DEMO_SCRIPT.md           # Week 4 rehearsal lịch sử
+    └── {qa,rc,client-agent,admin-web,usbguard,member1,...}/
 ```
+
+`target/`, `frontend/dist/`, `frontend/node_modules/` và `packaging/dist/` là đầu ra build/test hoặc phụ thuộc máy chạy; không phải nguồn versioned cần commit. **Không có thư mục source `admin-web/`** ở HEAD: tên module hiện hành là `frontend/` (thư mục `docs/admin-web/` chỉ chứa tài liệu frontend). Đường dẫn `USBGUARD_CORE.md` từng ghi trong blueprint là placeholder kế hoạch; thông tin M2 hiện có trong `docs/usbguard/`.
 
 ---
 
-
-# 22. Phân chia công việc 5 người
+# 22. Phân chia công việc 5 người (ownership/kế hoạch lịch sử)
 
 ## Member 1 — Admin Server Lead / Architecture / Integration Owner
 
@@ -1659,13 +1406,13 @@ release validation report
 ---
 
 
-# 23. Documentation ownership
+# 23. Documentation ownership (bảng phân công lịch sử)
 
 | Tài liệu | Owner | Contributor |
 |---|---|---|
 | README | M1 | tất cả |
 | ARCHITECTURE | M1 | M2, M3 |
-| USBGUARD_CORE | M2 | M3 |
+| USBGUARD_CORE (placeholder lịch sử; hiện tham khảo `docs/usbguard/`) | M2 | M3 |
 | Active-user attribution notes | M2 | M3 |
 | AGENT_SERVER_PROTOCOL | M1 | M3, M2 |
 | DEVELOPER_GUIDE | M1 | tất cả |
@@ -1680,7 +1427,7 @@ Ai code module nào phải cung cấp nội dung kỹ thuật của module đó.
 ---
 
 
-# 24. Kế hoạch 4 tuần
+# 24. Kế hoạch 4 tuần (snapshot lúc lập kế hoạch; không phải trạng thái nghiệm thu)
 
 ## WEEK 1 — Prove Core + Freeze Client/Server Contract
 
@@ -1968,9 +1715,9 @@ Integration phải bắt đầu từ Week 1–2, không đợi tuần cuối.
 ---
 
 
-# 29. Git workflow
+# 29. Git workflow (proposal lịch sử, không mặc định là Git branching policy hiện hành)
 
-Đề xuất:
+Đề xuất lúc lập kế hoạch:
 
 ```text
 main
@@ -2026,7 +1773,7 @@ Không giữ code một tuần trên máy cá nhân mới push.
 | T21 | Admin chưa login gọi Admin API | 401/403 |
 | T22 | Fresh `.deb` install | success |
 | T23 | Uninstall | service/app remove đúng |
-| T24 | USBGuard unavailable | Agent/Admin báo DEGRADED, không fake success |
+| T24 | USBGuard unavailable | Agent/Admin báo UNAVAILABLE/DEGRADED/UNKNOWN theo dữ liệu thực và staleness, không fake HEALTHY |
 | T25 | User GUI `student01` cắm Mass Storage lạ | USBGuard BLOCK và **một native desktop notification** hiện đúng session `student01` |
 | T26 | USB Mass Storage đã Allow, HID mouse hoặc Remove | Không hiển thị cảnh báo BLOCK |
 | T27 | Mất GUI/no active local session/notifier unavailable | Không báo nhầm session; USBGuard tiếp tục enforce; event vẫn được xử lý |
@@ -2410,7 +2157,9 @@ Normal user không được stop/sửa; root/sudo vẫn kiểm soát hệ thốn
 ---
 
 
-# 42. Final project checklist
+# 42. Final project checklist (DoD mục tiêu, không tự đánh dấu PASS)
+
+> Các checkbox chưa tick là **điều kiện nghiệm thu cần evidence**, không chứng minh chức năng chưa có code. Owner 09/11 đã báo Minimal Core P0+C1–C5 PASS trên baseline lúc đó; các bài native extended còn deferred và HEAD 20/11 chưa có log rerun. Xem bảng trạng thái ở đầu blueprint.
 
 ## Client core
 
@@ -2551,4 +2300,4 @@ có UI + API + log
 có package + docs + test
 ```
 
-Nếu toàn bộ flow trên chạy ổn định từ file `.deb` trên một máy Ubuntu sạch, project đã đáp ứng đúng trọng tâm đề tài và tạo ra một sản phẩm có thể trình bày, kiểm thử và bàn giao được.
+Nếu toàn bộ flow trên chạy ổn định từ `.deb` trên Ubuntu sạch **và được ghi bằng chứng cho đúng artifact/source**, project đáp ứng trọng tâm kỹ thuật đề tài. Tại baseline 09/11 chỉ có **Minimal Core P0+C1–C5 PASS theo báo cáo owner**; không suy ra full Week 4/native extended acceptance hoặc chất lượng production trên HEAD 20/11.
