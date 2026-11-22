@@ -44,7 +44,7 @@ test('live adapter attempts HTTP and reports unavailable network without mock da
   try {
     assert.equal(capabilities.authentication, true)
     assert.equal(capabilities.block, false)
-    assert.equal(capabilities.settings, false)
+    assert.equal('settings' in capabilities, false)
     await assert.rejects(protectionApi.getSnapshot(new AbortController().signal), ApiError)
     await assert.rejects(protectionApi.login('test-only', 'not-a-real-password'), ApiError)
     assert.equal(requests, 2)

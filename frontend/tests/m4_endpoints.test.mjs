@@ -13,7 +13,6 @@ let EndpointWhitelistPanel
 let getDemoSnapshot
 let Dashboard
 let Devices
-let Settings
 let Login
 let AuthContext
 
@@ -24,7 +23,6 @@ before(async () => {
   ;({ getDemoSnapshot } = await vite.ssrLoadModule('/src/services/demo.ts'))
   ;({ Dashboard } = await vite.ssrLoadModule('/src/pages/Dashboard.tsx'))
   ;({ Devices } = await vite.ssrLoadModule('/src/pages/Devices.tsx'))
-  ;({ Settings } = await vite.ssrLoadModule('/src/pages/Settings.tsx'))
   ;({ Login } = await vite.ssrLoadModule('/src/pages/Login.tsx'))
   ;({ AuthContext } = await vite.ssrLoadModule('/src/hooks/useAuth.ts'))
 })
@@ -197,34 +195,6 @@ test('management pages clear protected rows during loading, empty, unavailable a
       assert.ok(!html.includes('Hệ thống đang được bảo vệ'))
     }
   }
-})
-
-test('Settings keeps service configuration unavailable and demo read-only', () => {
-  const html = renderToStaticMarkup(createElement(Settings, { demo: true }))
-  assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
-  assert.ok(html.includes('dữ liệu stale/offline hiển thị Unknown'))
-  assert.ok(html.includes('Demo chỉ đọc'))
-  assert.ok(!html.includes('admin-old-password'))
-  assert.ok(!html.includes('admin-new-password'))
-  assert.ok(!html.includes('<input'))
-  assert.ok(!html.includes('<button'))
-})
-
-test('Settings offers password change only to authenticated Admin', () => {
-  const html = renderToStaticMarkup(createElement(
-    AuthContext.Provider,
-    { value: { user: { username: 'test-admin' }, loading: false, error: '', sessionExpired: false } },
-    createElement(Settings),
-  ))
-  assert.ok(html.includes('test-admin'))
-  assert.ok(html.includes('Đổi mật khẩu Admin'))
-  assert.ok(html.includes('id="admin-old-password"'))
-  assert.ok(html.includes('id="admin-new-password"'))
-  assert.ok(html.includes('Đổi mật khẩu và đăng xuất'))
-  assert.ok(html.includes('API cấu hình USBGuard chưa có trong phạm vi này'))
-  assert.ok(!html.includes('Allow globally'))
-  assert.ok(html.includes('Admin API'))
-  assert.ok(!/demo|mock/i.test(html))
 })
 
 test('login uses real Admin authentication without demo controls', () => {

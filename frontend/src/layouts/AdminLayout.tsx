@@ -11,9 +11,7 @@ const navigation: { route: string; label: string; icon: IconName; group: string 
   { route: '/devices', label: 'Devices', icon: 'usb', group: 'QUẢN LÝ USB' },
   { route: '/whitelist', label: 'Whitelist', icon: 'check', group: 'QUẢN LÝ USB' },
   { route: '/events', label: 'Event Logs', icon: 'history', group: 'HỆ THỐNG' },
-  { route: '/settings', label: 'Settings', icon: 'settings', group: 'HỆ THỐNG' },
 ]
-const visibleNavigation = navigation.filter(item => item.route !== '/settings')
 
 export function AdminLayout({ route, children, demo = false }: { route: string; children: ReactNode; demo?: boolean }) {
   const [open, setOpen] = useState(false)
@@ -47,8 +45,8 @@ export function AdminLayout({ route, children, demo = false }: { route: string; 
     {open && <button className="sidebar-overlay" aria-label="Đóng menu" onClick={() => setOpen(false)} />}
     <aside className={`sidebar ${open ? 'is-open' : ''}`} id="sidebar">
       <a href="#/dashboard" className="brand" onClick={() => setOpen(false)}><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span></span></a>
-      <nav aria-label="Điều hướng chính">{visibleNavigation.map((item, index) => <div key={item.route}>
-        {visibleNavigation[index - 1]?.group !== item.group && <p className="nav-group">{item.group}</p>}
+      <nav aria-label="Điều hướng chính">{navigation.map((item, index) => <div key={item.route}>
+        {navigation[index - 1]?.group !== item.group && <p className="nav-group">{item.group}</p>}
         <a href={`#${item.route}`} className={`nav-link ${active?.route === item.route ? 'active' : ''}`} aria-current={active?.route === item.route ? 'page' : undefined} onClick={() => setOpen(false)}>
           <Icon name={item.icon} /><span>{item.label}</span>
         </a>

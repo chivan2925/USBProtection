@@ -309,7 +309,7 @@ try {
   fixture.state.empty = false
 
   await cdp('Emulation.setDeviceMetricsOverride', { width: 375, height: 812, deviceScaleFactor: 1, mobile: true })
-  for (const [route, heading] of [['/dashboard', 'Tổng quan bảo vệ'], ['/devices', 'Quản lý thiết bị USB'], ['/whitelist', 'Whitelist & Policy'], ['/blocked', 'Không tìm thấy trang'], ['/events', 'Lịch sử sự kiện'], ['/endpoints', 'Quản lý endpoints'], ['/endpoints/A', 'fixture-ubuntu-a'], ['/settings', 'Cài đặt hệ thống'], ['/missing', 'Không tìm thấy trang'], ['/endpoints/%ZZ', 'Không tìm thấy trang']]) {
+  for (const [route, heading] of [['/dashboard', 'Tổng quan bảo vệ'], ['/devices', 'Quản lý thiết bị USB'], ['/whitelist', 'Whitelist & Policy'], ['/blocked', 'Không tìm thấy trang'], ['/events', 'Lịch sử sự kiện'], ['/endpoints', 'Quản lý endpoints'], ['/endpoints/A', 'fixture-ubuntu-a'], ['/settings', 'Không tìm thấy trang'], ['/missing', 'Không tìm thấy trang'], ['/endpoints/%ZZ', 'Không tìm thấy trang']]) {
     await navigate(route, heading)
     await until(() => evaluate(`!document.querySelector('.loading-state')`), 'route read finished')
     assert.equal(await evaluate(`document.documentElement.scrollWidth <= innerWidth`), true, `Mobile overflow: ${route}`)

@@ -298,7 +298,7 @@ frontend/src/
 │   └── event/           # Các component hiển thị sự kiện (EventTable, EventFilters)
 ├── hooks/               # Custom React Hooks (useAuth, useRoute, useToast, useResource)
 ├── layouts/             # Layout giao diện chính (AdminLayout, Sidebar, Navbar)
-├── pages/               # Trang ứng dụng (Dashboard, Endpoints, Events, Settings, Login)
+├── pages/               # Trang ứng dụng (Dashboard, Endpoints, Events, Login)
 ├── services/            # Layer giao tiếp API (api.ts, http.ts, models.ts, mappers/)
 ├── types/               # TypeScript interface và type definitions
 └── utils/               # Hàm tiện ích format ngày giờ, device name

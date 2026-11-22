@@ -1,63 +1,66 @@
-# USBShield — Admin Web
+# USBProtection — Admin Web
 
-React + Vite + TypeScript; tích hợp vào Admin Server Spring Boot JAR, sử dụng **PostgreSQL/Flyway**. Current branch `vinhkhang` commit `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` (04/11/2026, chưa merge `main`). Hướng dẫn vận hành tập trung: [RUN_GUIDE](../docs/RUN_GUIDE.md); [API hiện hành](../docs/API_PHASE1_TO_PHASE3_ADDENDUM.md); [Admin Guide](../docs/ADMIN_GUIDE.md); [Implementation status](../docs/IMPLEMENTATION_STATUS_20261104.md).
+React 19 + Vite 8 + TypeScript, source `frontend/`. Production frontend được build thành static assets trong **Admin Server Spring Boot JAR** (cùng origin `/api/**`); dùng **PostgreSQL/Flyway** ở backend, không kết nối DB trực tiếp từ browser.
 
-## Dev và API thật (chỉ loopback)
+> **Đối chiếu source:** `chivan2925/USBProtection` `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026). Trang **Settings đã bị xóa** ở cả frontend và Admin API, không phải chỉ ẩn menu. Xem [Admin Guide](../docs/ADMIN_GUIDE.md), [Run Guide](../docs/RUN_GUIDE.md), [API addendum](../docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) và [bản đồng bộ docs](../docs/DOCUMENTATION_SYNC_20261120_c7381fc7.md).
 
-Node.js 22.20+ và npm; thư mục `frontend/`:
+## 1. Phát triển (loopback) và runtime
 
-```sh
+Yêu cầu Node/npm phù hợp với lockfile (`npm ci`), JDK 21/Maven nếu build backend. Từ thư mục `frontend/`:
+
+```powershell
 npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
-Vite tại `http://127.0.0.1:5173/`; proxy `/api` mặc định về `https://usbprotection.lab`, giữ kiểm tra chứng chỉ TLS. Máy chạy Vite phải phân giải được hostname lab và tin cậy CA hiện có; không tắt TLS verification hoặc thêm fallback cổng backend. `API_PROXY_TARGET` chỉ ghi đè đích proxy khi chủ động chạy môi trường dev/test riêng. **Không dùng Vite/HTTP loopback làm cấu hình production/LAN.**
+Vite phục vụ tại `http://127.0.0.1:5173/`. `vite.config.ts` proxy `/api` mặc định tới `https://usbprotection.lab` với **TLS certificate verification bật**; `API_PROXY_TARGET` hoặc `USBSHIELD_API_TARGET` có thể chọn đích dev/test đã phê duyệt. Hostname lab phải được phân giải và CA tin cậy. Không tắt `secure`, không thêm HTTP fallback/đường bypass Spring/Nginx cho Agent `live`.
 
-Để xem dữ liệu thật, mở `https://usbprotection.lab/#/login`, đăng nhập Admin bằng tài khoản hiện có. Các trang và modal chi tiết dùng `/api/auth/**` và `/api/admin/**`, cookie session/CSRF, filter và phân trang tại server; API rỗng/lỗi không được thay bằng mock. Giao diện chính không còn liên kết hoặc nút demo; `?demo=1` không bật mock. Chỉ `/demo` (hoặc `/demo/`) dùng dữ liệu minh họa, chỉ đọc, không gọi API hay thay đổi USBGuard/policy. Các trang con dùng hash, ví dụ `/demo#/endpoints`; tải lại vẫn giữ chế độ mock. Build Vite không cập nhật UI trong JAR đang chạy; owner cần triển khai lại UI theo [guardrails](../docs/admin-web/POST_CORE_E2E_UI_CHANGE_GUARDRAILS.md), API, auth và nghiệp vụ backend giữ nguyên; mapping giao diện `/demo` được thêm để phục vụ cùng `index.html`. Không đổi DB, Nginx hay CA.
+Admin Web triển khai thật: truy cập HTTPS origin được Nginx cấu hình, ví dụ `https://usbprotection.lab/#/login`; cookie session và CSRF quản lý bởi Spring Security. Không đưa token/mật khẩu vào localStorage, không lấy dữ liệu giả để thay sự cố API thực. `/demo` hoặc `/demo/` là **mock chỉ đọc** với navigation qua hash, không gọi API hay thay đổi USBGuard. `?demo=1` không mở demo trong Admin Web thật.
 
-## Runtime và quyền truy cập
+`npm run build` cập nhật `frontend/dist/` nhưng **không sửa JAR đang chạy**; muốn thay UI trong ứng dụng phải đóng gói lại Admin JAR bằng Maven profile `with-frontend` hoặc `build-release.ps1`, sau đó triển khai JAR tương ứng. Không cài React/Vite trên Ubuntu Client.
 
-- **Production Admin:** React được build thành static assets trong một Spring Boot JAR; Admin workstation chỉ dùng HTTPS từ Nginx/IP allowlist, cùng origin với `/api/auth/**` và `/api/admin/**`. Chuyển hướng trực tiếp cổng backend không được phép trên LAN.
-- **Ubuntu Client:** không cài Web; Agent `live` dùng HTTPS có CA/hostname verification, và được ACL **chỉ cho `/api/agent/**`**. Auth/CSRF ở Spring vẫn bắt buộc, ACL không thay thế xác thực. Rate limiting không nằm trong scope theo quyết định owner.
-- **Database:** Web không kết nối trực tiếp PostgreSQL; Admin Server dùng Flyway V1/V2 và Hibernate `validate`, không dùng H2 runtime. Server-paged APIs chịu trách nhiệm tìm kiếm/đếm/giới hạn.
+## 2. Các màn hình hiện hành
 
-## Màn hình
-
-| Hash route | Nội dung |
+| Hash route | Hành vi |
 |---|---|
-| `#/login` | Admin session/CSRF login, không có chế độ demo |
-| `#/dashboard` | Thống kê backend toàn cục và hoạt động gần đây |
-| `#/endpoints` | Server-side search/filter/pagination; online/offline totals toàn hệ thống |
-| `#/endpoints/:id` | Metadata, `Healthy/Degraded/Unavailable/Unknown`, checkedAt/stale, desired/applied ACK, USB/whitelist scoped theo endpoint |
-| `#/devices` | Device lookup/filter với server pagination |
-| `#/whitelist` | Một API chung `/api/admin/whitelist/page`, phân trang và tìm kiếm; không N+1 theo từng endpoint |
-| `#/events` | Event History: filter và phân trang ở Server, giữ source timestamps |
-| `#/settings` | **Đổi mật khẩu Admin** khi có phiên, đăng xuất các phiên cũ; cấu hình USBGuard trực tiếp từ Web chưa có API |
+| `#/login` | Đăng nhập Admin, session/CSRF; đăng xuất qua điều khiển tài khoản |
+| `#/dashboard` | Tổng hợp số liệu server và sự kiện gần đây, không tự suy tổng từ trang đầu |
+| `#/endpoints` | Tìm kiếm/lọc online-offline và phân trang server; hiển thị version và USBGuard health |
+| `#/endpoints/:id` | Chi tiết endpoint/modal, USB đã quan sát, whitelist, Allow/Revoke có xác nhận và policy ACK |
+| `#/devices` | Trạng thái USB, lọc/tìm kiếm/phân trang server; “Bị chặn” là **bộ lọc**, không có trang Blocked riêng |
+| `#/whitelist` | Danh sách whitelist toàn hệ thống có pagination; mutation vẫn theo endpoint |
+| `#/events` | Event Logs: filter endpoint/user/USB/decision/type/date và phân trang server |
+| `#/settings` | **ĐÃ XÓA**; khi truy cập hash cũ, UI hiển thị trang 404, không còn API đổi mật khẩu Admin qua Web |
 
-Các bảng có phân trang dùng cố định **10 bản ghi/trang**, cả API thật và `/demo`. Trang Blocked Devices đã bỏ; xem quyết định bị chặn bằng bộ lọc **Bị chặn** trong Devices. Bộ lọc **Chưa xác định** vẫn gửi trạng thái API `detected`.
+Các bảng phân trang sử dụng **10 bản ghi mỗi trang** trong UI hiện tại. Online (heartbeat), ACK/applied policy và USBGuard health `HEALTHY/DEGRADED/UNAVAILABLE/UNKNOWN` là các khái niệm khác nhau; trạng thái Web không tự chứng minh USB đang cắm đã bị chặn vật lý. API lỗi/empty/401/403 không được thay bằng dữ liệu mock ngoài `/demo`.
 
-**Status boundary:** online chỉ là heartbeat; ACK chỉ là Agent-reported policy applied version; `Healthy` chỉ được hiển thị khi báo cáo USBGuard còn mới và đồng bộ, **không phải xác nhận USB vật lý độc lập từ Server**. Giao diện rỗng/lỗi/401/403 không được tự sinh mock records ngoài Demo.
+**Mật khẩu Admin:** `POST /api/admin/account/password` và Settings đã bị loại bỏ. Login, logout, CSRF, phiên và bootstrap Admin ban đầu vẫn còn; quên mật khẩu cần maintenance profile `admin-reset` **không mở HTTP** trên máy Server, không phải đổi biến bootstrap rồi restart. Xem [Developer Guide](../docs/DEVELOPER_GUIDE.md).
 
-## Kiểm thử Frontend và browser-live
+## 3. Kiểm thử frontend và tích hợp
 
-Từ thư mục gốc repository, dùng `.env` *untracked* cùng wrapper PowerShell cho các test PostgreSQL (IntelliJ DB credentials không tự truyền cho npm/Maven):
+Từ **root** repository (PowerShell; `.env` untracked chứa **chỉ** thông tin PostgreSQL test):
 
 ```powershell
 npm --prefix frontend ci
 npm --prefix frontend test
 npm --prefix frontend run lint
 npm --prefix frontend run build
-mvn -f admin-server/pom.xml -Pwith-frontend -DskipTests package
 .\scripts\with-env.ps1 -RequireTestDb -Command { npm --prefix frontend run test:browser:live }
 .\scripts\with-env.ps1 -RequireTestDb -Command { npm --prefix frontend run test:live }
 ```
 
-- `npm test`: components, auth/CSRF, endpoint/whitelist paged read, USBGuard health view, Events search/filters và API errors.
-- `test:browser`: browser fixture, session/demo/desktop/mobile; cần Chrome hoặc Edge phù hợp.
-- `test:live`: Spring Security + PostgreSQL **test DB** với controlled synthetic Agent ACK, không phải Ubuntu Agent thật.
-- `test:browser:live`: PostgreSQL `usbshield_browser_test`, schema `usbshield_e2e_*` riêng theo run, tạo HTTP test events tổng hợp, cleanup trên normal completion. Browser harness có thể dùng cổng 4173/4174 và backend riêng; các lệnh chạy lần lượt. Có thể đặt `CHROME_PATH` khi cần. Không bao giờ chạy vào app database `usbshield`.
-- Nếu tiến trình browser bị kill, kiểm tra schema test orphan trước khi dọn; không tự xóa bất kỳ schema ứng dụng nào. Screenshots `.artifacts/` là test artifacts cục bộ.
+Hoặc chạy gate Windows có tích hợp Maven/Agent/DEB theo nhu cầu:
 
-**Chưa nghiệm thu bằng các test này:** USBGuard enforcement thực tế, Agent live TLS/ACL trên LAN, USB thật, notifier GUI Ubuntu, reboot/offline. Xem [HTTPS/ACL/Paging](../docs/PHASE3_HTTPS_ACL_AND_PAGING.md) và [Ubuntu Acceptance](../docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md).
+```powershell
+.\packaging\tests\verify-windows.ps1 -AdminOnly
+.\packaging\tests\verify-windows.ps1
+```
 
-Historical UI screenshots/tests: [M4 Week 2](../docs/admin-web/week2-evidence/README.md), [M5 Events evidence](../docs/qa/week2-evidence/M5_LIVE_EVENTS_VERIFICATION.md); số liệu cũ không được tự đổi thành PASS của HEAD hiện tại.
+- `npm test`: component, auth/CSRF, Endpoints/Whitelist, Events, paged API, empty/error states, regression sau khi xóa Settings.
+- `test:browser`: fixture browser, routing, Allow/Revoke mock, demo/read-only, desktop/mobile; cần Chrome/Edge tương thích.
+- `test:browser:live` và `test:live`: backend thật với **PostgreSQL test-only** (`usbshield_browser_test`, schema `usbshield_e2e_*`), synthetic HTTP events; **không phải USBGuard hardware E2E**. Chỉ dùng `usbshield_test`/`usbshield_browser_test`; không chạy test vào application DB `usbshield`.
+- Source đã bỏ `frontend/src/pages/Settings.tsx` và test Settings cũ. Các suite hiện hành không được import `Settings.tsx` hoặc kỳ vọng menu/route đó còn hoạt động.
+
+**Báo cáo owner ngày 20/11/2026:** Windows verifier trả `RESULT: PASS for executed Windows verification gates`; các gate Linux-only không được thay bằng Windows PASS. `build-release.ps1` tạo JAR nhưng manifest ở `releases/` ghi `workingTreeCleanAtStart=false` và source commit `b12bb597`, nên **chưa release-qualified và không phải build provenance sạch từ HEAD `c7381fc7`**. Xem [Admin release](../docs/ADMIN_SERVER_RELEASE.md).
+
+**Phạm vi chưa chứng minh bằng frontend/Windows tests:** native Ubuntu USBGuard, USB vật lý, Linux notifier IPC, reboot/offline, negative TLS, Client-IP HTTPS/ACL. `packaging/tests/verify-phase3-https-acl.sh` vẫn là bài kiểm tra riêng từ Admin/Client IP thực, không nằm trong Windows verifier. Bằng chứng Week 1–4 và 09/11 là **snapshot lịch sử**, không sửa lại số liệu cũ.

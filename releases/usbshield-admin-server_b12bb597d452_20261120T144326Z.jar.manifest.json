@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 2,
+  "builtAtUtc": "2026-11-20T14:43:26.1163293Z",
+  "source": {
+    "commit": "b12bb597d45289ff507150554d6562b87c5848f4",
+    "tree": "669a71045fb180739d95319a805c60ab465f4617",
+    "branch": "main",
+    "workingTreeCleanAtStart": false
+  },
+  "toolchain": {
+    "java": "java version \"21.0.7\" 2025-04-15 LTS",
+    "maven": "Apache Maven 3.10.0 (c43a36b8d67be7e0805a411bc0898af1a51f5472)",
+    "node": "v22.19.0",
+    "npm": "10.9.3",
+    "javaTarget": "21"
+  },
+  "build": {
+    "backendTestsExecuted": true,
+    "frontendBuildExecuted": true,
+    "includesReact": true,
+    "command": "admin-server/build-release.ps1"
+  },
+  "artifact": {
+    "filename": "usbshield-admin-server_b12bb597d452_20261120T144326Z.jar",
+    "sizeBytes": 57258415,
+    "sha256": "8cd573ca4ee70a3bf3c276623d30512cc3a4af92d819c961c57437dfdb7909e0"
+  }
+}

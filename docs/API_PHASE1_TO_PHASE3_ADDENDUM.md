@@ -1,13 +1,12 @@
 # USBShield — API/Transport Addendum (Phase 1–3, 04/11/2026)
 
-**Source:** `vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142` (chưa merge `main`). Tài liệu này **bổ sung** [API v0.2](API.md) và [Agent–Server Protocol](AGENT_SERVER_PROTOCOL.md) lịch sử; không thay đổi các HTTP evidence đã công bố. Test Windows không chứng minh TLS/ACL/USBGuard thực tế trên Ubuntu.
+> **Trạng thái tài liệu (20/11/2026):** Đây là phần mở rộng hợp đồng HTTP/API từ giai đoạn 04/11, hiện đã có trong nhánh `main` tại baseline kiểm tra `c7381fc7b9ba34aa561083431ce7c68b9a514a51`. Dòng ghi chú cũ “`vinhkhang` chưa merge `main`” không còn đúng. Tài liệu này bổ sung [API v0.2](API.md) và [Agent–Server Protocol v0.2](AGENT_SERVER_PROTOCOL.md); không thay thế hai hợp đồng đó. Không suy ra Windows/Ubuntu E2E PASS chỉ từ source hoặc từ tài liệu này. Xem [Admin Server release](ADMIN_SERVER_RELEASE.md), [Run Guide](RUN_GUIDE.md) và [Implementation status 09/11 — snapshot lịch sử](IMPLEMENTATION_STATUS_20261109.md).
 
-## Admin authentication và đổi mật khẩu (F03)
+## Admin authentication và tình trạng F03 tại HEAD
 
-- `POST /api/admin/account/password` — **Admin session + CSRF**. JSON body: `{ "currentPassword": "...", "newPassword": "..." }`.
-- Mật khẩu mới phải từ **12 ký tự in được**, không vượt **72 UTF-8 bytes** và khác mật khẩu cũ. Mật khẩu cũ sai: HTTP 401; mật khẩu mới không hợp lệ: HTTP 400.
-- Khi thành công, `{"changed":true}` và session hiện tại bị invalidate; version credential tăng, các session cũ không còn hợp lệ. Không reset bằng cách đổi `USBSHIELD_ADMIN_PASSWORD` rồi restart.
-- Reset khẩn cấp chỉ qua **maintenance profile không mở Web HTTP** và quy trình root/operator; không cung cấp route reset công khai cho Client.
+- **Đang hoạt động:** `GET /api/auth/csrf`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`. Spring Security quản lý cookie session, CSRF, phân quyền `ROLE_ADMIN` và invalidation theo credential version.
+- **Đã loại bỏ trong commit `c7381fc7`:** `POST /api/admin/account/password` (trước đây là F03/password change qua Settings). Không gọi API này; controller và bài test tương ứng đã bị xóa. Đây là thay đổi hành vi API so với tài liệu Phase 1–3 ngày 04/11, **không được hiểu endpoint vẫn hiện hữu**.
+- **Giữ lại:** `AdminBootstrap` chỉ tạo Admin ban đầu nếu username chưa tồn tại; `USBSHIELD_ADMIN_PASSWORD` không reset account đã có. `AdminPasswordResetRunner` dùng profile `admin-reset`, `spring.main.web-application-type=none` và biến `USBSHIELD_ADMIN_RESET_*` cho khôi phục offline; **không mở route HTTP reset**. Chính sách mật khẩu 12+ ký tự in được, tối đa 72 UTF-8 bytes vẫn áp dụng khi reset.
 
 ## Endpoint list (F14) — server-side pagination
 
@@ -43,4 +42,4 @@
 - Nginx chỉ cho source IP Admin tới Web/static và `/api/auth/**`, `/api/admin/**`; source Client chỉ được tới `/api/agent/**` (vẫn yêu cầu Agent auth). Backend bind `127.0.0.1:18080`, không lộ trực tiếp trên LAN; PostgreSQL 5432 không mở cho Client.
 - **Không triển khai rate limiting** (owner decision); ACL không ngăn brute-force từ Admin source được phép. IP ACL không phân biệt được Admin/Client nếu chúng bị NAT về cùng source IP.
 
-Chi tiết vận hành: [RUN_GUIDE](RUN_GUIDE.md), [Phase 3 HTTPS/ACL/Paging](PHASE3_HTTPS_ACL_AND_PAGING.md), [Implementation status](IMPLEMENTATION_STATUS_20261104.md).
+Chi tiết vận hành: [RUN_GUIDE](RUN_GUIDE.md), [Phase 3 HTTPS/ACL/Paging](PHASE3_HTTPS_ACL_AND_PAGING.md), [Implementation status 04/11 — snapshot lịch sử](IMPLEMENTATION_STATUS_20261104.md).

@@ -1,121 +1,103 @@
-# USBShield Admin Web — Hướng dẫn quản trị
+# USBProtection Admin Web — Hướng dẫn sử dụng và quản trị
 
-**Hướng dẫn UI hiện hành (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`, 04/11/2026).** Backend sử dụng Spring Boot/PostgreSQL/Flyway. Các con số Week 4 ở cuối tài liệu là **evidence lịch sử dùng H2**, không phải kết quả chạy lại cho commit hiện tại. USB thật vẫn cần Agent/USBGuard trên Ubuntu. Cách build/chạy duy nhất: [RUN_GUIDE.md](RUN_GUIDE.md).
+> **Đối chiếu giao diện:** `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026). Hướng dẫn này dành cho **người sử dụng Admin Web**, không phải hướng dẫn build, phát hành JAR hay cài Ubuntu Agent. Xem [RUN_GUIDE.md](RUN_GUIDE.md) và [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md) khi cần triển khai. Các số liệu kiểm thử Week 4 ở cuối là **hồ sơ lịch sử**, không phải một lần nghiệm thu mới của source hiện tại.
 
-## Mở giao diện
+## 1. Truy cập Admin Web và phân biệt môi trường
 
-Với môi trường phát triển mặc định:
+- **Admin Web đã đóng gói:** trên máy Admin được phép truy cập, mở `https://usbprotection.lab/` khi sử dụng cấu hình lab/Nginx/CA như hướng dẫn [HTTPS/ACL](USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md). Tên miền thực tế có thể khác, nhưng phải khớp chứng chỉ TLS và cấu hình ACL. Với môi trường khác, dùng HTTPS origin đã được quản trị viên cung cấp.
+- **Phát triển frontend:** `http://127.0.0.1:5173/` khi Vite đang chạy; backend mặc định lắng nghe HTTP loopback `127.0.0.1:8080` trong profile phát triển. Cổng backend theo cấu hình có thể thay đổi.
+- **Demo chỉ đọc:** `/demo` hoặc `/demo/` tại origin tương ứng; trang con qua hash như `/demo#/events`. Demo là mock và không gọi API thực; nút thay đổi policy bị khóa. Giao diện Admin chính dùng API thật, không tự thay dữ liệu lỗi bằng mock và không dùng `?demo=1` để bật demo.
+- **Client Ubuntu:** chỉ Agent được truy cập `/api/agent/**` theo HTTPS và source-IP ACL. Người dùng ở Client không được xem trang Web/Auth/Admin API theo mô hình phân quyền mạng của lab. Spring Security vẫn kiểm tra session/token; ACL không phải biện pháp xác thực thay thế.
 
-- Admin Web: `http://127.0.0.1:5173/`.
-- Backend API: `http://127.0.0.1:8080`.
-- Demo chỉ đọc: `http://127.0.0.1:5173/demo` khi chạy Vite loopback, hoặc `/demo` trên cùng HTTPS origin của Admin Web.
-- **Vận hành LAN:** truy cập Admin Web bằng `https://<tên-miền-đúng-chứng-chỉ>/` từ **máy Admin thuộc allowlist**. Máy Ubuntu Client không được mở Web/Login; chỉ Agent gọi `/api/agent/**` qua HTTPS. Đây là cấu hình phải được kiểm thử thực tế, không phải kết quả đã nghiệm thu.
-
-Người phụ trách backend cấp tài khoản Admin qua cấu hình ngoài repository. Không có mật khẩu production mặc định. Bootstrap chỉ tạo tài khoản chưa tồn tại; đổi biến môi trường không đổi mật khẩu tài khoản đã có.
-
-Nếu cần chạy frontend, mở PowerShell ở thư mục `frontend` rồi chạy:
+Nếu chạy Vite để phát triển:
 
 ```powershell
+cd frontend
 npm ci
 npm run dev -- --host 127.0.0.1
 ```
 
-Backend chạy riêng theo [RUN_GUIDE.md](RUN_GUIDE.md). Frontend chuyển `/api` đến backend qua Vite proxy cùng origin. Đổi đích proxy bằng biến `API_PROXY_TARGET` nếu backend dùng URL khác.
+Vite proxy chuyển `/api` đến backend; thay đích proxy bằng `API_PROXY_TARGET` khi cần. Nếu `npm ci` báo EPERM vì native module đang dùng, dừng Vite của project rồi chạy lại. Không cần cài Node/npm/Vite khi chỉ sử dụng JAR phát hành. **Không đưa thông tin tài khoản, token hay `.env.e2e.local` cho người dùng chỉ có quyền truy cập Web.**
 
-Nếu `npm ci` báo EPERM với native module đang dùng, dừng tiến trình Vite của project rồi thử lại. Không cần xóa source hoặc đổi lockfile.
+## 2. Đăng nhập, phiên và đăng xuất
 
-## Đăng nhập và đăng xuất
+1. Mở Admin Web bằng HTTPS đã được cấu hình, nhập username/password của Admin. Không có mật khẩu production mặc định được dùng công khai.
+2. Sau đăng nhập, Web lấy dữ liệu từ các API quản trị thuộc session hiện tại. Các thay đổi yêu cầu CSRF token hợp lệ.
+3. Nếu mật khẩu sai, thử lại bằng thông tin được cấp; không tự thay đổi `USBSHIELD_ADMIN_PASSWORD` với kỳ vọng reset tài khoản cũ. Biến này chỉ phục vụ **bootstrap ban đầu**.
+4. Khi hết hạn hoặc bị thu hồi phiên, Web chuyển về Login và không giữ dữ liệu quản trị cần quyền truy cập. Đăng xuất qua nút **Đăng xuất** ở thanh điều hướng (trên mobile có thể cần mở menu trước).
 
-1. Mở giao diện và nhập tên đăng nhập, mật khẩu do backend cấp.
-2. Nhấn **Đăng nhập**. Nếu thông tin sai, sửa và nhập lại mật khẩu.
-3. Khi hết phiên, giao diện quay về Login, thông báo cần đăng nhập lại và gỡ nội dung cần quyền Admin.
-4. Đăng xuất bằng nút tài khoản ở cuối thanh điều hướng. Trên mobile, mở menu trước.
+Session cookie do browser quản lý, frontend không lưu mật khẩu hay token phiên trong localStorage/sessionStorage. Không chia sẻ phiên Admin với Ubuntu Client.
 
-Cookie phiên do trình duyệt quản lý. Frontend không lưu mật khẩu hoặc token phiên vào localStorage/sessionStorage.
+## 3. Dashboard và Endpoints
 
-## Đọc Dashboard và danh sách endpoint
+- **Dashboard:** hiển thị các tổng hợp do backend cung cấp (thiết bị phát hiện, quyết định gần nhất ALLOWED/BLOCKED, sự kiện, v.v.); không tự tính tổng hệ thống từ một trang phân trang. `0` là số đếm thực, `—` nghĩa là chưa đủ dữ liệu.
+- **Endpoints:** hiển thị hostname, ID, trạng thái ONLINE/OFFLINE, current user (nếu có), thời điểm heartbeat và thông tin policy; hỗ trợ tìm kiếm tên/ID và lọc ONLINE/OFFLINE. Kết quả live được **backend lọc trước, phân trang sau**.
+- Nhấn **Xem chi tiết** hoặc mở đường dẫn endpoint để quản lý đúng một máy. Chi tiết endpoint và thay đổi policy không áp dụng cho toàn hệ thống.
+- **ONLINE** chỉ thể hiện có heartbeat gần đây, **không** chứng minh USBGuard đang hoạt động hoặc policy đã thực sự bảo vệ USB. Trạng thái bảo vệ phải đọc cùng telemetry USBGuard và desired/applied version.
 
-- Dashboard và Endpoints sử dụng số tổng hợp **toàn bộ** từ API PostgreSQL; không đếm dựa trên trang đầu. Số 0 nghĩa là không có bản ghi; dấu `—` nghĩa là chưa có dữ liệu xác định.
-- Protection/service **Chưa xác định** nghĩa là API chưa cung cấp bằng chứng trạng thái bảo vệ.
-- Endpoints hiển thị hostname, ID, ONLINE/OFFLINE, người dùng nếu có, phiên bản policy và thời điểm kết nối gần nhất.
-- ONLINE nghĩa là backend còn thấy heartbeat trong ngưỡng cấu hình. Trạng thái này không tự chứng minh USBGuard đã áp dụng policy.
-- Tìm kiếm/lọc endpoint theo text và trạng thái ONLINE/OFFLINE, chuyển trang (backend lọc trước, phân trang sau). Whitelist tổng hợp cũng có tìm kiếm/phân trang; không gọi lần lượt từng endpoint. Sau đó nhấn **Xem chi tiết** để quản lý đúng máy.
+## 4. Policy version, ACK và USBGuard health
 
-## Hiểu desired, applied và ACK
-
-| Trường / trạng thái | Ý nghĩa |
-| --- | --- |
-| Policy version / desired | Phiên bản whitelist server muốn Agent áp dụng. |
-| Last Applied Version / applied | Phiên bản Agent đã báo ACK với server. |
-| Desired khác applied | Chưa xác nhận đồng bộ phiên bản mong muốn. |
-| Agent đã ACK phiên bản này | Server nhận ACK cho đúng phiên bản; đây là báo cáo của Agent. |
-| Chưa có dữ liệu ACK | Chưa nhận đủ thông tin phiên bản để xác nhận đồng bộ. |
-| Endpoint offline, đang chờ | Máy không có heartbeat gần đây; policy chưa đồng bộ phải chờ Agent kết nối và áp dụng. |
-
-Nhấn **Refresh dữ liệu** để kiểm tra tiến độ. Chưa có ACK không tự đồng nghĩa apply thất bại. Backend hiện chưa có trường mô tả lỗi apply riêng; UI không đoán lý do.
-
-## Trạng thái USBGuard và độ mới của báo cáo (I03)
-
-| Trạng thái | Diễn giải |
+| Tín hiệu | Ý nghĩa |
 |---|---|
-| `Healthy` | Agent báo daemon/rules/reconciliation tốt, báo cáo còn mới, endpoint online và desired/applied version phù hợp |
-| `Degraded` | Agent báo chức năng USBGuard chưa đáp ứng đầy đủ điều kiện policy/health |
-| `Unavailable` | Agent báo không thể sử dụng/kiểm tra USBGuard tại thời điểm probe |
-| `Unknown` | Thiếu kết quả probe, Agent cũ không có trường này, báo cáo stale/offline hoặc không đủ dữ liệu để xác nhận |
+| **Policy version / desired** | Phiên bản whitelist mà Server muốn Agent sử dụng. |
+| **Last Applied Version / applied** | Phiên bản Agent đã báo ACK sau bước apply; dữ kiện do Agent gửi về. |
+| **desired ≠ applied** | Chưa xác nhận Agent áp dụng đúng phiên bản mong muốn; kiểm tra đồng bộ và trạng thái Client. |
+| **ACK phiên bản hiện tại** | Server chấp nhận thông báo ACK hợp lệ; **không** phải bằng chứng độc lập USB vật lý đã chuyển trạng thái khi vẫn đang cắm. |
+| **Chưa có ACK / endpoint offline** | Cần chờ Agent kết nối, áp dụng và báo lại; không tự suy luận apply thất bại hoặc thành công. |
 
-Xem thời gian `usbGuardCheckedAt`, cờ `usbGuardStale`, `lastSeen`, desired/applied version riêng biệt; **ACK hoặc ONLINE một mình không chứng minh Healthy**. Nếu data đã stale, không giữ nhãn Healthy trước đó. Health vẫn do Agent báo cáo; nghiệm thu thực tế phải kiểm tra USBGuard/USB trên Ubuntu.
+**USBGuard health** do Agent probe và Server tổng hợp, có thể hiển thị:
 
-## Đổi mật khẩu Admin (F03)
+- **Healthy:** Agent báo daemon/rules/reconciliation đáp ứng yêu cầu, báo cáo còn mới, endpoint online và phiên bản desired/applied phù hợp.
+- **Degraded:** có dấu hiệu tình trạng bảo vệ không thỏa các điều kiện, chẳng hạn version không đồng bộ.
+- **Unavailable:** Agent báo không thể sử dụng hoặc kiểm tra USBGuard ở thời điểm probe.
+- **Unknown:** thiếu báo cáo, dữ liệu stale/offline, Agent cũ chưa cung cấp trường health hoặc không đủ bằng chứng để kết luận.
 
-Khi đã đăng nhập, vào **Settings → Đổi mật khẩu Admin**, nhập mật khẩu hiện tại và mật khẩu mới theo yêu cầu hệ thống, gửi với phiên/CSRF hợp lệ. Sau đổi mật khẩu, các phiên cũ bị vô hiệu hóa; đăng nhập lại bằng mật khẩu mới. Đổi `USBSHIELD_ADMIN_PASSWORD` trong môi trường **không** tự sửa mật khẩu đã lưu. Khi quên mật khẩu cần quy trình **reset bảo trì không mở HTTP**, do người vận hành server thực hiện; không có reset công khai cho Client. Xem [Developer Guide](DEVELOPER_GUIDE.md) và [runbook](RUN_GUIDE.md).
+Đọc `usbGuardCheckedAt`, `usbGuardStale`, `lastSeen`, trạng thái kết nối và phiên bản song song. ACK hay ONLINE riêng lẻ không được chuyển thành kết luận Healthy. Để nghiệm thu thực tế cần kiểm tra USBGuard và USB thật trên Ubuntu.
 
-## Allow USB trên một endpoint
+## 5. Allow USB trên một endpoint
 
-1. Vào **Endpoints**, mở đúng máy cần cấp quyền.
-2. Nhấn **Allow on this endpoint**.
-3. Chọn USB đã xuất hiện trong sự kiện của endpoint và có ID/HASH từ backend. Thiết bị không có serial vẫn có thể dùng HASH hợp lệ.
-4. Kiểm tra endpoint và HASH trong hộp xác nhận rồi nhấn **Xác nhận thay đổi**.
-5. Server lưu whitelist; kiểm tra desired/applied bằng **Refresh dữ liệu** cho đến khi Agent ACK phiên bản mới. **Người dùng rút USB ra rồi cắm lại** để USBGuard xét trạng thái ALLOW theo policy đã đồng bộ; không mong thiết bị đang cắm tự chuyển trạng thái.
+1. Mở **Endpoints → chi tiết đúng endpoint**.
+2. Chọn **Allow on this endpoint**. Chỉ chọn thiết bị đã được hệ thống nhận diện từ sự kiện/thiết bị của endpoint với ID và HASH hợp lệ; không nhập tùy ý serial/tên để tự tạo một danh tính yếu.
+3. Kiểm tra **endpoint**, USB ID và HASH trong hộp thoại xác nhận; nhấn **Xác nhận thay đổi**.
+4. Server lưu thay đổi whitelist và tăng desired version. Theo dõi Agent đồng bộ và ACK version mới.
+5. **Rút USB và cắm lại** tại đúng endpoint để USBGuard đánh giá quyền ALLOW theo policy mới. Không yêu cầu hoặc mặc định có tác động tức thời trên USB vẫn đang cắm.
 
-Nếu chưa có USB phù hợp, cần Agent gửi sự kiện trước. Frontend không cho nhập tên/serial để tự tạo danh tính yếu. Cấp quyền cho endpoint A không cấp quyền cho B.
+Nếu USB chưa từng xuất hiện, Agent cần ghi nhận event để Server có danh tính đủ mạnh. Thiết bị không có serial vẫn có thể hợp lệ khi nhận diện bằng HASH theo contract. Allow trên endpoint A **không** đồng nghĩa Allow trên endpoint B.
 
-## Revoke quyền USB
+## 6. Revoke quyền USB
 
-1. Trong chi tiết endpoint, tìm entry cần thu hồi ở **Whitelist thiết bị**.
-2. Nhấn **Revoke on this endpoint**, kiểm tra endpoint/entry rồi xác nhận.
-3. Theo dõi phiên bản mới và ACK. **Rút USB ra rồi cắm lại** để xác minh thiết bị bị BLOCK trên đúng endpoint. Lưu Revoke thành công hoặc ACK không chứng minh USB đang cắm bị chặn tức thời.
+1. Trong chi tiết endpoint, tìm entry trong **Whitelist thiết bị**.
+2. Nhấn **Revoke on this endpoint**, kiểm tra đúng endpoint/entry rồi xác nhận.
+3. Chờ Agent áp dụng và ACK version mới, sau đó **rút/cắm lại USB** để kiểm tra BLOCK tại endpoint đó.
 
-Nút xác nhận bị khóa khi đang gửi. Nếu có lỗi, đọc thông báo và thử lại; không coi lỗi mạng là bằng chứng thao tác chưa được server lưu. Refresh để kiểm tra trạng thái hiện tại.
+Nút xác nhận bị khóa khi request đang được xử lý. Nếu timeout/network error, không tự kết luận thao tác đã rollback — tải lại danh sách và version để kiểm tra trạng thái persisted trước khi thử lại.
 
-## Devices, Whitelist và Settings
+## 7. Devices, Whitelist và Event Logs
 
-- **Devices:** thiết bị được ghi nhận từ lịch sử event, theo từng endpoint.
-- **Whitelist:** rule server đã lưu; mở endpoint để Allow/Revoke. Không có quyền Allow toàn hệ thống.
-- Trang **Blocked Devices** đã bỏ. Dùng bộ lọc **Bị chặn** trong Devices; đây là quyết định BLOCKED gần nhất, không phải phép đo USBGuard thời gian thực. Bộ lọc **Chưa xác định** tương ứng trạng thái API `detected`. Các bảng có phân trang dùng cố định **10 bản ghi/trang**.
-- **Event Logs:** xem sự kiện và bộ lọc do phần Event History của M5 cung cấp.
-- **Settings:** đổi mật khẩu Admin có xác thực và quản lý phiên; **API cấu hình USBGuard từ Web vẫn chưa được triển khai** (không được nhầm với health telemetry).
+**Devices:** hiển thị thiết bị đã được ghi nhận theo endpoint, cho phép tìm kiếm thiết bị theo tên/ID và lọc quyết định gần nhất. `BLOCKED`/`ALLOWED` phản ánh event/trạng thái được ghi nhận, **không** phải kết quả USBGuard đo ngay lúc người dùng nhìn trang. **Blocked Devices** không còn là trang độc lập; dùng bộ lọc **Bị chặn** trong Devices. Trạng thái **Chưa xác định** phản ánh dữ liệu `detected` của API.
 
-## Khi gặp lỗi
+**Whitelist:** các rule còn hiệu lực có thể được tìm kiếm/phân trang trên backend; muốn Allow/Revoke thì mở đúng endpoint. Không có thao tác Allow toàn hệ thống.
 
-| Tình huống | Cách xử lý |
-| --- | --- |
-| Không kết nối / timeout | Kiểm tra backend, URL proxy và mạng; nhấn Thử lại hoặc Refresh. |
-| HTTP 401 | Đăng nhập lại; phiên không còn hợp lệ. |
-| HTTP 403 | Kiểm tra quyền và tải lại trang để lấy CSRF mới. |
-| HTTP 409 | Dữ liệu bị trùng hoặc đã thay đổi; tải lại trước khi thao tác tiếp. |
-| HTTP 5xx | Backend gặp lỗi; thử lại và chuyển log cho người phụ trách server nếu lặp lại. |
-| Payload API sai | UI từ chối dữ liệu thay vì hiển thị thành công giả; chuyển lỗi cho M1/M4. |
-| Danh sách rỗng | Có thể chưa có endpoint/event; live UI không tự dùng mock thay thế. |
+**Event Logs:** trong chế độ live, sử dụng API `/api/admin/events` với phân trang máy chủ (mỗi trang **10 bản ghi**). Các bộ lọc gồm Endpoint (tên/ID), Linux User (tìm phần tên không phân biệt hoa/thường), USB (tên/ID), Event Type, Decision (ALLOW/BLOCK), Từ ngày và Đến ngày. Khoảng ngày được hiểu theo ngày lịch local của frontend để tạo giới hạn thời gian truy vấn; không tự sửa UTC dữ liệu nguồn. Có thể thấy 14 bản ghi phù hợp nhưng trang đầu chỉ hiện 10: đó là **phân trang bình thường**, không phải thiếu dữ liệu. Khi bộ lọc không có kết quả, Web hiển thị “Không tìm thấy kết quả”.
 
-Mock chỉ có tại `/demo` hoặc `/demo/`, các trang con dùng hash như `/demo#/events`. Demo chỉ đọc, không gọi API và luôn khóa thay đổi policy; liên kết **Đăng nhập quản trị** quay lại `/#/login`. Giao diện chính chỉ dùng API thật, không có liên kết bật demo và không nhận cờ `?demo=1`; API rỗng/lỗi không được thay bằng mock.
+**Settings đã được xóa:** Menu, trang `/#/settings` và API `POST /api/admin/account/password` không còn tồn tại ở HEAD `c7381fc7`. Truy cập trực tiếp hash route cũ hiển thị trang không tìm thấy. Admin **không đổi mật khẩu qua Web**. Nếu quên mật khẩu, liên hệ người quản trị máy Server để thực hiện quy trình reset **offline, không HTTP** qua profile `admin-reset`; không thay `USBSHIELD_ADMIN_PASSWORD` rồi restart vì đây chỉ là biến bootstrap. Chỉnh cấu hình USBGuard trực tiếp từ Web cũng không được hỗ trợ; telemetry health không phải thao tác cấu hình enforcement.
 
-## Xác nhận M4 Week 4 — chỉ là hồ sơ kiểm thử lịch sử
+## 8. Khi gặp lỗi
 
-- `npm test`: 96/96 PASS.
-- `npm run lint`: PASS.
-- `npm run build`: PASS; frontend production bundle tích hợp được vào server JAR.
-- `npm run test:browser`: PASS; auth, CSRF, loading/empty/error, Allow/Revoke A/B, demo read-only và responsive routes.
-- `npm run test:live`: PASS; Spring Boot/Spring Security/H2 thật, session, policy version, A/B isolation, controlled HTTP ACK và mobile.
-- Screenshots và log: [Week 4 evidence](qa/week4-evidence/2026-10-28/windows-regression/README.md).
+| Biểu hiện | Xử lý |
+|---|---|
+| Không tải được dữ liệu, timeout, không kết nối | Kiểm tra Server/Nginx/HTTPS/network ACL; dùng nút thử lại nếu có hoặc tải lại trang. |
+| HTTP 401 / phiên hết hạn | Đăng nhập lại, không tiếp tục với dữ liệu cũ. |
+| HTTP 403 | Kiểm tra quyền, session và CSRF; tải lại trang để lấy CSRF mới. |
+| HTTP 404 | Kiểm tra endpoint/đường dẫn và dữ liệu không còn tồn tại. |
+| HTTP 409 | Có thay đổi đồng thời hoặc dữ liệu trùng/cũ; tải lại trang rồi xác nhận trạng thái trước khi thử lại. |
+| HTTP 5xx | Server lỗi; lưu thông tin thời điểm/request phù hợp nhưng không chụp credentials hay token. |
+| Payload API sai | Web từ chối hiển thị thành công giả; báo lỗi cho người phụ trách backend/frontend. |
+| Không có endpoint/event | Không tự suy ra lỗi: hệ thống mới chưa có dữ liệu hoặc Agent chưa kết nối. |
+| `prod` không mở được Swagger | Đây là mặc định bảo mật; `/api-docs` và `/swagger-ui.html` bị vô hiệu hóa. |
 
-Giới hạn của **evidence Week 4 ngày 30/10**: test trên Windows dùng HTTP/H2 và dữ liệu tổng hợp. Runtime hiện hành đã đổi sang PostgreSQL; bằng chứng mới phải ghi nguồn/test database và kết quả thực chạy. Ubuntu/USB vật lý/USBGuard/systemd/reboot/native GUI notification chưa thực thi; không suy ra hardware PASS từ demo hoặc HTTP test.
+## 9. Ranh giới kiểm thử và hồ sơ lịch sử
+
+**Hồ sơ M4 Week 4 ngày 28–30/10/2026, không phải lần chạy mới của HEAD hiện tại:** `npm test` 96 PASS; lint/build PASS; `test:browser` PASS; `test:live` khi đó dùng HTTP/H2 và event mô phỏng, với bằng chứng tại [Week 4 evidence](qa/week4-evidence/2026-10-28/windows-regression/README.md). Không sửa hoặc ghi lại các con số lịch sử này thành kết quả PostgreSQL mới.
+
+**Báo cáo owner ngày 09/11/2026** ghi Windows verifier PASS, HTTPS/ACL lab PASS và Ubuntu Minimal Core P0/C1–C5 PASS theo owner. Các test Ubuntu mở rộng (reboot/offline/negative TLS/remove-upgrade/native IPC) chưa hoàn thành theo scope. Source `main` tại `c7381fc7` có thay đổi xóa Settings. **Owner đã báo `verify-windows.ps1` PASS các gate được thực thi** sau khi sửa test frontend, nhưng điều này không thay thế thử nghiệm HTTPS/ACL và Ubuntu USBGuard native. JAR trong `releases/` được build từ working tree dirty và không đạt trạng thái full release qualification. Tham khảo [owner closeout](qa/2026-11-09-ubuntu-minimal-core-owner-acceptance.md), [status snapshot](IMPLEMENTATION_STATUS_20261109.md) và [release workflow](ADMIN_SERVER_RELEASE.md).

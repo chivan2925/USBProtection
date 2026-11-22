@@ -1,9 +1,8 @@
-# USBShield Admin Server Developer Guide
+# USBProtection Admin Server Developer Guide
 
-> **Vận hành và cài đặt:** xem [RUN_GUIDE.md](RUN_GUIDE.md). Tài liệu này giữ kiến trúc, API, build workflow và ghi chú developer; không thay thế runbook triển khai chung.
+> **Vận hành và cài đặt:** xem [RUN_GUIDE.md](RUN_GUIDE.md). **Phát hành Admin JAR và Windows verification tại HEAD 20/11/2026:** xem [ADMIN_SERVER_RELEASE.md](ADMIN_SERVER_RELEASE.md). Tài liệu này giữ kiến trúc, API, build workflow và ghi chú developer; không thay thế runbook triển khai chung.
 
-
-Owner: M1. Runtime database update: 2026-11-04 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`). Earlier Week 4 evidence remains historical. API contract: frozen v0.2.
+Owner: M1. Runtime database update: 2026-11-04 (`vinhkhang` `035b8ed5a4f5b111dace06cf839cf5f1c33f1142`). Earlier Week 4 evidence remains historical. API contract: frozen v0.2. Current source baseline: `main` `c7381fc7b9ba34aa561083431ce7c68b9a514a51` (20/11/2026); scripts originally introduced earlier. Owner-reported Windows PASS is scoped to executed gates; the committed `releases/` JAR is a dirty-tree build and is not fully release-qualified.
 
 This guide covers the Spring Boot Admin Server, its same-origin React bundle,
 local development, production configuration and Windows release checks. It does
@@ -23,11 +22,11 @@ not claim Ubuntu USBGuard, systemd, desktop notification or `.deb` runtime tests
 
 ## Requirements and local development
 
-Use JDK 21; the Week 4 Windows release build was verified with JDK 22.0.2, Maven
+Use JDK 21; the historical Week 4 Windows release build was verified with JDK 22.0.2, Maven
 3.9.9, Node.js 22.19.0 and npm 10.9.3. The Maven compiler targets Java 21. Validate
 other JDK versions against the pinned Lombok compiler integration. JDK 24 is known
 to fail with the pinned Lombok 1.18.36 (`Fatal error compiling ... TypeTag :: UNKNOWN`);
-if the default `java` is newer than 22, point `JAVA_HOME` at JDK 21/22 for the
+if the default `java` is newer than 22, point `JAVA_HOME` at a compatible JDK 21/22 for the
 build instead of changing the frozen dependency. Install frontend
 dependencies from the lockfile and build the backend tests:
 
@@ -39,7 +38,8 @@ cd frontend
 npm ci
 npm run build
 cd ..
-mvn -B -f admin-server/pom.xml clean test
+# Manual tests require test PostgreSQL settings loaded in the current process.
+.\scripts\with-env.ps1 -RequireTestDb -Command { mvn -B -f admin-server/pom.xml clean test }
 ```
 
 For a local Admin login and Agent enrollment, set test-only secrets in the shell
@@ -79,7 +79,7 @@ The frozen baseline is [API v0.2](API.md); the current [Phase 1–3 API/transpor
   `appliedPolicyVersion`.
 - Endpoint/whitelist list views use `/api/admin/endpoints/page` and `/api/admin/whitelist/page`; both are bounded, DB-filtered and paginated. Legacy endpoint list has a compatibility cap of 100. Endpoint detail and scoped Allow/Revoke are retained.
 - Fingerprint/HASH policy validation must agree Server ↔ Agent; malformed policy is rejected before USBGuard and is not ACKed. Agent `live` fails closed when HTTPS/cert/hostname or durable storage is unavailable.
-- Authenticated Admin can change password via Settings/Admin API; emergency reset runs only in the no-web maintenance profile. Password change invalidates existing sessions. The Admin bootstrap environment variable remains **initialization-only**.
+- **No Settings UI and no Admin password-change HTTP API** at HEAD `c7381fc7` (`POST /api/admin/account/password` was removed). Login/logout, CSRF/session and `AdminBootstrap` remain. Emergency Admin password recovery still uses `AdminPasswordResetRunner` under the **no-web** `admin-reset` profile, with `USBSHIELD_ADMIN_RESET_USERNAME`/`USBSHIELD_ADMIN_RESET_PASSWORD`; a successful reset increments credential version and invalidates existing sessions. `USBSHIELD_ADMIN_PASSWORD` remains **initialization-only**.
 - Enrollment never silently rotates an existing machine's credential. A duplicate
   machine ID returns 409 and needs a controlled administrator recovery process.
 - Agent tokens are returned only at enrollment and persisted as BCrypt hashes.
@@ -121,37 +121,34 @@ backup/restore tooling rather than copying live database files.
 
 - Test-only PostgreSQL role: `usbshield_test`. Maven integration test classes use distinct `usbshield_it_*` schemas in `usbshield_test`, cleaned after the class. Browser-live uses `usbshield_e2e_*` schemas in `usbshield_browser_test`, cleaned on normal completion; abnormal termination may leave schemas needing reviewed manual cleanup. Both use Flyway in test schema; never run destructive tests against `usbshield`.
 - `scripts/with-env.ps1 -RequireTestDb -Command { ... }` loads root `.env` (untracked/secret); Maven and npm do **not** read it automatically. The role must have schema CREATE only on dedicated test DBs. No baseline step for tests.
+- **Runtime E2E file is separate:** `.env.e2e.local` is not test `.env`. Running `java -jar ... --spring.profiles.active=prod` does not read that file; use `scripts/with-env.ps1 -EnvFile .env.e2e.local -Command { ... }` or set the variables in the OS/shell. Build-time `.env` values are not embedded in the JAR. See [release guide](ADMIN_SERVER_RELEASE.md).
 - Agent `live` requires `USBSHIELD_SERVER_URL=https://<matching-SAN>` and optional `USBSHIELD_TLS_CA_CERTIFICATE` absolute PEM path for private CA. Do not turn off hostname or trust validation. Debian `agent.env` is root-owned mode 0600 and should exist **before** `.deb` postinst starts/restarts Agent.
 - Nginx sample `packaging/nginx/usbshield-https-acl.conf.example` uses source-IP ACL; Admin allowlist **cannot include Client IP**. Spring `prod` binds loopback, TLS terminates at Nginx. No rate limiting is implemented (accepted owner decision; brute-force risk remains for allowlisted Admin sources).
 - Test-only synthetic HTTP events/ACK do not validate Ubuntu USBGuard or Linux notifier stale socket recovery (`@EnabledOnOs(LINUX)` can skip three tests on Windows). Run the Linux acceptance checklist separately.
 
+## Build, verify and provenance (source HEAD 20/11/2026)
 
-## Build, verify and provenance
-
-`admin-server/build-release.ps1` builds the React production assets, runs Maven's
-clean package lifecycle with `-Pwith-frontend`, and creates a SHA-256 provenance
-manifest at `docs/member1/week4-evidence/server-release-manifest.json`. The script
-requires a clean Git tree so the recorded source commit/tree identifies the build.
-It records Java/Maven/Node/npm versions, target Java release, JAR size and digest.
-
-After the build, run the isolated production-profile HTTP check:
+Use the following **current** entrypoints at repository root:
 
 ```powershell
-./admin-server/verify-week3.ps1 `
-  -JavaHome 'C:\Path\To\JDK' `
-  -EvidencePath 'docs/member1/week4-evidence/http'
+# Comprehensive Windows gate, including Agent and .deb validation:
+.\packaging\tests\verify-windows.ps1
+
+# Scope limited to Admin Maven/frontend/JAR/live suites (no Agent/.deb):
+.\packaging\tests\verify-windows.ps1 -AdminOnly
+
+# Distributable Admin JAR + .manifest.json + .sha256; requires clean Git tree:
+.\admin-server\build-release.ps1
+
+# Alternative external release location:
+.\admin-server\build-release.ps1 -OutputDirectory 'C:\USBShieldReleases'
 ```
 
-The check starts its own server process and uses the disposable PostgreSQL
-`usbshield_browser_test` database (role `usbshield_test`) with synthetic credentials/events;
-it **requires `USBSHIELD_TEST_DB_PASSWORD` and may create/drop tables in that test DB**.
-It restores selected shell variables. Never point this script at the `usbshield` app DB.
-Historical Week 4 pass logs refer to an earlier H2 runtime and are not proof of a
-PostgreSQL run. It checks the
-packaged index/assets, route redirect, 404 behavior, disabled production API docs,
-Admin session/CSRF, Agent authentication, event query, per-endpoint policy changes
-and ACK validation. It is a Windows HTTP check, not a physical USB or Ubuntu E2E
-test. Browser/UI regression remains separately owned by M4/M5.
+`build-release.ps1` runs `npm ci`, React production build and (by default) Maven's `-Pwith-frontend clean package` with **test-only PostgreSQL `.env`**. It does not package secrets. Default release directory is `admin-server/target/release/`, while the build JAR remains at `admin-server/target/usbshield-admin-server.jar`. A versioned `usbshield-admin-server_<commit>_<UTC>.jar`, manifest and `.sha256` record source and artifact provenance. `-AllowDirtyTree` or `-SkipTests` weakens release qualification and must be disclosed. JAR inspection uses `jar.exe` from the selected JDK, preventing mixed-JDK PATH errors.
+
+`verify-windows.ps1` requires Windows PowerShell **7.6+**, loads only test DB variables, runs Maven/frontend tests and verifies JAR content before the live browser/HTTP suites. These use `usbshield_browser_test` with random per-run schemas, Flyway and Hibernate `validate`; no `ddl-auto=create` legacy procedure is imported. Default mode additionally tests the Agent and checks Windows `.deb` packaging. `-SkipTests`, `-SkipBrowserLive` or `-SkipDebBuild` makes the run partial; **do not claim full Windows PASS**. See the [release guide](ADMIN_SERVER_RELEASE.md) for invocation/operational separation.
+
+Historical M1 Week 4 manifests and acceptance reports stay untouched; they refer to **previous** builds and tests. The removed `admin-server/verify-week1.ps1`, `verify-week2.ps1` and `verify-week3.ps1` are historical and **not** current verification entrypoints. No fresh Windows, HTTPS/LAN, physical USB or Ubuntu runtime PASS is claimed merely because the scripts are present in HEAD.
 
 ## Operations and troubleshooting
 
@@ -161,7 +158,7 @@ test. Browser/UI regression remains separately owned by M4/M5.
   rotate credentials silently; use the agreed administrator recovery workflow.
 - Endpoint shown OFFLINE: the last authenticated heartbeat is older than
   `USBSHIELD_OFFLINE_AFTER_SECONDS` (90 seconds by default). Connection status is separate from **Agent-reported USBGuard health**; stale/unknown health is not a healthy-enforcement assertion.
-- Admin login fails after changing the environment password: bootstrap only creates a first account. Use the authenticated password-change flow or offline maintenance reset; do not assume a restart resets credentials.
+- Admin login fails after changing the environment password: bootstrap only creates an initial account. There is **no authenticated password-change Web flow** after Settings removal; use the offline no-web `admin-reset` maintenance path for authorized recovery, not an `.env` edit and restart.
 - PostgreSQL login failure: check `USBSHIELD_DB_URL`, host/port, role, password,
   service status, firewall and `pg_hba.conf` authentication. IntelliJ may have a
   separate saved password from the terminal running Maven/JAR.
@@ -170,6 +167,7 @@ test. Browser/UI regression remains separately owned by M4/M5.
   browser-test role destructive access to the application database or drop app schema.
 - `/swagger-ui.html` and `/api-docs` return 404 under `prod` by design. Use the
   local profile for interactive API exploration.
+- `Driver org.postgresql.Driver claims to not accept jdbcUrl, ${USBSHIELD_DB_URL}`: the `prod` JDBC URL was not resolved in the Java process; load **runtime** settings (not test `.env`) before diagnosing database connectivity.
 
 ## Scope still deferred
 
