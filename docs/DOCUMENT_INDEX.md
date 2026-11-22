@@ -19,7 +19,7 @@
 | **Snapshot 09/11: trạng thái code, review F01–F14 và Windows PASS lịch sử** | **[IMPLEMENTATION_STATUS_20261109.md](IMPLEMENTATION_STATUS_20261109.md)**; [QA ledger](qa/2026-11-09-review-and-packaging-sync.md). Không coi là test mới cho HEAD 20/11. |
 | Cấu hình HTTPS/ACL contract và API phân trang | [PHASE3_HTTPS_ACL_AND_PAGING.md](PHASE3_HTTPS_ACL_AND_PAGING.md) |
 | Phạm vi chức năng và hợp đồng | [Blueprint](../USBShield_Blueprint_Allow_Revoke_Reinsert_20261103.md), [API v0.2 — frozen](API.md), [API addendum — Phase 1–3](API_PHASE1_TO_PHASE3_ADDENDUM.md), [Agent–Server protocol v0.2](AGENT_SERVER_PROTOCOL.md) |
-| Hướng dẫn phát triển / dùng Web | [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md), [ADMIN_GUIDE.md](ADMIN_GUIDE.md) |
+| Hướng dẫn phát triển / dùng Web | [DEVELOPER_CODING_GUIDE.md](DEVELOPER_CODING_GUIDE.md) (quy chuẩn code, test và E2E), [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md), [ADMIN_GUIDE.md](ADMIN_GUIDE.md) |
 | PostgreSQL migration cho **database hiện hữu, có dữ liệu** | [POSTGRES_FLYWAY_BASELINE.md](../admin-server/ops/POSTGRES_FLYWAY_BASELINE.md) — preflight + backup + baseline V1 một lần; **không** baseline DB trống/test |
 | Danh mục/plan kiểm thử | [TEST_CATALOG.md](TEST_CATALOG.md) (entrypoints hiện hành), [TEST_PLAN.md](TEST_PLAN.md) (kế hoạch lịch sử), [Ubuntu acceptance](qa/WEEK4_UBUNTU_ACCEPTANCE.md) (native extended) |
 | Tham chiếu USBGuard / M2 | [usbguard/WEEK4_M2_TECHNICAL_QA.md](usbguard/WEEK4_M2_TECHNICAL_QA.md) |

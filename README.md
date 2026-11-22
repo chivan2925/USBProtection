@@ -68,6 +68,7 @@ Windows gate không thay thế HTTPS/ACL từ Client IP hoặc Ubuntu USBGuard E
 - [Admin Server release, JAR và runtime](docs/ADMIN_SERVER_RELEASE.md) · [Flyway baseline cho PostgreSQL hiện hữu](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md)
 - [HTTPS/ACL và API phân trang](docs/PHASE3_HTTPS_ACL_AND_PAGING.md) · [Cấu hình HTTPS lab](docs/USBShield_HTTPS_ACL_Setup_usbprotection.lab_vinhkhang_4d2216c_20261109.md)
 - [Architecture — current runtime](docs/ARCHITECTURE.md) · [Tổng rà soát và phân loại docs (20/11)](docs/DOCUMENTATION_AUDIT_20261120.md)
+- [Developer Coding Guide](docs/DEVELOPER_CODING_GUIDE.md) — hướng dẫn lập trình, quy chuẩn code, test và luồng tính năng E2E cho dev
 - [Developer Guide](docs/DEVELOPER_GUIDE.md) — kỹ thuật mã nguồn và API, không phải runbook vận hành
 - [API v0.2 — hợp đồng đóng băng](docs/API.md) · [Addendum API Phase 1–3](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) · [Agent–Server protocol v0.2](docs/AGENT_SERVER_PROTOCOL.md)
 - [Admin Guide](docs/ADMIN_GUIDE.md) — hướng dẫn **sử dụng Web**, không phải chạy service · [Demo hiện hành](docs/DEMO_RUNBOOK_20261120.md) · [Kịch bản Week 4 lịch sử](docs/DEMO_SCRIPT.md)
