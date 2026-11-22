@@ -44,7 +44,8 @@ PostgreSQL phải được cài/khởi động và có database cùng role riên
 - [Trạng thái cập nhật 09/11 và phân loại review F01–F14](docs/IMPLEMENTATION_STATUS_20261109.md) · [Bản lịch sử 04/11](docs/IMPLEMENTATION_STATUS_20261104.md)
 - [Flyway baseline cho PostgreSQL hiện hữu](admin-server/ops/POSTGRES_FLYWAY_BASELINE.md) · [HTTPS/ACL và API phân trang](docs/PHASE3_HTTPS_ACL_AND_PAGING.md)
 - [Architecture](docs/ARCHITECTURE.md)
-- [Developer Guide](docs/DEVELOPER_GUIDE.md) — kỹ thuật mã nguồn và API, không phải runbook vận hành
+- [Developer Coding Guide](docs/DEVELOPER_CODING_GUIDE.md) — hướng dẫn lập trình, quy chuẩn code, test và luồng tính năng E2E cho dev
+- [Developer Guide (Admin Server)](docs/DEVELOPER_GUIDE.md) — kỹ thuật mã nguồn và API Admin Server gốc
 - [API v0.2](docs/API.md) · [Addendum API Phase 1–3](docs/API_PHASE1_TO_PHASE3_ADDENDUM.md) · [Agent–Server protocol](docs/AGENT_SERVER_PROTOCOL.md)
 - [Admin Guide](docs/ADMIN_GUIDE.md) — hướng dẫn **sử dụng Web**, không phải hướng dẫn chạy service
 - [Ubuntu acceptance](docs/qa/WEEK4_UBUNTU_ACCEPTANCE.md) — **phần mở rộng** vẫn DEFERRED BY OWNER
