@@ -17,6 +17,7 @@
 - Giữ ranh giới Central, Agent Ubuntu, USBGuard và notifier.
 - Domain/use case giữ invariant. HTTP, DB, USBGuard, IPC và UI là adapter.
 - Giữ behavior cũ khi refactor và kiểm tra qua entry point thực.
+- Khi viết hoặc refactor code, áp dụng skill `usbshield-implement`.
 - Policy owner là Server. Agent reconcile snapshot và báo version/health.
 - ACK của rules và actual block trên thiết bị đang cắm cần chứng cứ riêng.
 - Workspace, endpoint và quyền lấy từ identity phía Server khi triển khai isolation.
@@ -46,6 +47,7 @@
 - Gửi baseline, fingerprint và exact diff, acceptance, test evidence và giới hạn quyền.
 - Xác nhận reviewer đọc đúng candidate. Không chỉnh candidate khi reviewer đang đọc.
 - Chờ kết quả, kiểm chứng và xử lý findings trong scope, test lại và re-review delta cuối.
+- Tối đa ba vòng review subagent mỗi slice, tính cả review đầu. Kết thúc khi candidate cuối được chấp nhận. Nếu vòng ba chưa chấp nhận, dừng trước publication và báo Owner.
 - Reviewer báo severity và path/line trong chat. Reviewer không sửa/commit/push.
 - Nếu delegation bất khả thi, ghi SELF_REVIEW_ONLY hoặc SUBAGENT_UNAVAILABLE và dừng trước publication khi gate cần independent review.
 
@@ -61,6 +63,7 @@
 
 - [Intake và resume](.agents/skills/usbshield-intake/SKILL.md)
 - [Kiến trúc và bảo mật](.agents/skills/usbshield-architecture/SKILL.md)
+- [Viết và refactor code](.agents/skills/usbshield-implement/SKILL.md)
 - [Verification và evidence](.agents/skills/usbshield-verify/SKILL.md)
 - [Review độc lập](.agents/skills/usbshield-review/SKILL.md)
 - [Đồng bộ docs và sơ đồ](.agents/skills/usbshield-docs/SKILL.md)
