@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 646" width="920" height="646" role="img" aria-labelledby="policy-sync-title policy-sync-desc" id="policy-sync-root">
+  <title id="policy-sync-title">Allow, Revoke và đồng bộ policy</title>
+  <desc id="policy-sync-desc">Baseline từ desired version đến ACK của USBGuard rules.</desc>
+  <defs>
+    <marker id="policy-sync-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 1 L 8 5 L 0 9 Z" fill="#526b75" />
+    </marker>
+  </defs>
+  <rect width="920" height="646" fill="#f3f7f7" />
+  <text x="40" y="37" font-size="21" font-weight="700" fill="#142f39">Allow, Revoke và đồng bộ policy</text>
+  <g fill="none" stroke="#526b75" stroke-width="1.8" marker-end="url(#policy-sync-arrow)">
+    <path d="M 250 120 V 144" />
+    <path d="M 250 208 V 232" />
+    <path d="M 250 296 V 320" />
+    <path d="M 250 396 V 420" />
+    <path d="M 250 496 V 520" />
+    <path d="M 460 264 H 552" />
+    <path d="M 460 358 H 552" />
+    <path d="M 460 458 H 552" />
+  </g>
+  <g fill="#274b58" font-size="14">
+    <text x="505" y="254" text-anchor="middle" font-size="14">Mất LAN</text>
+    <text x="505" y="348" text-anchor="middle" font-size="14">Lỗi</text>
+    <text x="505" y="448" text-anchor="middle" font-size="14">Lỗi</text>
+  </g>
+  <g>
+    <rect x="40" y="56" width="420" height="64" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="56" y="80" font-size="18" font-weight="700" fill="#142f39">Central · Admin Allow hoặc Revoke</text>
+    <text x="56" y="102" font-size="15" fill="#274b58">Chọn endpoint và thiết bị đã quan sát.</text>
+  </g>
+  <g>
+    <rect x="40" y="144" width="420" height="64" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="56" y="168" font-size="18" font-weight="700" fill="#142f39">Central · Desired whitelist</text>
+    <text x="56" y="190" font-size="15" fill="#274b58">Mục HASH thay đổi thì tăng desired version.</text>
+  </g>
+  <g>
+    <rect x="40" y="232" width="420" height="64" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="56" y="256" font-size="18" font-weight="700" fill="#142f39">Ubuntu · Heartbeat</text>
+    <text x="56" y="278" font-size="15" fill="#274b58">Gửi local version/health, nhận desired version.</text>
+  </g>
+  <g>
+    <rect x="40" y="320" width="420" height="76" rx="6" fill="#e5f1f2" stroke="#397680" />
+    <text x="56" y="344" font-size="18" font-weight="700" fill="#142f39">Ubuntu · Pull và reconcile</text>
+    <text x="56" y="366" font-size="15" fill="#274b58">Khi version mới hoặc đến kỳ verify.</text>
+    <text x="56" y="386" font-size="15" fill="#274b58">Validate snapshot và kiểm tra USBGuard rules.</text>
+  </g>
+  <g>
+    <rect x="40" y="420" width="420" height="76" rx="6" fill="#e5f1f2" stroke="#397680" />
+    <text x="56" y="444" font-size="18" font-weight="700" fill="#142f39">Ubuntu · Lưu applied version và gửi ACK</text>
+    <text x="56" y="466" font-size="15" fill="#274b58">Lưu pending ACK trước khi POST.</text>
+    <text x="56" y="486" font-size="15" fill="#274b58">Chờ server xác nhận revision.</text>
+  </g>
+  <g>
+    <rect x="40" y="520" width="420" height="80" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="56" y="544" font-size="18" font-weight="700" fill="#142f39">Central · Ghi applied version</text>
+    <text x="56" y="566" font-size="15" fill="#274b58">ACK xác nhận rules, không xác nhận direct block.</text>
+    <text x="56" y="586" font-size="15" fill="#274b58">Kiểm tra kết quả baseline sau khi cắm lại.</text>
+  </g>
+  <g>
+    <rect x="552" y="232" width="328" height="64" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="568" y="256" font-size="18" font-weight="700" fill="#142f39">Offline · Tiếp tục enforcement</text>
+    <text x="568" y="278" font-size="15" fill="#274b58">Dùng rules local, chờ heartbeat sau.</text>
+  </g>
+  <g>
+    <rect x="552" y="320" width="328" height="76" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="568" y="344" font-size="18" font-weight="700" fill="#142f39">Lỗi reconcile hoặc persist</text>
+    <text x="568" y="366" font-size="15" fill="#274b58">Giữ lỗi và thử lại.</text>
+    <text x="568" y="386" font-size="15" fill="#274b58">Không ACK revision mới.</text>
+  </g>
+  <g>
+    <rect x="552" y="420" width="328" height="76" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="568" y="444" font-size="18" font-weight="700" fill="#142f39">Lỗi gửi ACK</text>
+    <text x="568" y="466" font-size="15" fill="#274b58">Giữ pending ACK và thử lại</text>
+    <text x="568" y="486" font-size="15" fill="#274b58">sau khi verify rules.</text>
+  </g>
+</svg>

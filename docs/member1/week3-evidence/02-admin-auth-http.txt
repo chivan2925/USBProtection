@@ -1,2 +1,0 @@
-PASS: real HTTP login, invalid password, session, me; credentials omitted.
-PASS: logout invalidates session; me returns 401.

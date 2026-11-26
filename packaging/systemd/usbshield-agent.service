@@ -1,6 +1,6 @@
 [Unit]
 Description=USBShield Client Agent Protection Service
-Documentation=https://github.com/chivan2925/USBProtection
+Documentation=https://github.com/chivan2925/USBShield
 After=network-online.target usbguard.service
 Wants=network-online.target
 Requires=usbguard.service

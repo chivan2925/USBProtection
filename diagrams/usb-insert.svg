@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 610" width="920" height="610" role="img" aria-labelledby="usb-insert-title usb-insert-desc" id="usb-insert-root">
+  <title id="usb-insert-title">USB insert và ghi sự kiện</title>
+  <desc id="usb-insert-desc">Baseline từ USBGuard đến Agent, Admin Web và thông báo desktop.</desc>
+  <defs>
+    <marker id="usb-insert-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M 0 1 L 8 5 L 0 9 Z" fill="#526b75" />
+    </marker>
+  </defs>
+  <rect width="920" height="610" fill="#f3f7f7" />
+  <text x="40" y="37" font-size="21" font-weight="700" fill="#142f39">USB insert và ghi sự kiện</text>
+  <g fill="none" stroke="#526b75" stroke-width="1.8" marker-end="url(#usb-insert-arrow)">
+    <path d="M 235 120 V 144" />
+    <path d="M 235 248 V 272" />
+    <path d="M 235 348 V 380" />
+    <path d="M 235 456 V 488" />
+    <path d="M 430 418 H 524" />
+  </g>
+  <g fill="#274b58" font-size="14">
+    <text x="281" y="477" text-anchor="middle" font-size="14">HTTPS</text>
+    <text x="477" y="407" text-anchor="middle" font-size="14">Đã ghi</text>
+  </g>
+  <g>
+    <rect x="40" y="56" width="390" height="64" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="56" y="80" font-size="18" font-weight="700" fill="#142f39">Ubuntu · Cắm thiết bị</text>
+    <text x="56" y="102" font-size="15" fill="#274b58">USBGuard đọc interface và HASH.</text>
+  </g>
+  <g>
+    <rect x="40" y="144" width="390" height="104" rx="6" fill="#e5f1f2" stroke="#397680" />
+    <text x="56" y="168" font-size="18" font-weight="700" fill="#142f39">USBGuard · Quyết định</text>
+    <text x="56" y="190" font-size="15" fill="#274b58">Không có Mass Storage → allow theo base rule.</text>
+    <text x="56" y="210" font-size="15" fill="#274b58">Mass Storage → kiểm managed HASH allow.</text>
+    <text x="56" y="230" font-size="15" fill="#274b58">Không có allow khớp → block mặc định.</text>
+  </g>
+  <g>
+    <rect x="40" y="272" width="390" height="76" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="56" y="296" font-size="18" font-weight="700" fill="#142f39">Agent · Quan sát kết quả</text>
+    <text x="56" y="318" font-size="15" fill="#274b58">Watch presence/policy và recovery qua IPC.</text>
+    <text x="56" y="338" font-size="15" fill="#274b58">Resolve active session hoặc UNKNOWN.</text>
+  </g>
+  <g>
+    <rect x="40" y="380" width="390" height="76" rx="6" fill="#e5f1f2" stroke="#397680" />
+    <text x="56" y="404" font-size="18" font-weight="700" fill="#142f39">Agent · Ghi outbox</text>
+    <text x="56" y="426" font-size="15" fill="#274b58">Sự kiện bền vững trước khi gửi qua HTTPS.</text>
+    <text x="56" y="446" font-size="15" fill="#274b58">Mất LAN → giữ trong quota và thử lại.</text>
+  </g>
+  <g>
+    <rect x="40" y="488" width="390" height="80" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="56" y="512" font-size="18" font-weight="700" fill="#142f39">Central · Hiển thị sự kiện</text>
+    <text x="56" y="534" font-size="15" fill="#274b58">Server kiểm endpoint và eventId.</text>
+    <text x="56" y="554" font-size="15" fill="#274b58">Lưu PostgreSQL, hiện trong Admin Web.</text>
+  </g>
+  <g>
+    <rect x="524" y="380" width="356" height="76" rx="6" fill="#ffffff" stroke="#8ba5ab" />
+    <text x="540" y="404" font-size="18" font-weight="700" fill="#142f39">Notifier · Desktop Ubuntu</text>
+    <text x="540" y="426" font-size="15" fill="#274b58">Mass Storage bị block/reject, có phiên.</text>
+    <text x="540" y="446" font-size="15" fill="#274b58">Unix socket local → notification best-effort.</text>
+  </g>
+</svg>

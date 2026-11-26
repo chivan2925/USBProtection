@@ -8,7 +8,7 @@
     The package file layout, owners (root:root) and Unix modes match
     packaging/scripts/build-deb.sh on main 1ae8f981.
 .NOTES
-    Run from a checkout of chivan2925/USBProtection on Windows with JDK 21,
+    Run from a checkout of chivan2925/USBShield on Windows with JDK 21,
     Maven and PowerShell 7.4+. This is a proposed replacement packaging PATH;
     it does not change the existing Linux build-deb.sh.
 #>
