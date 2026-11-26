@@ -29,3 +29,10 @@ Allow được xác thực theo endpoint đã báo thiết bị và HASH hợp l
 ## Mục tiêu v2.5
 
 [Blueprint](../BLUEPRINT.md) quy định JavaFX trên Windows, một workspace sở hữu endpoint, vận hành không cần Internet khi LAN còn, và giữ policy/outbox local khi mất LAN. Revoke mục tiêu chặn USB đang cắm khi Agent nhận và thực thi policy, với kết quả actual block riêng và retry khi lỗi. Allow mục tiêu vẫn cần rút/cắm lại. File monitoring và bộ cài Windows tích hợp là các slice sau. Thiết kế chi tiết cần ADR và quyết định Owner.
+
+### ADR đề xuất, chờ Owner duyệt
+
+- [Workspace, enrollment và chuyển đổi dữ liệu](adr/0001-workspace-enrollment.md)
+- [Policy versioning và xác nhận Revoke](adr/0002-policy-sync-revoke.md)
+- [Quan sát file USB và giới hạn dữ liệu](adr/0003-file-observation-privacy.md)
+- [Central Desktop và cài đặt Windows](adr/0004-desktop-windows-installation.md)
