@@ -1,5 +1,7 @@
 package com.group.usbshield.server.agentapi;
 
+import com.group.usbshield.server.WorkspaceTestData;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group.usbshield.server.endpoint.EndpointRepository;
@@ -30,13 +32,13 @@ class AgentHttpIntegrationTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, AgentHttpIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired TestRestTemplate http;
     @Autowired ObjectMapper mapper;
     @Autowired DataSource dataSource;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbEventRepository events;
     @Autowired UsbDeviceRepository devices;
-    @Autowired org.springframework.security.crypto.password.PasswordEncoder encoder;
 
     @Test
     void heartbeatAndMember2EventReachHttpServerAndPersistInPostgreSQL() throws Exception {
@@ -52,12 +54,13 @@ class AgentHttpIntegrationTest {
         String endpointId = source.get("endpointId").asText();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        String token = java.util.UUID.randomUUID().toString();
-        endpoints.save(com.group.usbshield.server.endpoint.Endpoint.builder()
+        String token = WorkspaceTestData.digest(java.util.UUID.randomUUID().toString());
+        endpoints.save(workspace.endpoint()
                 .endpointId(endpointId).hostname(source.get("hostname").asText())
-                .agentTokenHash(encoder.encode(token)).build());
+                .agentTokenHash(WorkspaceTestData.digest(token)).build());
         headers.set("X-Endpoint-Id", endpointId);
         headers.set("X-Agent-Token", token);
+        headers.set("X-USBShield-Protocol", "2");
 
         var heartbeat = mapper.createObjectNode();
         heartbeat.put("endpointId", endpointId);

@@ -11,7 +11,7 @@ import java.time.Instant;
     @Index(name = "idx_event_decision", columnList = "decision"),
     @Index(name = "idx_event_user", columnList = "linuxUsername")
 }, uniqueConstraints = {
-    @UniqueConstraint(name = "uk_endpoint_event_key", columnNames = {"endpointId", "eventId"})
+    @UniqueConstraint(name = "uk_endpoint_event_key", columnNames = {"workspaceId", "endpointId", "eventId"})
 })
 @Getter
 @Setter
@@ -23,6 +23,12 @@ public class UsbEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(insertable = false, updatable = false)
+    private Long ingestOrder;
+
+    @Column(nullable = false, updatable = false)
+    private long workspaceId;
 
     @Column(nullable = false, length = 100)
     private String endpointId;

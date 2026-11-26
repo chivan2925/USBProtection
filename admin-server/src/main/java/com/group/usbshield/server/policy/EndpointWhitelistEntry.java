@@ -10,7 +10,7 @@ import java.time.Instant;
     @Index(name = "idx_endpoint_whitelist", columnList = "endpointId, enabled"),
     @Index(name = "idx_endpoint_fingerprint", columnList = "endpointId, fingerprintValue")
 }, uniqueConstraints = {
-    @UniqueConstraint(name = "uk_endpoint_fingerprint", columnNames = {"endpointId", "fingerprintValue"})
+    @UniqueConstraint(name = "uk_endpoint_fingerprint", columnNames = {"workspaceId", "endpointId", "fingerprintValue"})
 })
 @Getter
 @Setter
@@ -23,9 +23,13 @@ public class EndpointWhitelistEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, updatable = false)
+    private long workspaceId;
+
     @Column(nullable = false, length = 100)
     private String endpointId;
 
+    @Column(nullable = false)
     private Long usbDeviceId;
 
     @Column(nullable = false, length = 50)

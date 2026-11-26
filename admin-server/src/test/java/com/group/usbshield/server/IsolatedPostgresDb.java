@@ -3,6 +3,7 @@ package com.group.usbshield.server;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.Import;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,8 +16,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ExtendWith(TestPostgresSchemaCleanup.class)
+@Import(WorkspaceTestData.class)
 @TestPropertySource(properties = {
     "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect",
-    "usbshield.enrollment-token=integration-test-bootstrap"
+    "usbshield.admin.username=" + WorkspaceTestData.ADMIN,
+    "usbshield.admin.password=" + WorkspaceTestData.PASSWORD
 })
 public @interface IsolatedPostgresDb {}

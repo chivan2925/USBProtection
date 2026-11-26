@@ -1,4 +1,8 @@
-# USBShield PostgreSQL: first Flyway adoption (Phase 2 / F07)
+# USBShield PostgreSQL and Flyway
+
+For P1, use a fresh PostgreSQL database. V3 refuses to migrate a V1/V2 schema containing endpoint, device, event or whitelist rows. Keep the existing database and verified backup until the ownership mapping and cutover are approved. The historical V1/V2 adoption procedure below requires an artifact built from the V1/V2 code.
+
+## Historical V1/V2 adoption
 
 This runbook is **only for an existing unversioned application database** (for example `usbshield`) which Hibernate formerly maintained with `ddl-auto=update`. It does **not** apply to a fresh empty database or to the dedicated integration/browser test databases.
 
@@ -42,7 +46,7 @@ This runbook is **only for an existing unversioned application database** (for e
 
 ## Fresh database
 
-On a brand-new, otherwise empty PostgreSQL database, do **not** baseline. Boot uses Flyway V1 to create tables and V2 to add `credential_version` and USBGuard health fields, then Hibernate `validate`. No `ddl-auto=update/create/drop` is permitted for the normal Admin Server runtime.
+On a fresh PostgreSQL database, boot runs Flyway V1 for base tables, V2 for credential version and USBGuard health fields, and V3 for workspace, enrollment and composite foreign keys. Hibernate then validates the schema. Keep `spring.flyway.baseline-on-migrate=false` and `spring.jpa.hibernate.ddl-auto=validate`.
 
 ## Why V1 + V2
 

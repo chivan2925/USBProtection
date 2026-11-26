@@ -13,4 +13,4 @@ Mở URL HTTPS do IT cung cấp từ mạng Admin. Đăng nhập bằng tài kho
 
 USB Events cho biết thời điểm, quyết định và thiết bị khi có dữ liệu. Attribution là user/session Ubuntu đang hoạt động theo Agent hoặc `UNKNOWN`. Notification desktop là best-effort. Nếu không thấy sự kiện, kiểm tra health, kết nối và bộ lọc endpoint/time. Chuyển sang [IT setup](IT_SETUP_GUIDE.md) để kiểm tra kết nối hoặc reset mật khẩu.
 
-Quản trị baseline dùng phạm vi dữ liệu chung cho tài khoản Admin. JavaFX, workspace riêng, Revoke trực tiếp và inventory/file activity thuộc [mục tiêu v2.5](../BLUEPRINT.md).
+Mỗi tài khoản Admin có một workspace. Dashboard, Endpoints, Whitelist, Devices và Events hiển thị dữ liệu của workspace đã đăng nhập. IT cấp endpoint vào workspace qua vé enrollment. JavaFX, Revoke trực tiếp và file activity thuộc [mục tiêu v2.5](../BLUEPRINT.md). [Quy trình cấp endpoint](IT_SETUP_GUIDE.md)

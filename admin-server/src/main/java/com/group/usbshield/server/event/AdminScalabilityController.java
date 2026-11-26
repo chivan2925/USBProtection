@@ -1,5 +1,8 @@
 package com.group.usbshield.server.event;
 
+import com.group.usbshield.server.auth.AdminIdentity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -47,16 +50,17 @@ public class AdminScalabilityController {
     // ROW_NUMBER chooses the latest event within a device lifecycle identity.
     private static final String LATEST = """
         WITH ranked AS (
-          SELECT e.id AS event_id, e.endpoint_id, e.usb_device_id, e.event_type,
+          SELECT e.ingest_order, e.endpoint_id, e.usb_device_id, e.event_type,
                  e.decision, e.occurred_at, COALESCE(e.hostname, ep.hostname) AS endpoint_name,
                  d.device_name, d.device_hash, d.vendor_id, d.product_id, d.serial_number,
                  """ + IDENTITY + """
                  AS identity_key,
                  ROW_NUMBER() OVER (PARTITION BY e.endpoint_id, """ + IDENTITY + """
-                   ORDER BY e.occurred_at DESC, e.id DESC) AS rn
+                   ORDER BY e.occurred_at DESC, e.ingest_order DESC) AS rn
           FROM usb_events e
-          JOIN usb_devices d ON d.id = e.usb_device_id
-          LEFT JOIN endpoints ep ON ep.endpoint_id = e.endpoint_id
+          JOIN usb_devices d ON d.workspace_id = e.workspace_id AND d.id = e.usb_device_id
+          LEFT JOIN endpoints ep ON ep.workspace_id = e.workspace_id AND ep.endpoint_id = e.endpoint_id
+          WHERE e.workspace_id = :workspaceId
         ), current_devices AS (
           SELECT *, CASE WHEN event_type = 'DISCONNECTED' THEN 'disconnected'
                          WHEN decision = 'BLOCKED' THEN 'blocked'
@@ -118,14 +122,14 @@ public class AdminScalabilityController {
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     @GetMapping("/device-states")
-    public DevicePage devices(@RequestParam(defaultValue = "0") int page,
+    public DevicePage devices(@AuthenticationPrincipal AdminIdentity admin, @RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "20") int size,
                               @RequestParam(required = false) String endpointId,
                               @RequestParam(required = false) String status,
                               @RequestParam(required = false) String q) {
         if (page < 0 || size < 1 || size > 100)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid page or size");
-        MapSqlParameterSource args = filters(endpointId, status, q);
+        MapSqlParameterSource args = filters(endpointId, status, q).addValue("workspaceId", admin.workspaceId());
         String where = where(endpointId, status, args.getValue("search"));
         long total = jdbc.queryForObject(LATEST + "SELECT COUNT(*) FROM current_devices " + where, args, Long.class);
         args.addValue("limit", size).addValue("offset", (long) page * size);
@@ -133,7 +137,7 @@ public class AdminScalabilityController {
             SELECT endpoint_id, identity_key, usb_device_id, device_hash, device_name, endpoint_name,
                    vendor_id, product_id, serial_number, status, decision, occurred_at
             FROM current_devices
-            """ + where + " ORDER BY occurred_at DESC, event_id DESC LIMIT :limit OFFSET :offset", args,
+            """ + where + " ORDER BY occurred_at DESC, ingest_order DESC LIMIT :limit OFFSET :offset", args,
             AdminScalabilityController::deviceRow);
         long pages = (total + size - 1) / size;
         if (pages > Integer.MAX_VALUE) throw new ResponseStatusException(HttpStatus.CONFLICT, "Too many pages");
@@ -142,10 +146,11 @@ public class AdminScalabilityController {
 
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
     @GetMapping("/dashboard/summary")
-    public Summary summary(@RequestParam Instant from, @RequestParam Instant to) {
+    public Summary summary(@AuthenticationPrincipal AdminIdentity admin, @RequestParam Instant from, @RequestParam Instant to) {
         if (!from.isBefore(to))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid day range");
         MapSqlParameterSource args = new MapSqlParameterSource()
+            .addValue("workspaceId", admin.workspaceId())
             .addValue("from", from.atOffset(ZoneOffset.UTC), Types.TIMESTAMP_WITH_TIMEZONE)
             .addValue("to", to.atOffset(ZoneOffset.UTC), Types.TIMESTAMP_WITH_TIMEZONE);
         // PostgreSQL preserves lower-case unquoted aliases; do not depend on
@@ -162,6 +167,6 @@ public class AdminScalabilityController {
                 return new long[] { rs.getLong("total_devices"), rs.getLong("blocked_devices"),
                     rs.getLong("allowed_devices"), rs.getLong("blocked_today") };
             });
-        return new Summary(totals[0], totals[1], totals[2], events.count(), totals[3]);
+        return new Summary(totals[0], totals[1], totals[2], events.countByWorkspaceId(admin.workspaceId()), totals[3]);
     }
 }

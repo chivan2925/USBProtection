@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -110,11 +109,12 @@ public class SystemInfoProvider {
         Path machineIdPath = Path.of("/etc/machine-id");
         try {
             if (Files.exists(machineIdPath)) {
-                return Files.readString(machineIdPath).trim();
+                String machineId = Files.readString(machineIdPath).trim();
+                return machineId.isEmpty() ? null : machineId;
             }
         } catch (Exception e) {
             log.warn("Could not read /etc/machine-id: {}", e.getMessage());
         }
-        return UUID.randomUUID().toString();
+        return null;
     }
 }

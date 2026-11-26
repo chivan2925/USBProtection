@@ -5,15 +5,15 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import java.time.Instant;
 @RestController @RequestMapping("/api/agent/heartbeat") @RequiredArgsConstructor
 public class AgentHeartbeatController {
-    private final EndpointRepository endpoints;
+    private final AgentCredentialService credentials;
     @PostMapping @Transactional
-    public AgentHeartbeatResponse heartbeat(@Valid @RequestBody AgentHeartbeatRequest request,Principal principal){
-        AgentCredentialService.bind(principal.getName(),request.getEndpointId());
-        var e=endpoints.lockByEndpointId(principal.getName()).orElseThrow();
+    public AgentHeartbeatResponse heartbeat(@Valid @RequestBody AgentHeartbeatRequest request,@AuthenticationPrincipal AgentIdentity agent){
+        AgentCredentialService.bind(agent.endpointId(),request.getEndpointId());
+        var e=credentials.lockCurrent(agent);
         e.setLastSeen(Instant.now());e.setStatus("ONLINE");
         if(request.getHostname()!=null && !request.getHostname().isBlank())e.setHostname(request.getHostname());
         if(request.getIpAddress()!=null && !request.getIpAddress().isBlank())e.setIpAddress(request.getIpAddress());

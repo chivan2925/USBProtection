@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface EndpointWhitelistEntryRepository extends JpaRepository<EndpointWhitelistEntry, Long> {
-    List<EndpointWhitelistEntry> findByEndpointIdAndEnabledTrue(String endpointId);
-    List<EndpointWhitelistEntry> findByEndpointId(String endpointId);
-    Optional<EndpointWhitelistEntry> findByEndpointIdAndFingerprintValue(String endpointId, String fingerprintValue);
+    List<EndpointWhitelistEntry> findByWorkspaceIdAndEndpointIdAndEnabledTrue(long workspaceId, String endpointId);
+    Optional<EndpointWhitelistEntry> findByWorkspaceIdAndEndpointIdAndFingerprintValue(long workspaceId, String endpointId, String fingerprintValue);
+    Optional<EndpointWhitelistEntry> findByWorkspaceIdAndEndpointIdAndId(long workspaceId, String endpointId, Long id);
 }

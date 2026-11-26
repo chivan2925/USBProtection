@@ -8,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 public class AgentEnrollmentResponse {
     private String endpointId;
+    @ToString.Exclude
     private String agentToken;
     private Long currentPolicyVersion;
 }

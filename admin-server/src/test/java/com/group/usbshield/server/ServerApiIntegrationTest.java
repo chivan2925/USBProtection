@@ -1,7 +1,7 @@
 package com.group.usbshield.server;
 
 import com.fasterxml.jackson.databind.*;
-import com.group.usbshield.server.auth.*;
+import com.group.usbshield.server.auth.AdminProvisioningService;
 import com.group.usbshield.server.endpoint.*;
 import com.group.usbshield.server.event.*;
 import com.group.usbshield.server.device.*;
@@ -12,7 +12,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.*;
 import org.springframework.mock.web.MockHttpSession;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import java.nio.file.*;
 import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @IsolatedPostgresDb
-@SpringBootTest(properties={"spring.jpa.hibernate.ddl-auto=create-drop","usbshield.enrollment-token=integration-test-bootstrap"})
+@SpringBootTest
 @AutoConfigureMockMvc
 class ServerApiIntegrationTest {
     @org.springframework.test.context.DynamicPropertySource
@@ -29,21 +28,25 @@ class ServerApiIntegrationTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, ServerApiIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper mapper;
-    @Autowired AdminUserRepository users;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbDeviceRepository devices;
     @Autowired UsbEventRepository events;
-    @Autowired PasswordEncoder encoder;
+    @Autowired AdminProvisioningService admins;
     MockHttpSession session;
     String csrf;
     record Agent(String id,String token){}
     @BeforeEach void setup() throws Exception {
-        if(!users.existsByUsername("test-admin"))users.save(AdminUser.builder().username("test-admin").passwordHash(encoder.encode("test-password")).build());
+        login(WorkspaceTestData.ADMIN);
+    }
+
+    private void login(String username) throws Exception {
         session=null;refreshCsrf();
         session=(MockHttpSession)mvc.perform(post("/api/auth/login").session(session).header("X-CSRF-TOKEN",csrf)
-            .contentType("application/json").content("{\"username\":\"test-admin\",\"password\":\"test-password\"}"))
+            .contentType("application/json").content(mapper.writeValueAsString(
+                    Map.of("username", username, "password", WorkspaceTestData.PASSWORD))))
             .andExpect(status().isOk()).andReturn().getRequest().getSession(false);
         refreshCsrf();
     }
@@ -53,15 +56,45 @@ class ServerApiIntegrationTest {
         session=(MockHttpSession)result.getRequest().getSession();csrf=mapper.readTree(result.getResponse().getContentAsString()).get("token").asText();
     }
     Agent enroll() throws Exception {
-        var result=mvc.perform(post("/api/agent/enroll").contentType("application/json").content(mapper.writeValueAsString(Map.of(
-            "machineId",UUID.randomUUID().toString(),"hostname","LAB-"+UUID.randomUUID(),"enrollmentToken","integration-test-bootstrap"))))
-            .andExpect(status().isOk()).andReturn();
-        var body=mapper.readTree(result.getResponse().getContentAsString());return new Agent(body.get("endpointId").asText(),body.get("agentToken").asText());
+        var installationId = UUID.randomUUID();
+        var slot = createSlot(installationId);
+        var id = slot.get("endpointId").asText();
+        var issued = response(mvc.perform(post("/api/admin/enrollment/{id}/ticket", id)
+                .session(session).header("X-CSRF-TOKEN", csrf)).andExpect(status().isCreated()));
+        var request = claimData(installationId, issued.get("enrollmentToken").asText());
+        var body = response(mvc.perform(claim(request)).andExpect(status().isOk()));
+        assertThat(body.get("endpointId").asText()).isEqualTo(id);
+        return new Agent(id, body.get("agentToken").asText());
+    }
+
+    private JsonNode createSlot(UUID installationId) throws Exception {
+        return response(mvc.perform(slot(installationId)).andExpect(status().isCreated()));
+    }
+
+    private org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder slot(UUID installationId) throws Exception {
+        return post("/api/admin/enrollment/slots").session(session).header("X-CSRF-TOKEN", csrf)
+                .contentType("application/json").content(mapper.writeValueAsString(
+                        Map.of("installationId", installationId, "hostname", "LAB")));
+    }
+
+    private Map<String, Object> claimData(UUID installationId, String ticket) {
+        return new HashMap<>(Map.of("machineId", UUID.randomUUID(), "hostname", "LAB",
+                "installationId", installationId, "requestId", UUID.randomUUID(),
+                "enrollmentToken", ticket, "agentToken", WorkspaceTestData.digest(UUID.randomUUID().toString())));
+    }
+
+    private org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder claim(Map<String, Object> body) throws Exception {
+        return post("/api/agent/enroll").header("X-USBShield-Protocol", "2")
+                .contentType("application/json").content(mapper.writeValueAsString(body));
+    }
+
+    private JsonNode response(ResultActions result) throws Exception {
+        return mapper.readTree(result.andReturn().getResponse().getContentAsString());
     }
     org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder agentPost(String path,Agent agent,Object body)throws Exception{
-        return post(path).header("X-Endpoint-Id",agent.id()).header("X-Agent-Token",agent.token()).contentType("application/json").content(mapper.writeValueAsString(body));
+        return post(path).header("X-USBShield-Protocol", "2").header("X-Endpoint-Id",agent.id()).header("X-Agent-Token",agent.token()).contentType("application/json").content(mapper.writeValueAsString(body));
     }
-    org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder policy(Agent a){return get("/api/agent/policy").header("X-Endpoint-Id",a.id()).header("X-Agent-Token",a.token());}
+    org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder policy(Agent a){return get("/api/agent/policy").header("X-USBShield-Protocol", "2").header("X-Endpoint-Id",a.id()).header("X-Agent-Token",a.token());}
     JsonNode sample(Agent a)throws Exception {
         Path p=Path.of("../docs/agent-contract/sample-usb-event.json");if(!Files.exists(p))p=Path.of("docs/agent-contract/sample-usb-event.json");
         var node=(com.fasterxml.jackson.databind.node.ObjectNode)mapper.readTree(Files.readString(p));node.put("endpointId",a.id());return node;
@@ -77,33 +110,120 @@ class ServerApiIntegrationTest {
         mvc.perform(get("/api/auth/me")).andExpect(status().isUnauthorized());
     }
     @Test void enrollmentRejectsInvalidAndDuplicateAndHashesCredential() throws Exception {
-        mvc.perform(post("/api/agent/enroll").contentType("application/json").content("{\"enrollmentToken\":\"wrong\"}" )).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/agent/enroll").contentType("application/json").content(mapper.writeValueAsString(Map.of("enrollmentToken","x".repeat(257))))).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/agent/enroll").contentType("application/json").content("{\"enrollmentToken\":\"integration-test-bootstrap\"}" )).andExpect(status().isBadRequest());
-        mvc.perform(post("/api/agent/enroll").contentType("application/json").content(mapper.writeValueAsString(Map.of("hostname","host","machineId","machine","ipAddress","1".repeat(51),"enrollmentToken","integration-test-bootstrap")))).andExpect(status().isBadRequest());
+        mvc.perform(post("/api/agent/enroll").contentType("application/json").content("{}"))
+                .andExpect(status().isUpgradeRequired());
+        mvc.perform(claim(Map.of())).andExpect(status().isBadRequest());
+        var invalid = claimData(UUID.randomUUID(), "wrong");
+        mvc.perform(claim(invalid)).andExpect(status().isUnauthorized());
+        invalid.put("enrollmentToken", "x".repeat(257));
+        mvc.perform(claim(invalid)).andExpect(status().isBadRequest());
+        invalid.put("enrollmentToken", "wrong");
+        invalid.put("ipAddress", "1".repeat(51));
+        mvc.perform(claim(invalid)).andExpect(status().isBadRequest());
         var a=enroll();var e=endpoints.findByEndpointId(a.id()).orElseThrow();
-        assertThat(e.getAgentTokenHash()).isNotEqualTo(a.token());assertThat(encoder.matches(a.token(),e.getAgentTokenHash())).isTrue();
-        mvc.perform(post("/api/agent/enroll").contentType("application/json").content(mapper.writeValueAsString(Map.of("machineId",e.getMachineId(),"hostname","duplicate","enrollmentToken","integration-test-bootstrap"))))
-            .andExpect(status().isConflict());
+        assertThat(e.getAgentTokenHash()).isEqualTo(WorkspaceTestData.digest(a.token()));
+        mvc.perform(slot(e.getInstallationId())).andExpect(status().isConflict());
     }
     @Test void agentRoutesRejectMissingInvalidAndCrossEndpointCredentials() throws Exception {
         var a=enroll();var b=enroll();
         for(String route:List.of("/api/agent/heartbeat","/api/agent/events","/api/agent/policy/ack")) {
-            mvc.perform(post(route).contentType("application/json").content("{}" )).andExpect(status().isUnauthorized());
-            mvc.perform(post(route).header("X-Endpoint-Id",a.id()).header("X-Agent-Token","wrong").contentType("application/json").content("{}" )).andExpect(status().isUnauthorized());
+            mvc.perform(post(route).header("X-USBShield-Protocol", "2").contentType("application/json").content("{}" )).andExpect(status().isUnauthorized());
+            mvc.perform(post(route).header("X-USBShield-Protocol", "2").header("X-Endpoint-Id",a.id()).header("X-Agent-Token","wrong").contentType("application/json").content("{}" )).andExpect(status().isUnauthorized());
         }
-        mvc.perform(get("/api/agent/policy")).andExpect(status().isUnauthorized());
-        mvc.perform(get("/api/agent/policy").header("X-Endpoint-Id",b.id()).header("X-Agent-Token",a.token())).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/agent/policy").header("X-USBShield-Protocol", "2")).andExpect(status().isUnauthorized());
+        mvc.perform(policy(new Agent(b.id(), a.token()))).andExpect(status().isUnauthorized());
         mvc.perform(policy(a).param("endpointId",b.id())).andExpect(status().isForbidden());
         mvc.perform(agentPost("/api/agent/heartbeat",a,Map.of("endpointId",b.id()))).andExpect(status().isForbidden());
         mvc.perform(agentPost("/api/agent/events",a,sample(b))).andExpect(status().isForbidden());
         mvc.perform(get("/api/admin/endpoints").header("X-Endpoint-Id",a.id()).header("X-Agent-Token",a.token())).andExpect(status().isUnauthorized());
     }
+
+    @Test void workspaceOwnsCatalogMetadataPolicyAndAdminReadSurfaces() throws Exception {
+        admins.create("scope-admin-a", WorkspaceTestData.PASSWORD);
+        admins.create("scope-admin-b", WorkspaceTestData.PASSWORD);
+        String url = "/api/admin/endpoints/{id}/whitelist";
+        login("scope-admin-a");
+        var a = enroll();
+        var eventA = ingestWorkspaceEvent(a, "Storage A", "scope-host-a");
+        long deviceA = eventA.path("usbDeviceId").asLong();
+        long eventIdA = eventA.path("id").asLong();
+        assertThat(deviceA).isPositive();
+        var entry = response(mvc.perform(post(url, a.id()).session(session).header("X-CSRF-TOKEN", csrf)
+                .contentType("application/json").content(mapper.writeValueAsString(Map.of("usbDeviceId", deviceA))))
+                .andExpect(status().isOk()));
+        long entryId = entry.path("id").asLong();
+        var workspaceASession = session;
+
+        login("scope-admin-b");
+        var b = enroll();
+        var eventB = ingestWorkspaceEvent(b, "Storage B", "scope-host-b");
+        long deviceB = eventB.path("usbDeviceId").asLong();
+        assertThat(deviceB).isPositive().isNotEqualTo(deviceA);
+        mvc.perform(get("/api/admin/endpoints/page").session(session))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].endpointId").value(b.id()));
+        mvc.perform(get("/api/admin/endpoints/{id}", a.id()).session(session)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/admin/events/{id}", eventIdA).session(session)).andExpect(status().isNotFound());
+        mvc.perform(get("/api/admin/events").session(session).param("deviceId", Long.toString(deviceA)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+        mvc.perform(get("/api/admin/events").session(session).param("endpoint", "scope-host-a"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+        mvc.perform(get("/api/admin/device-states").session(session))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Storage B"));
+        mvc.perform(get("/api/admin/dashboard/summary").session(session)
+                        .param("from", "2026-09-28T00:00:00Z").param("to", "2026-09-29T00:00:00Z"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalDevices").value(1))
+                .andExpect(jsonPath("$.recentEvents").value(1));
+        mvc.perform(get("/api/admin/whitelist/page").session(session))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+        mvc.perform(get(url, a.id()).session(session)).andExpect(status().isNotFound());
+        mvc.perform(post(url, b.id()).session(session).header("X-CSRF-TOKEN", csrf)
+                .contentType("application/json").content(mapper.writeValueAsString(Map.of("usbDeviceId", deviceA))))
+                .andExpect(status().isNotFound());
+        mvc.perform(delete(url + "/{entryId}", b.id(), entryId).session(session).header("X-CSRF-TOKEN", csrf))
+                .andExpect(status().isNotFound());
+        mvc.perform(post("/api/admin/enrollment/{id}/ticket", a.id()).session(session).header("X-CSRF-TOKEN", csrf))
+                .andExpect(status().isNotFound());
+        mvc.perform(get("/api/admin/audit").session(session))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(3))
+                .andExpect(jsonPath("$.content[0].actorUsername").value("scope-admin-b"))
+                .andExpect(jsonPath("$.content[0].actorAdminId").doesNotExist())
+                .andExpect(jsonPath("$.content[?(@.targetId == '%s')]", a.id()).isEmpty());
+        mvc.perform(policy(new Agent(a.id(), b.token()))).andExpect(status().isUnauthorized());
+        mvc.perform(policy(b)).andExpect(status().isOk()).andExpect(jsonPath("$.whitelistedDevices").isEmpty());
+        mvc.perform(get("/api/admin/events/{id}", eventIdA).session(workspaceASession))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.device.name").value("Storage A"));
+        mvc.perform(policy(a)).andExpect(status().isOk()).andExpect(jsonPath("$.whitelistedDevices.length()").value(1));
+    }
+
+    @Test void latestDeviceStateUsesIngestionOrderForEqualOccurredTime() throws Exception {
+        var agent = enroll();
+        var payload = (com.fasterxml.jackson.databind.node.ObjectNode) sample(agent);
+        payload.put("decision", "BLOCKED");
+        var first = response(mvc.perform(agentPost("/api/agent/events", agent, payload)).andExpect(status().isOk()));
+        payload.put("decision", "ALLOWED");
+        var second = response(mvc.perform(agentPost("/api/agent/events", agent, payload)).andExpect(status().isOk()));
+        assertThat(first.path("eventId").asLong()).isBetween(1L, 1L << 52);
+        assertThat(second.path("eventId").asLong()).isBetween(1L, 1L << 52)
+                .isNotEqualTo(first.path("eventId").asLong());
+        mvc.perform(get("/api/admin/device-states").session(session).param("endpointId", agent.id()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content[0].status").value("allowed"));
+    }
+
+    private JsonNode ingestWorkspaceEvent(Agent agent, String name, String hostname) throws Exception {
+        var payload = (com.fasterxml.jackson.databind.node.ObjectNode) sample(agent);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) payload.get("device")).put("name", name);
+        payload.put("hostname", hostname);
+        var receipt = response(mvc.perform(agentPost("/api/agent/events", agent, payload)).andExpect(status().isOk()));
+        return response(mvc.perform(get("/api/admin/events/{id}", receipt.path("eventId").asLong())
+                .session(session)).andExpect(status().isOk()));
+    }
     @Test void perEndpointAllowRevokeVersionAckAndCanonicalPolicy() throws Exception {
         var a=enroll();var b=enroll();
-        var device=devices.save(UsbDevice.builder().vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).deviceName("Storage").build());
+        var device=devices.save(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).deviceName("Storage").build());
         // Real endpoint A must have observed the device before it can whitelist it.
-        events.save(UsbEvent.builder().endpointId(a.id()).usbDeviceId(device.getId())
+        events.save(UsbEvent.builder().workspaceId(workspace.workspaceId()).endpointId(a.id()).usbDeviceId(device.getId())
             .eventType("CONNECTED").decision("BLOCKED").occurredAt(java.time.Instant.now()).build());
         String url="/api/admin/endpoints/"+a.id()+"/whitelist";
         mvc.perform(policy(a)).andExpect(status().isOk()).andExpect(jsonPath("$.whitelistedDevices").isEmpty()).andExpect(jsonPath("$.allowedDevices").doesNotExist());
@@ -225,7 +345,7 @@ class ServerApiIntegrationTest {
         applied.put("eventType", "POLICY_APPLIED");
         applied.put("decision", "ALLOWED");
         mvc.perform(agentPost("/api/agent/events", a, applied)).andExpect(status().isOk());
-        var history = events.findByEndpointIdOrderByOccurredAtDesc(a.id());
+        var history = events.findByWorkspaceIdAndEndpointIdOrderByOccurredAtDesc(workspace.workspaceId(), a.id());
         assertThat(history.stream().filter(e -> "CONNECTED".equals(e.getEventType())).count()).isEqualTo(1L);
         assertThat(history.stream().filter(e -> "POLICY_APPLIED".equals(e.getEventType())).count()).isEqualTo(1L);
         mvc.perform(get("/api/admin/events").session(session).param("endpointId", a.id())
@@ -252,22 +372,22 @@ class ServerApiIntegrationTest {
 
     @Test void concurrentWhitelistChangesDoNotLoseDesiredVersion() throws Exception {
         var a=enroll();
-        var first=devices.save(UsbDevice.builder().vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).build());
-        var second=devices.save(UsbDevice.builder().vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).build());
+        var first=devices.save(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).build());
+        var second=devices.save(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951").productId("1666").deviceHash(UUID.randomUUID().toString()).build());
         // F10: concurrent Allow is only valid after this exact endpoint observed
         // both device IDs. Do not bypass production's isolation check in tests.
         for (var device : java.util.List.of(first, second)) {
-            events.save(UsbEvent.builder().endpointId(a.id()).usbDeviceId(device.getId())
+            events.save(UsbEvent.builder().workspaceId(workspace.workspaceId()).endpointId(a.id()).usbDeviceId(device.getId())
                     .eventType("CONNECTED").decision("BLOCKED")
                     .occurredAt(java.time.Instant.now()).build());
         }
         try(var executor=java.util.concurrent.Executors.newFixedThreadPool(2)){
-            var x=executor.submit(()->policyService.allow(a.id(),new com.group.usbshield.server.policy.EndpointPolicyService.AllowRequest(first.getId())));
-            var y=executor.submit(()->policyService.allow(a.id(),new com.group.usbshield.server.policy.EndpointPolicyService.AllowRequest(second.getId())));
+            var x=executor.submit(()->policyService.allow(workspace.workspaceId(), a.id(),new com.group.usbshield.server.policy.EndpointPolicyService.AllowRequest(first.getId())));
+            var y=executor.submit(()->policyService.allow(workspace.workspaceId(), a.id(),new com.group.usbshield.server.policy.EndpointPolicyService.AllowRequest(second.getId())));
             x.get(15,java.util.concurrent.TimeUnit.SECONDS);y.get(15,java.util.concurrent.TimeUnit.SECONDS);
         }
         assertThat(endpoints.findByEndpointId(a.id()).orElseThrow().getPolicyVersion()).isEqualTo(3L);
-        assertThat(policyService.list(a.id())).hasSize(2);
+        assertThat(policyService.list(workspace.workspaceId(), a.id())).hasSize(2);
     }
 
     @Test void unknownUserAndOfflineStateRemainTruthful() throws Exception {
@@ -296,11 +416,14 @@ class ServerApiIntegrationTest {
         assertThat(events.count()).isEqualTo(before + 1L);
     }
 
-    @Test void invalidHashCannotBeAllowedOnAnyEndpoint() throws Exception {
+    @Test void invalidHashCannotEnterWorkspaceCatalogOrBecomeAnAllowRule() throws Exception {
         var a = enroll();
-        var d = devices.saveAndFlush(UsbDevice.builder().vendorId("0951").productId("1666")
-                .deviceHash("0951:1666").deviceName("unsafe model-only identity").build());
-        events.save(UsbEvent.builder().endpointId(a.id()).usbDeviceId(d.getId())
+        org.junit.jupiter.api.Assertions.assertThrows(org.springframework.dao.DataIntegrityViolationException.class,
+                () -> devices.saveAndFlush(UsbDevice.builder().workspaceId(workspace.workspaceId())
+                        .vendorId("0951").productId("1666").deviceHash("0951:1666").build()));
+        var d = devices.saveAndFlush(UsbDevice.builder().workspaceId(workspace.workspaceId())
+                .vendorId("0951").productId("1666").deviceName("USB without a usable hash").build());
+        events.save(UsbEvent.builder().workspaceId(workspace.workspaceId()).endpointId(a.id()).usbDeviceId(d.getId())
                 .eventType("CONNECTED").decision("BLOCKED").occurredAt(java.time.Instant.now()).build());
         long before = endpoints.findByEndpointId(a.id()).orElseThrow().getPolicyVersion();
         mvc.perform(post("/api/admin/endpoints/" + a.id() + "/whitelist")

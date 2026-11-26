@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,6 +40,7 @@ class AdminScalabilityIntegrationTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, AdminScalabilityIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbDeviceRepository devices;
@@ -50,24 +50,25 @@ class AdminScalabilityIntegrationTest {
     @Autowired JdbcTemplate jdbc;
 
     private UsbDevice device(String name) {
-        return devices.save(UsbDevice.builder().vendorId("0951").productId("1666")
+        return devices.save(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951").productId("1666")
             .deviceName(name).deviceHash("P3-" + UUID.randomUUID()).build());
     }
 
     @Test void r09EventPageUsesBatchMetadataQueriesNotNPlusOne() throws Exception {
-        endpoints.save(Endpoint.builder().endpointId("P3-BATCH").hostname("lab-batch").build());
+        endpoints.save(workspace.endpoint().endpointId("P3-BATCH").hostname("lab-batch").build());
         Instant t = Instant.parse("2026-11-03T01:00:00Z");
         for (int i = 0; i < 100; i++) {
             var d = device("USB-" + i);
-            events.save(UsbEvent.builder().endpointId("P3-BATCH").hostname(null)
+            events.save(UsbEvent.builder().workspaceId(workspace.workspaceId()).endpointId("P3-BATCH").hostname(null)
                 .usbDeviceId(d.getId()).eventType("CONNECTED").decision("BLOCKED")
                 .occurredAt(t.plusSeconds(i)).build());
         }
         em.flush();
         em.clear();
         var stats = emf.unwrap(SessionFactory.class).getStatistics();
+        var adminRequest = workspace.adminRequest();
         stats.clear();
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(adminRequest)
                 .param("page", "0").param("size", "100"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalElements").value(100))
@@ -78,41 +79,42 @@ class AdminScalabilityIntegrationTest {
     }
 
     @Test void r10SummaryAndDevicePagingStillWorkAfterMoreThanTenThousandEvents() throws Exception {
-        endpoints.saveAndFlush(Endpoint.builder().endpointId("P3-LARGE").hostname("lab-large").build());
+        endpoints.saveAndFlush(workspace.endpoint().endpointId("P3-LARGE").hostname("lab-large").build());
         var d = device("USB-LARGE");
         em.flush();
         Instant t = Instant.parse("2026-11-03T01:00:00Z");
         int total = 10050;
+        long workspaceId = workspace.workspaceId();
         // JDBC batching keeps the regression test practical on Windows CI.
         for (int start = 0; start < total; start += 250) {
             final int from = start;
             final int count = Math.min(250, total - start);
             jdbc.batchUpdate("""
                 INSERT INTO usb_events (endpoint_id, hostname, usb_device_id, linux_username,
-                   event_type, decision, occurred_at, received_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                   event_type, decision, occurred_at, received_at, workspace_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, new org.springframework.jdbc.core.BatchPreparedStatementSetter() {
                 @Override public void setValues(java.sql.PreparedStatement ps, int i) throws java.sql.SQLException {
                     Instant time = t.plusSeconds(from + i);
                     ps.setString(1, "P3-LARGE"); ps.setString(2, "lab-large");
                     ps.setLong(3, d.getId()); ps.setString(4, "UNKNOWN");
                     ps.setString(5, "CONNECTED"); ps.setString(6, "BLOCKED");
-                    ps.setTimestamp(7, Timestamp.from(time)); ps.setTimestamp(8, Timestamp.from(time));
+                    ps.setTimestamp(7, Timestamp.from(time)); ps.setTimestamp(8, Timestamp.from(time)); ps.setLong(9, workspaceId);
                 }
                 @Override public int getBatchSize() { return count; }
             });
         }
-        mvc.perform(get("/api/admin/dashboard/summary").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/dashboard/summary").with(workspace.adminRequest())
                 .param("from", "2026-11-03T00:00:00Z").param("to", "2026-11-04T00:00:00Z"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.recentEvents").value(total))
             .andExpect(jsonPath("$.totalDevices").value(1))
             .andExpect(jsonPath("$.blockedDevices").value(1));
-        mvc.perform(get("/api/admin/device-states").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/device-states").with(workspace.adminRequest())
                 .param("page", "0").param("size", "20").param("endpointId", "P3-LARGE"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content.length()").value(1));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("page", "0").param("size", "20"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(total))
             .andExpect(jsonPath("$.content.length()").value(20));

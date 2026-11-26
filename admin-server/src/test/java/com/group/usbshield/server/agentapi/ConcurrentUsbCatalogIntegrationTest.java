@@ -1,5 +1,7 @@
 package com.group.usbshield.server.agentapi;
 
+import com.group.usbshield.server.WorkspaceTestData;
+
 import com.group.usbshield.server.device.UsbDeviceRepository;
 import com.group.usbshield.server.endpoint.Endpoint;
 import com.group.usbshield.server.endpoint.EndpointRepository;
@@ -10,7 +12,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import com.group.usbshield.server.IsolatedPostgresDb;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Map;
 import java.util.UUID;
@@ -30,19 +31,19 @@ class ConcurrentUsbCatalogIntegrationTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, ConcurrentUsbCatalogIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired TestRestTemplate http;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbDeviceRepository devices;
-    @Autowired PasswordEncoder encoder;
 
     @Test void twoIndependentEndpointsShareOneCanonicalUsbHash() throws Exception {
-        String token = UUID.randomUUID().toString();
+        String token = WorkspaceTestData.digest(UUID.randomUUID().toString());
         String a = "EP-R02-A-" + UUID.randomUUID();
         String b = "EP-R02-B-" + UUID.randomUUID();
-        endpoints.save(Endpoint.builder().endpointId(a).hostname("ubuntu-a")
-                .agentTokenHash(encoder.encode(token)).build());
-        endpoints.save(Endpoint.builder().endpointId(b).hostname("ubuntu-b")
-                .agentTokenHash(encoder.encode(token)).build());
+        endpoints.save(workspace.endpoint().endpointId(a).hostname("ubuntu-a")
+                .agentTokenHash(WorkspaceTestData.digest(token)).build());
+        endpoints.save(workspace.endpoint().endpointId(b).hostname("ubuntu-b")
+                .agentTokenHash(WorkspaceTestData.digest(token)).build());
         String hash = "R02-same-hash-" + UUID.randomUUID();
         CountDownLatch gate = new CountDownLatch(1);
         var pool = Executors.newFixedThreadPool(2);
@@ -63,6 +64,7 @@ class ConcurrentUsbCatalogIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("X-Endpoint-Id", id);
         headers.set("X-Agent-Token", token);
+        headers.set("X-USBShield-Protocol", "2");
         Map<String, Object> body = Map.of(
                 "endpointId", id, "hostname", "ubuntu-test", "linuxUsername", "UNKNOWN",
                 "eventId", UUID.randomUUID().toString(), "eventType", "CONNECTED",

@@ -1,0 +1,6 @@
+spring:
+  config:
+    activate:
+      on-profile: admin-provision
+  main:
+    web-application-type: none

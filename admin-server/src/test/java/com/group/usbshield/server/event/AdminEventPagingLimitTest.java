@@ -14,11 +14,11 @@ class AdminEventPagingLimitTest {
     }
     @Test void rejectsUnboundedPagesAndFiltersBeforeDatabase() {
         var c = controller();
-        assertThrows(ResponseStatusException.class, () -> c.list(100001,20,
+        assertThrows(ResponseStatusException.class, () -> c.list(new com.group.usbshield.server.auth.AdminIdentity(1L, 2L, "qa"), 100001,20,
                 null,null,null,null,null,null,null,null,null,null));
-        assertThrows(ResponseStatusException.class, () -> c.list(0,20,
+        assertThrows(ResponseStatusException.class, () -> c.list(new com.group.usbshield.server.auth.AdminIdentity(1L, 2L, "qa"), 0,20,
                 null,null,null,null,null,null,null,"a".repeat(201),null,null));
-        assertThrows(ResponseStatusException.class, () -> c.list(0,20,
+        assertThrows(ResponseStatusException.class, () -> c.list(new com.group.usbshield.server.auth.AdminIdentity(1L, 2L, "qa"), 0,20,
                 null,null,null,null,null,null,null,null,"b".repeat(201),null));
     }
 }

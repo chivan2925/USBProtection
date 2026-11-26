@@ -7,6 +7,7 @@ import { mkdtemp, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:net'
 import { join, resolve } from 'node:path'
 import { createPostgresBrowserTestRun, postgresBrowserChildEnv, cleanupPostgresBrowserSchema } from './postgresTestDb.mjs'
+import { agentProtocol, enrollSyntheticAgent } from './enrollSyntheticAgent.mjs'
 
 export async function startLiveServer(artifacts) {
   const repo = resolve(artifacts, '../..')
@@ -15,7 +16,6 @@ export async function startLiveServer(artifacts) {
   const java = process.env.JAVA_HOME ? join(process.env.JAVA_HOME, 'bin', process.platform === 'win32' ? 'java.exe' : 'java') : 'java'
   const runtime = await mkdtemp(join(artifacts, 'live-'))
   const password = randomUUID()
-  const enrollmentToken = randomUUID()
   const browserDb = createPostgresBrowserTestRun()
   const reservation = createServer()
   await new Promise(resolveListen => reservation.listen(0, '127.0.0.1', resolveListen))
@@ -32,7 +32,7 @@ export async function startLiveServer(artifacts) {
     child = spawn(java, ['-jar', jar, `--server.port=${port}`, '--server.address=127.0.0.1',
       ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
       cwd: repo, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
-      env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: 'm4-live-admin', USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken }, browserDb),
+      env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: 'm4-live-admin', USBSHIELD_ADMIN_PASSWORD: password }, browserDb),
     })
     initialStart = false
     let launchError
@@ -95,13 +95,11 @@ export async function startLiveServer(artifacts) {
     await http('/api/auth/login', { method: 'POST', body: { username: 'm4-live-admin', password }, expected: 403 })
     await adminLogin()
     assert.deepEqual(await http('/api/admin/endpoints', { admin: true }), [])
-    async function enroll(name) {
-      return http('/api/agent/enroll', { method: 'POST', body: { hostname: name, machineId: randomUUID(), enrollmentToken } })
-    }
-    const a = await enroll('m4-live-ubuntu-a')
-    const b = await enroll('m4-live-ubuntu-b')
-    const agentHeaders = { 'X-Endpoint-Id': a.endpointId, 'X-Agent-Token': a.agentToken }
-    await http('/api/agent/policy', { expected: 401 })
+    const a = await enrollSyntheticAgent(http, 'm4-live-ubuntu-a')
+    const b = await enrollSyntheticAgent(http, 'm4-live-ubuntu-b')
+    const agentHeaders = { ...agentProtocol, 'X-Endpoint-Id': a.endpointId, 'X-Agent-Token': a.agentToken }
+    await http('/api/agent/policy', { expected: 426 })
+    await http('/api/agent/policy', { headers: agentProtocol, expected: 401 })
     await http('/api/agent/policy', { headers: { ...agentHeaders, 'X-Endpoint-Id': b.endpointId }, expected: 401 })
     const endpoint = id => http(`/api/admin/endpoints/${id}`, { admin: true })
     const rules = id => http(`/api/admin/endpoints/${id}/whitelist`, { admin: true })

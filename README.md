@@ -1,6 +1,6 @@
 # USBShield
 
-USBShield quản lý USB Mass Storage trên Ubuntu. Baseline hiện tại dùng Admin Web (React/Vite), Admin Server (Spring Boot/PostgreSQL) và Agent Ubuntu (USBGuard/systemd). [Blueprint v2.5](BLUEPRINT.md) mô tả mục tiêu JavaFX trên Windows, workspace riêng, Revoke trực tiếp và file activity. Các mục tiêu đó cần thiết kế và triển khai ở các slice riêng.
+USBShield quản lý USB Mass Storage trên Ubuntu. Source hiện tại dùng Admin Web (React/Vite), Admin Server (Spring Boot/PostgreSQL) và Agent Ubuntu (USBGuard/systemd). Central phân vùng dữ liệu theo workspace và Agent dùng vé enrollment theo endpoint. Xem hướng dẫn IT về điều kiện nâng cấp dữ liệu. JavaFX trên Windows, Revoke trực tiếp và file activity thuộc các slice sau của [Blueprint v2.5](BLUEPRINT.md).
 
 - [Cài đặt và vận hành cho IT](docs/IT_SETUP_GUIDE.md)
 - [Sử dụng Admin Web hiện tại](docs/ADMIN_GUIDE.md)

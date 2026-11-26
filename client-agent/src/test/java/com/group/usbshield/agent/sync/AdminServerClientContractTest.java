@@ -46,6 +46,7 @@ class AdminServerClientContractTest {
                 .build();
 
         mockServer.expect(requestTo("http://localhost:8080/api/agent/enroll"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andRespond(withSuccess(objectMapper.writeValueAsString(response), MediaType.APPLICATION_JSON));
@@ -74,6 +75,7 @@ class AdminServerClientContractTest {
                 .build();
 
         mockServer.expect(requestTo("http://localhost:8080/api/agent/heartbeat"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("X-Endpoint-Id", "EP-TEST-001"))
                 .andExpect(header("X-Agent-Token", "token-secret-123"))
@@ -110,6 +112,7 @@ class AdminServerClientContractTest {
                 """;
 
         mockServer.expect(requestTo("http://localhost:8080/api/agent/policy"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.GET))
                 .andExpect(header("X-Endpoint-Id", "EP-TEST-001"))
                 .andExpect(header("X-Agent-Token", "token-secret-123"))
@@ -127,6 +130,7 @@ class AdminServerClientContractTest {
     @DisplayName("acknowledgePolicy() should send ACK payload with authentication headers")
     void acknowledgePolicySuccess() {
         mockServer.expect(requestTo("http://localhost:8080/api/agent/policy/ack"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("X-Endpoint-Id", "EP-TEST-001"))
                 .andExpect(header("X-Agent-Token", "token-secret-123"))
@@ -146,6 +150,7 @@ class AdminServerClientContractTest {
     @DisplayName("sendEvent() should send real USB event payload")
     void sendEventSuccess() {
         mockServer.expect(requestTo("http://localhost:8080/api/agent/events"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("X-Endpoint-Id", "EP-TEST-001"))
                 .andExpect(header("X-Agent-Token", "token-secret-123"))
@@ -173,6 +178,7 @@ class AdminServerClientContractTest {
     @DisplayName("enroll() should return empty when server returns 401 Unauthorized or 400 Bad Request")
     void enrollFailureReturnsEmpty() {
         mockServer.expect(requestTo("http://localhost:8080/api/agent/enroll"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withUnauthorizedRequest());
 
@@ -191,6 +197,7 @@ class AdminServerClientContractTest {
     @DisplayName("sendHeartbeat() should return empty when token is rejected with 401 or 403")
     void sendHeartbeatAuthFailure() {
         mockServer.expect(requestTo("http://localhost:8080/api/agent/heartbeat"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withUnauthorizedRequest());
 
@@ -208,6 +215,7 @@ class AdminServerClientContractTest {
     @DisplayName("fetchPolicy() should return empty on 500 Server Error or 403 Forbidden")
     void fetchPolicyServerError() {
         mockServer.expect(requestTo("http://localhost:8080/api/agent/policy"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.GET))
                 .andRespond(withServerError());
 
@@ -220,6 +228,7 @@ class AdminServerClientContractTest {
     @DisplayName("acknowledgePolicy() should return false when server returns error or is unreachable")
     void acknowledgePolicyFailure() {
         mockServer.expect(requestTo("http://localhost:8080/api/agent/policy/ack"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withServerError());
 
@@ -237,6 +246,7 @@ class AdminServerClientContractTest {
     @DisplayName("sendEvent() should return false when server returns error or network flaps")
     void sendEventFailure() {
         mockServer.expect(requestTo("http://localhost:8080/api/agent/events"))
+                .andExpect(header("X-USBShield-Protocol", "2"))
                 .andExpect(method(HttpMethod.POST))
                 .andRespond(withServerError());
 

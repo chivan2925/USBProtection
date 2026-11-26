@@ -20,7 +20,6 @@ import java.time.Instant;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,6 +35,7 @@ class PostgreSqlPersistenceIntegrationTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, PostgreSqlPersistenceIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired DataSource dataSource;
     @Autowired JdbcTemplate jdbc;
     @Autowired EndpointRepository endpoints;
@@ -54,11 +54,11 @@ class PostgreSqlPersistenceIntegrationTest {
                   AND indexdef ILIKE '%UNIQUE%' AND indexdef ILIKE '%device_hash%'
                 """, Long.class)).isGreaterThanOrEqualTo(1L);
         String hash = "PG-" + UUID.randomUUID();
-        var device = devices.saveAndFlush(UsbDevice.builder()
+        var device = devices.saveAndFlush(UsbDevice.builder().workspaceId(workspace.workspaceId())
                 .vendorId("0951").productId("1666").deviceHash(hash).build());
-        assertThat(devices.findByDeviceHash(hash)).contains(device);
+        assertThat(devices.findByWorkspaceIdAndId(workspace.workspaceId(), device.getId())).contains(device);
         // Missing identities remain independent in the catalog, not one shared empty string.
-        var blank = devices.saveAndFlush(UsbDevice.builder()
+        var blank = devices.saveAndFlush(UsbDevice.builder().workspaceId(workspace.workspaceId())
                 .vendorId("0951").productId("1666").deviceHash("\t").build());
         assertThat(blank.getDeviceHash()).isNull();
     }
@@ -66,21 +66,21 @@ class PostgreSqlPersistenceIntegrationTest {
     @Test
     void nativeDashboardQueriesAndEndpointFilteringRunOnPostgres() throws Exception {
         String endpointId = "PG-SMOKE-" + UUID.randomUUID();
-        endpoints.saveAndFlush(Endpoint.builder().endpointId(endpointId).hostname("pg-test-host").build());
-        var device = devices.saveAndFlush(UsbDevice.builder().vendorId("0951")
+        endpoints.saveAndFlush(workspace.endpoint().endpointId(endpointId).hostname("pg-test-host").build());
+        var device = devices.saveAndFlush(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951")
                 .productId("1666").deviceName("PG Test USB")
                 .deviceHash("PG-" + UUID.randomUUID()).build());
-        events.saveAndFlush(UsbEvent.builder().endpointId(endpointId).usbDeviceId(device.getId())
+        events.saveAndFlush(UsbEvent.builder().workspaceId(workspace.workspaceId()).endpointId(endpointId).usbDeviceId(device.getId())
                 .eventType("CONNECTED").decision("BLOCKED")
                 .occurredAt(Instant.parse("2026-11-03T01:30:00Z")).build());
-        mvc.perform(get("/api/admin/dashboard/summary").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/dashboard/summary").with(workspace.adminRequest())
                     .param("from", "2026-11-03T00:00:00Z")
                     .param("to", "2026-11-04T00:00:00Z"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalDevices").value(1))
                 .andExpect(jsonPath("$.blockedDevices").value(1))
                 .andExpect(jsonPath("$.blockedToday").value(1));
-        mvc.perform(get("/api/admin/device-states").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/device-states").with(workspace.adminRequest())
                     .param("endpointId", endpointId).param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1))

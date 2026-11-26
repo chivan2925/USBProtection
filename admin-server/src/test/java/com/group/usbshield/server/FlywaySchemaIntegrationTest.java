@@ -8,7 +8,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
-/** Applies V1+V2 in an empty isolated schema, then passes Hibernate validate. */
+/** Applies V1–V3 in an empty isolated schema, then passes Hibernate validate. */
 @IsolatedPostgresDb
 @SpringBootTest
 class FlywaySchemaIntegrationTest {
@@ -21,7 +21,7 @@ class FlywaySchemaIntegrationTest {
     @Test void freshSchemaMigratesAndValidatesWithoutWritingApplicationDatabase() {
         assertThat(jdbc.queryForObject("select current_database()", String.class)).isEqualTo("usbshield_test");
         assertThat(jdbc.queryForObject("select count(*) from flyway_schema_history where success", Long.class))
-                .isEqualTo(2L);
+                .isEqualTo(3L);
         assertThat(jdbc.queryForObject("select count(*) from information_schema.columns "
                 + "where table_schema=current_schema() and table_name='endpoints' "
                 + "and column_name in ('usbguard_reported_status','usbguard_checked_at')", Long.class))
@@ -29,5 +29,11 @@ class FlywaySchemaIntegrationTest {
         assertThat(jdbc.queryForObject("select count(*) from information_schema.columns "
                 + "where table_schema=current_schema() and table_name='admin_users' "
                 + "and column_name='credential_version'", Long.class)).isEqualTo(1L);
+        assertThat(jdbc.queryForObject("""
+                select count(*) from information_schema.columns
+                where table_schema = current_schema() and column_name = 'id'
+                and table_name in ('usb_devices', 'usb_events', 'endpoint_whitelist_entries', 'admin_audit')
+                and is_identity = 'NO' and column_default = 'allocate_public_id()'
+                """, Long.class)).isEqualTo(4L);
     }
 }

@@ -1,6 +1,7 @@
 package com.group.usbshield.server;
 
 import com.group.usbshield.server.agentapi.AgentHeartbeatController;
+import com.group.usbshield.server.agentapi.AgentIdentity;
 import com.group.usbshield.server.agentapi.dto.AgentHeartbeatRequest;
 import com.group.usbshield.server.device.UsbDevice;
 import com.group.usbshield.server.device.UsbDeviceRepository;
@@ -23,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Exercises actual PostgreSQL entity persistence and the production endpoint/whitelist response DTOs. */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @IsolatedPostgresDb
-@SpringBootTest(properties = {"spring.jpa.hibernate.ddl-auto=create-drop", "usbshield.enrollment-token=test-only"})
+@SpringBootTest
 @Transactional
 class EndpointMetadataIntegrationTest {
     @org.springframework.test.context.DynamicPropertySource
@@ -31,6 +32,7 @@ class EndpointMetadataIntegrationTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, EndpointMetadataIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbEventRepository events;
     @Autowired UsbDeviceRepository devices;
@@ -41,22 +43,22 @@ class EndpointMetadataIntegrationTest {
     @Test
     void heartbeatMetadataIsStoredAndReturnedWithoutLeakingCredentialHash() {
         String endpointId = "EP-" + UUID.randomUUID();
-        endpoints.save(Endpoint.builder().endpointId(endpointId).machineId(UUID.randomUUID().toString())
-                .hostname("usbshield-lab").ipAddress("127.0.1.1").build());
+        endpoints.save(workspace.endpoint().endpointId(endpointId).machineId(UUID.randomUUID().toString())
+                .hostname("usbshield-lab").ipAddress("127.0.1.1").agentTokenHash(WorkspaceTestData.digest("synthetic-token")).build());
 
         heartbeats.heartbeat(AgentHeartbeatRequest.builder().endpointId(endpointId).currentPolicyVersion(1L)
                 .ipAddress("192.168.23.133").operatingSystem("Ubuntu 24.04")
-                .currentUser("usbdev").build(), () -> endpointId);
+                .currentUser("usbdev").build(), new AgentIdentity(workspace.workspaceId(), endpointId, 0L));
 
-        var dto = adminEndpoints.detail(endpointId);
+        var dto = adminEndpoints.detail(workspace.admin(), endpointId);
         assertEquals("192.168.23.133", dto.ipAddress());
         assertEquals("Ubuntu 24.04", dto.operatingSystem());
         assertEquals("usbdev", dto.currentUser());
         assertEquals("ONLINE", dto.status());
         // When a graphical session ends, the new Agent uses explicit UNKNOWN, not a stale username.
         heartbeats.heartbeat(AgentHeartbeatRequest.builder().endpointId(endpointId)
-                .currentUser("UNKNOWN").build(), () -> endpointId);
-        assertEquals("UNKNOWN", adminEndpoints.detail(endpointId).currentUser());
+                .currentUser("UNKNOWN").build(), new AgentIdentity(workspace.workspaceId(), endpointId, 0L));
+        assertEquals("UNKNOWN", adminEndpoints.detail(workspace.admin(), endpointId).currentUser());
     }
 
     @Test
@@ -64,25 +66,25 @@ class EndpointMetadataIntegrationTest {
         String endpointA = "EP-" + UUID.randomUUID();
         String endpointB = "EP-" + UUID.randomUUID();
         for (String id : new String[]{endpointA, endpointB}) {
-            endpoints.save(Endpoint.builder().endpointId(id).machineId(UUID.randomUUID().toString())
+            endpoints.save(workspace.endpoint().endpointId(id).machineId(UUID.randomUUID().toString())
                     .hostname("lab-" + id).build());
         }
-        var usb = devices.save(UsbDevice.builder().vendorId("0951").productId("1665")
+        var usb = devices.save(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951").productId("1665")
                 .deviceName("DataTraveler 2.0").serialNumber("SERIAL-LAB")
                 .deviceHash("stable-hash-" + UUID.randomUUID()).build());
 
-        events.save(UsbEvent.builder().endpointId(endpointA).usbDeviceId(usb.getId())
+        events.save(UsbEvent.builder().workspaceId(workspace.workspaceId()).endpointId(endpointA).usbDeviceId(usb.getId())
                 .eventType("CONNECTED").decision("BLOCKED").occurredAt(Instant.now()).build());
-        var allowed = policies.allow(endpointA, new EndpointPolicyService.AllowRequest(usb.getId()));
+        var allowed = policies.allow(workspace.workspaceId(), endpointA, new EndpointPolicyService.AllowRequest(usb.getId()));
         assertThrows(org.springframework.web.server.ResponseStatusException.class,
-                () -> policies.allow(endpointB, new EndpointPolicyService.AllowRequest(usb.getId())));
+                () -> policies.allow(workspace.workspaceId(), endpointB, new EndpointPolicyService.AllowRequest(usb.getId())));
         assertEquals("DataTraveler 2.0", allowed.name());
         assertEquals("0951", allowed.vendorId());
         assertEquals("1665", allowed.productId());
         assertEquals("SERIAL-LAB", allowed.serial());
         assertNotNull(allowed.createdAt());
-        assertEquals(1, policies.list(endpointA).size());
-        assertTrue(policies.list(endpointB).isEmpty());
+        assertEquals(1, policies.list(workspace.workspaceId(), endpointA).size());
+        assertTrue(policies.list(workspace.workspaceId(), endpointB).isEmpty());
         assertEquals(1L, endpoints.findByEndpointId(endpointB).orElseThrow().getPolicyVersion());
     }
 }

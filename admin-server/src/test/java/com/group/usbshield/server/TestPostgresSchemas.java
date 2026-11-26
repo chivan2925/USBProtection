@@ -18,8 +18,14 @@ public final class TestPostgresSchemas {
 
     private TestPostgresSchemas() {}
 
+    static org.flywaydb.core.api.configuration.FluentConfiguration flywayFor(Class<?> testClass) {
+        var schema = schemas.computeIfAbsent(testClass, ignored -> createSchema());
+        return org.flywaydb.core.Flyway.configure().dataSource(schema.url(), ROLE, schema.password())
+                .defaultSchema(schema.name()).schemas(schema.name()).baselineOnMigrate(false);
+    }
+
     public static void register(DynamicPropertyRegistry registry, Class<?> testClass) {
-        register(registry, testClass, false);
+        register(registry, testClass, true);
     }
 
     public static void register(DynamicPropertyRegistry registry, Class<?> testClass, boolean flywayMigration) {

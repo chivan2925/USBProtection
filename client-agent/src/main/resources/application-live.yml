@@ -10,8 +10,8 @@ usbshield:
     server-url: ${USBSHIELD_SERVER_URL:}
     require-https: true
     tls-ca-certificate: ${USBSHIELD_TLS_CA_CERTIFICATE:}
-    # Secret enrollment bootstrap token
-    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:default-enrollment-secret}
+    # Endpoint-scoped enrollment ticket from Central Admin
+    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:}
     # Production directories on Ubuntu Linux
     data-dir: ${USBSHIELD_DATA_DIR:/var/lib/usbshield-agent}
     require-absolute-storage: true

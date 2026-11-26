@@ -9,8 +9,8 @@ Ubuntu chạy USBGuard và Agent systemd dưới tài khoản dịch vụ `usbsh
 | Ranh giới | Hành vi source |
 | --- | --- |
 | LAN → central | HTTPS tại Nginx. Mạng Client được vào các route Agent theo ACL. Admin Web/API cần đường mạng Admin. |
-| Admin → Server | Spring Security session/CSRF và `ROLE_ADMIN`. Baseline dùng dữ liệu quản trị chung. |
-| Agent → Server | Enrollment dùng secret bootstrap. Các request tiếp theo dùng endpoint ID và Agent token. Agent không có quyền Admin. |
+| Admin → Server | Spring Security session/CSRF và `ROLE_ADMIN`. Principal mang Admin ID và workspace ID. Danh sách, joins, counts, lookup và đột biến dùng workspace của principal. |
+| Agent → Server | Enrollment v2 dùng vé theo slot đã gắn installation ID. Các request sau claim dùng credential riêng của endpoint. Central kiểm workspace, endpoint và generation trước khi đọc hoặc ghi trạng thái Agent. |
 | Agent → USBGuard | IPC ACL riêng cho service account. Daemon áp dụng rules local. |
 | Agent → notifier | IPC local cho thông báo đến desktop user. Active session là attribution tốt nhất có thể, có thể là `UNKNOWN`. |
 
@@ -30,7 +30,7 @@ Allow được xác thực theo endpoint đã báo thiết bị và HASH hợp l
 
 [Blueprint](../BLUEPRINT.md) quy định JavaFX trên Windows, một workspace sở hữu endpoint, vận hành không cần Internet khi LAN còn, và giữ policy/outbox local khi mất LAN. Revoke mục tiêu chặn USB đang cắm khi Agent nhận và thực thi policy, với kết quả actual block riêng và retry khi lỗi. Allow mục tiêu vẫn cần rút/cắm lại. File monitoring và bộ cài Windows tích hợp là các slice sau. Thiết kế chi tiết cần ADR và quyết định Owner.
 
-### ADR đề xuất, chờ Owner duyệt
+### Quyết định kiến trúc
 
 - [Workspace, enrollment và chuyển đổi dữ liệu](adr/0001-workspace-enrollment.md)
 - [Policy versioning và xác nhận Revoke](adr/0002-policy-sync-revoke.md)

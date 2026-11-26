@@ -108,7 +108,7 @@ if sudo test -f "$ca"; then
         fail 'Lab CA is not readable by the current user; cannot test TLS'
     fi
 fi
-http_status="$(curl "${curl_params[@]}" 'https://usbprotection.lab/api/agent/policy' 2>/dev/null)" || http_status='TLS/CONNECT ERROR'
+http_status="$(curl "${curl_params[@]}" --header 'X-USBShield-Protocol: 2' 'https://usbprotection.lab/api/agent/policy' 2>/dev/null)" || http_status='TLS/CONNECT ERROR'
 if [[ "$http_status" == '401' ]]; then
     pass 'HTTPS/CA/Agent path: unauthenticated request returned 401'
 else

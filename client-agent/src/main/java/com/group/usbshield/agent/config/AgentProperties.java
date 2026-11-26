@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "usbshield.agent")
 public class AgentProperties {
     private String serverUrl = "http://localhost:8080";
-    private String enrollmentToken = "default-enrollment-secret";
+    @lombok.ToString.Exclude
+    private String enrollmentToken = "";
     /** Enforced by the live profile before any enrollment/token transmission. */
     private boolean requireHttps = false;
     /** Optional PEM CA file for a privately signed HTTPS server (normal hostname verification remains enabled). */

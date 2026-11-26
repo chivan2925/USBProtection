@@ -1,6 +1,6 @@
 # ADR 0001 — Workspace, enrollment và chuyển đổi dữ liệu
 
-**Trạng thái đề xuất, chờ Owner duyệt.** Phạm vi D01–D02, đầu vào cho P1. Quyền sở hữu một workspace và việc bỏ Local Admin đã được chốt trong [blueprint](../../BLUEPRINT.md).
+**Trạng thái.** Owner duyệt candidate A1 và triển khai P1 trên PostgreSQL cô lập với dữ liệu synthetic. P1 giữ V1/V2 và chặn áp dụng V3 trên schema có dữ liệu vận hành chưa có mapping. Cutover dữ liệu cũ cần bước riêng. Quyền sở hữu một workspace và việc bỏ Local Admin đã được chốt trong [blueprint](../../BLUEPRINT.md).
 
 ## Bối cảnh
 
@@ -34,4 +34,4 @@ Dùng scoped repository và query bắt buộc ở P1, composite constraints là
 
 Test PostgreSQL trên schema cô lập với hai workspace và cùng HASH. Kiểm quyền cho list/detail/count/export và response không suy ra dữ liệu ngoài scope. Chạy đồng thời claim trên cùng slot và trên hai slot khác workspace với cùng installation identity đã xác minh, chỉ một assignment được commit. Kiểm replay mất response, hết hạn hoặc revoke vé, rotation, lỗi giao dịch và báo của Agent cho đúng endpoint. Tái sử dụng [enrollment retry](../../admin-server/src/test/java/com/group/usbshield/server/agentapi/EnrollmentRetryContractTest.java), [agent integration](../../admin-server/src/test/java/com/group/usbshield/server/agentapi/AgentHttpIntegrationTest.java) và [pagination](../../admin-server/src/test/java/com/group/usbshield/server/EndpointAndWhitelistPaginationIntegrationTest.java) làm baseline cho regression. Liên quan E03, E08, E09 và E11 trong blueprint.
 
-Owner duyệt quy trình IT cấp tài khoản và recovery, TTL vé/receipt, mapping dữ liệu lịch sử, và cửa sổ nâng cấp Agent trước khi P1 làm migration.
+P1 dùng profile bảo trì trên Central host, TTL vé 15 phút và cửa sổ receipt 24 giờ. Credential hiện hành lưu digest và generation trên endpoint. Ticket giữ digest đã claim để ngăn cấp lại credential cũ cho cùng slot. Mapping lịch sử, xử lý dữ liệu thiếu provenance và cửa sổ nâng cấp Agent là điều kiện cho cutover. [Migration V3](../../admin-server/src/main/resources/db/migration/V3__workspace_boundary.sql) · [Hướng dẫn IT](../IT_SETUP_GUIDE.md)

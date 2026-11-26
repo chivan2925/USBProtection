@@ -24,6 +24,8 @@ import javax.net.ssl.TrustManagerFactory;
 @Slf4j
 @Component
 public class AdminServerClient {
+    private static final String PROTOCOL_HEADER = "X-USBShield-Protocol";
+    private static final String PROTOCOL_VERSION = "2";
 
     private final RestClient restClient;
     private final AgentProperties properties;
@@ -139,13 +141,15 @@ public class AdminServerClient {
             log.info("Sending enrollment request to {} for host: {}", properties.getServerUrl(), request.getHostname());
             EnrollmentResponse response = restClient.post()
                     .uri("/api/agent/enroll")
+                    .header(PROTOCOL_HEADER, PROTOCOL_VERSION)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(request)
                     .retrieve()
                     .body(EnrollmentResponse.class);
             return Optional.ofNullable(response);
         } catch (Exception e) {
-            log.warn("Enrollment failed (Server may be offline): {}", e.getMessage());
+            log.warn("Enrollment failed ({})", e instanceof org.springframework.web.client.RestClientResponseException rejected
+                    ? "HTTP " + rejected.getStatusCode().value() : e.getClass().getSimpleName());
             return Optional.empty();
         }
     }
@@ -157,6 +161,7 @@ public class AdminServerClient {
         try {
             HeartbeatResponse response = restClient.post()
                     .uri("/api/agent/heartbeat")
+                    .header(PROTOCOL_HEADER, PROTOCOL_VERSION)
                     .header("X-Endpoint-Id", request.getEndpointId())
                     .header("X-Agent-Token", agentToken != null ? agentToken : "")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -178,6 +183,7 @@ public class AdminServerClient {
             log.info("Fetching latest policy for endpoint {}", endpointId);
             PolicyResponse response = restClient.get()
                     .uri("/api/agent/policy")
+                    .header(PROTOCOL_HEADER, PROTOCOL_VERSION)
                     .header("X-Endpoint-Id", endpointId)
                     .header("X-Agent-Token", agentToken != null ? agentToken : "")
                     .accept(MediaType.APPLICATION_JSON)
@@ -197,6 +203,7 @@ public class AdminServerClient {
         try {
             restClient.post()
                     .uri("/api/agent/policy/ack")
+                    .header(PROTOCOL_HEADER, PROTOCOL_VERSION)
                     .header("X-Endpoint-Id", endpointId)
                     .header("X-Agent-Token", agentToken != null ? agentToken : "")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -219,6 +226,7 @@ public class AdminServerClient {
         try {
             restClient.post()
                     .uri("/api/agent/events")
+                    .header(PROTOCOL_HEADER, PROTOCOL_VERSION)
                     .header("X-Endpoint-Id", endpointId)
                     .header("X-Agent-Token", agentToken != null ? agentToken : "")
                     .contentType(MediaType.APPLICATION_JSON)

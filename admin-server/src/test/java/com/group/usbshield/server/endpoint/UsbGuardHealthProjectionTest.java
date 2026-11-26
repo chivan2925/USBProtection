@@ -20,20 +20,21 @@ class UsbGuardHealthProjectionTest {
         e.setPolicyVersion(2L);e.setAppliedPolicyVersion(2L);
         e.setLastSeen(Instant.now());e.setUsbGuardCheckedAt(Instant.now());e.setUsbGuardReportedStatus("HEALTHY");
         // F14 changed endpoint listing from Sort to Pageable; mock the actual overloads.
-        when(repo.findAll(any(Pageable.class))).thenAnswer(call ->
-                new PageImpl<>(List.of(e), call.getArgument(0), 1));
+        when(repo.findByWorkspaceId(eq(2L), any(Pageable.class))).thenAnswer(call ->
+                new PageImpl<>(List.of(e), call.getArgument(1), 1));
         when(repo.findAll(org.mockito.ArgumentMatchers.<Specification<Endpoint>>any(), any(Pageable.class)))
                 .thenAnswer(call -> new PageImpl<>(List.of(e), call.getArgument(1), 1));
         var api=controller(repo);
+        var admin = new com.group.usbshield.server.auth.AdminIdentity(1L, 2L, "qa");
         // Primary paginated Admin API and bounded legacy endpoint list must agree.
-        assertEquals("HEALTHY",api.page(0, 20, null, null).content().get(0).usbGuardStatus());
-        assertEquals("HEALTHY",api.list().get(0).usbGuardStatus());
+        assertEquals("HEALTHY",api.page(admin, 0, 20, null, null).content().get(0).usbGuardStatus());
+        assertEquals("HEALTHY",api.list(admin).get(0).usbGuardStatus());
         e.setAppliedPolicyVersion(1L);
-        assertEquals("DEGRADED",api.list().get(0).usbGuardStatus());
+        assertEquals("DEGRADED",api.list(admin).get(0).usbGuardStatus());
         e.setAppliedPolicyVersion(2L);e.setUsbGuardCheckedAt(Instant.now().minusSeconds(200));
-        assertEquals("UNKNOWN",api.list().get(0).usbGuardStatus());
-        assertTrue(api.list().get(0).usbGuardStale());
+        assertEquals("UNKNOWN",api.list(admin).get(0).usbGuardStatus());
+        assertTrue(api.list(admin).get(0).usbGuardStale());
         e.setUsbGuardCheckedAt(Instant.now());e.setLastSeen(Instant.now().minusSeconds(200));
-        assertEquals("UNKNOWN",api.list().get(0).usbGuardStatus());
+        assertEquals("UNKNOWN",api.list(admin).get(0).usbGuardStatus());
     }
 }
