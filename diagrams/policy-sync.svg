@@ -64,14 +64,14 @@
   </g>
   <g>
     <rect x="552" y="320" width="328" height="76" rx="6" fill="#ffffff" stroke="#8ba5ab" />
-    <text x="568" y="344" font-size="18" font-weight="700" fill="#142f39">Lỗi reconcile hoặc persist</text>
-    <text x="568" y="366" font-size="15" fill="#274b58">Giữ lỗi và thử lại.</text>
+    <text x="568" y="344" font-size="18" font-weight="700" fill="#142f39">Lỗi pull, validate hoặc reconcile</text>
+    <text x="568" y="366" font-size="15" fill="#274b58">Ghi lỗi và thử lại.</text>
     <text x="568" y="386" font-size="15" fill="#274b58">Không ACK revision mới.</text>
   </g>
   <g>
     <rect x="552" y="420" width="328" height="76" rx="6" fill="#ffffff" stroke="#8ba5ab" />
-    <text x="568" y="444" font-size="18" font-weight="700" fill="#142f39">Lỗi gửi ACK</text>
-    <text x="568" y="466" font-size="15" fill="#274b58">Giữ pending ACK và thử lại</text>
-    <text x="568" y="486" font-size="15" fill="#274b58">sau khi verify rules.</text>
+    <text x="568" y="444" font-size="18" font-weight="700" fill="#142f39">Lỗi lưu state hoặc gửi ACK</text>
+    <text x="568" y="466" font-size="15" fill="#274b58">Lưu lỗi → dừng trước POST.</text>
+    <text x="568" y="486" font-size="15" fill="#274b58">Gửi lỗi → giữ pending ACK, verify rồi retry.</text>
   </g>
 </svg>

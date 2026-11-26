@@ -6,7 +6,7 @@
 | --- | --- |
 | Instructions và skills | Root `AGENTS.md`, repo `.agents/skills/`. Kiểm tra prompt/skill catalog mới của client. Khi catalog không hiện, đọc trực tiếp theo link trong AGENTS. |
 | Reviewers | `.codex/agents/*.toml` theo project agents schema của Codex. Phiên nào chưa thấy role thì dùng native built-in read-only brief. Nếu không delegate được, áp dụng fallback và stop gate ở mục 14.4. |
-| Rules | `.codex/rules/usbshield.rules` ở trusted project layer. Kiểm tra bằng `codex execpolicy check --rules .codex/rules/usbshield.rules -- git reset --hard HEAD`. Lệnh phía sau `--` là input kiểm tra. |
+| Rules | `.codex/rules/usbshield.rules` ở trusted project layer. Kiểm tra bằng `codex execpolicy check --rules .codex/rules/usbshield.rules -- git reset --hard HEAD`. Chạy probe này dưới dạng lệnh độc lập từ repo root. Codex chỉ phân tích phần sau `--` như dữ liệu, và guard cho phép đúng mẫu probe này. |
 | Hooks | `.codex/hooks.json` đăng ký `PreToolUse` cho Bash. Tool cần trusted repo và hook trust. Trên Desktop mở Settings → Hooks hoặc Review hooks trong composer. Trên CLI dùng /hooks. Xem hook project và guard.py trước khi chọn Trust cho từng định nghĩa đã kiểm tra. Dùng synthetic tests và chạy gate thủ công khi session chưa nạp hook hoặc surface không hỗ trợ command hook cục bộ. |
 
 Rules so khớp prefix Git; hook nhận command thật của Bash và kiểm tra mẫu lệnh phổ biến. Các helper không xử lý mọi wrapper, alias, shell expansion hoặc công cụ ngoài Bash. Quyền OS/sandbox, branch protection, scope và kiểm tra candidate vẫn áp dụng. Hook không tự thực thi lệnh được kiểm tra, không sửa file và không tự xuất bản. Heuristic secret check chọn các file nhạy cảm và một số dạng token/private key. Reviewer vẫn cần kiểm tra secrets trong diff.

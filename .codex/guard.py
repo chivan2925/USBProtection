@@ -16,6 +16,7 @@ GIT_DANGEROUS = (
     r"update-ref\b|(?:rebase|merge)(?=\s|$)|remote\s+(?:set-url|rename|remove|add)\b)"
 )
 GIT_PUBLICATION = GIT + r"(push|commit)\b"
+RULES_PROBE_COMMAND = "codex execpolicy check --rules .codex/rules/usbshield.rules -- git reset --hard HEAD"
 COMMIT_COMMAND = re.compile(
     r"""git commit(?: -m (?:'[^'&|;<>$\x60\r\n]+'|"[^"&|;<>$\x60\r\n]+"|[A-Za-z0-9._:-]+))?"""
 )
@@ -60,6 +61,10 @@ def publication_context(cwd):
 
 
 def inspect_command(command, cwd, context_ok=publication_context):
+    standalone = command.strip()
+    # Codex execpolicy only evaluates its trailing command tokens as data.
+    if standalone == RULES_PROBE_COMMAND:
+        return None
     if re.search(GIT + GIT_DANGEROUS, command, re.IGNORECASE):
         return "Repository policy blocks this history, branch, or remote mutation."
     if re.search(r"\bgh(?:\.exe)?[\"']?\s+pr\s+(?:create|merge)\b", command, re.IGNORECASE):
@@ -77,7 +82,6 @@ def inspect_command(command, cwd, context_ok=publication_context):
     publication = re.search(GIT_PUBLICATION, command, re.IGNORECASE)
     if publication:
         operation = publication[1].lower()
-        standalone = command.strip()
         if operation == "push" and standalone != "git push origin vinhkhang":
             return "Use only a normal, standalone git push origin vinhkhang after approval."
         if operation == "commit" and not COMMIT_COMMAND.fullmatch(standalone):

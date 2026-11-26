@@ -38,6 +38,13 @@ class GuardTest(TestCase):
             with self.subTest(command=command):
                 self.assertIsNotNone(inspect_command(command, ".", lambda _: True))
 
+    def test_documented_rules_probe_only_inspects_git_tokens(self):
+        command = "codex execpolicy check --rules .codex/rules/usbshield.rules -- git reset --hard HEAD"
+        self.assertIn(command, (ROOT / "HARNESS.md").read_text(encoding="utf-8"))
+        self.assertIsNone(inspect_command(command, "."))
+        self.assertIsNotNone(inspect_command(command + "; git status", "."))
+        self.assertIsNotNone(inspect_command("git reset --hard HEAD", "."))
+
     def test_publication_requires_context(self):
         for command in ("git commit -m test", "git push origin vinhkhang"):
             self.assertIsNotNone(inspect_command(command, ".", lambda _: False))

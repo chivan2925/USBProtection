@@ -1,5 +1,5 @@
 // Frontend view model mapped from the Admin API v0.2 at the adapter boundary.
-// Mapping and integration limits: docs/qa/EVENT_VIEW_MODEL_MAPPING.md.
+// Event API contract: docs/API.md. Mapping: ../services/mappers/eventMapper.ts.
 export type EventType = 'connected' | 'disconnected' | 'blocked' | 'allowed' | 'service' | 'policy_applied'
 export type EventDecision = 'allowed' | 'blocked' | 'unknown'
 export interface EventDevice {
