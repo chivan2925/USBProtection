@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Execute separately from the real Admin workstation and a real Client workstation.
-# Usage: ./verify-phase3-https-acl.sh admin|client https://usbshield.example.internal [ca-public.pem]
+# Execute on Central loopback and separately from an actual Client workstation.
+# Usage: ./verify-phase3-https-acl.sh admin https://127.0.0.1 [ca-public.pem]
+#        ./verify-phase3-https-acl.sh client https://usbshield.example.internal [ca-public.pem]
 set -euo pipefail
 if [ "$#" -lt 2 ] || [ "$#" -gt 3 ] || { [ "$1" != admin ] && [ "$1" != client ]; }; then
     echo "usage: $0 admin|client https://<DNS_NAME> [ca-public.pem]" >&2
@@ -22,9 +23,12 @@ expect() {
     echo "PASS $mode $path HTTP $actual"
 }
 if [ "$mode" = admin ]; then
+    case "$base" in https://127.0.0.1|https://127.0.0.1:*) ;; *) echo 'Admin probe requires the HTTPS loopback listener' >&2; exit 2 ;; esac
+    expect 404 '/'
     expect 200 '/api/auth/csrf'
     # Admin-only API still requires login, so unauthenticated traffic should be 401.
     expect 401 '/api/admin/endpoints/page'
+    expect 404 '/api/agent/policy'
 else
     expect 403 '/'
     expect 403 '/api/auth/csrf'

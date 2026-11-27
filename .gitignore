@@ -1,5 +1,8 @@
 HELP.md
 target/
+
+# Untracked local artifacts from the retired React application.
+/frontend/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

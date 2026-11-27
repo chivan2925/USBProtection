@@ -1,15 +1,15 @@
 # Kiến trúc
 
-## Runtime tại baseline
+## Runtime hiện tại
 
-Windows chạy Nginx, Spring Boot và PostgreSQL. Nginx kết thúc TLS và kiểm tra CIDR. Cấu hình mẫu chuyển tiếp đến Spring Boot ở loopback. React/Vite có thể được đóng gói trong cùng JAR thông qua Maven profile `with-frontend`. PostgreSQL lưu tài khoản, endpoint, thiết bị, sự kiện và danh sách cho phép theo endpoint. Flyway quản lý schema.
+Windows chạy Central Admin Desktop JavaFX, Nginx, Spring Boot và PostgreSQL. Nginx kết thúc TLS trên hai listener. Listener loopback chỉ chuyển tiếp Admin và auth, listener LAN chỉ chuyển tiếp Agent API từ CIDR đã cấp. Backend và PostgreSQL bind loopback. PostgreSQL lưu tài khoản, endpoint, thiết bị, sự kiện và danh sách cho phép theo endpoint. Flyway quản lý schema.
 
 Ubuntu chạy USBGuard và Agent systemd dưới tài khoản dịch vụ `usbshield`. USBGuard quyết định trên thiết bị bằng rules đã nạp. Agent dùng gateway để quan sát, quản lý allow rules theo HASH và kiểm tra rules sau reconcile. Tách gateway khỏi đồng bộ HTTP để test được contract và failure path bằng test double. Helper trong phiên desktop nhận thông báo qua Unix socket local. Việc không có phiên phù hợp hoặc thông báo lỗi có thể làm mất thông báo desktop trong khi USBGuard vẫn xử lý thiết bị.
 
 | Ranh giới | Hành vi source |
 | --- | --- |
-| LAN → central | HTTPS tại Nginx. Mạng Client được vào các route Agent theo ACL. Admin Web/API cần đường mạng Admin. |
-| Admin → Server | Spring Security session/CSRF và `ROLE_ADMIN`. Principal mang Admin ID và workspace ID. Danh sách, joins, counts, lookup và đột biến dùng workspace của principal. |
+| LAN → Central | HTTPS tại IP LAN của Nginx. CIDR được cấp chỉ gọi được Agent API. |
+| Desktop → Server | HTTPS qua `127.0.0.1` và CA đã provision. JavaFX chuyển HTTP sang luồng nền và giữ session trong bộ nhớ. Spring Security xác minh session, CSRF và workspace của principal. |
 | Agent → Server | Enrollment v2 dùng vé theo slot đã gắn installation ID. Các request sau claim dùng credential riêng của endpoint. Central kiểm workspace, endpoint và generation trước khi đọc hoặc ghi trạng thái Agent. |
 | Agent → USBGuard | IPC ACL riêng cho service account. Daemon áp dụng rules local. |
 | Agent → notifier | IPC local cho thông báo đến desktop user. Active session là attribution tốt nhất có thể, có thể là `UNKNOWN`. |
@@ -28,7 +28,7 @@ Allow được xác thực theo endpoint đã báo thiết bị và HASH hợp l
 
 ## Mục tiêu v2.5
 
-[Blueprint](../BLUEPRINT.md) quy định JavaFX trên Windows, một workspace sở hữu endpoint, vận hành không cần Internet khi LAN còn, và giữ policy/outbox local khi mất LAN. Revoke mục tiêu chặn USB đang cắm khi Agent nhận và thực thi policy, với kết quả actual block riêng và retry khi lỗi. Allow mục tiêu vẫn cần rút/cắm lại. File monitoring và bộ cài Windows tích hợp là các slice sau. Thiết kế chi tiết cần ADR và quyết định Owner.
+[Blueprint](../BLUEPRINT.md) quy định vận hành không cần Internet khi LAN còn và giữ policy/outbox local khi mất LAN. Revoke mục tiêu chặn USB đang cắm khi Agent nhận và thực thi policy, với kết quả actual block riêng và retry khi lỗi. Allow mục tiêu vẫn cần rút/cắm lại. File monitoring và lifecycle cài đặt phát hành thuộc các slice sau.
 
 ### Quyết định kiến trúc
 

@@ -8,7 +8,7 @@ This runbook is **only for an existing unversioned application database** (for e
 
 ## Safety requirements
 
-1. Stop every Admin Server process connected to this application database. Take a **verified, restorable backup** of both database structure and data first. Never run this on `usbshield_test` or `usbshield_browser_test`.
+1. Stop every Admin Server process connected to this application database. Take a **verified, restorable backup** of both database structure and data first. Apply this procedure only to the verified application database.
 2. Open the **application** PostgreSQL database in IntelliJ Database. Run this **read-only** preflight query and verify the output:
 
    ```sql
@@ -55,5 +55,4 @@ Some installations were started after Phase 1 (new columns already present), oth
 ## Test databases
 
 - Java integration tests: `usbshield_test`, role `usbshield_test`, random schema `usbshield_it_*` **per test class**, cleaned at the end of that class.
-- Browser live tests: `usbshield_browser_test`, role `usbshield_test`, random schema `usbshield_e2e_*` **per browser run**, migrated using Flyway and cleaned when its backend JVM stops.
-- The test role must have `CREATE` permission on **these two test databases only**. Tests refuse the application/admin database names and roles. Hard-killing a test process can leave an abandoned random test schema; inspect and clean it manually only after verifying its ownership and that no matching test process remains.
+- The test role needs `CREATE` on the dedicated test database. Tests verify database and role. If a test process is terminated abruptly, verify ownership and process status before removing a leftover test schema.

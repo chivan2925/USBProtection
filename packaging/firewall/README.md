@@ -1,22 +1,7 @@
-# USBShield LAN firewall / reverse proxy deployment
+# USBShield LAN firewall and HTTPS
 
-These are templates, not live firewall rules. Replace placeholders before deployment.
-
-- Spring Boot **must bind `127.0.0.1:18080`** (`USBSHIELD_BIND_ADDRESS=127.0.0.1`, `PORT=18080`, `prod`). Never expose port 18080 directly; firewall must reject external TCP/18080 and restrict PostgreSQL TCP/5432 to the Admin Server only.
-- **Critical:** `ADMIN_CIDR` must not include Client IPs. On a shared LAN, use each Admin workstation's exact `/32` IP (or a dedicated Admin VLAN); broad `192.168.x.0/24` would also allow Client browsers. Ensure clients and Admin appear under distinguishable source IPs at Nginx.
-- Deploy `packaging/nginx/usbshield-https-acl.conf.example` as a real Nginx site **after** replacing `@@ADMIN_CIDR@@`, `@@CLIENT_CIDR@@`, `@@USBSHIELD_DNS_NAME@@`, certificate/key file paths. Do not let Nginx load an unmodified template.
-- Permit TCP/443 to the HTTPS reverse proxy **from the explicitly allowed Admin and Client CIDRs only**. Nginx has a second, path-level ACL: `/api/agent/**` for permitted Agent clients; everything else Admin-only. Network firewall alone cannot enforce HTTP paths.
-- Example UFW (replace values; use a maintenance console to avoid losing SSH access):
-
-  ```bash
-  sudo ufw allow from <ADMIN_CIDR> to any port 443 proto tcp
-  sudo ufw allow from <CLIENT_CIDR> to any port 443 proto tcp
-  # Ensure no broader inbound 443/18080/5432 allowances remain.
-  sudo ufw status numbered
-  ```
-
-- Trust only the actual source IP on the Nginx connection. A load-balancer/NAT that collapses all sources to one IP requires revised ACL design; do not use arbitrary `X-Forwarded-For` headers as an access decision.
-- Provide the root-managed Client Agent config with `USBSHIELD_SERVER_URL=https://<DNS_NAME>` (must match certificate SAN); if issued from an internal PKI set `USBSHIELD_TLS_CA_CERTIFICATE` to the absolute path of the CA PEM. Store the enrollment token securely. Never set `trust-all`, `--insecure`, or disable hostname verification.
-- After deployment the Admin workstation should load the login page and sign in. From a Client workstation, `GET /`, `/api/auth/csrf` and `/api/admin/endpoints/page` must return 403. `GET /api/agent/policy` with protocol 2 and no Agent credential must return 401 from Spring. Verify enrollment and heartbeat from an Agent using validated TLS.
-- Enrollment has server-side rate limiting. Admin login accepts repeated attempts from the authorized Admin network.
-- `nginx -t` validates syntax but does **not** verify actual source-IP segregation. Run the acceptance tests from separate Admin and Client machines.
+- The Central backend uses 127.0.0.1:18080 and PostgreSQL binds loopback. Keep both ports inaccessible from LAN.
+- Fill the static LAN IPv4, Agent CIDR, internal DNS name and TLS paths in [the Nginx template](../nginx/usbshield-https-acl.conf.example). Use a server certificate with IP SAN 127.0.0.1 and the LAN DNS SAN. Keep the private key accessible to the proxy service identity.
+- Permit inbound TCP/443 on the LAN address from the authorized Agent CIDRs. Nginx forwards normalized Agent API paths only on that listener. The dedicated loopback listener serves Admin and authentication routes.
+- Match the Agent HTTPS URL to the LAN DNS SAN. Supply its provisioned CA using `USBSHIELD_TLS_CA_CERTIFICATE`. Desktop trusts the CA PEM from its launcher configuration and validates the loopback IP SAN.
+- Run the [ACL verifier](../tests/verify-phase3-https-acl.sh) from Windows Central loopback and separately from an actual Agent workstation. Check that the LAN listener denies Admin routes, and then verify enrollment and heartbeat with a valid Agent credential. [Setup and acceptance steps](../../docs/IT_SETUP_GUIDE.md)

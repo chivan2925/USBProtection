@@ -1,16 +1,19 @@
-# Sử dụng Admin Web baseline
+# Sử dụng Central Admin Desktop
 
-Mở URL HTTPS do IT cung cấp từ mạng Admin. Đăng nhập bằng tài khoản USBShield. Dashboard tóm tắt endpoint và sự kiện. Endpoints hiển thị health, last seen, desired/applied policy và chi tiết từng máy. Devices, Whitelist và Events giúp tra cứu thiết bị đã quan sát, quyền cho phép và sự kiện theo endpoint.
+Mở USBShield trên máy Windows Central bằng launcher do IT cung cấp. Đăng nhập bằng tài khoản workspace. Tổng quan hiển thị số thiết bị và sự kiện. Chọn khoảng ngày theo giờ Windows rồi bấm **Áp dụng** để xem thống kê trong kỳ.
 
-## Cho phép và thu hồi
+- **Máy trạm** hiển thị trạng thái kết nối, USBGuard, người dùng Ubuntu và hai phiên bản policy. Chọn máy để xem chi tiết, các thiết bị đã thấy hoặc danh sách cho phép của máy đó.
+- **Thiết bị USB** hiển thị trạng thái ghi nhận gần nhất của thiết bị theo từng máy. **Danh sách cho phép** hiển thị quy tắc desired theo endpoint.
+- **Sự kiện USB** có bộ lọc máy, thiết bị, người dùng, loại sự kiện, quyết định và ngày. Chọn sự kiện để xem thời điểm, attribution và phiên Ubuntu. **Nhật ký quản trị** ghi các thao tác cấp tài khoản, slot, vé và thu hồi credential trong workspace.
 
-1. Mở endpoint đích và chọn thiết bị mà máy đó đã báo cáo. Đọc tên, HASH và endpoint trước khi xác nhận.
-2. Dùng **Allow on this endpoint** hoặc **Revoke on this endpoint**. Thao tác đổi desired whitelist của endpoint được chọn. Nếu API từ chối vì thiết bị chưa được thấy tại endpoint, kiểm tra sự kiện ở đúng máy.
-3. Kiểm tra desired/applied version và USBGuard health. Chờ Agent đồng bộ. Sau đó rút USB và cắm lại để kiểm tra hiệu lực baseline. ACK là xác nhận revision rules. Kiểm tra kết quả trên USB qua hành vi tại máy và sự kiện tương ứng.
-4. Khi máy offline hoặc version chưa khớp, theo dõi pending và last seen. Máy có thể tiếp tục dùng policy áp dụng trước đó. Sự kiện bị giữ ở outbox có thể xuất hiện sau khi nối mạng lại.
+## Cho phép và thu hồi quyền USB
 
-## Đọc sự kiện và lỗi
+1. Chọn máy trạm, mở **Thiết bị đã thấy**, chọn thiết bị rồi bấm **Cho phép tại máy này**. Central chỉ cấp quyền cho HASH hợp lệ mà máy đích đã quan sát.
+2. Muốn thu hồi, mở **Quyền cho phép**, chọn quy tắc rồi bấm **Thu hồi quyền cho phép**.
+3. Xem **Mong muốn** và **Đã ACK** tại **Máy trạm**. Máy mất LAN tiếp tục dùng policy đã áp dụng. Khi Agent đã đồng bộ, rút và cắm lại USB để kiểm tra hiệu lực hiện tại. ACK cho biết phiên bản rules Agent đã áp dụng.
 
-USB Events cho biết thời điểm, quyết định và thiết bị khi có dữ liệu. Attribution là user/session Ubuntu đang hoạt động theo Agent hoặc `UNKNOWN`. Notification desktop là best-effort. Nếu không thấy sự kiện, kiểm tra health, kết nối và bộ lọc endpoint/time. Chuyển sang [IT setup](IT_SETUP_GUIDE.md) để kiểm tra kết nối hoặc reset mật khẩu.
+## Đăng ký và vận hành
 
-Mỗi tài khoản Admin có một workspace. Dashboard, Endpoints, Whitelist, Devices và Events hiển thị dữ liệu của workspace đã đăng nhập. IT cấp endpoint vào workspace qua vé enrollment. JavaFX, Revoke trực tiếp và file activity thuộc [mục tiêu v2.5](../BLUEPRINT.md). [Quy trình cấp endpoint](IT_SETUP_GUIDE.md)
+Bấm **Tạo slot đăng ký** với installation UUID do IT xác minh. Chọn slot trong **Máy trạm** rồi bấm **Cấp vé**. Dùng **Thu hồi credential** khi IT cần vô hiệu hóa kết nối của Agent và cấp lại vé. Hai thao tác thu hồi credential và thu hồi quyền USB có tác động khác nhau. [Quy trình IT](IT_SETUP_GUIDE.md)
+
+Dùng **Tải lại** sau khi kết nối về Central gián đoạn. Nếu thao tác ghi báo lỗi hoặc timeout, kiểm tra trạng thái hiện tại trước khi thao tác lại. Central có thể xử lý request trước khi đường truyền trả phản hồi. Đăng xuất khi kết thúc.

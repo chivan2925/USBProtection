@@ -1,6 +1,9 @@
 server:
   address: 127.0.0.1
   port: 8080
+  error:
+    whitelabel:
+      enabled: false
   servlet:
     context-path: /
     session:
@@ -11,6 +14,9 @@ server:
 spring:
   application:
     name: usbshield-admin-server
+  web:
+    resources:
+      add-mappings: false
 
   datasource:
     url: jdbc:postgresql://${USBSHIELD_DB_HOST:127.0.0.1}:${USBSHIELD_DB_PORT:5432}/${USBSHIELD_DB_NAME:usbshield}
@@ -40,8 +46,7 @@ springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
+    enabled: false
 
 logging:
   level:
