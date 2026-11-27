@@ -7,7 +7,7 @@ spring:
 usbshield:
   agent:
     server-url: ${USBSHIELD_SERVER_URL:http://localhost:8080}
-    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:default-enrollment-secret}
+    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:}
     data-dir: ${USBSHIELD_DATA_DIR:./data}
     config-dir: ${USBSHIELD_CONFIG_DIR:./config}
     heartbeat-interval-ms: 5000

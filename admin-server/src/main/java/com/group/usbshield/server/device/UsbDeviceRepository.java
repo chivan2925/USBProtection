@@ -4,9 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 
 @Repository
 public interface UsbDeviceRepository extends JpaRepository<UsbDevice, Long> {
-    Optional<UsbDevice> findByDeviceHash(String deviceHash);
-    Optional<UsbDevice> findByVendorIdAndProductIdAndSerialNumber(String vendorId, String productId, String serialNumber);
+    Optional<UsbDevice> findByWorkspaceIdAndId(long workspaceId, Long id);
+    List<UsbDevice> findByWorkspaceIdAndIdIn(long workspaceId, Collection<Long> ids);
 }

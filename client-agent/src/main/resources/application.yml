@@ -9,8 +9,8 @@ usbshield:
   agent:
     # Admin Server base URL
     server-url: http://localhost:8080
-    # Optional shared enrollment token
-    enrollment-token: default-enrollment-secret
+    # Per-endpoint enrollment ticket, supplied through protected process configuration.
+    enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:}
     # Heartbeat interval in milliseconds (default 5 seconds)
     heartbeat-interval-ms: 5000
     # Local data directory for credentials and offline spool

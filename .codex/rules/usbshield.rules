@@ -1,0 +1,6 @@
+# Native exact-prefix defense in depth. No elevated allow rules.
+prefix_rule(pattern = ["git", "push", ["--force", "--force-with-lease", "-f"]], decision = "forbidden")
+prefix_rule(pattern = ["git", "reset", "--hard"], decision = "forbidden")
+prefix_rule(pattern = ["git", "clean"], decision = "forbidden")
+prefix_rule(pattern = ["git", "branch", ["-D", "-d", "--delete"]], decision = "forbidden")
+prefix_rule(pattern = ["gh", "pr", ["create", "merge"]], decision = "forbidden")

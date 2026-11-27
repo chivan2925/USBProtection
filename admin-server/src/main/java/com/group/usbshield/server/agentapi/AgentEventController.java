@@ -2,9 +2,9 @@ package com.group.usbshield.server.agentapi;
 
 import com.group.usbshield.server.agentapi.dto.AgentEventRequest;
 import com.group.usbshield.server.agentapi.dto.AgentUsbDeviceDto;
-import com.group.usbshield.server.device.UsbDevice;
+import com.group.usbshield.server.device.UsbCatalogWriter;
 import com.group.usbshield.server.device.UsbDeviceRepository;
-import com.group.usbshield.server.endpoint.EndpointRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.group.usbshield.server.event.UsbEvent;
 import com.group.usbshield.server.event.UsbEventRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,41 +28,30 @@ public class AgentEventController {
 
     private final UsbEventRepository usbEventRepository;
     private final UsbDeviceRepository usbDeviceRepository;
-    private final EndpointRepository endpointRepository;
+    private final AgentCredentialService credentials;
+    private final UsbCatalogWriter catalog;
 
     @org.springframework.transaction.annotation.Transactional
     @PostMapping
     @Operation(summary = "Tiếp nhận USB Event từ Client Agent", description = "Lưu trữ sự kiện cắm/rút USB cùng thông tin Active User và quyết định ALLOWED/BLOCKED")
     public ResponseEntity<Map<String, Object>> handleUsbEvent(
             @Valid @RequestBody AgentEventRequest request,
-            java.security.Principal principal) {
+            @AuthenticationPrincipal AgentIdentity agent) {
 
-        String effectiveEndpointId = principal.getName();
+        String effectiveEndpointId = agent.endpointId();
+        long workspaceId = agent.workspaceId();
         AgentCredentialService.bind(effectiveEndpointId, request.getEndpointId());
         // Reject implausible future events, but keep arbitrarily old offline events.
-        // Check before acquiring the catalog-wide transaction lock.
         if (request.getOccurredAt().isAfter(Instant.now().plus(java.time.Duration.ofMinutes(5)))) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.BAD_REQUEST, "Event timestamp exceeds allowed future clock skew");
         }
 
-        // A per-endpoint lock alone does NOT serialize a new shared USB hash
-        // reported by two different endpoints. Lock one stable row across all
-        // instances/transactions before catalog find-or-create. A UNIQUE DB
-        // constraint provides the secondary invariant if another writer bypasses
-        // this API; deleting duplicate data must precede schema migration.
-        endpointRepository.lockDeviceCatalogCoordinator().orElseThrow(
-                () -> new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.UNAUTHORIZED, "No endpoint available"));
-        // Lock the authenticated endpoint row BEFORE the duplicate lookup and
-        // insert. This serializes concurrent deliveries across server instances
-        // using the database lock, without a check-then-insert uniqueness race.
-        endpointRepository.lockByEndpointId(effectiveEndpointId).orElseThrow(
-                () -> new org.springframework.web.server.ResponseStatusException(
-                        org.springframework.http.HttpStatus.UNAUTHORIZED, "Unknown endpoint"));
+        // Serialize dedup and recheck the authenticated generation with the endpoint locked.
+        credentials.lockCurrent(agent);
         String payloadDigest = AgentEventCanonicalDigest.digest(effectiveEndpointId, request);
         if (request.getEventId() != null) {
-            var existing = usbEventRepository.findByEndpointIdAndEventId(effectiveEndpointId, request.getEventId());
+            var existing = usbEventRepository.findByWorkspaceIdAndEndpointIdAndEventId(workspaceId, effectiveEndpointId, request.getEventId());
             if (existing.isPresent()) {
                 UsbEvent stored = existing.get();
                 boolean sameEvent = stored.getPayloadDigest() != null
@@ -78,29 +67,11 @@ public class AgentEventController {
             }
         }
 
-        Long usbDeviceId = null;
         AgentUsbDeviceDto deviceDto = request.getDevice();
-        if (deviceDto != null) {
-            UsbDevice savedDevice = null;
-            if (deviceDto.getHash() != null && !deviceDto.getHash().isBlank()) {
-                savedDevice = usbDeviceRepository.findByDeviceHash(deviceDto.getHash()).orElse(null);
-            }
-            if (savedDevice == null) {
-                savedDevice = UsbDevice.builder()
-                        .vendorId(deviceDto.getVendorId() != null ? deviceDto.getVendorId() : "UNKNOWN")
-                        .productId(deviceDto.getProductId() != null ? deviceDto.getProductId() : "UNKNOWN")
-                        .serialNumber(deviceDto.getSerial())
-                        .deviceHash(deviceDto.getHash() == null || deviceDto.getHash().isBlank()
-                                ? null : deviceDto.getHash())
-                        .deviceName(deviceDto.getName())
-                        .interfaces(deviceDto.getInterfaceClass())
-                        .build();
-                savedDevice = usbDeviceRepository.save(savedDevice);
-            }
-            usbDeviceId = savedDevice.getId();
-        }
+        Long usbDeviceId = deviceDto == null ? null : catalog.observe(workspaceId, deviceDto);
 
         UsbEvent usbEvent = UsbEvent.builder()
+                .workspaceId(workspaceId)
                 .endpointId(effectiveEndpointId)
                 .eventId(request.getEventId())
                 .payloadDigest(payloadDigest)
@@ -144,7 +115,7 @@ public class AgentEventController {
         AgentUsbDeviceDto requested = request.getDevice();
         if (requested == null) return stored.getUsbDeviceId() == null;
         if (stored.getUsbDeviceId() == null) return false;
-        var device = usbDeviceRepository.findById(stored.getUsbDeviceId());
+        var device = usbDeviceRepository.findByWorkspaceIdAndId(stored.getWorkspaceId(), stored.getUsbDeviceId());
         return device.isPresent()
                 && Objects.equals(device.get().getVendorId(), requested.getVendorId())
                 && Objects.equals(device.get().getProductId(), requested.getProductId())

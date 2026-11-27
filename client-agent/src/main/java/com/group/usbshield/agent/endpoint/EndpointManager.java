@@ -13,15 +13,18 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Set;
 import java.util.UUID;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.util.HexFormat;
 import java.util.Optional;
 
@@ -38,7 +41,12 @@ public class EndpointManager {
     private EndpointRegistration currentRegistration;
     private Path storageFilePath;
     private static final SecureRandom TOKEN_RANDOM = new SecureRandom();
-    private record PendingEnrollment(String machineId, String agentToken) {}
+    private record EnrollmentBinding(UUID installationId, String machineId) {}
+
+    private record PendingEnrollment(String machineId, UUID installationId, UUID requestId,
+                                     String ticketDigest, String agentToken) {
+        @Override public String toString() { return "PendingEnrollment[requestId=" + requestId + "]"; }
+    }
 
     public EndpointManager(AgentProperties properties,
                            SystemInfoProvider systemInfoProvider,
@@ -95,7 +103,7 @@ public class EndpointManager {
             log.info("Loaded endpoint credentials: EndpointId={}, CurrentPolicyVersion={}",
                     currentRegistration.getEndpointId(), currentRegistration.getCurrentPolicyVersion());
         } catch (Exception e) {
-            log.warn("Failed to read endpoint registration from file: {}", e.getMessage());
+            log.warn("Failed to read endpoint registration from disk");
         }
     }
 
@@ -104,11 +112,15 @@ public class EndpointManager {
             return true;
         }
 
+        UUID installationId = installationId();
+        if (installationId == null || properties.getEnrollmentToken() == null
+                || properties.getEnrollmentToken().isBlank()) return false;
+
         // The pending token is persisted BEFORE the HTTP request, so a lost
         // response, process crash or failed endpoint.json rename cannot orphan
         // an already committed endpoint on the server.
         String machineId = systemInfoProvider.getMachineId();
-        PendingEnrollment pending = loadOrStageEnrollment(machineId);
+        PendingEnrollment pending = loadOrStageEnrollment(machineId, installationId);
         if (pending == null) {
             log.error("Cannot durably stage enrollment identity; refusing enrollment request");
             return false;
@@ -116,9 +128,11 @@ public class EndpointManager {
         log.info("Attempting to enroll this endpoint with Admin Server...");
         EnrollmentRequest request = EnrollmentRequest.builder()
                 .hostname(systemInfoProvider.getHostname())
-                .machineId(machineId)
+                .machineId(pending.machineId())
                 .ipAddress(systemInfoProvider.getIpAddressForServer(properties.getServerUrl()))
                 .operatingSystem(systemInfoProvider.getOperatingSystem())
+                .installationId(pending.installationId())
+                .requestId(pending.requestId())
                 .enrollmentToken(properties.getEnrollmentToken())
                 .agentToken(pending.agentToken())
                 .build();
@@ -149,7 +163,7 @@ public class EndpointManager {
                 return false;
             }
         } else {
-            log.warn("Enrollment could not be completed at this time (Admin Server unreachable).");
+            log.warn("Enrollment could not be completed; check Central availability and ticket status");
             return false;
         }
     }
@@ -209,28 +223,83 @@ public class EndpointManager {
         return storageFilePath == null ? null : storageFilePath.resolveSibling("enrollment-pending.json");
     }
 
-    private PendingEnrollment loadOrStageEnrollment(String machineId) {
-        if (machineId == null || machineId.isBlank() || storageFilePath == null) return null;
+    private UUID installationId() {
+        if (storageFilePath == null) return null;
+        Path path = storageFilePath.resolveSibling("installation-id.json");
+        try {
+            if (Files.exists(path)) {
+                UUID existing = objectMapper.readValue(path.toFile(), UUID.class);
+                if (existing == null) log.error("Missing durable installation identity");
+                return existing;
+            }
+            UUID created = UUID.randomUUID();
+            return persistAtomically(path, created) ? created : null;
+        } catch (IOException failure) {
+            log.error("Cannot read durable installation identity");
+            return null;
+        }
+    }
+
+    private PendingEnrollment loadOrStageEnrollment(String machineId, UUID installationId) {
         Path staged = pendingFile();
-        if (Files.exists(staged)) {
-            try {
-                PendingEnrollment previous = objectMapper.readValue(staged.toFile(), PendingEnrollment.class);
-                // A different machine identity must not silently reuse another machine's key.
-                if (!machineId.equals(previous.machineId()) || previous.agentToken() == null
-                        || !previous.agentToken().matches("[0-9a-f]{64}")) {
-                    log.error("Staged enrollment identity mismatch/corruption; administrator intervention required");
-                    return null;
-                }
-                return previous;
-            } catch (Exception failure) {
-                log.error("Cannot read staged enrollment; refusing token rotation: {}", failure.getMessage());
+        String ticketDigest = ticketDigest(properties.getEnrollmentToken());
+        try {
+            boolean stagedExists = !Files.notExists(staged);
+            PendingEnrollment previous = !stagedExists ? null
+                    : objectMapper.readValue(staged.toFile(), PendingEnrollment.class);
+            if (stagedExists && (previous == null || !installationId.equals(previous.installationId())
+                    || previous.machineId() == null || previous.machineId().isBlank()
+                    || previous.requestId() == null || previous.agentToken() == null
+                    || !previous.agentToken().matches("[0-9a-f]{64}"))) {
+                log.error("Invalid staged enrollment identity; IT intervention required");
                 return null;
             }
+            EnrollmentBinding binding = loadOrBindMachineId(installationId, machineId, previous);
+            if (binding == null) return null;
+            if (previous != null && ticketDigest.equals(previous.ticketDigest())) return previous;
+
+            byte[] randomBytes = new byte[32];
+            TOKEN_RANDOM.nextBytes(randomBytes);
+            PendingEnrollment candidate = new PendingEnrollment(binding.machineId(), installationId, UUID.randomUUID(),
+                    ticketDigest, HexFormat.of().formatHex(randomBytes));
+            return persistAtomically(staged, candidate) ? candidate : null;
+        } catch (IOException failure) {
+            log.error("Cannot read durable enrollment state; IT intervention required");
+            return null;
         }
-        byte[] randomBytes = new byte[32];
-        TOKEN_RANDOM.nextBytes(randomBytes);
-        PendingEnrollment candidate = new PendingEnrollment(machineId, HexFormat.of().formatHex(randomBytes));
-        return persistAtomically(staged, candidate) ? candidate : null;
+    }
+
+    private EnrollmentBinding loadOrBindMachineId(UUID installationId, String observedMachineId,
+                                                   PendingEnrollment previous) throws IOException {
+        Path path = storageFilePath.resolveSibling("enrollment-binding.json");
+        String installationFallback = "installation:" + installationId;
+        boolean machineIdAvailable = observedMachineId != null && !observedMachineId.isBlank();
+        boolean newBinding = Files.notExists(path);
+        // An existing pending claim may already have committed even if Agent lacks its receipt.
+        String selectedMachineId = previous != null ? previous.machineId()
+                : machineIdAvailable ? observedMachineId : installationFallback;
+        EnrollmentBinding binding = newBinding ? new EnrollmentBinding(installationId, selectedMachineId)
+                : objectMapper.readValue(path.toFile(), EnrollmentBinding.class);
+        if (binding == null || !installationId.equals(binding.installationId())
+                || binding.machineId() == null || binding.machineId().isBlank() || binding.machineId().length() > 100
+                || (previous != null && !binding.machineId().equals(previous.machineId()))
+                || (machineIdAvailable && !installationFallback.equals(binding.machineId())
+                    && !binding.machineId().equals(observedMachineId))) {
+            log.error("Enrollment binding mismatch or corruption; IT intervention required");
+            return null;
+        }
+        // Save independently of the pending proof and endpoint.json so same-slot recovery can reuse it.
+        if (newBinding && !persistAtomically(path, binding)) return null;
+        return binding;
+    }
+
+    private static String ticketDigest(String ticket) {
+        try {
+            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+                    .digest(ticket.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("SHA-256 unavailable", impossible);
+        }
     }
 
     public synchronized boolean saveRegistration(EndpointRegistration registration) {
@@ -280,7 +349,7 @@ public class EndpointManager {
             log.debug("Durably persisted Agent state to {}", destination);
             return true;
         } catch (Exception e) {
-            log.error("Failed to persist Agent state to {}: {}", destination, e.getMessage());
+            log.error("Failed to persist Agent state to {} ({})", destination, e.getClass().getSimpleName());
             return false;
         }
     }

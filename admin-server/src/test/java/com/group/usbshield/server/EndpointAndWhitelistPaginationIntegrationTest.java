@@ -27,6 +27,7 @@ class EndpointAndWhitelistPaginationIntegrationTest {
         TestPostgresSchemas.register(registry, EndpointAndWhitelistPaginationIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired EndpointRepository endpoints;
     @Autowired EndpointWhitelistEntryRepository whitelist;
     @Autowired UsbDeviceRepository devices;
@@ -36,44 +37,45 @@ class EndpointAndWhitelistPaginationIntegrationTest {
     @Test void endpointSearchFiltersBeforePagingAndCountsGlobalStatus() {
         String marker = "paging-" + UUID.randomUUID().toString().substring(0, 8);
         for (int i = 0; i < 3; i++) {
-            endpoints.save(Endpoint.builder().endpointId("EP-" + marker + "-" + i)
+            endpoints.save(workspace.endpoint().endpointId("EP-" + marker + "-" + i)
                     .hostname(marker + "-node-" + i)
                     .lastSeen(i == 0 ? Instant.now() : null).build());
         }
-        var first = endpointController.page(0, 2, marker, null);
-        var second = endpointController.page(1, 2, marker, null);
+        var first = endpointController.page(workspace.admin(), 0, 2, marker, null);
+        var second = endpointController.page(workspace.admin(), 1, 2, marker, null);
         assertEquals(3, first.totalElements());
         assertEquals(2, first.content().size());
         assertEquals(1, second.content().size());
         assertTrue(first.onlineEndpoints() >= 1);
         assertTrue(first.offlineEndpoints() >= 2);
-        assertEquals(1, endpointController.page(0, 20, marker, "online").totalElements());
-        assertEquals(2, endpointController.page(0, 20, marker, "offline").totalElements());
-        assertEquals(0, endpointController.page(0, 20, "a-nonmatching-term", null).totalElements());
+        assertEquals(1, endpointController.page(workspace.admin(), 0, 20, marker, "online").totalElements());
+        assertEquals(2, endpointController.page(workspace.admin(), 0, 20, marker, "offline").totalElements());
+        assertEquals(0, endpointController.page(workspace.admin(), 0, 20, "a-nonmatching-term", null).totalElements());
         assertThrows(org.springframework.web.server.ResponseStatusException.class,
-                () -> endpointController.page(-1, 20, null, null));
+                () -> endpointController.page(workspace.admin(), -1, 20, null, null));
         assertThrows(org.springframework.web.server.ResponseStatusException.class,
-                () -> endpointController.page(0, 101, null, null));
+                () -> endpointController.page(workspace.admin(), 0, 101, null, null));
     }
 
     @Test void whitelistSearchIsGloballyPagedAndIncludesDeviceMetadata() {
         String marker = "WL-" + UUID.randomUUID().toString().substring(0, 8);
-        var usb = devices.save(UsbDevice.builder().vendorId("0951").productId("1665")
+        var usb = devices.save(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951").productId("1665")
                 .deviceHash("hash-" + UUID.randomUUID()).deviceName(marker).build());
         for (int i = 0; i < 3; i++) {
-            whitelist.save(EndpointWhitelistEntry.builder().endpointId(marker + "-" + i)
+            endpoints.save(workspace.endpoint().endpointId(marker + "-" + i).hostname(marker + "-" + i).build());
+            whitelist.save(EndpointWhitelistEntry.builder().workspaceId(workspace.workspaceId()).endpointId(marker + "-" + i)
                     .usbDeviceId(usb.getId()).fingerprintType("HASH")
-                    .fingerprintValue("wl-" + i + "-" + marker).enabled(true).build());
+                    .fingerprintValue(usb.getDeviceHash()).enabled(true).build());
         }
         devices.flush();
         whitelist.flush();
-        var first = whitelistController.page(0, 2, null, marker);
+        var first = whitelistController.page(workspace.admin(), 0, 2, null, marker);
         assertEquals(3, first.totalElements());
         assertEquals(2, first.content().size());
         assertTrue(first.content().stream().allMatch(e -> marker.equals(e.name())));
-        assertEquals(1, whitelistController.page(1, 2, null, marker).content().size());
-        assertEquals(1, whitelistController.page(0, 20, marker + "-1", marker).totalElements());
+        assertEquals(1, whitelistController.page(workspace.admin(), 1, 2, null, marker).content().size());
+        assertEquals(1, whitelistController.page(workspace.admin(), 0, 20, marker + "-1", marker).totalElements());
         assertThrows(org.springframework.web.server.ResponseStatusException.class,
-                () -> whitelistController.page(0, 0, null, null));
+                () -> whitelistController.page(workspace.admin(), 0, 0, null, null));
     }
 }

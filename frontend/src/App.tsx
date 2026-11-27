@@ -42,7 +42,7 @@ function Console({ route, demo, revision }: { route: string; demo: boolean; revi
     case '/events': page = <Events {...props} />; break
     case '/endpoints': page = <Endpoints {...props} />; break
     default: {
-      page = <><PageHeading eyebrow="404" title="Không tìm thấy trang" description="Đường dẫn này không tồn tại trong USB Protection." />
+      page = <><PageHeading eyebrow="404" title="Không tìm thấy trang" description="Đường dẫn này không tồn tại trong USBShield." />
           <Panel title="Kiểm tra lại đường dẫn"><EmptyState icon="search" title="Trang không khả dụng" description="Sử dụng thanh điều hướng hoặc quay lại Dashboard." />
             <a className="button primary" href="#/dashboard">Về Dashboard</a>
           </Panel></>

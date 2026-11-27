@@ -17,6 +17,8 @@ public class AdminPasswordResetRunner implements ApplicationRunner {
     private final AdminUserRepository accounts;
     private final PasswordEncoder encoder;
     private final TransactionTemplate transactions;
+    private final WorkspaceRepository workspaces;
+    private final WorkspaceAudit audit;
     private final Environment env;
 
     @Override public void run(ApplicationArguments args) {
@@ -34,7 +36,10 @@ public class AdminPasswordResetRunner implements ApplicationRunner {
                 throw new IllegalStateException("New password must differ");
             admin.setPasswordHash(encoder.encode(password));
             admin.setCredentialVersion((admin.getCredentialVersion() == null ? 0L : admin.getCredentialVersion()) + 1);
+            Workspace workspace = workspaces.findByOwnerAdminId(admin.getId())
+                    .orElseThrow(() -> new IllegalStateException("Admin workspace missing"));
             accounts.saveAndFlush(admin);
+            audit.record(workspace.getId(), admin.getId(), "ADMIN_PASSWORD_RESET", admin.getUsername());
         });
         // No password value or hash in logs.
         org.slf4j.LoggerFactory.getLogger(getClass()).info("Admin password reset completed; all previous sessions revoked");

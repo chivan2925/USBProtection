@@ -8,8 +8,9 @@ import java.util.Optional;
 
 @Repository
 public interface UsbEventRepository extends JpaRepository<UsbEvent, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<UsbEvent> {
-    Optional<UsbEvent> findByEndpointIdAndEventId(String endpointId, String eventId);
-    boolean existsByEndpointIdAndUsbDeviceId(String endpointId, Long usbDeviceId);
-    List<UsbEvent> findByEndpointIdOrderByOccurredAtDesc(String endpointId);
-    List<UsbEvent> findTop50ByOrderByOccurredAtDesc();
+    Optional<UsbEvent> findByWorkspaceIdAndEndpointIdAndEventId(long workspaceId, String endpointId, String eventId);
+    Optional<UsbEvent> findByWorkspaceIdAndId(long workspaceId, Long id);
+    boolean existsByWorkspaceIdAndEndpointIdAndUsbDeviceId(long workspaceId, String endpointId, Long usbDeviceId);
+    long countByWorkspaceId(long workspaceId);
+    List<UsbEvent> findByWorkspaceIdAndEndpointIdOrderByOccurredAtDesc(long workspaceId, String endpointId);
 }

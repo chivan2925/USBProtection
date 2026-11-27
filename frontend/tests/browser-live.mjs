@@ -9,6 +9,7 @@ import { dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:net'
 import { createPostgresBrowserTestRun, postgresBrowserChildEnv, cleanupPostgresBrowserSchema } from './postgresTestDb.mjs'
+import { agentProtocol, enrollSyntheticAgent } from './enrollSyntheticAgent.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const artifacts = join(root, '.artifacts')
@@ -29,7 +30,6 @@ await new Promise(resolveClose => portReservation.close(resolveClose))
 const api = `http://127.0.0.1:${backendPort}`
 const web = 'http://127.0.0.1:4174'
 const password = randomUUID()
-const enrollmentToken = randomUUID()
 const browserDb = createPostgresBrowserTestRun()
 let javaExecutable
 let browserFailure
@@ -61,11 +61,20 @@ function start(executable, args, options = {}) {
   children.push(child)
   return child
 }
-async function post(path, body, headers = {}) {
-  const response = await fetch(`${api}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) })
-  assert.equal(response.status, 200, `QA HTTP ${path}`)
+let adminCookie
+let csrf
+async function http(path, { method = 'GET', body, headers = {}, expected = 200, admin = false } = {}) {
+  const response = await fetch(`${api}${path}`, {
+    method, headers: {
+      'Content-Type': 'application/json', ...(adminCookie && admin ? { Cookie: adminCookie } : {}),
+      ...(admin && method !== 'GET' && csrf ? { [csrf.headerName]: csrf.token } : {}), ...headers,
+    }, body: JSON.stringify(body), signal: AbortSignal.timeout(15000),
+  })
+  if (admin && response.headers.get('set-cookie')) adminCookie = response.headers.get('set-cookie').split(';')[0]
+  assert.equal(response.status, expected, `QA HTTP ${path}`)
   return response.json()
 }
+const post = (path, body, headers = {}) => http(path, { method: 'POST', body, headers })
 try {
   // The previous hard-coded JDK 22 path broke Windows machines using JDK 21.
   // Honor JAVA_HOME when provided; otherwise resolve `java` from PATH, like M4's live harness.
@@ -82,7 +91,7 @@ try {
   }
   console.log(`Browser-live PostgreSQL target: usbshield_browser_test (role=usbshield_test, schema=${browserDb.schema})`)
   const backend = start(java, ['-jar', jar, `--server.port=${backendPort}`, '--server.address=127.0.0.1', ...browserDb.datasourceArgs, ...browserDb.hibernateArgs], {
-    env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: username, USBSHIELD_ADMIN_PASSWORD: password, USBSHIELD_ENROLLMENT_TOKEN: enrollmentToken }, browserDb),
+    env: postgresBrowserChildEnv({ ...process.env, USBSHIELD_ADMIN_USERNAME: username, USBSHIELD_ADMIN_PASSWORD: password }, browserDb),
   })
   // Do not suppress a JVM launch error or early exit for two minutes.
   let ready = false
@@ -101,8 +110,11 @@ try {
     await delay(100)
   }
   if (!ready) throw new Error(`Timed out: real backend readiness (${java}, ${api})\n${serverOutput}`)
-  const endpoint = await post('/api/agent/enroll', { hostname: 'Windows-HTTP-QA', machineId: randomUUID(), enrollmentToken })
-  const headers = { 'X-Endpoint-Id': endpoint.endpointId, 'X-Agent-Token': endpoint.agentToken }
+  csrf = await http('/api/auth/csrf', { admin: true })
+  await http('/api/auth/login', { method: 'POST', admin: true, body: { username, password } })
+  csrf = await http('/api/auth/csrf', { admin: true })
+  const endpoint = await enrollSyntheticAgent(http, 'Windows-HTTP-QA')
+  const headers = { ...agentProtocol, 'X-Endpoint-Id': endpoint.endpointId, 'X-Agent-Token': endpoint.agentToken }
   const baseEvent = {
     endpointId: endpoint.endpointId, hostname: 'Windows-HTTP-QA', linuxUsername: 'qa-linux-user', linuxUid: 1000, sessionId: 'qa-session', sessionType: 'wayland', seat: 'seat0',
     device: { vendorId: '0951', productId: '1666', serial: 'HTTP-QA-ONLY', name: 'Windows HTTP QA storage', hash: 'windows-http-qa-device-hash', interfaceClass: '08:06:50' },
@@ -301,8 +313,8 @@ try {
   await until(() => bodyHas('1–10 trên 25 bản ghi'), 'recovery without demo fallback')
 
   // Week 3 synthetic attribution and isolation regression; no Linux resolver is run.
-  const endpointB = await post('/api/agent/enroll', { hostname: 'Windows-HTTP-QA-B', machineId: randomUUID(), enrollmentToken })
-  const headersB = { 'X-Endpoint-Id': endpointB.endpointId, 'X-Agent-Token': endpointB.agentToken }
+  const endpointB = await enrollSyntheticAgent(http, 'Windows-HTTP-QA-B')
+  const headersB = { ...agentProtocol, 'X-Endpoint-Id': endpointB.endpointId, 'X-Agent-Token': endpointB.agentToken }
   const noSerialDevice = { ...baseEvent.device, serial: null, name: 'Week 3 HTTP no-serial storage', hash: 'week3-http-no-serial-shared-hash' }
   await post('/api/agent/events', {
     ...baseEvent, device: noSerialDevice, linuxUsername: 'UNKNOWN', linuxUid: null, sessionId: null, sessionType: null, seat: null,

@@ -8,7 +8,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "usb_devices", indexes = {
     @Index(name = "idx_usb_vid_pid", columnList = "vendorId, productId")
-})
+}, uniqueConstraints = @UniqueConstraint(name = "uk_device_workspace_hash", columnNames = {"workspaceId", "deviceHash"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,9 +29,11 @@ public class UsbDevice {
     @Column(length = 150)
     private String serialNumber;
 
-    // PostgreSQL allows multiple NULLs in a UNIQUE column: devices without a trustworthy hash remain
-    // independent; nonblank device hashes have exactly one catalog identity.
-    @Column(length = 255, unique = true)
+    @Column(nullable = false, updatable = false)
+    private long workspaceId;
+
+    // Devices without a trustworthy hash remain independent within each workspace.
+    @Column(length = 255)
     private String deviceHash;
 
     @Column(length = 255)

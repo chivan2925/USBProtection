@@ -53,7 +53,6 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 usbshield:
-  enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN:}
   admin:
     username: ${USBSHIELD_ADMIN_USERNAME:admin}
     password: ${USBSHIELD_ADMIN_PASSWORD:}

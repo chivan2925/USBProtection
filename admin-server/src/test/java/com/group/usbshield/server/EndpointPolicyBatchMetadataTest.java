@@ -24,9 +24,9 @@ class EndpointPolicyBatchMetadataTest {
         var devices = mock(UsbDeviceRepository.class);
         var events = mock(UsbEventRepository.class);
         var service = new EndpointPolicyService(endpoints, entries, devices, events);
-        when(endpoints.findByEndpointId("EP-A")).thenReturn(Optional.of(
+        when(endpoints.findByWorkspaceIdAndEndpointId(2L, "EP-A")).thenReturn(Optional.of(
                 Endpoint.builder().endpointId("EP-A").hostname("lab-a").build()));
-        when(endpoints.lockByEndpointId("EP-A")).thenReturn(Optional.of(
+        when(endpoints.lockByWorkspaceIdAndEndpointId(2L, "EP-A")).thenReturn(Optional.of(
                 Endpoint.builder().endpointId("EP-A").hostname("lab-a").build()));
         var first = EndpointWhitelistEntry.builder().id(11L).endpointId("EP-A").usbDeviceId(1L)
                 .fingerprintType("HASH").fingerprintValue("hash-one").build();
@@ -36,16 +36,16 @@ class EndpointPolicyBatchMetadataTest {
                 .fingerprintType("HASH").fingerprintValue("hash-three").build();
         var legacy = EndpointWhitelistEntry.builder().id(14L).endpointId("EP-A")
                 .fingerprintType("HASH").fingerprintValue("legacy-hash").build();
-        when(entries.findByEndpointIdAndEnabledTrue("EP-A")).thenReturn(List.of(first, second, third, legacy));
-        when(devices.findAllById(any())).thenReturn(List.of(
+        when(entries.findByWorkspaceIdAndEndpointIdAndEnabledTrue(2L, "EP-A")).thenReturn(List.of(first, second, third, legacy));
+        when(devices.findByWorkspaceIdAndIdIn(eq(2L), any())).thenReturn(List.of(
                 UsbDevice.builder().id(1L).vendorId("0951").productId("1665").deviceName("Kingston").build(),
                 UsbDevice.builder().id(2L).vendorId("1234").productId("5678").deviceName("Second").build()));
 
-        var response = service.list("EP-A");
+        var response = service.list(2L, "EP-A");
         assertEquals(java.util.Arrays.asList("Kingston", "Second", "Kingston", null),
                 response.stream().map(EndpointPolicyService.EntryResponse::name).toList());
-        assertEquals(4, service.policy("EP-A").getWhitelistedDevices().size());
-        verify(devices, times(2)).findAllById(any()); // once for list, once for policy
+        assertEquals(4, service.policy(2L, "EP-A").getWhitelistedDevices().size());
+        verify(devices, times(2)).findByWorkspaceIdAndIdIn(eq(2L), any()); // once for list, once for policy
         verify(devices, never()).findById(any());
     }
 }

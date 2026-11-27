@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.*;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.csrf.*;
@@ -18,6 +17,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 public class AdminAuthController {
     private final PasswordEncoder encoder;
     private final AdminUserRepository adminUsers;
+    private final WorkspaceRepository workspaces;
     public record Login(@NotBlank String username,@NotBlank String password){}
     @GetMapping("/csrf") public Map<String,String> csrf(CsrfToken token){return Map.of("token",token.getToken(),"headerName",token.getHeaderName());}
     @PostMapping("/login") @org.springframework.transaction.annotation.Transactional
@@ -26,9 +26,12 @@ public class AdminAuthController {
         AdminUser user = adminUsers.lockByUsername(body.username())
                 .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED,"Invalid credentials"));
         if(!encoder.matches(body.password(),user.getPasswordHash())) throw new ResponseStatusException(UNAUTHORIZED,"Invalid credentials");
+        Workspace workspace = workspaces.findByOwnerAdminId(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(UNAUTHORIZED, "Invalid credentials"));
+        var identity = new AdminIdentity(user.getId(), workspace.getId(), user.getUsername());
         if(request.getSession(false)!=null)request.changeSessionId();
         var context=SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(new UsernamePasswordAuthenticationToken(user.getUsername(),null,
+        context.setAuthentication(new UsernamePasswordAuthenticationToken(identity,null,
                 java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN"))));
         SecurityContextHolder.setContext(context);
         new HttpSessionSecurityContextRepository().saveContext(context,request,response);

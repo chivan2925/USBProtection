@@ -234,8 +234,11 @@ class EndpointManagerTest {
         assertEquals(2L, endpointManager.getCurrentRegistration().getPendingAckVersion(),
                 "Pending ACK version must be retained in memory when disk write fails");
     }
-    @Test
-    void lostHttpResponseRetainsStagedCredentialAcrossAgentRestart() {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.NullSource
+    @org.junit.jupiter.params.provider.ValueSource(strings = "machine-from-os")
+    void lostHttpResponseRetainsStagedCredentialAcrossAgentRestart(String machineId) {
+        when(systemInfoProvider.getMachineId()).thenReturn(machineId);
         java.util.concurrent.atomic.AtomicInteger attempts = new java.util.concurrent.atomic.AtomicInteger();
         when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(call -> {
             EnrollmentRequest request = call.getArgument(0);
@@ -254,6 +257,9 @@ class EndpointManagerTest {
         var sent = org.mockito.ArgumentCaptor.forClass(EnrollmentRequest.class);
         verify(adminServerClient, times(2)).enroll(sent.capture());
         assertEquals(sent.getAllValues().get(0).getAgentToken(), sent.getAllValues().get(1).getAgentToken());
+        assertEquals(sent.getAllValues().get(0).getMachineId(), sent.getAllValues().get(1).getMachineId());
+        assertEquals(sent.getAllValues().get(0).getRequestId(), sent.getAllValues().get(1).getRequestId());
+        assertEquals(sent.getAllValues().get(0).getInstallationId(), sent.getAllValues().get(1).getInstallationId());
         assertTrue(sent.getAllValues().get(0).getAgentToken().matches("[0-9a-f]{64}"));
     }
 
@@ -287,6 +293,104 @@ class EndpointManagerTest {
         when(systemInfoProvider.getMachineId()).thenReturn("different-machine");
         assertFalse(endpointManager.ensureEnrolled());
         verifyNoInteractions(adminServerClient);
+    }
+
+    @Test
+    void replacingTicketRestagesProofButKeepsInstallationIdentity() {
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenReturn(Optional.empty());
+        assertFalse(endpointManager.ensureEnrolled());
+        properties.setEnrollmentToken("replacement-synthetic-ticket");
+        assertFalse(endpointManager.ensureEnrolled());
+        var sent = org.mockito.ArgumentCaptor.forClass(EnrollmentRequest.class);
+        verify(adminServerClient, times(2)).enroll(sent.capture());
+        var original = sent.getAllValues().get(0);
+        var replacement = sent.getAllValues().get(1);
+        assertEquals(original.getInstallationId(), replacement.getInstallationId());
+        assertNotEquals(original.getRequestId(), replacement.getRequestId());
+        assertNotEquals(original.getAgentToken(), replacement.getAgentToken());
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource(value = {
+            "unavailable, machine-123", "machine-123, unavailable"
+    }, nullValues = "unavailable")
+    void successfulEnrollmentRecoversSameBindingWhenMachineIdAvailabilityChanges(
+            String initialMachineId, String recoveryMachineId) throws Exception {
+        when(systemInfoProvider.getMachineId()).thenReturn(initialMachineId);
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(call -> {
+            EnrollmentRequest request = call.getArgument(0);
+            return Optional.of(EnrollmentResponse.builder().endpointId("EP-RECOVERY")
+                    .agentToken(request.getAgentToken()).currentPolicyVersion(0L).build());
+        });
+
+        assertTrue(endpointManager.ensureEnrolled());
+        assertFalse(Files.exists(tempDir.resolve("enrollment-pending.json")));
+        Files.move(tempDir.resolve("endpoint.json"), tempDir.resolve("archived-endpoint.json"));
+        properties.setEnrollmentToken("replacement-synthetic-ticket");
+        when(systemInfoProvider.getMachineId()).thenReturn(recoveryMachineId);
+
+        EndpointManager restarted = new EndpointManager(properties, systemInfoProvider, adminServerClient, objectMapper);
+        restarted.init();
+        assertTrue(restarted.ensureEnrolled());
+        assertEquals("EP-RECOVERY", restarted.getEndpointId());
+        var sent = org.mockito.ArgumentCaptor.forClass(EnrollmentRequest.class);
+        verify(adminServerClient, times(2)).enroll(sent.capture());
+        var original = sent.getAllValues().get(0);
+        var recovery = sent.getAllValues().get(1);
+        assertEquals(original.getInstallationId(), recovery.getInstallationId());
+        assertEquals(original.getMachineId(), recovery.getMachineId());
+        assertNotEquals(original.getRequestId(), recovery.getRequestId());
+        assertNotEquals(original.getAgentToken(), recovery.getAgentToken());
+    }
+
+    @Test
+    void recoveryRefusesDifferentKnownMachineAfterSuccessfulEnrollment() throws Exception {
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenAnswer(call -> {
+            EnrollmentRequest request = call.getArgument(0);
+            return Optional.of(EnrollmentResponse.builder().endpointId("EP-RECOVERY")
+                    .agentToken(request.getAgentToken()).currentPolicyVersion(0L).build());
+        });
+        assertTrue(endpointManager.ensureEnrolled());
+        assertFalse(Files.exists(tempDir.resolve("enrollment-pending.json")));
+        Files.move(tempDir.resolve("endpoint.json"), tempDir.resolve("archived-endpoint.json"));
+        clearInvocations(adminServerClient);
+        when(systemInfoProvider.getMachineId()).thenReturn("different-machine");
+        properties.setEnrollmentToken("replacement-synthetic-ticket");
+
+        EndpointManager restarted = new EndpointManager(properties, systemInfoProvider, adminServerClient, objectMapper);
+        restarted.init();
+        assertFalse(restarted.ensureEnrolled());
+        verifyNoInteractions(adminServerClient);
+    }
+
+    @Test
+    void adoptsPendingClaimWhenIndependentBindingIsAbsent() throws Exception {
+        when(systemInfoProvider.getMachineId()).thenReturn(null);
+        when(adminServerClient.enroll(any(EnrollmentRequest.class))).thenReturn(Optional.empty());
+        assertFalse(endpointManager.ensureEnrolled());
+        Files.delete(tempDir.resolve("enrollment-binding.json"));
+        when(systemInfoProvider.getMachineId()).thenReturn("machine-123");
+
+        EndpointManager restarted = new EndpointManager(properties, systemInfoProvider, adminServerClient, objectMapper);
+        restarted.init();
+        assertFalse(restarted.ensureEnrolled());
+        assertTrue(Files.exists(tempDir.resolve("enrollment-binding.json")));
+        var sent = org.mockito.ArgumentCaptor.forClass(EnrollmentRequest.class);
+        verify(adminServerClient, times(2)).enroll(sent.capture());
+        var original = sent.getAllValues().get(0);
+        var replay = sent.getAllValues().get(1);
+        assertEquals(original.getMachineId(), replay.getMachineId());
+        assertEquals(original.getRequestId(), replay.getRequestId());
+        assertEquals(original.getAgentToken(), replay.getAgentToken());
+    }
+
+    @Test
+    void unreadableEnrollmentBindingPreventsClaim() throws Exception {
+        Files.writeString(tempDir.resolve("enrollment-binding.json"), "{invalid");
+
+        assertFalse(endpointManager.ensureEnrolled());
+        verifyNoInteractions(adminServerClient);
+        assertFalse(Files.exists(tempDir.resolve("enrollment-pending.json")));
     }
 
 }

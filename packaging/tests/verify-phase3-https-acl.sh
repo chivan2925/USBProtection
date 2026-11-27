@@ -30,5 +30,7 @@ else
     expect 403 '/api/auth/csrf'
     expect 403 '/api/admin/endpoints/page'
     # Agent route is allowed past the proxy; the Spring Agent filter rejects missing token.
+    expect 426 '/api/agent/policy'
+    args+=(--header 'X-USBShield-Protocol: 2')
     expect 401 '/api/agent/policy'
 fi

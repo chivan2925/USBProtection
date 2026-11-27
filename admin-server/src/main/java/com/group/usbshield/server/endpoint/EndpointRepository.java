@@ -11,14 +11,11 @@ import java.util.List;
 public interface EndpointRepository extends JpaRepository<Endpoint, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Endpoint> {
     Optional<Endpoint> findByEndpointId(String endpointId);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
-    @org.springframework.data.jpa.repository.Query("select e from Endpoint e where e.endpointId = :id")
-    Optional<Endpoint> lockByEndpointId(@org.springframework.data.repository.query.Param("id") String id);
-    /** Catalog-wide transaction lock; all Agent event writers use the same row. */
-    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
-    @org.springframework.data.jpa.repository.Query("select e from Endpoint e where e.id = (select min(root.id) from Endpoint root)")
-    Optional<Endpoint> lockDeviceCatalogCoordinator();
-    Optional<Endpoint> findByMachineId(String machineId);
-    List<Endpoint> findByEndpointIdIn(Collection<String> endpointIds);
-    long countByLastSeenAfter(java.time.Instant cutoff);
-    boolean existsByEndpointId(String endpointId);
+    @org.springframework.data.jpa.repository.Query("select e from Endpoint e where e.workspaceId = :workspaceId and e.endpointId = :id")
+    Optional<Endpoint> lockByWorkspaceIdAndEndpointId(long workspaceId, String id);
+    Optional<Endpoint> findByWorkspaceIdAndEndpointId(long workspaceId, String endpointId);
+    List<Endpoint> findByWorkspaceIdAndEndpointIdIn(long workspaceId, Collection<String> endpointIds);
+    org.springframework.data.domain.Page<Endpoint> findByWorkspaceId(long workspaceId, org.springframework.data.domain.Pageable page);
+    long countByWorkspaceId(long workspaceId);
+    long countByWorkspaceIdAndLastSeenAfter(long workspaceId, java.time.Instant cutoff);
 }

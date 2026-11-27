@@ -1,4 +1,7 @@
 package com.group.usbshield.server.event;
+
+import com.group.usbshield.server.auth.AdminIdentity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.group.usbshield.server.device.*;
 import com.group.usbshield.server.endpoint.*;
 import com.group.usbshield.server.agentapi.dto.AgentUsbDeviceDto;
@@ -35,7 +38,7 @@ public class AdminEventController {
     }
 
     // Batch metadata on one page: O(1) extra queries, not one lookup per event.
-    private List<EventResponse> views(List<UsbEvent> batch) {
+    private List<EventResponse> views(long workspaceId, List<UsbEvent> batch) {
         if (batch.isEmpty()) return List.of();
         Set<Long> deviceIds = new HashSet<>();
         Set<String> fallbackIds = new HashSet<>();
@@ -44,15 +47,15 @@ public class AdminEventController {
             if (e.getHostname() == null) fallbackIds.add(e.getEndpointId());
         }
         Map<Long, UsbDevice> byDevice = new HashMap<>();
-        if (!deviceIds.isEmpty()) devices.findAllById(deviceIds).forEach(d -> byDevice.put(d.getId(), d));
+        if (!deviceIds.isEmpty()) devices.findByWorkspaceIdAndIdIn(workspaceId, deviceIds).forEach(d -> byDevice.put(d.getId(), d));
         Map<String, String> byHostname = new HashMap<>();
-        if (!fallbackIds.isEmpty()) endpoints.findByEndpointIdIn(fallbackIds)
+        if (!fallbackIds.isEmpty()) endpoints.findByWorkspaceIdAndEndpointIdIn(workspaceId, fallbackIds)
             .forEach(e -> byHostname.put(e.getEndpointId(), e.getHostname()));
         return batch.stream().map(e -> view(e, byDevice, byHostname)).toList();
     }
 
     @Transactional(readOnly = true)
-    @GetMapping public EventPage list(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size,
+    @GetMapping public EventPage list(@AuthenticationPrincipal AdminIdentity admin, @RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size,
         @RequestParam(required=false) String endpointId,@RequestParam(required=false) String linuxUsername,
         @RequestParam(required=false) String decision,@RequestParam(required=false) String eventType,
         @RequestParam(required=false) Long deviceId,@RequestParam(required=false) Instant from,@RequestParam(required=false) Instant to,
@@ -69,6 +72,7 @@ public class AdminEventController {
         }
         var result=events.findAll((root,query,cb)->{
             List<Predicate> p=new ArrayList<>();
+            p.add(cb.equal(root.get("workspaceId"), admin.workspaceId()));
             if(endpointId!=null)p.add(cb.equal(root.get("endpointId"),endpointId));
             if(linuxUsername!=null)p.add(cb.equal(root.get("linuxUsername"),linuxUsername));
             if(username!=null && !username.isBlank())
@@ -81,6 +85,7 @@ public class AdminEventController {
                 var registeredName = query.subquery(Integer.class);
                 var registered = registeredName.from(Endpoint.class);
                 registeredName.select(cb.literal(1)).where(
+                    cb.equal(registered.get("workspaceId"), admin.workspaceId()),
                     cb.equal(registered.get("endpointId"), root.get("endpointId")),
                     cb.like(cb.lower(registered.get("hostname")), pattern, '\\'));
                 // Match the hostname displayed by view(): captured event name,
@@ -94,6 +99,7 @@ public class AdminEventController {
                 var matchingDevice = query.subquery(Integer.class);
                 var usb = matchingDevice.from(UsbDevice.class);
                 matchingDevice.select(cb.literal(1)).where(
+                    cb.equal(usb.get("workspaceId"), admin.workspaceId()),
                     cb.equal(usb.get("id"), root.get("usbDeviceId")),
                     cb.like(cb.lower(usb.get("deviceName")), containsPattern(device), '\\'));
                 Long id = numericDeviceId(device);
@@ -104,8 +110,8 @@ public class AdminEventController {
             if(from!=null)p.add(cb.greaterThanOrEqualTo(root.get("occurredAt"),from));
             if(to!=null)p.add(cb.lessThanOrEqualTo(root.get("occurredAt"),to));
             return cb.and(p.toArray(Predicate[]::new));
-        },PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"occurredAt","id")));
-        return new EventPage(views(result.getContent()),page,size,result.getTotalElements(),result.getTotalPages());
+        },PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"occurredAt","ingestOrder")));
+        return new EventPage(views(admin.workspaceId(), result.getContent()),page,size,result.getTotalElements(),result.getTotalPages());
     }
     private static boolean exceedsFilterLimit(String value, int limit) {
         return value != null && value.length() > limit;
@@ -123,8 +129,8 @@ public class AdminEventController {
         }
     }
     @Transactional(readOnly = true)
-    @GetMapping("/{id}") public EventResponse detail(@PathVariable Long id){
-        return views(List.of(events.findById(id).orElseThrow(() ->
+    @GetMapping("/{id}") public EventResponse detail(@AuthenticationPrincipal AdminIdentity admin, @PathVariable Long id){
+        return views(admin.workspaceId(), List.of(events.findByWorkspaceIdAndId(admin.workspaceId(), id).orElseThrow(() ->
             new ResponseStatusException(NOT_FOUND, "Event not found")))).get(0);
     }
 }

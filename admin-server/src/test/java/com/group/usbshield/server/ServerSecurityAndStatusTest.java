@@ -2,7 +2,6 @@ package com.group.usbshield.server;
 
 import com.group.usbshield.server.endpoint.*;
 import com.group.usbshield.server.policy.EndpointPolicyService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,42 +25,42 @@ class ServerSecurityAndStatusTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, ServerSecurityAndStatusTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired EndpointPolicyService policies;
-    @Autowired PasswordEncoder passwordEncoder;
 
     Endpoint endpoint(String hash) {
-        return endpoints.saveAndFlush(Endpoint.builder().endpointId("W3-"+UUID.randomUUID())
+        return endpoints.saveAndFlush(workspace.endpoint().endpointId("W3-"+UUID.randomUUID())
                 .hostname("week3").agentTokenHash(hash).build());
     }
 
-    @Test @WithMockUser(roles="ADMIN")
+    @Test
     void noHeartbeatAndExpiredHeartbeatAreOffline() throws Exception {
         var e=endpoint(null);
         assertThat(e.getLastSeen()).isNull();
-        mvc.perform(get("/api/admin/endpoints/"+e.getEndpointId()))
+        mvc.perform(get("/api/admin/endpoints/"+e.getEndpointId()).with(workspace.adminRequest()))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("OFFLINE"));
         e.setLastSeen(Instant.now().minusSeconds(95));endpoints.saveAndFlush(e);
-        mvc.perform(get("/api/admin/endpoints/"+e.getEndpointId())).andExpect(jsonPath("$.status").value("OFFLINE"));
+        mvc.perform(get("/api/admin/endpoints/"+e.getEndpointId()).with(workspace.adminRequest())).andExpect(jsonPath("$.status").value("OFFLINE"));
         e.setLastSeen(Instant.now());endpoints.saveAndFlush(e);
-        mvc.perform(get("/api/admin/endpoints/"+e.getEndpointId())).andExpect(jsonPath("$.status").value("ONLINE"));
+        mvc.perform(get("/api/admin/endpoints/"+e.getEndpointId()).with(workspace.adminRequest())).andExpect(jsonPath("$.status").value("ONLINE"));
     }
 
-    @Test @WithMockUser(roles="ADMIN")
+    @Test
     void adminSessionDoesNotBypassAgentCredentialsAndCorruptHashesFailClosed() throws Exception {
         for(String hash:new String[]{"not-a-hash", "$2a$99$"+"A".repeat(53)}) {
             var e=endpoint(hash);
-            mvc.perform(get("/api/agent/policy").header("X-Endpoint-Id",e.getEndpointId()).header("X-Agent-Token","bad"))
+            mvc.perform(get("/api/agent/policy").header("X-USBShield-Protocol", "2").header("X-Endpoint-Id",e.getEndpointId()).with(workspace.adminRequest()).header("X-Agent-Token",WorkspaceTestData.digest("wrong")))
                     .andExpect(status().isUnauthorized());
         }
-        mvc.perform(get("/api/agent/policy")).andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/agent/policy").header("X-USBShield-Protocol", "2")).andExpect(status().isUnauthorized());
     }
 
     @Test
     void oversizedUtf8AgentTokenIsRejectedAsUnauthorized() throws Exception {
-        var e=endpoint(passwordEncoder.encode("expected-agent-token"));
-        mvc.perform(get("/api/agent/policy")
+        var e=endpoint(WorkspaceTestData.digest("expected-agent-token"));
+        mvc.perform(get("/api/agent/policy").header("X-USBShield-Protocol", "2")
                         .header("X-Endpoint-Id",e.getEndpointId())
                         .header("X-Agent-Token","é".repeat(72)))
                 .andExpect(status().isUnauthorized());
@@ -77,9 +76,9 @@ class ServerSecurityAndStatusTest {
     @Test void pendingPolicyAckCanCatchUpWithoutChangingDesiredOrAnotherEndpoint() {
         var a=endpoint(null);var b=endpoint(null);
         a.setPolicyVersion(4L);a.setAppliedPolicyVersion(1L);endpoints.saveAndFlush(a);
-        policies.ack(a.getEndpointId(),3L);
-        assertThat(policies.policy(a.getEndpointId()).getPolicyVersion()).isEqualTo(4L);
-        policies.ack(a.getEndpointId(),3L);
+        policies.ack(workspace.workspaceId(), a.getEndpointId(),3L);
+        assertThat(policies.policy(workspace.workspaceId(), a.getEndpointId()).getPolicyVersion()).isEqualTo(4L);
+        policies.ack(workspace.workspaceId(), a.getEndpointId(),3L);
         assertThat(endpoints.findByEndpointId(a.getEndpointId()).orElseThrow().getAppliedPolicyVersion()).isEqualTo(3L);
         assertThat(endpoints.findByEndpointId(b.getEndpointId()).orElseThrow().getAppliedPolicyVersion()).isZero();
     }
@@ -89,7 +88,7 @@ class ServerSecurityAndStatusTest {
         mvc.perform(get("/assets/missing.js")).andExpect(status().isNotFound());
         mvc.perform(get("/api/admin/endpoints")).andExpect(status().isUnauthorized());
     }
-    @Test @WithMockUser(roles="ADMIN")
+    @Test
     void usbGuardStatusIsStaleOfflineOrPolicyMismatchEvenIfAgentClaimedHealthy() throws Exception {
         var e = endpoint(null);
         e.setLastSeen(Instant.now());
@@ -97,15 +96,15 @@ class ServerSecurityAndStatusTest {
         e.setUsbGuardCheckedAt(Instant.now());
         e.setPolicyVersion(2L);e.setAppliedPolicyVersion(2L);endpoints.saveAndFlush(e);
         String url = "/api/admin/endpoints/" + e.getEndpointId();
-        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("HEALTHY"));
+        mvc.perform(get(url).with(workspace.adminRequest())).andExpect(jsonPath("$.usbGuardStatus").value("HEALTHY"));
         e.setAppliedPolicyVersion(1L);endpoints.saveAndFlush(e);
-        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("DEGRADED"));
+        mvc.perform(get(url).with(workspace.adminRequest())).andExpect(jsonPath("$.usbGuardStatus").value("DEGRADED"));
         e.setAppliedPolicyVersion(2L);
         e.setUsbGuardCheckedAt(Instant.now().minusSeconds(200));endpoints.saveAndFlush(e);
-        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"))
+        mvc.perform(get(url).with(workspace.adminRequest())).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"))
                 .andExpect(jsonPath("$.usbGuardStale").value(true));
         e.setLastSeen(Instant.now().minusSeconds(200));e.setUsbGuardCheckedAt(Instant.now());endpoints.saveAndFlush(e);
-        mvc.perform(get(url)).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"));
+        mvc.perform(get(url).with(workspace.adminRequest())).andExpect(jsonPath("$.usbGuardStatus").value("UNKNOWN"));
     }
 
 }

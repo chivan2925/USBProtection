@@ -1,5 +1,8 @@
 package com.group.usbshield.server.endpoint;
 
+import com.group.usbshield.server.auth.AdminIdentity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -46,7 +49,7 @@ public class AdminEndpointController {
     /** New bounded query contract. Filtering precedes pagination in PostgreSQL. */
     @Transactional(readOnly = true)
     @GetMapping("/page")
-    public EndpointPage page(@RequestParam(defaultValue = "0") int page,
+    public EndpointPage page(@AuthenticationPrincipal AdminIdentity admin, @RequestParam(defaultValue = "0") int page,
                              @RequestParam(defaultValue = "20") int size,
                              @RequestParam(required = false) String q,
                              @RequestParam(required = false) String status) {
@@ -60,6 +63,7 @@ public class AdminEndpointController {
         Instant cutoff = now.minusSeconds(offlineAfter);
         Specification<Endpoint> filter = (root, query, cb) -> {
             var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+            predicates.add(cb.equal(root.get("workspaceId"), admin.workspaceId()));
             if (status != null) {
                 var lastSeen = root.<Instant>get("lastSeen");
                 predicates.add("online".equals(status)
@@ -78,8 +82,8 @@ public class AdminEndpointController {
             return cb.and(predicates.toArray(jakarta.persistence.criteria.Predicate[]::new));
         };
         var result = endpoints.findAll(filter, PageRequest.of(page, size, Sort.by("endpointId")));
-        long online = endpoints.countByLastSeenAfter(cutoff);
-        long all = endpoints.count();
+        long online = endpoints.countByWorkspaceIdAndLastSeenAfter(admin.workspaceId(), cutoff);
+        long all = endpoints.countByWorkspaceId(admin.workspaceId());
         return new EndpointPage(result.getContent().stream().map(e -> view(e, now)).toList(),
                 page, size, result.getTotalElements(), result.getTotalPages(), online, all - online);
     }
@@ -88,16 +92,16 @@ public class AdminEndpointController {
     @Deprecated
     @Transactional(readOnly = true)
     @GetMapping
-    public List<EndpointResponse> list() {
+    public List<EndpointResponse> list(@AuthenticationPrincipal AdminIdentity admin) {
         Instant now = Instant.now();
-        return endpoints.findAll(PageRequest.of(0, 100, Sort.by("endpointId")))
+        return endpoints.findByWorkspaceId(admin.workspaceId(), PageRequest.of(0, 100, Sort.by("endpointId")))
                 .getContent().stream().map(e -> view(e, now)).toList();
     }
 
     @GetMapping("/{endpointId}")
     @Transactional(readOnly = true)
-    public EndpointResponse detail(@PathVariable String endpointId) {
-        return view(endpoints.findByEndpointId(endpointId)
+    public EndpointResponse detail(@AuthenticationPrincipal AdminIdentity admin, @PathVariable String endpointId) {
+        return view(endpoints.findByWorkspaceIdAndEndpointId(admin.workspaceId(), endpointId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Endpoint not found")), Instant.now());
     }
 }

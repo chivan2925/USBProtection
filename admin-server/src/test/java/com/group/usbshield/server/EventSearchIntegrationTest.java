@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,40 +32,45 @@ class EventSearchIntegrationTest {
         com.group.usbshield.server.TestPostgresSchemas.register(registry, EventSearchIntegrationTest.class);
     }
 
+    @Autowired WorkspaceTestData workspace;
+    @org.junit.jupiter.api.BeforeEach
+    void seedEndpoints() {
+        endpoint("EP-A", "CURRENT-LAB");
+        endpoint("EP-B", "OTHER-HOST");
+    }
+
     @Autowired MockMvc mvc;
     @Autowired EndpointRepository endpoints;
     @Autowired UsbDeviceRepository devices;
     @Autowired UsbEventRepository events;
 
     private Endpoint endpoint(String id, String hostname) {
-        return endpoints.save(Endpoint.builder().endpointId(id).hostname(hostname).build());
+        return endpoints.save(workspace.endpoint().endpointId(id).hostname(hostname).build());
     }
 
     private UsbDevice device(String name) {
-        return devices.save(UsbDevice.builder().vendorId("0951").productId("1666").deviceName(name).build());
+        return devices.save(UsbDevice.builder().workspaceId(workspace.workspaceId()).vendorId("0951").productId("1666").deviceName(name).build());
     }
 
     private UsbEvent event(String endpointId, String hostname, Long deviceId, String username, int second) {
-        return events.save(UsbEvent.builder().endpointId(endpointId).hostname(hostname).usbDeviceId(deviceId)
+        return events.save(UsbEvent.builder().workspaceId(workspace.workspaceId()).endpointId(endpointId).hostname(hostname).usbDeviceId(deviceId)
             .linuxUsername(username).eventType("CONNECTED").decision("BLOCKED")
             .occurredAt(Instant.parse("2026-10-21T10:00:00Z").plusSeconds(second)).build());
     }
 
     @Test void endpointSearchMatchesVisibleSnapshotNameAndLegacyFallback() throws Exception {
-        endpoint("EP-A", "CURRENT-LAB");
-        endpoint("EP-B", "OTHER-HOST");
         event("EP-A", "DESKTOP-8STBDDD", null, "student01", 1);
         event("EP-A", null, null, "student01", 2);
         event("EP-B", "OTHER-HOST", null, "student02", 3);
 
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("endpoint", " desktop-8st "))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("endpoint", " desktop-8st "))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].hostname").value("DESKTOP-8STBDDD"));
         // A renamed endpoint only supplies its current hostname for legacy rows without a snapshot.
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("endpoint", "current-lab"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("endpoint", "current-lab"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].hostname").value("CURRENT-LAB"));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("endpoint", "EP-A"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("endpoint", "EP-A"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(2));
     }
 
@@ -77,14 +81,14 @@ class EventSearchIntegrationTest {
         for (int second = 0; second < 25; second++) {
             event("EP-A", "DESKTOP-8STBDDD", kingston.getId(), "student01", second);
         }
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("device", " kInGsToN ").param("page", "1").param("size", "20"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(25))
             .andExpect(jsonPath("$.totalPages").value(2)).andExpect(jsonPath("$.content.length()").value(5))
             .andExpect(jsonPath("$.content[0].device.name").value("Kingston DataTraveler 3.0"));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("device", kingston.getId().toString()))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("device", kingston.getId().toString()))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(25));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("endpointId", "EP-A").param("deviceId", kingston.getId().toString()).param("linuxUsername", "student01"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(25));
     }
@@ -95,24 +99,25 @@ class EventSearchIntegrationTest {
         event("EP-A", "DESKTOP-8STBDDD", usb.getId(), "UNKNOWN", 2);
         event("EP-B", "OTHER-HOST", usb.getId(), "student01", 3);
 
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("endpoint", "desktop").param("device", "datatraveler").param("linuxUsername", "student01")
                 .param("decision", "BLOCKED").param("eventType", "CONNECTED"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].endpointId").value("EP-A"));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("endpoint", "desktop").param("linuxUsername", "student"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("endpointId", "EP-B").param("endpoint", "desktop"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
     }
 
-    @Test void numericSearchRetainsHistoricalRowsWithoutDeviceDetails() throws Exception {
-        event("EP-A", "DESKTOP-8STBDDD", 999999L, "student01", 1);
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("device", "999999"))
+    @Test void numericSearchHasNoMatchWhenHistoricalEventHasNoDevice() throws Exception {
+        event("EP-A", "DESKTOP-8STBDDD", null, "student01", 1);
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("device", "999999"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
-            .andExpect(jsonPath("$.content[0].usbDeviceId").value(999999))
             .andExpect(jsonPath("$.content[0].device").isEmpty());
     }
 
@@ -122,27 +127,27 @@ class EventSearchIntegrationTest {
         for (int second = 0; second < 25; second++) {
             event("EP-A", "DESKTOP", null, second % 2 == 0 ? "student01" : "student02", second);
         }
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("username", " StUdEnT0 ").param("page", "1").param("size", "20"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(25))
             .andExpect(jsonPath("$.totalPages").value(2)).andExpect(jsonPath("$.content.length()").value(5));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("username", "student").param("linuxUsername", "student01"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(13));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest())
                 .param("username", "student").param("endpointId", "EP-B"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("username", "KnOw"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("username", "KnOw"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].linuxUsername").value("UNKNOWN"));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("username", " "))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("username", " "))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(27));
     }
 
     @Test void usernameSearchTreatsWildcardCharactersLiterally() throws Exception {
         event("EP-A", "DESKTOP", null, "user%_\\backup", 1);
         event("EP-B", "OTHER", null, "userXYzbackup", 2);
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("username", "%_\\"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("username", "%_\\"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].endpointId").value("EP-A"));
     }
@@ -154,13 +159,13 @@ class EventSearchIntegrationTest {
         event("EP-B", "LAB 100xYsafeZbackup", other.getId(), "UNKNOWN", 2);
 
         for (String field : new String[]{"endpoint", "device"}) {
-            mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param(field, "%_safe\\"))
+            mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param(field, "%_safe\\"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
                 .andExpect(jsonPath("$.content[0].endpointId").value("EP-A"));
         }
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("endpoint", " ").param("device", " "))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("endpoint", " ").param("device", " "))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(2));
-        mvc.perform(get("/api/admin/events").with(user("qa").roles("ADMIN")).param("device", "9223372036854775808"))
+        mvc.perform(get("/api/admin/events").with(workspace.adminRequest()).param("device", "9223372036854775808"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
     }
 }

@@ -12,7 +12,7 @@ export function Login() {
   const [error, setError] = useState('')
   const auth = useAuth()
   const notify = useToast()
-  useEffect(() => { document.title = 'Đăng nhập · USB Protection' }, [])
+  useEffect(() => { document.title = 'Đăng nhập · USBShield' }, [])
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -36,7 +36,7 @@ export function Login() {
 
   return <main className="login-page">
     <section className="login-story">
-      <a className="brand" href="#/dashboard"><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span></span></a>
+      <a className="brand" href="#/dashboard"><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Shield</span></span></a>
       <div className="login-story-content">
         <div className="login-shield"><Icon name="shield" size={86} /></div>
         <h1>An toàn bắt đầu<br />từ mỗi kết nối.</h1>

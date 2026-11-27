@@ -22,7 +22,7 @@ export function AdminLayout({ route, children, demo = false }: { route: string; 
   const active = navigation.find(item => route === item.route || route.startsWith(`${item.route}/`))
 
   useEffect(() => {
-    document.title = `${active?.label ?? 'Không tìm thấy'} · USB Protection`
+    document.title = `${active?.label ?? 'Không tìm thấy'} · USBShield`
     mainRef.current?.focus({ preventScroll: true })
     window.scrollTo(0, 0)
   }, [route, active?.label])
@@ -44,7 +44,7 @@ export function AdminLayout({ route, children, demo = false }: { route: string; 
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); mainRef.current?.focus() }}>Đến nội dung chính</a>
     {open && <button className="sidebar-overlay" aria-label="Đóng menu" onClick={() => setOpen(false)} />}
     <aside className={`sidebar ${open ? 'is-open' : ''}`} id="sidebar">
-      <a href="#/dashboard" className="brand" onClick={() => setOpen(false)}><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Protection</span></span></a>
+      <a href="#/dashboard" className="brand" onClick={() => setOpen(false)}><span className="brand-mark"><Icon name="shield" size={25} /></span><span>USB<span className="brand-light">Shield</span></span></a>
       <nav aria-label="Điều hướng chính">{navigation.map((item, index) => <div key={item.route}>
         {navigation[index - 1]?.group !== item.group && <p className="nav-group">{item.group}</p>}
         <a href={`#${item.route}`} className={`nav-link ${active?.route === item.route ? 'active' : ''}`} aria-current={active?.route === item.route ? 'page' : undefined} onClick={() => setOpen(false)}>

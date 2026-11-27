@@ -1,5 +1,8 @@
 package com.group.usbshield.server.policy;
 
+import com.group.usbshield.server.auth.AdminIdentity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -15,7 +18,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 
-/** One bounded query for global whitelist; avoids one HTTP/database lookup per Endpoint. */
+/** One bounded query for workspace whitelist; avoids one HTTP/database lookup per Endpoint. */
 @RestController
 @RequestMapping("/api/admin/whitelist")
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ public class AdminWhitelistPageController {
 
     @GetMapping("/page")
     @Transactional(readOnly = true, isolation = Isolation.REPEATABLE_READ)
-    public WhitelistPage page(@RequestParam(defaultValue = "0") int page,
+    public WhitelistPage page(@AuthenticationPrincipal AdminIdentity admin, @RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "20") int size,
                               @RequestParam(required = false) String endpointId,
                               @RequestParam(required = false) String q) {
@@ -46,8 +49,9 @@ public class AdminWhitelistPageController {
         if (endpointId != null && (endpointId.isBlank() || endpointId.length() > 100))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid endpoint ID");
 
-        var where = new StringBuilder(" WHERE w.enabled = TRUE");
-        var values = new MapSqlParameterSource().addValue("size", size).addValue("offset", page * size);
+        var where = new StringBuilder(" WHERE w.workspace_id = :workspaceId AND w.enabled = TRUE");
+        var values = new MapSqlParameterSource().addValue("workspaceId", admin.workspaceId())
+                .addValue("size", size).addValue("offset", page * size);
         if (endpointId != null) {
             where.append(" AND w.endpoint_id = :endpointId");
             values.addValue("endpointId", endpointId);
@@ -60,7 +64,7 @@ public class AdminWhitelistPageController {
             values.addValue("pattern", "%" + q.strip().toLowerCase(Locale.ROOT)
                     .replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%");
         }
-        String tables = " FROM endpoint_whitelist_entries w LEFT JOIN usb_devices d ON d.id = w.usb_device_id";
+        String tables = " FROM endpoint_whitelist_entries w LEFT JOIN usb_devices d ON d.workspace_id = w.workspace_id AND d.id = w.usb_device_id";
         long total = jdbc.queryForObject("SELECT COUNT(*)" + tables + where, values, Long.class);
         String select = "SELECT w.id, w.endpoint_id, w.usb_device_id, w.fingerprint_type, "
                 + "w.fingerprint_value, w.created_at, d.device_name, d.vendor_id, "

@@ -29,5 +29,4 @@ logging:
     com.group.usbshield.server: INFO
     org.hibernate.SQL: WARN
 usbshield:
-  enrollment-token: ${USBSHIELD_ENROLLMENT_TOKEN}
   offline-after-seconds: ${USBSHIELD_OFFLINE_AFTER_SECONDS:90}

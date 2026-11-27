@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EnrollmentResponse {
     private String endpointId;
+    @lombok.ToString.Exclude
     private String agentToken;
     private Long currentPolicyVersion;
 }

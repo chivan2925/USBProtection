@@ -1,23 +1,39 @@
 package com.group.usbshield.server.agentapi;
-import com.group.usbshield.server.endpoint.*;
+
+import com.group.usbshield.server.endpoint.Endpoint;
+import com.group.usbshield.server.endpoint.EndpointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
-import java.nio.charset.StandardCharsets;
 import static org.springframework.http.HttpStatus.*;
-@Service @RequiredArgsConstructor
+
+@Service
+@RequiredArgsConstructor
 public class AgentCredentialService {
     private final EndpointRepository endpoints;
-    private final PasswordEncoder encoder;
-    public Endpoint authenticate(String id,String token) {
-        if(id==null || id.isBlank() || id.length()>100 || token==null || token.isBlank()
-                || token.getBytes(StandardCharsets.UTF_8).length>72) throw new ResponseStatusException(UNAUTHORIZED,"Agent credentials required");
-        Endpoint e=endpoints.findByEndpointId(id).orElseThrow(()->new ResponseStatusException(UNAUTHORIZED,"Invalid Agent credentials"));
-        if(e.getAgentTokenHash()==null || !e.getAgentTokenHash().matches("\\$2[aby]\\$(0[4-9]|1[0-6])\\$[./A-Za-z0-9]{53}") || !encoder.matches(token,e.getAgentTokenHash())) throw new ResponseStatusException(UNAUTHORIZED,"Invalid Agent credentials");
-        return e;
+
+    public AgentIdentity authenticate(String id, String token) {
+        if (id == null || id.isBlank() || id.length() > 100 || !AgentSecrets.valid(token)) throw invalid();
+        Endpoint endpoint = endpoints.findByEndpointId(id).orElseThrow(AgentCredentialService::invalid);
+        if (!AgentSecrets.matches(endpoint.getAgentTokenHash(), token)) throw invalid();
+        return new AgentIdentity(endpoint.getWorkspaceId(), endpoint.getEndpointId(), endpoint.getCredentialGeneration());
     }
-    public static void bind(String authenticatedId,String claimedId) {
-        if(claimedId!=null && !authenticatedId.equals(claimedId)) throw new ResponseStatusException(FORBIDDEN,"Endpoint identity mismatch");
+
+    /** Call inside the transaction modifying or reading Agent-owned state. */
+    public Endpoint lockCurrent(AgentIdentity agent) {
+        Endpoint endpoint = endpoints.lockByWorkspaceIdAndEndpointId(agent.workspaceId(), agent.endpointId())
+                .orElseThrow(AgentCredentialService::invalid);
+        if (endpoint.getAgentTokenHash() == null || endpoint.getCredentialGeneration() != agent.generation()) throw invalid();
+        return endpoint;
+    }
+
+    public static void bind(String authenticatedId, String claimedId) {
+        if (claimedId != null && !authenticatedId.equals(claimedId)) {
+            throw new ResponseStatusException(FORBIDDEN, "Endpoint identity mismatch");
+        }
+    }
+
+    private static ResponseStatusException invalid() {
+        return new ResponseStatusException(UNAUTHORIZED, "Invalid Agent credentials");
     }
 }
