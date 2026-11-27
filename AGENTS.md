@@ -7,7 +7,7 @@
 - URL canonical là `https://github.com/chivan2925/USBShield.git`. Dừng nếu còn remote cũ.
 - Owner cập nhật remote nếu cần. Dừng khi diverged, dirty tree hoặc scope xung đột.
 - Chỉ làm slice Owner cấp quyền. Xác định baseline SHA, thay đổi được phép và stop gate.
-- Giữ nguyên user edits. Cấm force-push, reset phá hủy, push main, tạo/merge PR.
+- Giữ nguyên user edits. Cấm force-push, reset phá hủy và push trực tiếp lên main.
 - Đọc [BLUEPRINT.md](BLUEPRINT.md), mục 14 và skill liên quan trước khi làm.
 - Source/test mô tả baseline. Blueprint mô tả mục tiêu và ghi rõ ADR còn mở.
 - A1 và các slice sau cần quyền riêng. Dừng nếu chi tiết phải duyệt còn thiếu.
@@ -18,6 +18,7 @@
 - Domain/use case giữ invariant. HTTP, DB, USBGuard, IPC và UI là adapter.
 - Giữ behavior cũ khi refactor và kiểm tra qua entry point thực.
 - Khi viết hoặc refactor code, áp dụng skill `usbshield-implement`.
+- Khi đổi giao diện JavaFX, áp dụng skill `usbshield-design` và đọc `admin-desktop/DESIGN.md`.
 - Policy owner là Server. Agent reconcile snapshot và báo version/health.
 - ACK của rules và actual block trên thiết bị đang cắm cần chứng cứ riêng.
 - Workspace, endpoint và quyền lấy từ identity phía Server khi triển khai isolation.
@@ -44,6 +45,7 @@
 - Sau khi implement và test, đóng băng candidate (bao gồm file mới) trước commit.
 - Tự gọi reviewer read-only trong cùng task theo mục 14.4. Owner đã cho phép.
 - Chọn chuyên môn theo delta. Ưu tiên custom đã load, hoặc reviewer native built-in.
+- Review code/test theo SOLID, Design Patterns, Clean Architecture và Clean Code khi có tác động cụ thể.
 - Gửi baseline, fingerprint và exact diff, acceptance, test evidence và giới hạn quyền.
 - Xác nhận reviewer đọc đúng candidate. Không chỉnh candidate khi reviewer đang đọc.
 - Chờ kết quả, kiểm chứng và xử lý findings trong scope, test lại và re-review delta cuối.
@@ -55,8 +57,9 @@
 
 - Theo [hướng dẫn harness](.codex/HARNESS.md) để chạy gate trên staged candidate.
 - Kiểm tra scope, index, branch, canonical remote, quyền push và kết quả review/test.
-- Chỉ commit và normal push `origin vinhkhang` khi được cấp quyền và gate đạt.
-- Xác minh remote SHA sau push. Owner tự tạo và merge PR.
+- Chỉ commit và normal push `origin vinhkhang` khi được cấp quyền, review đạt và mọi gate còn áp dụng đạt.
+- Owner có thể hoãn gate native được nêu rõ. Ghi NOT EXECUTED và đưa ca vào nghiệm thu tổng.
+- Xác minh remote SHA sau push. Khi được giao, tạo/merge PR `vinhkhang` → `main` qua GitHub connector có quyền.
 - Dừng ở cuối slice. Báo next step với actor, scope, gate và authorization.
 
 ## Skills
@@ -64,6 +67,7 @@
 - [Intake và resume](.agents/skills/usbshield-intake/SKILL.md)
 - [Kiến trúc và bảo mật](.agents/skills/usbshield-architecture/SKILL.md)
 - [Viết và refactor code](.agents/skills/usbshield-implement/SKILL.md)
+- [Thiết kế JavaFX](.agents/skills/usbshield-design/SKILL.md)
 - [Verification và evidence](.agents/skills/usbshield-verify/SKILL.md)
 - [Review độc lập](.agents/skills/usbshield-review/SKILL.md)
 - [Đồng bộ docs và sơ đồ](.agents/skills/usbshield-docs/SKILL.md)

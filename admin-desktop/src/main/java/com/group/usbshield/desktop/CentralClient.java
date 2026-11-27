@@ -41,12 +41,12 @@ final class CentralClient implements AutoCloseable {
     }
 
     Session login(String username, String password) throws IOException, InterruptedException {
-        cookies.getCookieStore().removeAll();
+        discardSession();
         try {
             mutate("POST", "/api/auth/login", Map.of("username", username, "password", password), Session.class);
             return get("/api/auth/me", Session.class);
         } catch (IOException | InterruptedException failure) {
-            cookies.getCookieStore().removeAll();
+            discardSession();
             throw failure;
         }
     }
@@ -55,8 +55,17 @@ final class CentralClient implements AutoCloseable {
         try {
             mutate("POST", "/api/auth/logout", null, Void.class);
         } finally {
-            cookies.getCookieStore().removeAll();
+            discardSession();
         }
+    }
+
+    void changeCredentials(CredentialChange change) throws IOException, InterruptedException {
+        mutate("POST", "/api/admin/account/credentials", change, Void.class);
+        discardSession();
+    }
+
+    void discardSession() {
+        cookies.getCookieStore().removeAll();
     }
 
     void checkReady() throws IOException, InterruptedException {
@@ -167,7 +176,7 @@ final class CentralClient implements AutoCloseable {
         }
         var response = http.send(builder.method(method, content).build(), HttpResponse.BodyHandlers.ofByteArray());
         int status = response.statusCode();
-        if (status == 401) cookies.getCookieStore().removeAll();
+        if (status == 401) discardSession();
         if (status < 200 || status >= 300) throw new RequestFailure(status);
         if (type.hasRawClass(Void.class)) return null;
         return json.readValue(response.body(), type);

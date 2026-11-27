@@ -38,6 +38,7 @@
                         <Button text="Nhật ký quản trị" maxWidth="Infinity" onAction="#openAudit" styleClass="nav"/>
                         <Region VBox.vgrow="ALWAYS"/>
                         <Label fx:id="identity" styleClass="sidebar-account" wrapText="true"/>
+                        <Button text="Cài đặt tài khoản" maxWidth="Infinity" onAction="#openSettings" styleClass="nav"/>
                         <Button text="Đăng xuất" maxWidth="Infinity" onAction="#signOut" styleClass="nav"/>
                     </VBox>
                 </left>
@@ -47,39 +48,44 @@
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <Label fx:id="title" styleClass="page-heading"/>
                             <Region HBox.hgrow="ALWAYS"/>
-                            <Button text="Tải lại" onAction="#refresh"/>
-                            <Button text="Tạo slot đăng ký" onAction="#createSlot" styleClass="primary"/>
+                            <HBox fx:id="dataToolbar" spacing="10">
+                                <Button text="Tải lại" onAction="#refresh"/>
+                                <Button text="Tạo slot đăng ký" onAction="#createSlot" styleClass="primary"/>
+                            </HBox>
                         </HBox>
-                        <HBox fx:id="searchBar" alignment="CENTER_LEFT" spacing="7">
-                            <TextField fx:id="query" promptText="Tìm kiếm" HBox.hgrow="ALWAYS" onAction="#search"/>
-                            <TextField fx:id="endpointFilter" promptText="Máy trạm / endpoint" onAction="#search"/>
-                            <TextField fx:id="deviceFilter" promptText="Tên hoặc ID USB" onAction="#search"/>
-                            <TextField fx:id="userFilter" promptText="Người dùng Ubuntu" onAction="#search"/>
-                            <ComboBox fx:id="stateFilter" promptText="Trạng thái"/>
-                            <Button text="Tìm" onAction="#search" styleClass="primary"/>
-                        </HBox>
-                        <HBox fx:id="dateBar" alignment="CENTER_LEFT" spacing="8">
-                            <Label text="Từ ngày"/>
-                            <DatePicker fx:id="fromDate" promptText="Ngày bắt đầu" editable="false"/>
-                            <Label text="Đến ngày"/>
-                            <DatePicker fx:id="toDate" promptText="Ngày kết thúc" editable="false"/>
-                            <ComboBox fx:id="eventType" promptText="Loại sự kiện" accessibleText="Loại sự kiện"/>
-                            <Button text="Áp dụng" onAction="#search"/>
-                            <Button fx:id="clearDates" text="Xóa ngày" onAction="#clearEventDates"/>
-                        </HBox>
-                        <FlowPane fx:id="dashboard" hgap="13" vgap="13"/>
-                        <HBox fx:id="dashboardCaption" alignment="CENTER_LEFT" spacing="8">
-                            <Label text="Hoạt động USB gần nhất" styleClass="section-heading"/>
-                            <Region HBox.hgrow="ALWAYS"/>
-                            <Label fx:id="endpointCounts" styleClass="muted"/>
-                        </HBox>
-                        <TableView fx:id="table" VBox.vgrow="ALWAYS"/>
-                        <HBox fx:id="actions" alignment="CENTER_LEFT" spacing="7"/>
-                        <HBox fx:id="paging" alignment="CENTER_RIGHT" spacing="8">
-                            <Label fx:id="pageLabel" styleClass="muted"/>
-                            <Button fx:id="previous" text="Trang trước" onAction="#previousPage"/>
-                            <Button fx:id="next" text="Trang sau" onAction="#nextPage"/>
-                        </HBox>
+                        <VBox fx:id="dataPane" spacing="15" VBox.vgrow="ALWAYS">
+                            <HBox fx:id="searchBar" alignment="CENTER_LEFT" spacing="7">
+                                <TextField fx:id="query" promptText="Tìm kiếm" HBox.hgrow="ALWAYS" onAction="#search"/>
+                                <TextField fx:id="endpointFilter" promptText="Máy trạm / endpoint" onAction="#search"/>
+                                <TextField fx:id="deviceFilter" promptText="Tên hoặc ID USB" onAction="#search"/>
+                                <TextField fx:id="userFilter" promptText="Người dùng Ubuntu" onAction="#search"/>
+                                <ComboBox fx:id="stateFilter" promptText="Trạng thái"/>
+                                <Button text="Tìm" onAction="#search" styleClass="primary"/>
+                            </HBox>
+                            <HBox fx:id="dateBar" alignment="CENTER_LEFT" spacing="8">
+                                <Label text="Từ ngày"/>
+                                <DatePicker fx:id="fromDate" promptText="Ngày bắt đầu" editable="false"/>
+                                <Label text="Đến ngày"/>
+                                <DatePicker fx:id="toDate" promptText="Ngày kết thúc" editable="false"/>
+                                <ComboBox fx:id="eventType" promptText="Loại sự kiện" accessibleText="Loại sự kiện"/>
+                                <Button text="Áp dụng" onAction="#search"/>
+                                <Button fx:id="clearDates" text="Xóa ngày" onAction="#clearEventDates"/>
+                            </HBox>
+                            <FlowPane fx:id="dashboard" hgap="13" vgap="13"/>
+                            <HBox fx:id="dashboardCaption" alignment="CENTER_LEFT" spacing="8">
+                                <Label text="Hoạt động USB gần nhất" styleClass="section-heading"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="endpointCounts" styleClass="muted"/>
+                            </HBox>
+                            <TableView fx:id="table" VBox.vgrow="ALWAYS"/>
+                            <HBox fx:id="actions" alignment="CENTER_LEFT" spacing="7"/>
+                            <HBox fx:id="paging" alignment="CENTER_RIGHT" spacing="8">
+                                <Label fx:id="pageLabel" styleClass="muted"/>
+                                <Button fx:id="previous" text="Trang trước" onAction="#previousPage"/>
+                                <Button fx:id="next" text="Trang sau" onAction="#nextPage"/>
+                            </HBox>
+                        </VBox>
+                        <fx:include fx:id="accountSettings" source="account-settings.fxml"/>
                     </VBox>
                 </center>
             </BorderPane>

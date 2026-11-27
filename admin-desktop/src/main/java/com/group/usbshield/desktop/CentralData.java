@@ -7,6 +7,9 @@ final class CentralData {
     private CentralData() {}
 
     record Session(String username) {}
+    record CredentialChange(String currentPassword, String newUsername, String newPassword) {
+        @Override public String toString() { return "CredentialChange[redacted]"; }
+    }
     record Page<T>(List<T> content, int page, int size, long totalElements) {
         Page {
             content = List.copyOf(content);

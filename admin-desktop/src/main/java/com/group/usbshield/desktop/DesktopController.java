@@ -31,7 +31,8 @@ final class DesktopController implements AutoCloseable {
     private static final String ALL_STATES = "Tất cả";
     private enum View {
         DASHBOARD("Tổng quan"), ENDPOINTS("Máy trạm"), DEVICES("Thiết bị USB"),
-        WHITELIST("Danh sách cho phép"), EVENTS("Sự kiện USB"), AUDIT("Nhật ký quản trị");
+        WHITELIST("Danh sách cho phép"), EVENTS("Sự kiện USB"), AUDIT("Nhật ký quản trị"),
+        SETTINGS("Cài đặt tài khoản");
         final String title;
         View(String title) { this.title = title; }
     }
@@ -80,6 +81,10 @@ final class DesktopController implements AutoCloseable {
     @FXML private Button previous;
     @FXML private Button next;
     @FXML private HBox actions;
+    @FXML private HBox dataToolbar;
+    @FXML private VBox dataPane;
+    @FXML private VBox accountSettings;
+    @FXML private AccountSettingsController accountSettingsController;
 
     DesktopController(CentralClient client) { this.client = client; }
 
@@ -87,6 +92,7 @@ final class DesktopController implements AutoCloseable {
         table.setPlaceholder(new Label("Không có kết quả."));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         table.getSelectionModel().selectedItemProperty().addListener((ignored, before, selected) -> showActions(selected));
+        accountSettingsController.configure(this::changeCredentials, error -> message(error, true));
         showLogin();
     }
 
@@ -126,6 +132,7 @@ final class DesktopController implements AutoCloseable {
         userFilter.clear();
         stateFilter.setValue(null);
         password.clear();
+        accountSettingsController.clear();
         message("", false);
     }
 
@@ -135,10 +142,23 @@ final class DesktopController implements AutoCloseable {
     @FXML private void openWhitelist() { navigate(View.WHITELIST, ""); }
     @FXML private void openEvents() { navigate(View.EVENTS, ""); }
     @FXML private void openAudit() { navigate(View.AUDIT, ""); }
+    @FXML private void openSettings() {
+        if (view != View.SETTINGS) navigate(View.SETTINGS, "");
+    }
 
     private void navigate(View target, String endpoint) {
         view = target;
         title.setText(target.title);
+        boolean settings = target == View.SETTINGS;
+        show(dataToolbar, !settings);
+        show(dataPane, !settings);
+        show(accountSettings, settings);
+        if (settings) {
+            accountSettingsController.open(identity.getText());
+            message("", false);
+            return;
+        }
+        accountSettingsController.clear();
         query.clear();
         endpointFilter.setText(endpoint);
         endpointFilter.setPromptText(target == View.EVENTS ? "Máy trạm / endpoint" : "Endpoint ID");
@@ -181,6 +201,7 @@ final class DesktopController implements AutoCloseable {
     @FXML private void clearEventDates() { fromDate.setValue(null); toDate.setValue(null); reload(0); }
 
     private void reload(int index) {
+        if (view == View.SETTINGS) return;
         var filters = new Filters(query.getText(), endpointFilter.getText(), deviceFilter.getText(), userFilter.getText(),
                 selected(stateFilter), selected(eventType), fromDate.getValue(), toDate.getValue());
         int requestedPage = filters.equals(appliedFilters) ? index : 0;
@@ -209,6 +230,7 @@ final class DesktopController implements AutoCloseable {
             case AUDIT -> run(() -> client.audit(requestedPage), page -> present(page,
                     List.of("Thời điểm", "Tài khoản", "Thao tác", "Đối tượng"),
                     a -> cells(a.occurredAt(), a.actorUsername(), a.action(), a.targetId())), true);
+            case SETTINGS -> throw new IllegalStateException("Settings has no data refresh");
         }
     }
 
@@ -377,6 +399,31 @@ final class DesktopController implements AutoCloseable {
 
     private void change(CheckedAction command) {
         run(() -> { command.run(); return null; }, ignored -> reload(pageIndex), false);
+    }
+
+    private void changeCredentials(CredentialChange change) {
+        String newLogin = Objects.requireNonNullElse(change.newUsername(), identity.getText());
+        run(() -> { client.changeCredentials(change); return null; }, ignored -> {
+            showLogin();
+            username.setText(newLogin);
+            password.requestFocus();
+            message("Đã lưu thông tin đăng nhập. Hãy đăng nhập lại.", false);
+        }, false, this::showCredentialFailure);
+    }
+
+    private void showCredentialFailure(Throwable error) {
+        if (error instanceof CentralClient.RequestFailure response && response.status() < 500) {
+            switch (response.status()) {
+                case 400 -> message("Kiểm tra tên mới và yêu cầu mật khẩu. Mật khẩu mới phải khác mật khẩu hiện tại.", true);
+                case 409 -> message("Tên đăng nhập này không khả dụng.", true);
+                case 422 -> message("Mật khẩu hiện tại chưa đúng.", true);
+                default -> showFailure(error);
+            }
+            return;
+        }
+        client.discardSession();
+        showLogin();
+        message("Central chưa xác nhận đã lưu. Hãy đăng nhập để kiểm tra thông tin trước khi thử lại.", true);
     }
 
     @FXML private void createSlot() {

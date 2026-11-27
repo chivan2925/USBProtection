@@ -36,6 +36,7 @@
 .button:focused { -fx-border-color: #138568; -fx-border-width: 2px; -fx-padding: 6px 11px; }
 .button.primary { -fx-background-color: #13775d; -fx-border-color: #13775d; -fx-text-fill: white; }
 .button.primary:hover { -fx-background-color: #0d624c; }
+.button.primary:focused { -fx-border-color: #071e17; }
 .button.nav { -fx-alignment: CENTER_LEFT; -fx-background-color: transparent; -fx-border-color: transparent; -fx-text-fill: #e0edf5; }
 .button.nav:hover, .button.nav:focused { -fx-background-color: #284a60; }
 .text-field, .combo-box, .date-picker {

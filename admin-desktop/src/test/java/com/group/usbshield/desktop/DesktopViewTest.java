@@ -1,6 +1,8 @@
 package com.group.usbshield.desktop;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -10,6 +12,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -51,20 +54,7 @@ class DesktopViewTest {
             var requests = new CopyOnWriteArrayList<String>();
             fixture.server.createContext("/", exchange -> CentralClientTest.admin(exchange, requests));
             fixture.server.start();
-            var view = fx(() -> {
-                var loader = new FXMLLoader(DesktopApplication.class.getResource("desktop.fxml"));
-                loader.setController(controller);
-                Parent root = loader.load();
-                var scene = new Scene(root, 1180, 760);
-                scene.getStylesheets().add(DesktopApplication.class.getResource("desktop.css").toExternalForm());
-                assertTrue(root.lookup("#login").isVisible());
-                ((TextField) root.lookup("#username")).setText("test-admin");
-                ((TextField) root.lookup("#password")).setText("fixture-password");
-                button(root, "Đăng nhập").fire();
-                assertEquals("", ((TextField) root.lookup("#password")).getText());
-                return root;
-            });
-            await(() -> view.lookup("#workspace").isVisible() && !view.lookup("#workspace").isDisabled());
+            var view = signIn(controller, 1180, 760);
             assertEquals("Tổng quan", fx(() -> ((Label) view.lookup("#title")).getText()));
             assertTrue(fx(() -> view.lookup("#dashboard").isVisible()));
             fx(() -> { button(view, "Máy trạm").fire(); return null; });
@@ -108,6 +98,96 @@ class DesktopViewTest {
             assertFalse(fx(() -> view.lookup("#workspace").isVisible()));
             assertEquals(0, fx(() -> ((TableView<?>) view.lookup("#table")).getItems().size()));
         }
+    }
+
+    @Test void accountSettingsRequiresConfirmationAndReturnsToLoginAfterSaving() throws Exception {
+        try (var fixture = new LocalHttpsFixture(directory, "ip:127.0.0.1");
+             var controller = new DesktopController(new CentralClient(fixture.origin(), CentralTls.trust(fixture.ca)))) {
+            var requests = new CopyOnWriteArrayList<String>();
+            var updates = new CopyOnWriteArrayList<CentralData.CredentialChange>();
+            var json = new ObjectMapper();
+            fixture.server.createContext("/", exchange -> CentralClientTest.admin(exchange, requests));
+            fixture.server.createContext("/api/admin/account/credentials", exchange -> {
+                if (!"POST".equals(exchange.getRequestMethod())
+                        || !"after-login".equals(exchange.getRequestHeaders().getFirst("X-CSRF-TOKEN"))) {
+                    exchange.sendResponseHeaders(403, -1);
+                } else {
+                    var update = json.readValue(exchange.getRequestBody(), CentralData.CredentialChange.class);
+                    updates.add(update);
+                    exchange.sendResponseHeaders("fixture-password".equals(update.currentPassword()) ? 204 : 422, -1);
+                }
+                exchange.close();
+            });
+            fixture.server.start();
+            var view = signIn(controller, 970, 650);
+            fx(() -> {
+                button(view, "Cài đặt tài khoản").fire();
+                assertFalse(view.lookup("#dataPane").isVisible());
+                assertEquals("test-admin", ((Label) view.lookup("#currentUsername")).getText());
+                form(view, "wrong-fixture", "different-confirmation");
+                button(view, "Cài đặt tài khoản").fire();
+                assertEquals("renamed-fixture", field(view, "newUsername").getText());
+                assertEquals("wrong-fixture", field(view, "currentPassword").getText());
+                var save = button(view, "Lưu thông tin đăng nhập");
+                var focused = PseudoClass.getPseudoClass("focused");
+                save.pseudoClassStateChanged(focused, true);
+                view.applyCss();
+                assertEquals(Color.web("#071e17"), save.getBorder().getStrokes().getFirst().getTopStroke());
+                save.pseudoClassStateChanged(focused, false);
+                save.fire();
+                assertTrue(((Label) view.lookup("#notice")).getText().contains("trùng khớp"));
+                return null;
+            });
+            assertTrue(updates.isEmpty());
+            fx(() -> {
+                form(view, "wrong-fixture", "fixture-new-password");
+                button(view, "Lưu thông tin đăng nhập").fire();
+                assertTrue(field(view, "currentPassword").getText().isEmpty());
+                assertTrue(field(view, "newPassword").getText().isEmpty());
+                assertTrue(field(view, "confirmPassword").getText().isEmpty());
+                return null;
+            });
+            await(() -> !view.lookup("#workspace").isDisabled());
+            assertEquals("Mật khẩu hiện tại chưa đúng.", fx(() -> ((Label) view.lookup("#notice")).getText()));
+            fx(() -> {
+                form(view, "fixture-password", "fixture-new-password");
+                button(view, "Lưu thông tin đăng nhập").fire();
+                return null;
+            });
+            await(() -> view.lookup("#login").isVisible() && !view.lookup("#login").isDisabled());
+            assertEquals("renamed-fixture", fx(() -> field(view, "username").getText()));
+            assertEquals(2, updates.size());
+            assertEquals("fixture-new-password", updates.getLast().newPassword());
+        }
+    }
+
+    private static Parent signIn(DesktopController controller, int width, int height) throws Exception {
+        var view = fx(() -> {
+            var loader = new FXMLLoader(DesktopApplication.class.getResource("desktop.fxml"));
+            loader.setController(controller);
+            Parent root = loader.load();
+            var scene = new Scene(root, width, height);
+            scene.getStylesheets().add(DesktopApplication.class.getResource("desktop.css").toExternalForm());
+            assertTrue(root.lookup("#login").isVisible());
+            field(root, "username").setText("test-admin");
+            field(root, "password").setText("fixture-password");
+            button(root, "Đăng nhập").fire();
+            assertTrue(field(root, "password").getText().isEmpty());
+            return root;
+        });
+        await(() -> view.lookup("#workspace").isVisible() && !view.lookup("#workspace").isDisabled());
+        return view;
+    }
+
+    private static void form(Parent view, String current, String confirmation) {
+        field(view, "currentPassword").setText(current);
+        field(view, "newUsername").setText("renamed-fixture");
+        field(view, "newPassword").setText("fixture-new-password");
+        field(view, "confirmPassword").setText(confirmation);
+    }
+
+    private static TextField field(Parent view, String id) {
+        return (TextField) view.lookup("#" + id);
     }
 
     private static Button button(Parent root, String label) {

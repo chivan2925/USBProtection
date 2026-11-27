@@ -17,3 +17,9 @@ Mở USBShield trên máy Windows Central bằng launcher do IT cung cấp. Đă
 Bấm **Tạo slot đăng ký** với installation UUID do IT xác minh. Chọn slot trong **Máy trạm** rồi bấm **Cấp vé**. Dùng **Thu hồi credential** khi IT cần vô hiệu hóa kết nối của Agent và cấp lại vé. Hai thao tác thu hồi credential và thu hồi quyền USB có tác động khác nhau. [Quy trình IT](IT_SETUP_GUIDE.md)
 
 Dùng **Tải lại** sau khi kết nối về Central gián đoạn. Nếu thao tác ghi báo lỗi hoặc timeout, kiểm tra trạng thái hiện tại trước khi thao tác lại. Central có thể xử lý request trước khi đường truyền trả phản hồi. Đăng xuất khi kết thúc.
+
+## Cài đặt tài khoản
+
+Mở **Cài đặt tài khoản** và nhập mật khẩu hiện tại. Điền tên đăng nhập mới, mật khẩu mới hoặc cả hai. Để trống mục cần giữ nguyên. Nếu đổi mật khẩu, nhập lại mật khẩu mới ở ô xác nhận. Mật khẩu mới cần ít nhất 12 ký tự Unicode, tối đa 72 byte UTF-8 và không chứa ký tự điều khiển ISO.
+
+Sau khi lưu, đăng nhập lại bằng thông tin mới. Mọi phiên Admin đã mở của tài khoản này hết hiệu lực. Tài khoản giữ nguyên workspace, máy trạm và dữ liệu. Nếu quên mật khẩu, liên hệ IT để đặt lại bằng quy trình bảo trì trên máy Central. [Hướng dẫn IT](IT_SETUP_GUIDE.md)

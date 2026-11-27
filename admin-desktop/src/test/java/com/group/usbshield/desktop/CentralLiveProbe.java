@@ -53,6 +53,7 @@ public final class CentralLiveProbe {
             require(events.content().size() == 1 && "BLOCKED".equals(desktop.event(events.content().getFirst().id()).decision()), "event queries");
             verifyEventDateBoundary(desktop, agent, agentOrigin, endpoint, token, install);
             require(desktop.audit(0).totalElements() > 0, "audit");
+            verifyCredentialChange(config, desktop, endpoint);
             desktop.revokeCredential(endpoint);
             desktop.logout();
             try {
@@ -62,6 +63,31 @@ public final class CentralLiveProbe {
                 require(expected.status() == 401, "logout status");
             }
             System.out.println("PASS Desktop HTTPS consumer against packaged Central and synthetic Agent on native Nginx");
+        }
+    }
+
+    private static void verifyCredentialChange(DesktopConfiguration config, CentralClient desktop, String endpoint)
+            throws Exception {
+        String previous = System.getenv("P2_TEST_ADMIN_PASSWORD");
+        String replacement = "fixture-" + UUID.randomUUID();
+        String newUsername = "p2-renamed-admin";
+        try (var peer = config.connect()) {
+            peer.login("p2-synthetic-admin", previous);
+            desktop.changeCredentials(new CentralData.CredentialChange(previous, newUsername, replacement));
+            requireSignedOut(desktop, endpoint);
+            requireSignedOut(peer, endpoint);
+        }
+        require(newUsername.equals(desktop.login(newUsername, replacement).username()), "sign in after credential change");
+        require(endpoint.equals(desktop.endpoint(endpoint).endpointId()), "credential change retains workspace access");
+        System.out.println("PASS credential change against packaged Central through Desktop HTTPS");
+    }
+
+    private static void requireSignedOut(CentralClient client, String endpoint) throws Exception {
+        try {
+            client.endpoint(endpoint);
+            throw new IllegalStateException("credential change left a usable session");
+        } catch (CentralClient.RequestFailure expected) {
+            require(expected.status() == 401, "credential change forces sign-in");
         }
     }
     private static void verifyEventDateBoundary(CentralClient desktop, HttpClient agent, URI agentOrigin,
