@@ -1,6 +1,6 @@
 # ADR 0004 — Central Desktop và cài đặt Windows
 
-**Trạng thái đề xuất, chờ Owner duyệt.** Phạm vi D06, D07 và vận hành LAN của D03. Blueprint đã chốt một bộ cài hoặc launcher tích hợp Windows Central và giữ Agent Ubuntu dạng `.deb`. [Blueprint](../../BLUEPRINT.md)
+**Trạng thái.** P2 dùng JavaFX và một launcher Windows cho các dịch vụ đã provision. Toolchain installer phát hành và lifecycle nâng cấp vẫn thuộc R1. Phạm vi D06, D07 và vận hành LAN của D03. [Blueprint](../../BLUEPRINT.md)
 
 ## Bối cảnh
 
@@ -22,5 +22,7 @@ Phương án ưu tiên thử một bundle Windows signed có thể điều phố
 3. **Upgrade và uninstall.** Đối chiếu version/protocol, backup DB/config đã test restore, drain hoặc bảo toàn outbox endpoint. Upgrade chạy migrations đã duyệt, có rollback trước khi nhận ghi mới. Sau DB migration có ghi dữ liệu cần forward repair hoặc restore đã duyệt. Uninstall gỡ service/app và giữ DB/config theo mặc định. Xóa dữ liệu cần quyết định riêng được hiển thị và ghi nhận. Thu hồi firewall/TLS material theo tài nguyên thuộc installer, giữ tài nguyên ngoài scope cài.
 
 ## Gate P2/R1 và điểm cần duyệt
+
+Launcher P2 nằm trong một gói Windows cùng API JAR, JavaFX app image và Java runtime. Desktop dùng IP SAN `127.0.0.1` để kết nối trực tiếp đến listener loopback, Nginx dùng DNS SAN riêng cho Agent LAN. Cách này bỏ DNS khỏi đường xác thực Desktop. Không thay đổi quy trình provision PKI, database và tài khoản Windows service. [Hướng dẫn IT](../IT_SETUP_GUIDE.md)
 
 P2 cần build Windows/JavaFX và parity API/Desktop thật với no-Internet LAN. R1 cần install/upgrade/restart/uninstall từ máy sạch, lỗi cố ý ở từng bước, tiếp tục sau reboot, quyền service, TLS invalid CA/SAN, health/error rõ và không mất dữ liệu. Test Ubuntu `.deb` riêng theo packaging hiện hành. Liên quan E04, E12 và E17. Owner duyệt Windows target, nguồn phân phối artifact/components, PKI owner, lifecycle toolchain và quy tắc rollback trước khi build installer phát hành.

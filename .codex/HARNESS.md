@@ -21,4 +21,8 @@ python -B .codex/check.py --baseline <sha> --scope docs/ --scope README.md
 
 Dùng dòng `--h0` riêng cho candidate reset được Owner cấp. Với slice khác, lặp `--scope` cho từng file hoặc prefix thư mục của scope được cấp. Stage đúng delta trên `vinhkhang`, bao gồm file mới. Candidate gate kiểm baseline, branch, origin, code/docs scope, relative link paths, secret heuristics và whitespace. H0 giữ nguyên blueprint theo hash; ngoại lệ trailing spaces của attachment chỉ áp dụng cho file đó. Gate in SHA-256 của staged binary diff để giao cho reviewer. Trước commit, chạy lại với `--reviewed-fingerprint <sha256>`.
 
+Giao diện Central JavaFX dùng [skill thiết kế](../.agents/skills/usbshield-design/SKILL.md) và [design contract](../admin-desktop/DESIGN.md). Chạy python -B admin-desktop/tools/check_design.py cho kiểm tra source. Review accessibility và layout ở cửa sổ JavaFX thật.
+
+Khi Owner giao tạo hoặc merge PR, dùng GitHub connector có quyền và xác minh head vinhkhang, base main. Shell guard vẫn chặn các lệnh tạo/merge PR. Dừng riêng thao tác PR nếu connector hoặc quyền không khả dụng.
+
 Mỗi lần xuất bản cần review thực tế, test evidence phù hợp, xác nhận quyền và ref upstream mới. Tối đa ba vòng review subagent mỗi slice, tính cả lần đầu. Xem [skill review](../.agents/skills/usbshield-review/SKILL.md) để tính vòng và xử lý gate còn mở. Hook và script chỉ kiểm được điều kiện cơ học qua dữ kiện mà chúng nhận. Ghi evidence và reviewer verdict trong chat. Dùng cùng gate khi hook chưa load hoặc ở cloud và ghi rõ khả năng tương ứng.

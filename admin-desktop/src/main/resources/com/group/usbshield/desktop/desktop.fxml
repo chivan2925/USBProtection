@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <center>
+        <StackPane>
+            <VBox fx:id="login" alignment="CENTER" spacing="0" styleClass="login-backdrop">
+                <VBox maxWidth="435" spacing="16" styleClass="login-card">
+                    <padding><Insets top="34" right="36" bottom="34" left="36"/></padding>
+                    <Label text="USBShield" styleClass="brand"/>
+                    <Label text="Đăng nhập quản trị" styleClass="page-heading"/>
+                    <VBox spacing="6">
+                        <Label text="Tên tài khoản"/>
+                        <TextField fx:id="username" promptText="Tài khoản Central" accessibleText="Tên tài khoản"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Mật khẩu"/>
+                        <PasswordField fx:id="password" onAction="#signIn" accessibleText="Mật khẩu"/>
+                    </VBox>
+                    <Button text="Đăng nhập" maxWidth="Infinity" onAction="#signIn" defaultButton="true" styleClass="primary"/>
+                    <Label text="Kết nối HTTPS trên máy Central" styleClass="muted"/>
+                </VBox>
+            </VBox>
+            <BorderPane fx:id="workspace" visible="false" managed="false">
+                <left>
+                    <VBox prefWidth="205" spacing="11" styleClass="sidebar">
+                        <padding><Insets top="25" right="17" bottom="20" left="17"/></padding>
+                        <Label text="USBShield" styleClass="brand"/>
+                        <Label text="Quản trị trung tâm" styleClass="sidebar-caption"/>
+                        <Separator/>
+                        <Button text="Tổng quan" maxWidth="Infinity" onAction="#openDashboard" styleClass="nav"/>
+                        <Button text="Máy trạm" maxWidth="Infinity" onAction="#openEndpoints" styleClass="nav"/>
+                        <Button text="Thiết bị USB" maxWidth="Infinity" onAction="#openDevices" styleClass="nav"/>
+                        <Button text="Danh sách cho phép" maxWidth="Infinity" onAction="#openWhitelist" styleClass="nav"/>
+                        <Button text="Sự kiện USB" maxWidth="Infinity" onAction="#openEvents" styleClass="nav"/>
+                        <Button text="Nhật ký quản trị" maxWidth="Infinity" onAction="#openAudit" styleClass="nav"/>
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Label fx:id="identity" styleClass="sidebar-account" wrapText="true"/>
+                        <Button text="Cài đặt tài khoản" maxWidth="Infinity" onAction="#openSettings" styleClass="nav"/>
+                        <Button text="Đăng xuất" maxWidth="Infinity" onAction="#signOut" styleClass="nav"/>
+                    </VBox>
+                </left>
+                <center>
+                    <VBox spacing="15" styleClass="content">
+                        <padding><Insets top="25" right="25" bottom="18" left="25"/></padding>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label fx:id="title" styleClass="page-heading"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <HBox fx:id="dataToolbar" spacing="10">
+                                <Button text="Tải lại" onAction="#refresh"/>
+                                <Button text="Tạo slot đăng ký" onAction="#createSlot" styleClass="primary"/>
+                            </HBox>
+                        </HBox>
+                        <VBox fx:id="dataPane" spacing="15" VBox.vgrow="ALWAYS">
+                            <HBox fx:id="searchBar" alignment="CENTER_LEFT" spacing="7">
+                                <TextField fx:id="query" promptText="Tìm kiếm" HBox.hgrow="ALWAYS" onAction="#search"/>
+                                <TextField fx:id="endpointFilter" promptText="Máy trạm / endpoint" onAction="#search"/>
+                                <TextField fx:id="deviceFilter" promptText="Tên hoặc ID USB" onAction="#search"/>
+                                <TextField fx:id="userFilter" promptText="Người dùng Ubuntu" onAction="#search"/>
+                                <ComboBox fx:id="stateFilter" promptText="Trạng thái"/>
+                                <Button text="Tìm" onAction="#search" styleClass="primary"/>
+                            </HBox>
+                            <HBox fx:id="dateBar" alignment="CENTER_LEFT" spacing="8">
+                                <Label text="Từ ngày"/>
+                                <DatePicker fx:id="fromDate" promptText="Ngày bắt đầu" editable="false"/>
+                                <Label text="Đến ngày"/>
+                                <DatePicker fx:id="toDate" promptText="Ngày kết thúc" editable="false"/>
+                                <ComboBox fx:id="eventType" promptText="Loại sự kiện" accessibleText="Loại sự kiện"/>
+                                <Button text="Áp dụng" onAction="#search"/>
+                                <Button fx:id="clearDates" text="Xóa ngày" onAction="#clearEventDates"/>
+                            </HBox>
+                            <FlowPane fx:id="dashboard" hgap="13" vgap="13"/>
+                            <HBox fx:id="dashboardCaption" alignment="CENTER_LEFT" spacing="8">
+                                <Label text="Hoạt động USB gần nhất" styleClass="section-heading"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="endpointCounts" styleClass="muted"/>
+                            </HBox>
+                            <TableView fx:id="table" VBox.vgrow="ALWAYS"/>
+                            <HBox fx:id="actions" alignment="CENTER_LEFT" spacing="7"/>
+                            <HBox fx:id="paging" alignment="CENTER_RIGHT" spacing="8">
+                                <Label fx:id="pageLabel" styleClass="muted"/>
+                                <Button fx:id="previous" text="Trang trước" onAction="#previousPage"/>
+                                <Button fx:id="next" text="Trang sau" onAction="#nextPage"/>
+                            </HBox>
+                        </VBox>
+                        <fx:include fx:id="accountSettings" source="account-settings.fxml"/>
+                    </VBox>
+                </center>
+            </BorderPane>
+        </StackPane>
+    </center>
+    <bottom>
+        <HBox minHeight="38" alignment="CENTER_LEFT" spacing="10" styleClass="status-bar">
+            <padding><Insets left="18" right="18" top="4" bottom="4"/></padding>
+            <ProgressIndicator fx:id="progress" maxWidth="18" maxHeight="18" visible="false" managed="false"/>
+            <Label fx:id="notice" wrapText="true" HBox.hgrow="ALWAYS"/>
+            <Button fx:id="cancel" text="Hủy tải" onAction="#cancelRead" visible="false" managed="false"/>
+        </HBox>
+    </bottom>
+</BorderPane>

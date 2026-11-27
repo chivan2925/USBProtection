@@ -25,8 +25,9 @@ public class AdminPasswordResetRunner implements ApplicationRunner {
         if (!"none".equalsIgnoreCase(env.getProperty("spring.main.web-application-type", "")))
             throw new IllegalStateException("Admin recovery must run with the no-web application profile");
         String password = env.getProperty("USBSHIELD_ADMIN_RESET_PASSWORD");
-        String username = env.getProperty("USBSHIELD_ADMIN_RESET_USERNAME",
-                env.getProperty("usbshield.admin.username", "admin"));
+        String username = env.getProperty("USBSHIELD_ADMIN_RESET_USERNAME");
+        if (username == null || username.isBlank())
+            throw new IllegalStateException("Set USBSHIELD_ADMIN_RESET_USERNAME to the current account name");
         if (!AdminPasswordPolicy.acceptable(password))
             throw new IllegalStateException("Admin reset requires a new printable secret with at least 12 characters and at most 72 UTF-8 bytes in USBSHIELD_ADMIN_RESET_PASSWORD");
         transactions.executeWithoutResult(status -> {
@@ -35,7 +36,7 @@ public class AdminPasswordResetRunner implements ApplicationRunner {
             if (encoder.matches(password, admin.getPasswordHash()))
                 throw new IllegalStateException("New password must differ");
             admin.setPasswordHash(encoder.encode(password));
-            admin.setCredentialVersion((admin.getCredentialVersion() == null ? 0L : admin.getCredentialVersion()) + 1);
+            admin.advanceCredentialVersion();
             Workspace workspace = workspaces.findByOwnerAdminId(admin.getId())
                     .orElseThrow(() -> new IllegalStateException("Admin workspace missing"));
             accounts.saveAndFlush(admin);

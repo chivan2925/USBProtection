@@ -11,4 +11,11 @@ class AdminPasswordPolicyTest {
         assertFalse(AdminPasswordPolicy.acceptable("validPassword\n"));
         assertTrue(AdminPasswordPolicy.acceptable("correct horse battery staple"));
     }
+
+    @Test void lengthCountsUnicodeCodePointsAndStillCapsUtf8Bytes() {
+        String supplementary = new String(Character.toChars(0x1F600));
+        assertFalse(AdminPasswordPolicy.acceptable(supplementary.repeat(6)));
+        assertTrue(AdminPasswordPolicy.acceptable(supplementary.repeat(12)));
+        assertFalse(AdminPasswordPolicy.acceptable(supplementary.repeat(19)));
+    }
 }

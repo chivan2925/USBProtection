@@ -83,9 +83,10 @@ class ServerSecurityAndStatusTest {
         assertThat(endpoints.findByEndpointId(b.getEndpointId()).orElseThrow().getAppliedPolicyVersion()).isZero();
     }
 
-    @Test void onlyNavigationRoutesRedirectToHashSpa() throws Exception {
-        mvc.perform(get("/events")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/#/events"));
-        mvc.perform(get("/assets/missing.js")).andExpect(status().isNotFound());
+    @Test void formerWebEntrypointsAreAbsentAndApisRequireAuthentication() throws Exception {
+        for (String route : new String[]{"/", "/events", "/login", "/dashboard", "/index.html", "/assets/missing.js", "/swagger-ui.html"}) {
+            mvc.perform(get(route)).andExpect(status().isNotFound());
+        }
         mvc.perform(get("/api/admin/endpoints")).andExpect(status().isUnauthorized());
     }
     @Test

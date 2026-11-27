@@ -1,26 +1,29 @@
 #requires -Version 7.6
 <#
 .SYNOPSIS
-    Canonical USBShield Windows verification: executable Admin JAR, UI/API,
+    Canonical USBShield Windows verification: executable Central JAR, native Desktop/API,
     source contracts and (unless -AdminOnly) Agent + Windows-built DEB.
 .DESCRIPTION
-    The Admin runtime gate reuses the existing live browser/HTTP suites on
-    PostgreSQL usbshield_browser_test with random temporary schemas.
-    It deliberately does not import the historical Week 3 acceptance script.
-    No ddl-auto=create, no prod-DB reset and no Ubuntu E2E claim.
+    Central integration tests use PostgreSQL usbshield_test with random schemas.
+    Desktop tests load the FXML and exercise the HTTPS client with a synthetic loopback fixture.
+    The live gate runs the packaged launcher, Central and Nginx on loopback.
 .EXAMPLE
     .\packaging\tests\verify-windows.ps1
 .EXAMPLE
     .\packaging\tests\verify-windows.ps1 -AdminOnly
 .EXAMPLE
-    .\packaging\tests\verify-windows.ps1 -SkipBrowserLive
+    .\packaging\tests\verify-windows.ps1 -SkipBundle
 #>
 [CmdletBinding()]
 param(
     [switch]$SkipTests,
-    [switch]$SkipBrowserLive,
+    [switch]$SkipBundle,
+    [switch]$SkipLive,
     [switch]$SkipDebBuild,
-    [switch]$AdminOnly
+    [switch]$AdminOnly,
+    [string]$NginxPath = 'C:/nginx/nginx.exe',
+    [string]$OpenSslPath = 'C:/Program Files/Git/usr/bin/openssl.exe',
+    [string]$PsqlPath = 'C:/Program Files/PostgreSQL/18/bin/psql.exe'
 )
 
 Set-StrictMode -Version Latest
@@ -81,14 +84,26 @@ function Protect-ProductionDb() {
 }
 function Import-TestDbSettings() {
     $file = Join-Path $root '.env'
-    if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
-        throw 'Missing untracked .env with PostgreSQL test-DB settings.'
-    }
     foreach ($name in @('USBSHIELD_TEST_DB_HOST','USBSHIELD_TEST_DB_PORT','USBSHIELD_TEST_DB_USERNAME','USBSHIELD_TEST_DB_PASSWORD')) {
         $script:savedTestVars[$name] = [System.Environment]::GetEnvironmentVariable($name, 'Process')
     }
+    if ([string]::IsNullOrWhiteSpace($env:USBSHIELD_TEST_DB_PASSWORD)) {
+        if (-not (Test-Path -LiteralPath $file -PathType Leaf)) {
+            throw 'Set the isolated test database environment or provide test settings in the local env file.'
+        }
+        Import-TestDbEnvFile $file
+    }
+    Assert-True ($env:USBSHIELD_TEST_DB_USERNAME -ceq 'usbshield_test') 'Isolated test DB role is usbshield_test'
+    Assert-True (-not [string]::IsNullOrWhiteSpace($env:USBSHIELD_TEST_DB_PASSWORD) -and
+        $env:USBSHIELD_TEST_DB_PASSWORD -cne 'REPLACE_WITH_YOUR_TEST_PASSWORD') 'Test DB password provided'
+    $hostName = if ($env:USBSHIELD_TEST_DB_HOST) { $env:USBSHIELD_TEST_DB_HOST } else { '127.0.0.1' }
+    $port = if ($env:USBSHIELD_TEST_DB_PORT) { $env:USBSHIELD_TEST_DB_PORT } else { '5432' }
+    Assert-True ($hostName -match '^[A-Za-z0-9_.-]+$' -and $port -match '^\d{1,5}$' -and
+        [int]$port -ge 1 -and [int]$port -le 65535) 'Test PostgreSQL host and port format'
+}
+function Import-TestDbEnvFile([string]$File) {
     $lineNumber = 0
-    foreach ($line in [System.IO.File]::ReadAllLines($file)) {
+    foreach ($line in [IO.File]::ReadAllLines($File)) {
         $lineNumber++
         $trimmed = $line.Trim()
         if (-not $trimmed -or $trimmed.StartsWith('#')) { continue }
@@ -107,13 +122,6 @@ function Import-TestDbSettings() {
             [System.Environment]::SetEnvironmentVariable($key, $value, 'Process')
         }
     }
-    Assert-True ($env:USBSHIELD_TEST_DB_USERNAME -ceq 'usbshield_test') 'Isolated test DB role is usbshield_test'
-    Assert-True (-not [string]::IsNullOrWhiteSpace($env:USBSHIELD_TEST_DB_PASSWORD) -and
-        $env:USBSHIELD_TEST_DB_PASSWORD -cne 'REPLACE_WITH_YOUR_TEST_PASSWORD') 'Test DB password provided'
-    $hostName = if ($env:USBSHIELD_TEST_DB_HOST) { $env:USBSHIELD_TEST_DB_HOST } else { '127.0.0.1' }
-    $port = if ($env:USBSHIELD_TEST_DB_PORT) { $env:USBSHIELD_TEST_DB_PORT } else { '5432' }
-    Assert-True ($hostName -match '^[A-Za-z0-9_.-]+$' -and $port -match '^\d{1,5}$' -and
-        [int]$port -ge 1 -and [int]$port -le 65535) 'Test PostgreSQL host and port format'
 }
 function Assert-JarContents([string]$JarPath, [string]$JarTool) {
     Assert-True (Test-Path -LiteralPath $JarPath -PathType Leaf) 'Admin executable JAR exists'
@@ -123,19 +131,14 @@ function Assert-JarContents([string]$JarPath, [string]$JarTool) {
     foreach ($required in @(
         'org/springframework/boot/loader/launch/JarLauncher.class',
         'BOOT-INF/classes/com/group/usbshield/server/UsbShieldServerApplication.class',
-        'BOOT-INF/classes/static/index.html',
         'BOOT-INF/classes/db/migration/V1__initial_postgresql_schema.sql',
-        'BOOT-INF/classes/db/migration/V2__admin_session_and_usbguard_health.sql'
+        'BOOT-INF/classes/db/migration/V2__admin_session_and_usbguard_health.sql',
+        'BOOT-INF/classes/db/migration/V3__workspace_boundary.sql'
     )) {
         Assert-True ($items -ccontains $required) "JAR includes $required"
     }
-    $distDir = Join-Path $root 'frontend/dist'
-    Assert-True (Test-Path (Join-Path $distDir 'index.html')) 'Frontend production index exists'
-    $distAssets = @(Get-ChildItem -LiteralPath (Join-Path $distDir 'assets') -File -ErrorAction Stop)
-    Assert-True ($distAssets.Count -ge 2) 'Frontend assets generated'
-    foreach ($asset in $distAssets) {
-        Assert-True ($items -ccontains "BOOT-INF/classes/static/assets/$($asset.Name)") "JAR embeds $($asset.Name)"
-    }
+    $webAssets = @($items | Where-Object { $_ -like 'BOOT-INF/classes/static/*' -or $_ -like '*swagger-ui-*.jar' })
+    Assert-True ($webAssets.Count -eq 0) 'Admin JAR has no Web UI assets'
 }
 function Get-ArEntries([string]$File) {
     $entries = @{}
@@ -283,7 +286,6 @@ try {
     Assert-True ('System.Formats.Tar.TarReader' -as [type] -ne $null) 'PowerShell TarReader available'
     $git = Require-Command @('git.exe','git')
     $mvn = Require-Command @('mvn.cmd','mvn')
-    $npm = Require-Command @('npm.cmd','npm')
     $jar = Require-Command @('jar.exe','jar')
     $java = Require-Command @('java.exe','java')
     $global:LASTEXITCODE = 0
@@ -300,9 +302,8 @@ try {
     Source-Contains 'admin-server/src/main/resources/application.yml' 'ddl-auto: validate'
     Source-Contains 'admin-server/src/main/resources/application.yml' 'baseline-on-migrate: false'
     Source-Contains 'admin-server/src/main/resources/application-prod.yml' 'USBSHIELD_DB_URL'
-    Source-Contains 'frontend/tests/postgresTestDb.mjs' 'usbshield_browser_test'
-    Source-Contains 'frontend/tests/postgresTestDb.mjs' '--spring.jpa.hibernate.ddl-auto=validate'
-    Source-Contains 'frontend/tests/postgresTestDb.mjs' 'cleanupPostgresBrowserSchema'
+    Source-Contains 'admin-desktop/pom.xml' 'javafx-fxml'
+    Source-Contains 'packaging/nginx/usbshield-https-acl.conf.example' 'listen 127.0.0.1:443 ssl bind;'
     if (-not $AdminOnly) {
         $contracts = @{
             'packaging/systemd/usbshield-agent.service' = @(
@@ -364,7 +365,8 @@ try {
             Assert-True (-not $text.Contains($forbidden[1])) "Forbidden source fragment absent in $($forbidden[0])"
         }
     }
-    foreach ($scriptPath in @('admin-server/build-release.ps1','packaging/tests/verify-windows.ps1')) {
+    foreach ($scriptPath in @('admin-server/build-release.ps1','packaging/windows/Start-USBShield.ps1',
+                              'packaging/tests/verify-windows.ps1','packaging/tests/verify-central-live.ps1')) {
         $tokens = $null; $parseErrors = $null
         [void][System.Management.Automation.Language.Parser]::ParseFile(
             (Join-Path $root $scriptPath), [ref]$tokens, [ref]$parseErrors)
@@ -374,31 +376,35 @@ try {
     if (-not $SkipTests) {
         Protect-ProductionDb
         Import-TestDbSettings
-        Invoke-Checked 'Admin Maven tests (isolated PostgreSQL)' $mvn @('-f','admin-server/pom.xml','clean','test')
+        Invoke-Checked 'Admin Maven tests/package (isolated PostgreSQL)' $mvn @('-f','admin-server/pom.xml','clean','package')
         if (-not $AdminOnly) {
             Invoke-Checked 'Client Agent Maven tests (Windows applicable)' $mvn @('-f','client-agent/pom.xml','clean','test')
         }
-        Invoke-Checked 'Frontend npm ci' $npm @('--prefix','frontend','ci')
-        Invoke-Checked 'Frontend test' $npm @('--prefix','frontend','test')
-        Invoke-Checked 'Frontend lint' $npm @('--prefix','frontend','run','lint')
-        Invoke-Checked 'Frontend production build' $npm @('--prefix','frontend','run','build')
-        # Maven clean test removes target/. Build after tests and before live suites.
-        Invoke-Checked 'Package current Admin JAR + React' $mvn @(
-            '-f','admin-server/pom.xml','-Pwith-frontend','-DskipTests','package')
+        Invoke-Checked 'Desktop tests (JavaFX and loopback TLS)' $mvn @('-f','admin-desktop/pom.xml','clean','package')
     } else {
         Write-Warning 'Unit/build tests skipped. Only inspecting existing artifacts.'
     }
 
-    Set-Phase 'Verify packaged Admin Server executable + React + Flyway'
+    Set-Phase 'Verify packaged Admin API JAR and Flyway'
     Assert-JarContents $serverJar $jar
 
-    if (-not $SkipTests -and -not $SkipBrowserLive) {
-        # Existing harness: unique schema in usbshield_browser_test, Flyway migrate,
-        # Hibernate validate, API/browser assertions and guarded cleanup.
-        Invoke-Checked 'Browser-live: actual Admin Server and React UI' $npm @('--prefix','frontend','run','test:browser:live')
-        Invoke-Checked 'HTTP-live: Admin Server integration' $npm @('--prefix','frontend','run','test:live')
+    if (-not $SkipTests -and -not $SkipBundle) {
+        $pwsh = Join-Path $PSHOME 'pwsh.exe'
+        $bundleOutput = Join-Path $root ('target/verify-p2-' + [guid]::NewGuid().ToString('N'))
+        Invoke-Checked 'Build native Windows Central bundle' $pwsh @(
+            '-NoProfile','-NonInteractive','-File',(Join-Path $root 'admin-server/build-release.ps1'),
+            '-SkipTests','-AllowDirtyTree','-OutputDirectory',$bundleOutput)
+        if (-not $SkipLive) {
+            $bundles = @(Get-ChildItem -LiteralPath $bundleOutput -File -Filter '*.zip')
+            Assert-True ($bundles.Count -eq 1) 'Exactly one built Central ZIP'
+            Invoke-Checked 'Live packaged Central, Desktop readiness and split HTTPS listeners' $pwsh @(
+                '-NoProfile','-NonInteractive','-File',(Join-Path $root 'packaging/tests/verify-central-live.ps1'),
+                '-BundleZip',$bundles[0].FullName,'-NginxPath',$NginxPath,'-OpenSslPath',$OpenSslPath,'-PsqlPath',$PsqlPath)
+        } else {
+            Write-Warning 'Live packaged Central fixture skipped.'
+        }
     } else {
-        Write-Warning 'Live backend/browser execution skipped; runnable Admin Server not fully verified.'
+        Write-Warning 'Windows Central bundle build skipped.'
     }
 
     if (-not $AdminOnly) {
@@ -418,7 +424,7 @@ try {
     Write-Host "Admin JAR: $serverJar"
     if (-not $AdminOnly) { Write-Host "Agent manifest: $debManifest" }
     Write-Host 'Windows tests do not replace HTTPS/LAN or native Ubuntu USBGuard E2E.' -ForegroundColor Yellow
-    if ($SkipTests -or $SkipBrowserLive -or $SkipDebBuild) {
+    if ($SkipTests -or $SkipBundle -or $SkipLive -or $SkipDebBuild) {
         Write-Warning 'One or more gates were skipped. Do not present this as a full Windows PASS.'
     }
 } catch {

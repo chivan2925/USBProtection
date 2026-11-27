@@ -1,9 +1,30 @@
-# Install after replacing ALL @@...@@ placeholders. Keep Spring Boot on 127.0.0.1:18080.
-# Nginx must receive real client IPs; do NOT trust unverified X-Forwarded-For headers.
-# If behind a load balancer, configure trusted real_ip ranges separately before using IP ACLs.
+# Replace every @@...@@ placeholder. Use a non-loopback static IPv4 for CENTRAL_LAN_IPV4.
+# The certificate must cover IP:127.0.0.1 and the LAN DNS name. Keep backend on 127.0.0.1:18080.
+# Use explicit bind so loopback and LAN stay separate. Do not add a wildcard listener.
 server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 127.0.0.1:443 ssl bind;
+    server_name 127.0.0.1;
+    ssl_certificate @@FULLCHAIN_PEM_PATH@@;
+    ssl_certificate_key @@PRIVATE_KEY_PEM_PATH@@;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    server_tokens off;
+    client_max_body_size 1m;
+
+    location ^~ /api/auth/ {
+        proxy_pass http://127.0.0.1:18080/api/auth/;
+        proxy_set_header Host $host;
+    }
+
+    location ^~ /api/admin/ {
+        proxy_pass http://127.0.0.1:18080/api/admin/;
+        proxy_set_header Host $host;
+    }
+
+    location / { return 404; }
+}
+
+server {
+    listen @@CENTRAL_LAN_IPV4@@:443 ssl bind;
     server_name @@USBSHIELD_DNS_NAME@@;
     ssl_certificate @@FULLCHAIN_PEM_PATH@@;
     ssl_certificate_key @@PRIVATE_KEY_PEM_PATH@@;
@@ -11,25 +32,13 @@ server {
     server_tokens off;
     client_max_body_size 1m;
 
-    # Agent API is available only to explicitly authorized Client and Admin networks.
+    # Forward the normalized Agent URI with its own prefix. Admin is loopback-only.
     location ^~ /api/agent/ {
         allow @@CLIENT_CIDR@@;
-        allow @@ADMIN_CIDR@@;
         deny all;
-        proxy_pass http://127.0.0.1:18080;
+        proxy_pass http://127.0.0.1:18080/api/agent/;
         proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Forwarded-For $remote_addr;
     }
 
-    # Everything else (Admin Web, /api/auth/**, /api/admin/**, static, documentation)
-    # is completely inaccessible from Client networks, even without a login session.
-    location / {
-        allow @@ADMIN_CIDR@@;
-        deny all;
-        proxy_pass http://127.0.0.1:18080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-Proto https;
-        proxy_set_header X-Forwarded-For $remote_addr;
-    }
+    location / { return 403; }
 }

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.group.usbshield.desktop.AccountSettingsController" spacing="14"
+      fillWidth="false" visible="false" managed="false">
+    <Label fx:id="currentUsername" styleClass="section-heading" wrapText="true" maxWidth="520"/>
+    <VBox spacing="7" prefWidth="430">
+        <Label text="Mật khẩu hiện tại"/>
+        <PasswordField fx:id="currentPassword" accessibleText="Mật khẩu hiện tại"/>
+    </VBox>
+    <VBox spacing="7" prefWidth="430">
+        <Label text="Tên đăng nhập mới"/>
+        <TextField fx:id="newUsername" accessibleText="Tên đăng nhập mới" promptText="Để trống để giữ tên hiện tại"/>
+    </VBox>
+    <VBox spacing="7" prefWidth="430">
+        <Label text="Mật khẩu mới"/>
+        <PasswordField fx:id="newPassword" accessibleText="Mật khẩu mới" promptText="Để trống để giữ mật khẩu hiện tại"/>
+        <Label text="Tối thiểu 12 ký tự và tối đa 72 byte UTF-8." styleClass="muted" wrapText="true"/>
+    </VBox>
+    <VBox spacing="7" prefWidth="430">
+        <Label text="Xác nhận mật khẩu mới"/>
+        <PasswordField fx:id="confirmPassword" accessibleText="Xác nhận mật khẩu mới" onAction="#submit"/>
+    </VBox>
+    <Label text="Sau khi lưu, đăng nhập lại bằng thông tin mới." styleClass="muted" wrapText="true"/>
+    <Button text="Lưu thông tin đăng nhập" onAction="#submit" styleClass="primary"/>
+</VBox>

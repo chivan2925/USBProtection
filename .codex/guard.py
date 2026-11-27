@@ -68,7 +68,7 @@ def inspect_command(command, cwd, context_ok=publication_context):
     if re.search(GIT + GIT_DANGEROUS, command, re.IGNORECASE):
         return "Repository policy blocks this history, branch, or remote mutation."
     if re.search(r"\bgh(?:\.exe)?[\"']?\s+pr\s+(?:create|merge)\b", command, re.IGNORECASE):
-        return "PR creation and merge are Owner actions."
+        return "Shell PR mutations are disabled. Delegated PR work uses the authorized GitHub connector."
     if re.search(
         r"\b(?:remove-item|ri)\b[^\r\n;&|]*\s-recurse\b|"
         r"\brm\b[^\r\n;&|]*\s(?:--recursive\b|-[a-z]*r[a-z]*(?=\s|$))|"

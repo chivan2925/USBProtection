@@ -1,10 +1,10 @@
 #requires -Version 7.4
 <#
 .SYNOPSIS
-    Build a distributable Admin Server JAR from the current React + Java sources.
+    Build a Windows Central bundle with the API JAR and native JavaFX app image.
 .DESCRIPTION
     Output is written to admin-server/target/release by default (gitignored),
-    not to the source folder. The JAR includes the React production bundle.
+    not to the source folder. Desktop includes its own Java runtime.
     A clean Git working tree is required unless -AllowDirtyTree is specified.
     Tests run by default using the repo-root, untracked .env test database.
     The .env file is loaded only for build-time tests; environment variables are
@@ -37,6 +37,7 @@ if (-not $IsWindows -or $PSVersionTable.PSEdition -ne 'Core') {
 $repo = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $target = Join-Path $PSScriptRoot 'target'
 $artifact = Join-Path $target 'usbshield-admin-server.jar'
+$desktopModule = Join-Path $repo 'admin-desktop'
 $previousJavaHome = $env:JAVA_HOME
 $savedTestVars = @{}
 $savedProdVars = @{}
@@ -52,8 +53,6 @@ function Resolve-Application([string]$Name) {
 
 $git = Resolve-Application 'git.exe'
 $mvn = Resolve-Application 'mvn.cmd'
-$npm = Resolve-Application 'npm.cmd'
-$node = Resolve-Application 'node.exe'
 
 function Invoke-Checked([string]$Title, [string]$Executable, [string[]]$Arguments, [string]$WorkingDirectory) {
     Write-Host "`n== $Title ==" -ForegroundColor Cyan
@@ -76,8 +75,10 @@ try {
     $java = if ($JavaHome) { $javaExecutable } else { Resolve-Application 'java.exe' }
     # jar.exe must come from the same JDK as java.exe, not an arbitrary PATH hit.
     $jarTool = Join-Path (Split-Path -Parent $java) 'jar.exe'
-    if (-not (Test-Path -LiteralPath $jarTool -PathType Leaf)) {
-        throw "Selected Java installation is missing jar.exe (JDK 21+ required): $jarTool"
+    $jpackage = Join-Path (Split-Path -Parent $java) 'jpackage.exe'
+    if (-not (Test-Path -LiteralPath $jarTool -PathType Leaf) -or
+        -not (Test-Path -LiteralPath $jpackage -PathType Leaf)) {
+        throw 'Selected Java installation must be a full JDK 21 with jar and jpackage.'
     }
 
     $global:LASTEXITCODE = 0
@@ -106,21 +107,9 @@ try {
     $mavenLines = @(& $mvn -version 2>&1)
     if ($LASTEXITCODE -ne 0 -or $mavenLines.Count -lt 1) { throw 'mvn -version failed.' }
     $mavenVersion = [string]$mavenLines[0]
-    $global:LASTEXITCODE = 0
-    $nodeVersion = (& $node --version).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'node --version failed.' }
-    $global:LASTEXITCODE = 0
-    $npmVersion = (& $npm --version).Trim()
-    if ($LASTEXITCODE -ne 0) { throw 'npm --version failed.' }
-
-    Invoke-Checked 'Install pinned frontend dependencies' $npm @('ci') (Join-Path $repo 'frontend')
-    Invoke-Checked 'Build current React frontend' $npm @('run', 'build') (Join-Path $repo 'frontend')
-    $index = Join-Path $repo 'frontend/dist/index.html'
-    if (-not (Test-Path -LiteralPath $index -PathType Leaf)) { throw 'Frontend dist/index.html is missing.' }
-
     if ($SkipTests) {
         Invoke-Checked 'Package Admin Server (tests explicitly skipped)' $mvn @(
-            '-B', '-f', (Join-Path $PSScriptRoot 'pom.xml'), '-Pwith-frontend', '-DskipTests', 'clean', 'package'
+            '-B', '-f', (Join-Path $PSScriptRoot 'pom.xml'), '-DskipTests', 'clean', 'package'
         ) $repo
     } else {
         $envFile = Join-Path $repo '.env'
@@ -161,7 +150,7 @@ try {
             throw 'Test PostgreSQL role must be usbshield_test with a real test password.'
         }
         Invoke-Checked 'Test and package Admin Server' $mvn @(
-            '-B', '-f', (Join-Path $PSScriptRoot 'pom.xml'), '-Pwith-frontend', 'clean', 'package'
+            '-B', '-f', (Join-Path $PSScriptRoot 'pom.xml'), 'clean', 'package'
         ) $repo
     }
 
@@ -172,24 +161,49 @@ try {
     foreach ($entry in @(
         'org/springframework/boot/loader/launch/JarLauncher.class',
         'BOOT-INF/classes/com/group/usbshield/server/UsbShieldServerApplication.class',
-        'BOOT-INF/classes/static/index.html',
         'BOOT-INF/classes/db/migration/V1__initial_postgresql_schema.sql',
-        'BOOT-INF/classes/db/migration/V2__admin_session_and_usbguard_health.sql'
+        'BOOT-INF/classes/db/migration/V2__admin_session_and_usbguard_health.sql',
+        'BOOT-INF/classes/db/migration/V3__workspace_boundary.sql'
     )) {
         if ($entries -cnotcontains $entry) { throw "Required JAR entry missing: $entry" }
     }
-    $assets = @($entries | Where-Object { $_ -like 'BOOT-INF/classes/static/assets/*' -and $_ -notlike '*/' })
-    if ($assets.Count -lt 2) { throw 'React JS/CSS assets missing from the JAR.' }
+    if (@($entries | Where-Object { $_ -like 'BOOT-INF/classes/static/*' -or $_ -like '*swagger-ui-*.jar' }).Count) {
+        throw 'Admin Server JAR contains Web UI assets.'
+    }
+    $desktopBuild = @('-B', '-f', (Join-Path $desktopModule 'pom.xml'))
+    if ($SkipTests) { $desktopBuild += '-DskipTests' }
+    $desktopBuild += @('clean', 'package')
+    Invoke-Checked 'Package JavaFX Desktop' $mvn $desktopBuild $repo
 
     New-Item -ItemType Directory -Path $outDir -Force | Out-Null
     $stamp = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ')
-    $fileName = "usbshield-admin-server_$($commit.Substring(0,12))_$stamp.jar"
-    $releaseJar = Join-Path $outDir $fileName
-    Copy-Item -LiteralPath $artifact -Destination $releaseJar -ErrorAction Stop
-    $hash = (Get-FileHash -LiteralPath $releaseJar -Algorithm SHA256).Hash.ToLowerInvariant()
+    $bundleName = "usbshield-central_$($commit.Substring(0,12))_$stamp"
+    $bundle = Join-Path $outDir $bundleName
+    $stage = Join-Path $desktopModule 'target/jpackage-input'
+    New-Item -ItemType Directory -Path $bundle,$stage | Out-Null
+    Copy-Item -LiteralPath (Join-Path $desktopModule 'target/usbshield-desktop.jar') -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $desktopModule 'target/lib') -Destination $stage -Recurse
+    $checkProperties = Join-Path $desktopModule 'target/check-launcher.properties'
+    @('win-console=true', 'arguments=--check-central') | Set-Content -LiteralPath $checkProperties -Encoding ascii
+    Invoke-Checked 'Build native Windows app image' $jpackage @(
+        '--type','app-image','--name','USBShield','--input',$stage,'--dest',$bundle,
+        '--main-jar','usbshield-desktop.jar','--add-launcher',"USBShieldCheck=$checkProperties",
+        '--java-options','--module-path=$APPDIR/lib','--java-options','--add-modules=javafx.controls,javafx.fxml',
+        '--add-modules','java.desktop,java.net.http,java.logging,java.xml,java.scripting,java.management,java.naming,jdk.crypto.ec,jdk.unsupported'
+    ) $repo
+    foreach ($relative in @('USBShield/USBShield.exe','USBShield/USBShieldCheck.exe','USBShield/runtime/release')) {
+        if (-not (Test-Path -LiteralPath (Join-Path $bundle $relative) -PathType Leaf)) { throw "Missing app image file: $relative" }
+    }
+    Copy-Item -LiteralPath $artifact -Destination $bundle
+    Copy-Item -LiteralPath (Join-Path $repo 'packaging/windows/Start-USBShield.ps1') -Destination $bundle
+    Copy-Item -LiteralPath (Join-Path $repo 'packaging/nginx/usbshield-https-acl.conf.example') -Destination $bundle
+    $fileName = "$bundleName.zip"
+    $archive = Join-Path $outDir $fileName
+    Compress-Archive -LiteralPath $bundle -DestinationPath $archive
+    $hash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     $relativeManifest = "$fileName.manifest.json"
     $manifest = [ordered]@{
-        schemaVersion = 2
+        schemaVersion = 3
         builtAtUtc = [DateTime]::UtcNow.ToString('o')
         source = [ordered]@{
             commit = $commit
@@ -200,27 +214,25 @@ try {
         toolchain = [ordered]@{
             java = ($javaVersion -split "`r?`n")[0]
             maven = [string]$mavenVersion
-            node = $nodeVersion
-            npm = $npmVersion
             javaTarget = '21'
         }
         build = [ordered]@{
             backendTestsExecuted = (-not $SkipTests)
-            frontendBuildExecuted = $true
-            includesReact = $true
+            desktopTestsExecuted = (-not $SkipTests)
+            nativeLauncher = 'jpackage app-image'
             command = 'admin-server/build-release.ps1'
         }
         artifact = [ordered]@{
             filename = $fileName
-            sizeBytes = (Get-Item -LiteralPath $releaseJar).Length
+            sizeBytes = (Get-Item -LiteralPath $archive).Length
             sha256 = $hash
         }
     }
     $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $outDir $relativeManifest) -Encoding utf8NoBOM
     "$hash  $fileName" | Set-Content -LiteralPath (Join-Path $outDir "$fileName.sha256") -Encoding ascii
 
-    Write-Host "`nPASS: Admin Server JAR packaged with current frontend." -ForegroundColor Green
-    Write-Host "JAR: $releaseJar"
+    Write-Host "`nPASS: Windows Central bundle packaged." -ForegroundColor Green
+    Write-Host "Bundle: $archive"
     Write-Host "SHA256: $hash"
     Write-Host "Manifest: $(Join-Path $outDir $relativeManifest)"
     if ($SkipTests -or $dirty.Count -gt 0) {

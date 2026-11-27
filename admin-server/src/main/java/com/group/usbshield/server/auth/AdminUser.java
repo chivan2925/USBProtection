@@ -24,10 +24,14 @@ public class AdminUser {
     @Column(nullable = false, length = 255)
     private String passwordHash;
 
-    /** Incremented on every password change/reset; invalidates all prior sessions. */
+    /** Incremented on every credential change; invalidates all prior sessions. */
     @Column(name = "credential_version")
     @Builder.Default
     private Long credentialVersion = 0L;
+
+    void advanceCredentialVersion() {
+        credentialVersion = (credentialVersion == null ? 0L : credentialVersion) + 1;
+    }
 
     @Column(nullable = false, updatable = false)
     @Builder.Default
